@@ -1,0 +1,136 @@
+Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo
+1,2024-11-13 00:00:00,19h20,PAH,MTC,10,8,EGI,1,
+1,2024-11-13 00:00:00,19h20,PAH,EET,15,16,Eng. Mecânica,1,
+1,2024-11-13 00:00:00,19h40,PAH,Biologia,12,15,Fisioterapia,1,
+1,2024-11-13 00:00:00,19h40,PAH,Eng. Aeroespacial,10,19,Eng. Materiais,1,
+1,2024-11-13 00:00:00,20h00,PAH,Economia,6,8,ECT,1,
+2,2024-11-13 00:00:00,20h00,PAH,EGI,6,9,EET,1,
+2,2024-11-13 00:00:00,20h20,PAH,ECT,6,7,MTC,1,
+2,2024-11-13 00:00:00,20h20,PAH,Eng. Mecânica,20,12,Biologia,1,
+2,2024-11-13 00:00:00,20h40,PAH,Eng. Materiais,15,6,Economia,1,
+2,2024-11-13 00:00:00,20h40,PAH,Fisioterapia,7,10,Eng. Aeroespacial,1,
+1,2024-11-13 00:00:00,21h00,PAH,Eng. Física,10,3,Biologia e Geologia,2,A
+1,2024-11-13 00:00:00,21h00,PAH,Eng. Biomédica,9,11,TI,2,A
+1,2024-11-13 00:00:00,21h20,PAH,Finanças,3,2,Gestao,2,A
+1,2024-11-13 00:00:00,21h20,PAH,Matemática,9,4,GPT,2,A
+2,2024-11-13 00:00:00,21h40,PAH,Biologia e Geologia,5,6,Eng. Biomédica,2,A
+1,2024-11-13 00:00:00,21h40,PAH,Eng. Química,7,3,DPT,2,A
+2,2024-11-13 00:00:00,22h00,PAH,TI,12,9,Matemática,2,A
+2,2024-11-13 00:00:00,22h00,PAH,DPT,3,7,Eng. Física,2,A
+2,2024-11-13 00:00:00,22h20,PAH,Gestao,11,16,Eng. Química,2,A
+2,2024-11-13 00:00:00,22h20,PAH,GPT,5,4,Finanças,2,A
+1,2024-11-13 00:00:00,22h40,PAH,AP,5,9,Eng. Informática,2,B
+1,2024-11-13 00:00:00,22h40,PAH,LRE,14,3,Eng. Civil,2,B
+1,2024-11-13 00:00:00,23h00,PAH,Biotecnologia,12,8,Design,2,B
+1,2024-11-13 00:00:00,23h00,PAH,Bioquímica,12,17,Psicologia,2,B
+1,2024-11-13 00:00:00,23h20,PAH,Educaçao Básica,2,11,Eng. Compotacional,2,B
+2,2024-11-13 00:00:00,23h20,PAH,Eng. Civil,6,13,AP,2,B
+2,2024-11-13 00:00:00,23h40,PAH,Eng. Compotacional,9,14,LRE,2,B
+2,2024-11-13 00:00:00,23h40,PAH,Eng. Informática,9,5,Biotecnologia,2,B
+2,2024-11-13 00:00:00,0h00,PAH,Design,14,6,Bioquímica,2,B
+2,2024-11-13 00:00:00,0h00,PAH,Psicologia,21,2,Educaçao Básica,2,B
+3,2024-12-04 00:00:00,18h40,PAH,Biotecnologia,6,10,Eng. Civil,2,B
+3,2024-12-04 00:00:00,18h40,PAH,AP,3,20,LRE,2,B
+3,2024-12-04 00:00:00,19h00,PAH,Educaçao Básica,3,18,Design,2,B
+3,2024-12-04 00:00:00,19h00,PAH,Bioquímica,4,8,Eng. Informática,2,B
+4,2024-12-04 00:00:00,19h20,PAH,Eng. Civil,12,6,Bioquímica,2,B
+3,2024-12-04 00:00:00,19h20,PAH,Eng. Compotacional,8,16,Psicologia,2,B
+4,2024-12-04 00:00:00,19h40,PAH,AP,6,15,Eng. Compotacional,2,B
+4,2024-12-04 00:00:00,19h40,PAH,LRE,6,8,Biotecnologia,2,B
+4,2024-12-04 00:00:00,20h00,PAH,Eng. Informática,14,1,Educaçao Básica,2,B
+4,2024-12-04 00:00:00,20h00,PAH,Design,11,9,Psicologia,2,B
+3,2024-12-04 00:00:00,20h20,PAH,Matemática,7,3,Biologia e Geologia,2,A
+3,2024-12-04 00:00:00,20h20,PAH,Eng. Biomédica,9,6,Eng. Física,2,A
+3,2024-12-04 00:00:00,20h40,PAH,Finanças,3,13,TI,2,A
+3,2024-12-04 00:00:00,20h40,PAH,Eng. Química,5,9,GPT,2,A
+3,2024-12-04 00:00:00,21h00,PAH,DPT,9,10,Gestao,2,A
+4,2024-12-04 00:00:00,21h00,PAH,Biologia e Geologia,2,6,Finanças,2,A
+4,2024-12-04 00:00:00,21h20,PAH,Eng. Biomédica,6,8,DPT,2,A
+4,2024-12-04 00:00:00,21h20,PAH,Eng. Física,4,10,Matemática,2,A
+4,2024-12-04 00:00:00,21h40,PAH,GPT,13,11,Gestao,2,A
+4,2024-12-04 00:00:00,21h40,PAH,TI,18,7,Eng. Química,2,A
+3,2024-12-04 00:00:00,22h00,PAH,EET,14,11,MTC,1,
+3,2024-12-04 00:00:00,22h00,PAH,Biologia,10,13,EGI,1,
+3,2024-12-04 00:00:00,22h20,PAH,Economia,7,9,Fisioterapia,1,
+3,2024-12-04 00:00:00,22h20,PAH,Eng. Aeroespacial,10,11,Eng. Mecânica,1,
+4,2024-12-04 00:00:00,22h40,PAH,EGI,13,16,Eng. Aeroespacial,1,
+3,2024-12-04 00:00:00,22h40,PAH,ECT,8,14,Eng. Materiais,1,
+4,2024-12-04 00:00:00,23h00,PAH,EET,21,7,ECT,1,
+4,2024-12-04 00:00:00,23h00,PAH,MTC,9,12,Biologia,1,
+4,2024-12-04 00:00:00,23h20,PAH,Fisioterapia,11,22,Eng. Materiais,1,
+4,2024-12-04 00:00:00,23h20,PAH,Eng. Mecânica,21,6,Economia,1,
+5,2025-02-24 00:00:00,20h20,Caixa UA,Eng. Aeroespacial,11,14,MTC,1,
+5,2025-02-24 00:00:00,20h20,Caixa UA,Economia,10,4,EGI,1,
+5,2025-02-24 00:00:00,20h40,Caixa UA,Eng. Materiais,6,11,Eng. Mecânica,1,
+5,2025-02-24 00:00:00,20h40,Caixa UA,Biologia,8,9,EET,1,
+6,2025-02-24 00:00:00,21h00,Caixa UA,EGI,10,12,Eng. Materiais,1,
+5,2025-02-24 00:00:00,21h00,Caixa UA,ECT,10,3,Fisioterapia,1,
+6,2025-02-24 00:00:00,21h20,Caixa UA,EET,10,4,Eng. Aeroespacial,1,
+6,2025-02-24 00:00:00,21h20,Caixa UA,MTC,3,6,Economia,1,
+6,2025-02-24 00:00:00,21h40,Caixa UA,Eng. Mecânica,14,6,Fisioterapia,1,
+6,2025-02-24 00:00:00,21h40,Caixa UA,Biologia,14,13,ECT,1,
+5,2025-02-24 00:00:00,22h00,Caixa UA,Eng. Química,17,3,Biologia e Geologia,2,A
+5,2025-02-24 00:00:00,22h00,Caixa UA,Finanças,7,8,Eng. Física,2,A
+5,2025-02-24 00:00:00,22h20,Caixa UA,Matemática,9,8,Eng. Biomédica,2,A
+5,2025-02-24 00:00:00,22h20,Caixa UA,Gestao,10,19,TI,2,A
+5,2025-02-24 00:00:00,22h40,Caixa UA,DPT,4,11,GPT,2,A
+6,2025-02-24 00:00:00,22h40,Caixa UA,Biologia e Geologia,11,10,Gestao,2,A
+6,2025-02-24 00:00:00,23h00,Caixa UA,Eng. Biomédica,12,11,Finanças,2,A
+6,2025-02-24 00:00:00,23h00,Caixa UA,Eng. Física,4,6,Eng. Química,2,A
+6,2025-02-24 00:00:00,23h20,Caixa UA,TI,10,6,GPT,2,A
+6,2025-02-24 00:00:00,23h20,Caixa UA,Matemática,6,4,DPT,2,A
+5,2025-02-25 00:00:00,21h20,Caixa UA,Educaçao Básica,4,8,Eng. Civil,2,B
+5,2025-02-25 00:00:00,21h20,Caixa UA,Bioquímica,4,16,LRE,2,B
+5,2025-02-25 00:00:00,21h40,Caixa UA,Biotecnologia,12,8,AP,2,B
+5,2025-02-25 00:00:00,21h40,Caixa UA,Psicologia,16,11,Eng. Informática,2,B
+5,2025-02-25 00:00:00,22h00,Caixa UA,Eng. Compotacional,8,7,Design,2,B
+6,2025-02-25 00:00:00,22h00,Caixa UA,Eng. Civil,16,12,Psicologia,2,B
+6,2025-02-25 00:00:00,22h20,Caixa UA,LRE,9,3,Educaçao Básica,2,B
+6,2025-02-25 00:00:00,22h20,Caixa UA,AP,13,8,Bioquímica,2,B
+6,2025-02-25 00:00:00,22h40,Caixa UA,Biotecnologia,9,6,Eng. Compotacional,2,B
+6,2025-02-25 00:00:00,22h40,Caixa UA,Eng. Informática,14,4,Design,2,B
+7,2025-03-19 00:00:00,19h00,PAH,Design,19,11,Eng. Civil,2,B
+7,2025-03-19 00:00:00,19h00,PAH,Psicologia,5,14,LRE,2,B
+7,2025-03-19 00:00:00,19h20,PAH,Bioquímica,7,10,Biotecnologia,2,B
+7,2025-03-19 00:00:00,19h20,PAH,Educaçao Básica,1,8,AP,2,B
+8,2025-03-19 00:00:00,19h40,PAH,LRE,19,15,Design,2,B
+7,2025-03-19 00:00:00,19h40,PAH,Eng. Compotacional,7,16,Eng. Informática,2,B
+8,2025-03-19 00:00:00,20h00,PAH,AP,9,10,Psicologia,2,B
+8,2025-03-19 00:00:00,20h00,PAH,Eng. Civil,13,19,Eng. Informática,2,B
+8,2025-03-19 00:00:00,20h20,PAH,Biotecnologia,20,1,Educaçao Básica,2,B
+8,2025-03-19 00:00:00,20h20,PAH,Bioquímica,10,12,Eng. Compotacional,2,B
+7,2025-03-19 00:00:00,20h40,PAH,GPT,6,7,Biologia e Geologia,2,A
+7,2025-03-19 00:00:00,20h40,PAH,Gestao,9,12,Eng. Física,2,A
+7,2025-03-19 00:00:00,21h00,PAH,Eng. Química,10,9,Eng. Biomédica,2,A
+7,2025-03-19 00:00:00,21h00,PAH,Finanças,6,13,Matemática,2,A
+7,2025-03-19 00:00:00,21h20,PAH,DPT,5,8,TI,2,A
+8,2025-03-19 00:00:00,21h20,PAH,Eng. Física,10,8,GPT,2,A
+8,2025-03-19 00:00:00,21h40,PAH,Biologia e Geologia,5,9,TI,2,A
+8,2025-03-19 00:00:00,21h40,PAH,Eng. Biomédica,18,8,Gestao,2,A
+8,2025-03-19 00:00:00,22h00,PAH,Finanças,4,3,DPT,2,A
+8,2025-03-19 00:00:00,22h00,PAH,Matemática,6,3,Eng. Química,2,A
+7,2025-03-19 00:00:00,22h20,PAH,Fisioterapia,5,9,EGI,1,
+7,2025-03-19 00:00:00,22h40,PAH,Eng. Aeroespacial,6,17,Biologia,1,
+7,2025-03-19 00:00:00,22h40,PAH,Economia,14,19,EET,1,
+8,2025-03-19 00:00:00,23h00,PAH,MTC,15,14,Fisioterapia,1,
+7,2025-03-19 00:00:00,23h00,PAH,ECT,12,11,Eng. Mecânica,1,
+8,2025-03-19 00:00:00,23h20,PAH,EGI,13,4,Eng. Mecânica,1,
+8,2025-03-19 00:00:00,23h40,PAH,Eng. Aeroespacial,14,11,ECT,1,
+8,2025-03-19 00:00:00,23h40,PAH,Biologia,22,0,Economia,1,
+9,2025-05-07 00:00:00,21h00,PAH,Eng. Informática,16,14,LRE,2,B
+9,2025-05-07 00:00:00,21h00,PAH,Eng. Compotacional,4,14,Eng. Civil,2,B
+9,2025-05-07 00:00:00,21h20,PAH,Psicologia,8,10,Biotecnologia,2,B
+9,2025-05-07 00:00:00,21h20,PAH,Design,21,0,AP,2,B
+9,2025-05-07 00:00:00,21h20,PAH,Gestao,8,10,Matemática,2,A
+9,2025-05-07 00:00:00,21h20,PAH,Eng. Química,1,6,Finanças,2,A
+9,2025-05-07 00:00:00,21h40,PAH,Educaçao Básica,5,7,Bioquímica,2,B
+9,2025-05-07 00:00:00,21h40,PAH,DPT,9,0,Biologia e Geologia,2,A
+9,2025-05-07 00:00:00,22h00,PAH,TI,15,5,Eng. Física,2,A
+9,2025-05-07 00:00:00,22h00,PAH,GPT,8,3,Eng. Biomédica,2,A
+9,2025-05-07 00:00:00,22h40,PAH,ECT,6,10,EGI,1,
+7,2025-05-07 00:00:00,22h40,PAH,Eng. Materiais,9,11,MTC,1,
+9,2025-05-07 00:00:00,23h00,PAH,Fisioterapia,10,19,EET,1,
+9,2025-05-07 00:00:00,23h00,PAH,Eng. Mecânica,13,9,MTC,1,
+9,2025-05-07 00:00:00,23h20,PAH,Eng. Materiais,19,16,Biologia,1,
+9,2025-05-07 00:00:00,23h20,PAH,Economia,1,14,Eng. Aeroespacial,1,
+8,2025-05-07 00:00:00,23h40,PAH,EET,13,15,Eng. Materiais,1,
