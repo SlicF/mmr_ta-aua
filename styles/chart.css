@@ -1,0 +1,179 @@
+/* Estilos para os gráficos */
+
+#rating-history-chart {
+    width: 100%;
+    height: 400px;
+    margin: 20px 0;
+}
+
+.chart-container {
+    width: 100%;
+    height: 400px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.chart-legend-item {
+    margin: 0 10px;
+    display: flex;
+    align-items: center;
+}
+
+.chart-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.highlight {
+    border: 2px solid #ffcc00; /* Cor para destacar equipes */
+}
+
+/* Tabela de classificação */
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 0.95em;
+}
+
+.standings-table th,
+.standings-table td {
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.standings-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.standings-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.team-name {
+    text-align: left;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.team-name:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+.team-name.highlighted {
+    font-weight: bold;
+    color: #2980b9;
+}
+
+/* Árvore de playoffs */
+.playoff-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+@media (min-width: 768px) {
+    .playoff-tree {
+        flex-direction: row;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .playoff-phase {
+        flex: 1;
+        min-width: 250px;
+        margin-right: 15px;
+    }
+}
+
+.playoff-phase h3 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eaeaea;
+    color: #444;
+}
+
+.phase-games {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.playoff-game {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+    transition: box-shadow 0.2s;
+}
+
+.playoff-game:hover {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.playoff-game .team {
+    padding: 10px 12px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.playoff-game .team:hover {
+    background-color: #f0f0f0;
+}
+
+.playoff-game .team.highlighted {
+    font-weight: bold;
+    color: #2980b9;
+}
+
+.playoff-game .score {
+    padding: 8px;
+    text-align: center;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    color: #333;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.playoff-game .winner {
+    font-weight: bold;
+    background-color: #e8f5fe;
+    color: #2980b9;
+}
+
+.playoff-game .game-date {
+    padding: 6px;
+    text-align: center;
+    color: #777;
+    font-size: 0.85em;
+    background-color: #fcfcfc;
+}
+
+.instructions {
+    font-style: italic;
+    color: #666;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 3px solid #3498db;
+}

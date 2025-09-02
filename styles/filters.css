@@ -1,0 +1,43 @@
+/* Estilos para os filtros de seleção de modalidade e equipes */
+
+.filter-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.filter-label {
+    font-size: 1.2em;
+    margin-right: 10px;
+}
+
+.select-modalidade,
+.select-equipe {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s;
+}
+
+.select-modalidade:focus,
+.select-equipe:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.button-compare {
+    padding: 10px 15px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button-compare:hover {
+    background-color: #218838;
+}

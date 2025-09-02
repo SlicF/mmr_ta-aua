@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taça UA Rating</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/chart.css">
+    <link rel="stylesheet" href="styles/filters.css">
+    <link rel="icon" href="assets/icons/favicon.ico" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1"></script>
+    <script src="scripts/dataLoader.js" defer></script>
+    <script src="scripts/chart.js" defer></script>
+    <script src="scripts/teamComparison.js" defer></script>
+    <script src="index.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <h1>Taça UA Rating</h1>
+        <div class="modality-selector">
+            <label for="modalidade-select">Selecione a Modalidade:</label>
+            <select id="modalidade-select">
+                <option value="ANDEBOL MISTO">Andebol Misto</option>
+                <option value="BASQUETEBOL FEMININO">Basquetebol Feminino</option>
+                <option value="BASQUETEBOL MASCULINO">Basquetebol Masculino</option>
+                <option value="FUTEBOL DE 7 MASCULINO">Futebol de 7 Masculino</option>
+                <option value="FUTSAL FEMININO">Futsal Feminino</option>
+                <option value="FUTSAL MASCULINO">Futsal Masculino</option>
+                <option value="VOLEIBOL FEMININO">Voleibol Feminino</option>
+                <option value="VOLEIBOL MASCULINO">Voleibol Masculino</option>
+            </select>
+        </div>
+    </header>
+    <main>
+        <section id="rating-section">
+            <h2>Classificação Atual</h2>
+            <p class="instructions">Clique no nome de uma equipe na tabela abaixo para destacá-la no gráfico.</p>
+            <div id="current-rating">Carregando...</div>
+        </section>
+
+        <section id="history-section">
+            <h2>Evolução de Ratings</h2>
+            <div class="chart-container">
+                <canvas id="rating-history-chart"></canvas>
+            </div>
+        </section>
+
+        <section id="playoff-section">
+            <h2>Árvore de Playoffs</h2>
+            <div id="playoff-tree">Carregando...</div>
+        </section>
+
+        <section id="comparison-section">
+            <h2>Comparação de Equipas</h2>
+            <div class="comparison-controls">
+                <div class="team-selectors">
+                    <div>
+                        <label for="team-select-1">Equipa 1:</label>
+                        <select id="team-select-1"></select>
+                    </div>
+                    <div>
+                        <label for="team-select-2">Equipa 2:</label>
+                        <select id="team-select-2"></select>
+                    </div>
+                </div>
+                <button id="compare-teams" class="comparison-btn">Comparar</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="team-comparison-chart"></canvas>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Taça UA</p>
+    </footer>
+</body>
+
+</html>
