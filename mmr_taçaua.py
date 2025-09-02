@@ -175,9 +175,15 @@ class StandingsCalculator:
             # Caso tenha divisão, mas não tenha grupos explícitos
             if self.div_col:
                 # Criar grupos inferidos por divisão
-                df_group["Inferred_Group"] = df_group[self.div_col].astype(int).astype(str)
-                logger.info(f"Grupos inferidos a partir da coluna de divisão: {self.div_col}")
-                logger.info(f"Valores únicos: {df_group[self.div_col].dropna().unique().tolist()}")
+                df_group["Inferred_Group"] = (
+                    df_group[self.div_col].astype(int).astype(str)
+                )
+                logger.info(
+                    f"Grupos inferidos a partir da coluna de divisão: {self.div_col}"
+                )
+                logger.info(
+                    f"Valores únicos: {df_group[self.div_col].dropna().unique().tolist()}"
+                )
                 return "Inferred_Group"
             else:
                 # Sem divisões nem grupos, usar grupo único
@@ -188,30 +194,32 @@ class StandingsCalculator:
         """Calcula classificações separadas por grupo"""
         # Verificar se group_key_col existe como coluna
         if group_key_col not in df_group.columns:
-            logger.warning(f"Coluna de agrupamento '{group_key_col}' não encontrada. A usar classificação única.")
+            logger.warning(
+                f"Coluna de agrupamento '{group_key_col}' não encontrada. A usar classificação única."
+            )
             return self._calculate_single_standings(df_group, self.teams)
-    
+
         # Obter grupos únicos
         groups = df_group[group_key_col].dropna().unique()
-    
+
         if not len(groups):
             logger.info("Nenhum grupo encontrado. A calcular classificação única.")
             return self._calculate_single_standings(df_group, self.teams)
-    
+
         all_standings = []
-    
+
         for group in sorted(groups):
             # Filtrar jogos do grupo atual
             df_grp = df_group[df_group[group_key_col] == group]
-    
+
             # Obter equipas deste grupo
             teams_grp = set()
             for col in ["Equipa 1", "Equipa 2"]:
                 teams_grp.update(df_grp[col].dropna().unique())
-    
+
             # Calcular classificação para este grupo
             grp_standings = self._calculate_single_standings(df_grp, teams_grp)
-    
+
             # Adicionar informações do grupo
             if self.div_col and group_key_col == "Inferred_Group":
                 # Para grupos inferidos a partir da divisão
@@ -232,13 +240,13 @@ class StandingsCalculator:
                 grp_standings["Grupo"] = grp_num
             elif self.group_col:
                 grp_standings["Grupo"] = group
-    
+
             all_standings.append(grp_standings)
-    
+
         # Combinar todos os grupos
         if all_standings:
             result = pd.concat(all_standings, ignore_index=True)
-    
+
             # Reordenar colunas
             cols = self._get_columns_order(result)
             return result[cols]
@@ -555,10 +563,10 @@ class StandingsCalculator:
         # Calcular diferenças para desempate
         self._calculate_h2h_differences(h2h_stats)
 
-        # Ordenar por critérios de confronto direto
+        # Criar tabela de classificação do confronto direto
         h2h_df = self._create_h2h_standings(h2h_stats)
 
-        # Criar resultado final com dados originais
+        # Criar resultado final com dados originais e critérios completos
         return self._create_final_h2h_result(h2h_df, original_standings)
 
     def _initialize_h2h_stats(self, tied_teams):
@@ -656,11 +664,54 @@ class StandingsCalculator:
         )
 
     def _create_final_h2h_result(self, h2h_df, original_standings):
-        """Cria resultado final do desempate usando os dados originais"""
+        """Cria resultado final do desempate usando os dados originais e aplicando critérios adicionais quando necessário"""
+        # Mesclar dados de h2h com os dados originais para ter todos os critérios disponíveis
+        merged_df = pd.merge(
+            h2h_df, original_standings, on="Equipa", suffixes=("_h2h", "")
+        )
+
+        # Aplicar todos os critérios de desempate na ordem correta:
+        # 1. Pontos no confronto direto
+        # 2. Faltas de comparência no confronto direto
+        # 3. Diferença de sets no confronto direto (para vôlei)
+        # 4. Diferença de gols no confronto direto
+        # 5. Gols marcados no confronto direto
+        # 6. Diferença de sets total (para vôlei)
+        # 7. Diferença de gols total
+        # 8. Gols marcados total
+        sort_columns = [
+            "pontos_h2h",
+            "faltas_h2h",
+            "diferenca_sets_h2h",
+            "diferenca_golos_h2h",
+            "golos_marcados_h2h",
+            "diferenca_sets",
+            "diferenca_golos",
+            "golos_marcados",
+        ]
+
+        # Filtrar apenas colunas que existem
+        valid_columns = [col for col in sort_columns if col in merged_df.columns]
+        # Define ascending (False para pontos e stats positivas, True para faltas)
+        ascending_values = []
+        for col in valid_columns:
+            if "faltas" in col:
+                ascending_values.append(True)  # Menor é melhor
+            else:
+                ascending_values.append(False)  # Maior é melhor
+
+        # Ordenar com algoritmo estável para garantir consistência
+        sorted_df = merged_df.sort_values(
+            by=valid_columns,
+            ascending=ascending_values,
+            kind="stable",  # Usa algoritmo estável de ordenação
+        )
+
+        # Criar lista final
         result_teams = []
-        for _, row in h2h_df.iterrows():
+        for _, row in sorted_df.iterrows():
             team = row["Equipa"]
-            # Pegar dados originais da equipa
+            # Usar os dados originais da equipa para o resultado final
             original_row = (
                 original_standings[original_standings["Equipa"] == team].iloc[0].copy()
             )
@@ -1592,7 +1643,9 @@ class TournamentProcessor:
 
         return processed_files, failed_files
 
-    def _save_tournament_results(self, filename, teams, elo_history, detailed_rows, real_standings):
+    def _save_tournament_results(
+        self, filename, teams, elo_history, detailed_rows, real_standings
+    ):
         """Salva os resultados do processamento de um torneio"""
         base_name = os.path.splitext(filename)[0]
 
@@ -1600,8 +1653,8 @@ class TournamentProcessor:
             # Salvar classificação real
             if isinstance(real_standings, pd.DataFrame):
                 # Converter a coluna Divisao para inteiro quando existir
-                if 'Divisao' in real_standings.columns:
-                    real_standings['Divisao'] = real_standings['Divisao'].astype(int)
+                if "Divisao" in real_standings.columns:
+                    real_standings["Divisao"] = real_standings["Divisao"].astype(int)
 
                 real_standings.to_csv(
                     os.path.join(self.output_dir, f"classificacao_{filename}"),
