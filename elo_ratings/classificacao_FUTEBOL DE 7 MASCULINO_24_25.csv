@@ -1,0 +1,32 @@
+Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
+1,nan,1,Eng. Mecânica,31,11,10,1,0,45,11,34,0
+1,nan,2,EGI,24,11,7,3,1,36,13,23,0
+1,nan,3,Finanças,24,11,8,0,3,43,20,23,0
+1,nan,4,GPT,23,11,7,2,2,27,13,14,0
+1,nan,5,Biotecnologia,20,11,6,2,3,26,19,7,0
+1,nan,6,Fisioterapia,18,11,5,3,3,35,19,16,0
+1,nan,7,EET,15,11,4,3,4,20,18,2,0
+1,nan,8,Economia,9,11,3,0,8,30,44,-14,0
+1,nan,9,Eng. Física,9,11,3,0,8,23,40,-17,0
+1,nan,10,Eng.Cívil,8,11,2,2,7,18,34,-16,0
+1,nan,11,Gestao,7,11,2,1,8,21,55,-34,0
+1,nan,12,Eng. Informática,1,11,0,1,10,14,52,-38,0
+2,A,1,Eng. Mecânica B,23,9,7,2,0,28,11,17,0
+2,A,2,AP,20,9,6,2,1,29,16,13,0
+2,A,3,Eng. Biomédica,19,9,6,1,2,25,13,12,0
+2,A,4,CBM,18,9,6,0,3,18,19,-1,0
+2,A,5,Eng. Química,13,8,4,1,3,12,9,3,0
+2,A,6,Psicologia,10,9,3,1,5,13,19,-6,0
+2,A,7,Eng. Computacional,8,9,2,2,5,26,24,2,0
+2,A,8,MTC,8,8,2,2,4,24,32,-8,0
+2,A,9,Matemática,7,9,2,1,6,14,24,-10,0
+2,A,10,LRE,0,9,0,0,9,16,38,-22,1
+2,B,1,ECT,24,8,8,0,0,25,2,23,0
+2,B,2,Contabilidade,21,8,7,0,1,35,13,22,0
+2,B,3,Eng. Materiais,15,8,5,0,3,29,18,11,0
+2,B,4,TI,12,8,4,0,4,16,21,-5,0
+2,B,5,Geologia,10,8,3,1,4,18,15,3,0
+2,B,6,Biologia,9,8,3,0,5,11,19,-8,0
+2,B,7,Biologia e Geologia,7,8,2,1,5,11,30,-19,0
+2,B,8,Música,4,8,1,1,6,8,23,-15,0
+2,B,9,Design,3,8,0,3,5,7,19,-12,0

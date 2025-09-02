@@ -1,0 +1,15 @@
+Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
+A,1,Eng. Mecânica,12,6,6,0,0,97,32,65,0
+A,2,EGI,10,6,5,0,1,83,34,49,0
+A,3,Eng. Biomédica,8,6,4,0,2,34,51,-17,0
+A,4,Eng. Física,6,6,3,0,3,46,24,22,0
+A,5,Bioquímica,4,6,2,0,4,34,57,-23,0
+A,6,Economia,2,6,1,0,5,19,74,-55,0
+A,7,Psicologia,0,6,0,0,6,15,56,-41,0
+B,1,Fisioterapia,12,6,6,0,0,112,34,78,0
+B,2,LRE,8,6,4,0,2,45,46,-1,0
+B,3,EET,8,6,4,0,2,36,33,3,0
+B,4,GPT,6,6,3,0,3,52,53,-1,0
+B,5,Biologia,4,6,2,0,4,42,59,-17,0
+B,6,Traduçao,4,6,2,0,4,24,52,-28,0
+B,7,Educaçao Básica,0,6,0,0,6,25,59,-34,0

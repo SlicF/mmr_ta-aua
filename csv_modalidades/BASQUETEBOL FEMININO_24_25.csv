@@ -41,3 +41,11 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Grupo
 7,2025-05-07 00:00:00,20h20,PAH,GPT,13,21,Fisioterapia,B
 7,2025-05-07 00:00:00,20h40,PAH,LRE,11,5,Educaçao Básica,B
 7,2025-05-07 00:00:00,20h40,PAH,EET,7,3,Traduçao,B
+E1,2025-05-08 00:00:00,20h20,,Eng. Mecânica,21,2,GPT,
+E1,2025-05-08 00:00:00,20h20,,Eng. Biomédica,21,0,LRE,
+E1,2025-05-08 00:00:00,20h40,,EGI,13,4,EET,
+E1,2025-05-08 00:00:00,20h40,,Eng. Física,0,21,Fisioterapia,
+E2,2025-05-09 00:00:00,20h20,,Eng. Mecânica,9,16,Eng. Biomédica,
+E2,2025-05-09 00:00:00,20h20,,EGI,10,6,Fisioterapia,
+E3L,2025-05-09 00:00:00,20h40,,Eng. Mecânica,0,21,Fisioterapia,
+E3,2025-05-09 00:00:00,20h40,,Eng. Biomédica,9,14,EGI,

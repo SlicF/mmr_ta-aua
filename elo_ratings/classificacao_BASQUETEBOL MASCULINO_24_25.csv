@@ -1,0 +1,31 @@
+Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
+1,nan,1,Eng. Mecânica,14,9,7,0,2,121,89,32,0
+1,nan,2,Eng. Materiais,14,9,7,0,2,131,96,35,0
+1,nan,3,EET,14,9,7,0,2,129,91,38,0
+1,nan,4,MTC,10,9,5,0,4,89,93,-4,0
+1,nan,5,Biologia,8,9,4,0,5,123,104,19,0
+1,nan,6,EGI,8,9,4,0,5,86,82,4,0
+1,nan,7,Eng. Aeroespacial,8,9,4,0,5,95,103,-8,0
+1,nan,8,ECT,6,9,3,0,6,81,100,-19,0
+1,nan,9,Fisioterapia,4,9,2,0,7,80,118,-38,0
+1,nan,10,Economia,4,9,2,0,7,56,115,-59,0
+2,A,1,TI,18,9,9,0,0,115,59,56,0
+2,A,2,Matemática,16,9,8,0,1,79,52,27,0
+2,A,3,GPT,10,9,5,0,4,70,63,7,0
+2,A,4,Eng. Física,10,9,5,0,4,66,70,-4,0
+2,A,5,Eng. Química,10,9,5,0,4,72,69,3,0
+2,A,6,Eng. Biomédica,8,9,4,0,5,80,76,4,0
+2,A,7,Finanças,8,9,4,0,5,50,59,-9,0
+2,A,8,DPT,4,9,2,0,7,48,59,-11,0
+2,A,9,Biologia e Geologia,4,9,2,0,7,39,80,-41,0
+2,A,10,Gestao,2,9,1,0,8,79,111,-32,0
+2,B,1,Eng. Informática,16,9,8,0,1,116,69,47,0
+2,B,2,Biotecnologia,14,9,7,0,2,92,63,29,0
+2,B,3,LRE,14,9,7,0,2,126,66,60,0
+2,B,4,Design,10,9,5,0,4,117,82,35,0
+2,B,5,Eng. Civil,10,9,5,0,4,93,97,-4,0
+2,B,6,Psicologia,10,9,5,0,4,114,93,21,0
+2,B,7,Eng. Compotacional,8,9,4,0,5,80,94,-14,0
+2,B,8,AP,6,9,3,0,6,65,102,-37,0
+2,B,9,Bioquímica,2,9,1,0,8,64,107,-43,0
+2,B,10,Educaçao Básica,0,9,0,0,9,22,116,-94,0
