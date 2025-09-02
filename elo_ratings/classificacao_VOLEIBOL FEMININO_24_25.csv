@@ -17,8 +17,8 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,A,4,AP,12,8,4,0,4,9,9,0,0,0,0,0
 2,A,5,Psicologia,12,9,4,0,5,9,12,-3,0,0,0,0
 2,A,6,Eng. Mecânica,9,8,3,0,5,8,12,-4,0,0,0,0
-2,A,7,Educaçao Básica,9,8,3,0,5,8,11,-3,0,0,0,0
-2,A,8,Gestao Comercial,9,8,3,0,5,6,10,-4,0,0,0,0
+2,A,7,Gestao Comercial,9,8,3,0,5,6,10,-4,0,0,0,0
+2,A,8,Educaçao Básica,9,8,3,0,5,8,11,-3,0,0,0,0
 2,A,9,Matemática,6,8,2,0,6,4,13,-9,0,0,0,0
 2,A,10,Eng. Ambiente,0,2,0,0,2,0,4,-4,2,0,0,0
 2,B,1,GPT,24,9,8,0,1,17,4,13,0,0,0,0
@@ -30,5 +30,5 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,B,7,LRE,12,9,4,0,5,10,11,-1,0,0,0,0
 2,B,8,Tradução,6,7,2,0,5,4,11,-7,0,0,0,0
 2,B,9,MTC,6,9,2,0,7,6,15,-9,0,0,0,0
-2,B,10,Gestao,0,9,0,0,9,1,18,-17,0,0,0,0
-2,B,11,Traduçao,0,1,0,0,1,0,2,-2,0,0,0,0
+2,B,10,Traduçao,0,1,0,0,1,0,2,-2,0,0,0,0
+2,B,11,Gestao,0,9,0,0,9,1,18,-17,0,0,0,0
