@@ -88,25 +88,36 @@ class PointsCalculator:
                 return 1, 1  # empate
 
         elif sport == Sport.VOLEI:
-            # Precisa dos sets para vôlei
+            # Para vôlei, assumir que "Golos" na verdade representam sets ganhos
+            # já que não há colunas separadas para sets
             if sets1 is None or sets2 is None:
-                # Se não tiver sets, assume baseado no score
-                if score1 > score2:
-                    return 3, 0  # assume 2-0
-                else:
-                    return 0, 3  # assume 0-2
+                # Usar score como sets se não houver colunas de sets específicas
+                sets1 = score1
+                sets2 = score2
+
+            if sets1 == 2 and sets2 == 0:
+                return 3, 0  # 2-0 em sets
+            elif sets1 == 2 and sets2 == 1:
+                return 2, 1  # 2-1 em sets
+            elif sets1 == 1 and sets2 == 2:
+                return 1, 2  # 1-2 em sets
+            elif sets1 == 0 and sets2 == 2:
+                return 0, 3  # 0-2 em sets
             else:
-                if sets1 == 2 and sets2 == 0:
-                    return 3, 0
-                elif sets1 == 2 and sets2 == 1:
+                logger.warning(
+                    f"Combinação de sets não prevista no vôlei: {sets1}-{sets2}"
+                )
+                # Em caso de combinação não prevista, usar lógica básica
+                if sets1 > sets2:
                     return 2, 1
-                elif sets1 == 1 and sets2 == 2:
+                elif sets2 > sets1:
                     return 1, 2
-                elif sets1 == 0 and sets2 == 2:
-                    return 0, 3
                 else:
-                    logger.warning(f"Combinação de sets não prevista: {sets1}-{sets2}")
-                    return 0, 0  # caso não previsto
+                    return 1, 1
+
+        # Caso padrão se o sport não for reconhecido
+        logger.warning(f"Sport não reconhecido: {sport}")
+        return 0, 0
 
 
 class StandingsCalculator:
@@ -1113,8 +1124,8 @@ class EloRatingSystem:
         """Inicializa os ratings ELO para todas as equipas"""
         teams = {}
 
-        # Identificar coluna de divisão
-        div_col = next((col for col in df.columns if "Divisão" in col), None)
+        # Identificar coluna de divisão (sem acento pois as colunas são limpas)
+        div_col = next((col for col in df.columns if "Divisao" in col), None)
 
         if div_col:
             # Inicializar equipas apenas nas linhas da fase de grupos
@@ -1460,8 +1471,8 @@ class EloRatingSystem:
         self, df, teams, sport, elo_history, detailed_rows
     ):
         """Aplica ajustes inter-grupos se necessário"""
-        # Verificar se tem divisões
-        div_col = next((col for col in df.columns if "Divisão" in col), None)
+        # Verificar se tem divisões (sem acento pois as colunas são limpas)
+        div_col = next((col for col in df.columns if "Divisao" in col), None)
 
         if div_col:
             return  # Não aplicar ajustes se houver divisões

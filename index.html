@@ -4,79 +4,2601 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taça UA Rating</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/chart.css">
-    <link rel="stylesheet" href="styles/filters.css">
-    <link rel="icon" href="assets/icons/favicon.ico" type="image/x-icon">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1"></script>
-    <script src="scripts/dataLoader.js" defer></script>
-    <script src="scripts/chart.js" defer></script>
-    <script src="scripts/teamComparison.js" defer></script>
-    <script src="index.js" defer></script>
+    <title>Dashboard de Torneio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.8em;
+            height: fit-content;
+        }
+
+        .filter-btn:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .chart-card {
+            grid-column: span 2;
+        }
+
+        .ranking-card {
+            grid-column: span 2;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 550px;
+            margin-bottom: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .zoom-controls {
+            position: static;
+            display: flex;
+            gap: 8px;
+        }
+
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            color: #667eea;
+        }
+
+        .zoom-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .zoom-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.8em;
+            height: fit-content;
+        }
+
+        .team-selector {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .team-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            pointer-events: all;
+            backdrop-filter: blur(5px);
+            font-size: 0.85em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            min-height: 32px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin: 2px;
+        }
+
+        .team-checkbox:hover {
+            border-color: #667eea;
+            transform: translateY(-2px) scale(1.05);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .team-checkbox.active {
+            background: rgba(102, 126, 234, 0.95);
+            color: white;
+            border-color: transparent;
+            font-weight: 500;
+        }
+
+        .team-checkbox.active:hover {
+            background: rgba(102, 126, 234, 1);
+        }
+
+        .team-checkbox input {
+            display: none;
+        }
+
+        .team-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        /* Layouts adaptativos para diferentes números de equipas */
+        .team-selector.few-teams {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .team-selector.medium-teams {
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .team-selector.many-teams {
+            max-height: 150px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .team-selector.many-teams .team-checkbox {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            min-height: 26px;
+        }
+
+        .team-selector.many-teams .team-dot {
+            width: 10px;
+            height: 10px;
+        }
+
+        /* Controles de seleção rápida */
+        .quick-control-btn {
+            padding: 6px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .quick-control-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Barra de scroll personalizada para muitas equipas */
+        .team-selector.many-teams::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .team-selector.many-teams::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .team-selector.many-teams::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        .team-selector.many-teams::-webkit-scrollbar-thumb:hover {
+            background: #5a6fd8;
+        }
+
+        /* Labels dinâmicos posicionados no final das linhas */
+        .team-end-labels {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .team-end-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 2px 6px;
+            font-size: 0.75em;
+            font-weight: 500;
+            white-space: nowrap;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-50%);
+            transition: all 0.3s ease;
+            display: none;
+            z-index: 10;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .team-end-label.visible {
+            display: block;
+        }
+
+        .team-end-label.group-label {
+            background: rgba(255, 255, 255, 0.98);
+            font-weight: 600;
+            border-width: 3px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+            max-width: 200px;
+        }
+
+        .team-end-label:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-50%) scale(1.05);
+            z-index: 20;
+            max-width: none;
+            overflow: visible;
+        }
+
+        .rankings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .rankings-table th,
+        .rankings-table td {
+            padding: 8px 6px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .rankings-table th:nth-child(2),
+        .rankings-table td:nth-child(2) {
+            text-align: left;
+            padding-left: 12px;
+        }
+
+        .rankings-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9em;
+        }
+
+        .rankings-table th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        .rankings-table th:last-child {
+            border-top-right-radius: 10px;
+        }
+
+        .rankings-table tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .rank-1 {
+            background: #ffd700;
+        }
+
+        .rank-2 {
+            background: #c0c0c0;
+        }
+
+        .rank-3 {
+            background: #cd7f32;
+        }
+
+        .rank-other {
+            background: #667eea;
+        }
+
+        .division-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .group-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+        }
+
+        .division-btn,
+        .group-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .group-btn {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            border-color: #764ba2;
+            color: #764ba2;
+        }
+
+        .division-btn.active,
+        .division-btn:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .group-btn.active,
+        .group-btn:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .bracket-container {
+            grid-column: span 2;
+            overflow-x: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .bracket {
+            display: flex;
+            gap: 60px;
+            min-width: 800px;
+            justify-content: center;
+        }
+
+        .bracket-round {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 200px;
+        }
+
+        .bracket-round h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .bracket-match {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .bracket-match:hover {
+            transform: translateY(-3px);
+        }
+
+        .bracket-team {
+            padding: 8px 12px;
+            margin: 3px 0;
+            border-radius: 6px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .bracket-team.winner {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+        }
+
+        .bracket-team:not(.winner):hover {
+            background: #e9ecef;
+        }
+
+        .score {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card,
+            .bracket-container {
+                grid-column: span 1;
+            }
+
+            .chart-wrapper {
+                height: 400px;
+            }
+
+            .team-selector {
+                position: relative;
+                width: 100%;
+                height: auto;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 15px;
+                background: #f8f9fa;
+                border-radius: 10px;
+                margin-top: 15px;
+                right: auto;
+                top: auto;
+                bottom: auto;
+                min-width: auto;
+                max-width: none;
+                justify-content: center;
+            }
+
+            .team-checkbox {
+                transform: none !important;
+                font-size: 0.8em;
+                padding: 4px 8px;
+                min-height: 28px;
+                margin: 1px;
+            }
+
+            .team-end-labels {
+                display: none;
+                /* Ocultar labels dinâmicos no mobile */
+            }
+
+            .quick-selection-controls {
+                flex-direction: column;
+                gap: 5px !important;
+            }
+
+            .quick-control-btn {
+                font-size: 0.75em !important;
+                padding: 4px 8px !important;
+            }
+
+            .team-selector.many-teams {
+                max-height: 200px;
+            }
+
+            .division-selector {
+                flex-wrap: wrap;
+            }
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        .modalidade-selector {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modalidade-selector label {
+            font-weight: 600;
+            margin-right: 10px;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .modalidade-selector select {
+            padding: 10px 16px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            font-size: 1em;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .modalidade-selector select:hover {
+            border-color: #764ba2;
+            background: #f7f7ff;
+        }
+
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <header>
-        <h1>Taça UA Rating</h1>
-        <div class="modality-selector">
-            <label for="modalidade-select">Selecione a Modalidade:</label>
-            <select id="modalidade-select">
-                <option value="ANDEBOL MISTO">Andebol Misto</option>
-                <option value="BASQUETEBOL FEMININO">Basquetebol Feminino</option>
-                <option value="BASQUETEBOL MASCULINO">Basquetebol Masculino</option>
-                <option value="FUTEBOL DE 7 MASCULINO">Futebol de 7 Masculino</option>
-                <option value="FUTSAL FEMININO">Futsal Feminino</option>
-                <option value="FUTSAL MASCULINO">Futsal Masculino</option>
-                <option value="VOLEIBOL FEMININO">Voleibol Feminino</option>
-                <option value="VOLEIBOL MASCULINO">Voleibol Masculino</option>
-            </select>
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard de Torneio</h1>
+            <p>Análise de ELO, Classificações e Brackets em Tempo Real</p>
         </div>
-    </header>
-    <main>
-        <section id="rating-section">
-            <h2>Classificação Atual</h2>
-            <p class="instructions">Clique no nome de uma equipe na tabela abaixo para destacá-la no gráfico.</p>
-            <div id="current-rating">Carregando...</div>
-        </section>
 
-        <section id="history-section">
-            <h2>Evolução de Ratings</h2>
-            <div class="chart-container">
-                <canvas id="rating-history-chart"></canvas>
-            </div>
-        </section>
+        <div class="modalidade-selector">
+            <label for="modalidade">Escolhe a modalidade:</label>
+            <select id="modalidade" onchange="changeModalidade(this.value)">
+                <option value="">-- Selecionar --</option>
+                <option value="ANDEBOL MISTO_24_25">Andebol Misto</option>
+                <option value="BASQUETEBOL FEMININO_24_25">Basquetebol Feminino</option>
+                <option value="BASQUETEBOL MASCULINO_24_25">Basquetebol Masculino</option>
+                <option value="FUTEBOL DE 7 MASCULINO_24_25">Futebol 7 Masculino</option>
+                <option value="FUTSAL FEMININO_24_25">Futsal Feminino</option>
+                <option value="FUTSAL MASCULINO_24_25">Futsal Masculino</option>
+                <option value="VOLEIBOL FEMININO_24_25">Voleibol Feminino</option>
+                <option value="VOLEIBOL MASCULINO_24_25">Voleibol Masculino</option>
+            </select>
+            <button onclick="debugData()" style="margin-left: 10px; padding: 5px 10px;">Debug</button>
+        </div>
 
-        <section id="playoff-section">
-            <h2>Árvore de Playoffs</h2>
-            <div id="playoff-tree">Carregando...</div>
-        </section>
-
-        <section id="comparison-section">
-            <h2>Comparação de Equipas</h2>
-            <div class="comparison-controls">
-                <div class="team-selectors">
-                    <div>
-                        <label for="team-select-1">Equipa 1:</label>
-                        <select id="team-select-1"></select>
-                    </div>
-                    <div>
-                        <label for="team-select-2">Equipa 2:</label>
-                        <select id="team-select-2"></select>
+        <div class="dashboard-grid">
+            <!-- Gráfico de ELO -->
+            <div class="card chart-card">
+                <!-- Filtros rápidos -->
+                <div class="quick-filters" id="quickFilters">
+                    <!-- Filtros serão gerados dinamicamente baseados na modalidade -->
+                </div>
+                <div class="chart-header">
+                    <div class="card-title">Evolução de ELO das Equipas</div>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomChart(1.2)" title="Zoom In">🔍+</button>
+                        <button class="zoom-btn" onclick="zoomChart(0.8)" title="Zoom Out">🔍-</button>
+                        <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
+                        <button class="zoom-btn" onclick="togglePanMode()" id="panModeBtn" title="Pan Mode">✋</button>
                     </div>
                 </div>
-                <button id="compare-teams" class="comparison-btn">Comparar</button>
+                <div class="chart-wrapper">
+                    <div class="chart-container">
+                        <canvas id="eloChart"></canvas>
+                        <div class="team-end-labels" id="teamEndLabels">
+                            <!-- Labels dinâmicos serão gerados aqui -->
+                        </div>
+                    </div>
+                    <div class="team-selector" id="teamSelector">
+                        <!-- Checkboxes serão gerados dinamicamente -->
+                    </div>
+                </div>
             </div>
-            <div class="chart-container">
-                <canvas id="team-comparison-chart"></canvas>
+
+            <!-- Tabela de Classificação -->
+            <div class="card ranking-card">
+                <div class="card-title">Classificação Geral</div>
+                <div class="division-selector" id="divisionSelector">
+                    <!-- Botões de divisão serão gerados dinamicamente -->
+                </div>
+                <div class="group-selector" id="groupSelector" style="display: none;">
+                    <!-- Botões de grupo serão gerados dinamicamente -->
+                </div>
+                <table class="rankings-table" id="rankingsTable">
+                    <thead>
+                        <tr>
+                            <th>Pos.</th>
+                            <th>Equipa</th>
+                            <th>Pts</th>
+                            <th>J</th>
+                            <th>V</th>
+                            <th>E</th>
+                            <th>D</th>
+                            <th>GM</th>
+                            <th>GS</th>
+                            <th>±</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingsBody">
+                        <!-- Dados serão preenchidos dinamicamente -->
+                    </tbody>
+                </table>
             </div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2024 Taça UA</p>
-    </footer>
+        </div>
+
+        <!-- Bracket -->
+        <div class="card">
+            <div class="card-title">Bracket de Eliminação</div>
+            <div class="bracket-container">
+                <div class="bracket" id="bracketContainer">
+                    <!-- Bracket será gerado dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eloChart = null;
+        let currentDivision = 'A';
+        let currentGroup = null; // Para controlar grupo dentro da divisão
+        let currentModalityHasAdjustments = false; // Para controlar se modalidade atual tem ajustes
+
+        // Função de debug temporária
+        function debugData() {
+            console.log('=== DEBUG DOS DADOS ===');
+            console.log('sampleData completo:', sampleData);
+            console.log('Teams:', sampleData.teams);
+            console.log('Rankings:', sampleData.rankings);
+            console.log('ELO History:', sampleData.eloHistory);
+            console.log('Games Dates:', sampleData.gamesDates);
+            console.log('Modalidade tem ajustes intergrupos:', currentModalityHasAdjustments);
+
+            // Testar análise de estrutura
+            const structure = analyzeModalityStructure();
+            console.log('Estrutura analisada:', structure);
+        }
+
+        // Inicializar aplicação
+        function initApp() {
+            // Não carregar dados inicialmente - aguardar seleção de modalidade
+            document.getElementById('teamSelector').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Selecione uma modalidade para ver os dados</p>';
+            document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="10" style="text-align: center; color: #666;">Selecione uma modalidade</td></tr>';
+            document.getElementById('bracketContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Selecione uma modalidade para ver o bracket</p>';
+
+            // Inicializar gráfico vazio
+            initEloChart();
+        }
+
+        // Criar seletor de equipas
+        function createTeamSelector() {
+            const selector = document.getElementById('teamSelector');
+            selector.innerHTML = '';
+
+            if (sampleData.teams.length === 0) {
+                selector.innerHTML = '<p style="color: #666; text-align: center;">Selecione uma modalidade primeiro</p>';
+                return;
+            }
+
+            // Aplicar layout inteligente baseado no número de equipas
+            applyIntelligentTeamLayout(selector, sampleData.teams.length);
+
+            sampleData.teams.forEach(team => {
+                const label = document.createElement('label');
+                label.className = 'team-checkbox active';
+                label.innerHTML = `
+                    <input type="checkbox" checked onchange="toggleTeam('${team.name}')">
+                    <div class="team-dot" style="background-color: ${team.color}"></div>
+                    ${team.name}
+                `;
+                selector.appendChild(label);
+            });
+
+            // Se há muitas equipas, adicionar controles de seleção rápida
+            if (sampleData.teams.length > 12) {
+                addQuickSelectionControls(selector);
+            }
+
+            // Inicializar indicador de equipas
+            setTimeout(updateTeamCountIndicator, 100);
+        }
+
+        // Função para aplicar layout inteligente baseado no número de equipas
+        function applyIntelligentTeamLayout(selector, teamCount) {
+            // Remover classes de layout anterior
+            selector.classList.remove('many-teams', 'few-teams', 'medium-teams');
+
+            if (teamCount <= 8) {
+                // Poucas equipas: layout normal com boa margem
+                selector.classList.add('few-teams');
+                selector.style.gap = '12px';
+            } else if (teamCount <= 16) {
+                // Número médio: layout compacto mas legível
+                selector.classList.add('medium-teams');
+                selector.style.gap = '8px';
+            } else {
+                // Muitas equipas: layout muito compacto com scrolling horizontal se necessário
+                selector.classList.add('many-teams');
+                selector.style.gap = '6px';
+            }
+        }
+
+        // Função para adicionar controles de seleção rápida
+        function addQuickSelectionControls(selector) {
+            const controlsDiv = document.createElement('div');
+            controlsDiv.className = 'quick-selection-controls';
+            controlsDiv.style.cssText = `
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-bottom: 10px;
+                padding: 10px;
+                background: rgba(102, 126, 234, 0.1);
+                border-radius: 8px;
+            `;
+
+            const selectAllBtn = document.createElement('button');
+            selectAllBtn.textContent = 'Seleccionar Todas';
+            selectAllBtn.className = 'quick-control-btn';
+            selectAllBtn.onclick = () => selectAllTeams(true);
+
+            const deselectAllBtn = document.createElement('button');
+            deselectAllBtn.textContent = 'Desseleccionar Todas';
+            deselectAllBtn.className = 'quick-control-btn';
+            deselectAllBtn.onclick = () => selectAllTeams(false);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.textContent = 'Inverter Seleção';
+            toggleBtn.className = 'quick-control-btn';
+            toggleBtn.onclick = toggleAllTeams;
+
+            controlsDiv.appendChild(selectAllBtn);
+            controlsDiv.appendChild(deselectAllBtn);
+            controlsDiv.appendChild(toggleBtn);
+
+            selector.prepend(controlsDiv);
+        }
+
+        // Funções de controle rápido
+        function selectAllTeams(select) {
+            const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                const label = checkbox.parentElement;
+                checkbox.checked = select;
+                if (select) {
+                    label.classList.add('active');
+                } else {
+                    label.classList.remove('active');
+                }
+            });
+            updateEloChart();
+            updateTeamCountIndicator();
+        }
+
+        function toggleAllTeams() {
+            const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                const label = checkbox.parentElement;
+                checkbox.checked = !checkbox.checked;
+                if (checkbox.checked) {
+                    label.classList.add('active');
+                } else {
+                    label.classList.remove('active');
+                }
+            });
+            updateEloChart();
+            updateTeamCountIndicator();
+        }
+
+        // Alternar visibilidade da equipa no gráfico
+        function toggleTeam(teamName) {
+            const checkbox = event.target;
+            const label = checkbox.parentElement;
+
+            if (checkbox.checked) {
+                label.classList.add('active');
+            } else {
+                label.classList.remove('active');
+            }
+
+            updateEloChart();
+            updateTeamCountIndicator();
+        }
+
+        // Função para atualizar indicador de número de equipas selecionadas
+        function updateTeamCountIndicator() {
+            const activeCount = document.querySelectorAll('#teamSelector input[type="checkbox"]:checked').length;
+            const totalCount = document.querySelectorAll('#teamSelector input[type="checkbox"]').length;
+
+            let indicator = document.getElementById('team-count-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'team-count-indicator';
+                indicator.style.cssText = `
+                    position: absolute;
+                    top: 10px;
+                    right: 15px;
+                    background: rgba(102, 126, 234, 0.9);
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 10px;
+                    font-size: 0.75em;
+                    font-weight: 500;
+                    z-index: 15;
+                    transition: all 0.3s ease;
+                `;
+                document.querySelector('.chart-container').appendChild(indicator);
+            }
+
+            indicator.textContent = `${activeCount}/${totalCount} equipas`;
+
+            // Mudar cor baseado na quantidade
+            if (activeCount > 12) {
+                indicator.style.background = 'rgba(220, 53, 69, 0.9)'; // Vermelho - muitas equipas
+            } else if (activeCount > 8) {
+                indicator.style.background = 'rgba(255, 193, 7, 0.9)'; // Amarelo - número médio
+            } else {
+                indicator.style.background = 'rgba(40, 167, 69, 0.9)'; // Verde - poucas equipas
+            }
+        }
+
+        // Criar seletor de divisões
+        function createDivisionSelector() {
+            const selector = document.getElementById('divisionSelector');
+
+            if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
+                selector.innerHTML = '<p style="color: #666;">Nenhuma categoria disponível</p>';
+                return;
+            }
+
+            const structure = analyzeModalityStructure();
+            const divisions = Object.keys(sampleData.rankings);
+            currentDivision = divisions[0]; // Definir primeira divisão como padrão
+
+            selector.innerHTML = '';
+            divisions.forEach(division => {
+                const btn = document.createElement('button');
+                btn.className = `division-btn ${division === currentDivision ? 'active' : ''}`;
+
+                // Escolher nomenclatura baseada na estrutura
+                let label = division;
+                if (structure.type === 'groups-only') {
+                    label = `Grupo ${division}`;
+                } else if (structure.type === 'divisions-only' || structure.type === 'divisions-and-groups') {
+                    label = `Divisão ${division}`;
+                }
+
+                btn.textContent = label;
+                btn.onclick = () => switchDivision(division);
+                selector.appendChild(btn);
+            });
+
+            // Inicializar seletor de grupos para a divisão padrão
+            updateGroupSelector();
+        }
+
+        // Trocar divisão
+        function switchDivision(division) {
+            currentDivision = division;
+            currentGroup = null; // Reset group selection when changing division
+            document.querySelectorAll('.division-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateGroupSelector();
+            updateRankingsTable();
+        }
+
+        // Atualizar seletor de grupos
+        function updateGroupSelector() {
+            const groupSelector = document.getElementById('groupSelector');
+
+            if (!sampleData.rankings || !sampleData.rankings[currentDivision]) {
+                groupSelector.style.display = 'none';
+                return;
+            }
+
+            // Obter grupos únicos para a divisão atual
+            const teams = sampleData.rankings[currentDivision];
+            const groups = [...new Set(teams.map(team => team.group))].filter(group => group && group !== 'nan');
+
+            if (groups.length <= 1) {
+                groupSelector.style.display = 'none';
+                currentGroup = null;
+                return;
+            }
+
+            // Mostrar seletor de grupos se há múltiplos grupos
+            groupSelector.style.display = 'flex';
+            groupSelector.innerHTML = '';
+
+            // Definir Grupo A como padrão se não há grupo selecionado
+            if (currentGroup === null && groups.includes('A')) {
+                currentGroup = 'A';
+            } else if (currentGroup === null) {
+                currentGroup = groups[0]; // Primeiro grupo disponível se não há A
+            }
+
+            // Botões de grupos específicos (sem botão "Todos")
+            groups.forEach(group => {
+                const btn = document.createElement('button');
+                btn.className = `group-btn ${group === currentGroup ? 'active' : ''}`;
+                btn.textContent = `Grupo ${group}`;
+                btn.onclick = () => switchGroup(group);
+                groupSelector.appendChild(btn);
+            });
+        }
+
+        // Trocar grupo
+        function switchGroup(group) {
+            currentGroup = group;
+            document.querySelectorAll('.group-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateRankingsTable();
+        }
+
+        // Inicializar gráfico ELO
+        function initEloChart() {
+            const ctx = document.getElementById('eloChart').getContext('2d');
+
+            eloChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: false,
+                                mode: 'xy',
+                                modifierKey: null,
+                                onPanComplete: function () {
+                                    setTimeout(updateDynamicTeamLabels, 100);
+                                }
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.1
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                drag: {
+                                    enabled: false,
+                                    backgroundColor: 'rgba(225,225,225,0.3)'
+                                },
+                                mode: 'xy',
+                                onZoomComplete: function () {
+                                    setTimeout(updateDynamicTeamLabels, 100);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
+                        },
+                        point: {
+                            radius: 4,
+                            hoverRadius: 6
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            right: 50
+                        }
+                    }
+                }
+            });
+
+            // Adicionar funcionalidade de pan manual
+            setupManualPan();
+        }
+
+        // Configurar pan manual com eventos de mouse
+        function setupManualPan() {
+            const canvas = eloChart.canvas;
+            let isPanning = false;
+            let panStartX = 0;
+            let panStartY = 0;
+            let panMode = false;
+
+            canvas.addEventListener('mousedown', function (event) {
+                if (!panMode || !eloChart) return;
+
+                isPanning = true;
+                panStartX = event.clientX;
+                panStartY = event.clientY;
+                canvas.style.cursor = 'grabbing';
+            });
+
+            canvas.addEventListener('mousemove', function (event) {
+                if (!isPanning || !panMode || !eloChart) return;
+
+                const deltaX = event.clientX - panStartX;
+                const deltaY = event.clientY - panStartY;
+
+                const xScale = eloChart.scales.x;
+                const yScale = eloChart.scales.y;
+
+                // Calcular movimento proporcional
+                const xRange = xScale.max - xScale.min;
+                const yRange = yScale.max - yScale.min;
+
+                const xMovement = -(deltaX / canvas.width) * xRange;
+                const yMovement = (deltaY / canvas.height) * yRange;
+
+                // Aplicar pan
+                eloChart.options.scales.x.min = (eloChart.options.scales.x.min || xScale.min) + xMovement;
+                eloChart.options.scales.x.max = (eloChart.options.scales.x.max || xScale.max) + xMovement;
+                eloChart.options.scales.y.min = (eloChart.options.scales.y.min || yScale.min) + yMovement;
+                eloChart.options.scales.y.max = (eloChart.options.scales.y.max || yScale.max) + yMovement;
+
+                eloChart.update('none');
+                updateDynamicTeamLabels();
+
+                panStartX = event.clientX;
+                panStartY = event.clientY;
+            });
+
+            canvas.addEventListener('mouseup', function () {
+                if (isPanning) {
+                    isPanning = false;
+                    canvas.style.cursor = panMode ? 'grab' : 'default';
+                }
+            });
+
+            canvas.addEventListener('mouseleave', function () {
+                if (isPanning) {
+                    isPanning = false;
+                    canvas.style.cursor = 'default';
+                }
+            });
+
+            // Função global para ativar/desativar pan
+            window.toggleManualPan = function () {
+                panMode = !panMode;
+                canvas.style.cursor = panMode ? 'grab' : 'default';
+
+                const panButton = document.getElementById('panButton');
+                panButton.textContent = panMode ? '🤚 Pan: ON' : '✋ Pan: OFF';
+                panButton.classList.toggle('active', panMode);
+            };
+        }
+
+        // Atualizar gráfico ELO
+        function updateEloChart() {
+            if (!eloChart || !sampleData.teams || sampleData.teams.length === 0) {
+                console.log('Não é possível atualizar gráfico - dados insuficientes');
+                return;
+            }
+
+            console.log('Atualizando gráfico ELO...');
+
+            const datasets = [];
+            const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
+
+            // Verificar se existem ajustes intergrupos reais nos dados atuais
+            const hasAdjustments = currentModalityHasAdjustments;
+
+            // Criar labels com datas formatadas e identificação das fases
+            let labels = [];
+            if (sampleData.gamesDates && sampleData.gamesDates.length > 0) {
+                // Contadores para identificar fases dos playoffs
+                let playoffPhaseIndex = 0;
+                const playoffPhases = ['Quartos', 'Meias', 'Final', '3º Lugar']; // E1, E2, E3, E3L
+                let regularSeasoneEnded = false;
+
+                // Calcular quantas jornadas de fase de grupos existem
+                let regularSeasonGames = 0;
+                if (sampleData.rawEloData) {
+                    const regularRounds = sampleData.rawEloData
+                        .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
+                        .map(match => parseInt(match.Jornada));
+                    regularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;
+                }
+
+                labels = sampleData.gamesDates.map((date, index) => {
+                    if (date instanceof Date) {
+                        if (index === 0) {
+                            return 'Início'; // Primeira data é o início da época
+                        } else if (index === sampleData.gamesDates.length - 1 && hasAdjustments) {
+                            // Verificar se é a última data e há ajustes intergrupos reais
+                            return `Ajustes (${date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })})`;
+                        }
+
+                        // Verificar se já passou da fase de grupos
+                        if (index > regularSeasonGames && !regularSeasoneEnded) {
+                            regularSeasoneEnded = true;
+                            playoffPhaseIndex = 0;
+                        }
+
+                        if (regularSeasoneEnded && playoffPhaseIndex < playoffPhases.length) {
+                            const label = `${playoffPhases[playoffPhaseIndex]} (${date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })})`;
+                            playoffPhaseIndex++;
+                            return label;
+                        }
+
+                        return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+                    }
+                    return index === 0 ? 'Início' : 'Data desconhecida';
+                });
+            } else {
+                // Fallback para jornadas se não houver datas
+                let maxRounds = 0;
+                sampleData.teams.forEach(team => {
+                    if (sampleData.eloHistory[team.name] && sampleData.eloHistory[team.name].length > maxRounds) {
+                        maxRounds = sampleData.eloHistory[team.name].length;
+                    }
+                });
+                labels = Array.from({ length: maxRounds }, (_, i) => i === 0 ? 'Início' : `Jornada ${i}`);
+
+                // Adicionar "Ajustes" só se há ajustes reais
+                if (hasAdjustments && labels.length > 1) {
+                    labels[labels.length - 1] = 'Ajustes';
+                }
+            }
+
+            console.log('Labels do gráfico:', labels);
+            console.log('Ajustes encontrados:', hasAdjustments);
+
+            checkboxes.forEach((checkbox, index) => {
+                if (checkbox.checked && sampleData.teams[index]) {
+                    const team = sampleData.teams[index];
+                    const teamHistory = sampleData.eloHistory[team.name] || [1500];
+
+                    console.log(`Adicionando ${team.name} ao gráfico:`, teamHistory);
+
+                    datasets.push({
+                        label: team.name,
+                        data: teamHistory,
+                        borderColor: team.color,
+                        backgroundColor: team.color + '20',
+                        fill: false,
+                        borderWidth: 3,
+                        tension: 0.4
+                    });
+                }
+            });
+
+            console.log('Total de datasets:', datasets.length);
+
+            eloChart.data.labels = labels;
+            eloChart.data.datasets = datasets;
+            eloChart.update('active');
+
+            // Atualizar labels dinâmicos após o gráfico ser renderizado
+            setTimeout(() => {
+                updateDynamicTeamLabels();
+            }, 100);
+        }
+
+        // Função para criar e posicionar labels dinâmicos no final das linhas
+        function updateDynamicTeamLabels() {
+            const labelsContainer = document.getElementById('teamEndLabels');
+            const chartInstance = eloChart;
+
+            if (!chartInstance || !labelsContainer) return;
+
+            labelsContainer.innerHTML = ''; // Limpar labels existentes
+
+            // Obter apenas as equipas ativas (visíveis no gráfico)
+            const activeDatasets = chartInstance.data.datasets || [];
+            const chartArea = chartInstance.chartArea;
+            const canvas = chartInstance.canvas;
+            const canvasRect = canvas.getBoundingClientRect();
+            const containerRect = labelsContainer.getBoundingClientRect();
+
+            // Calcular offset entre canvas e container
+            const offsetX = canvasRect.left - containerRect.left;
+            const offsetY = canvasRect.top - containerRect.top;
+
+            // Coletar informações de todas as equipas primeiro
+            const teamEndpoints = [];
+
+            activeDatasets.forEach((dataset, datasetIndex) => {
+                if (dataset && dataset.data && dataset.data.length > 0) {
+                    // Em vez de procurar o último ponto absoluto, encontrar o último ponto VISÍVEL
+                    let rightmostVisibleIndex = -1;
+                    let rightmostVisibleX = -Infinity;
+
+                    // Percorrer todos os pontos para encontrar o mais à direita que está visível
+                    for (let i = 0; i < dataset.data.length; i++) {
+                        if (dataset.data[i] !== null && dataset.data[i] !== undefined) {
+                            const xPixel = chartInstance.scales.x.getPixelForValue(i);
+
+                            // Verificar se este ponto está na área visível do gráfico
+                            if (xPixel >= chartArea.left && xPixel <= chartArea.right) {
+                                if (xPixel > rightmostVisibleX) {
+                                    rightmostVisibleX = xPixel;
+                                    rightmostVisibleIndex = i;
+                                }
+                            }
+                        }
+                    }
+
+                    // Se encontrou um ponto visível, usar esse
+                    if (rightmostVisibleIndex >= 0) {
+                        const visibleValue = dataset.data[rightmostVisibleIndex];
+                        const xPixel = chartInstance.scales.x.getPixelForValue(rightmostVisibleIndex);
+                        const yPixel = chartInstance.scales.y.getPixelForValue(visibleValue);
+
+                        // Verificar se o ponto Y também está numa área razoável
+                        if (yPixel >= chartArea.top - 50 && yPixel <= chartArea.bottom + 50) {
+                            teamEndpoints.push({
+                                dataset: dataset,
+                                xPosition: xPixel,
+                                yPixel: yPixel,
+                                lastValue: visibleValue,
+                                name: dataset.label,
+                                dataIndex: rightmostVisibleIndex
+                            });
+                        }
+                    }
+                }
+            });
+
+            // Calcular nível de zoom atual para ajustar thresholds dinamicamente
+            const yScale = chartInstance.scales.y;
+            const xScale = chartInstance.scales.x;
+
+            // Calcular fator de zoom baseado na diferença entre escalas atuais e originais
+            const originalYRange = yScale.max - yScale.min;
+            const originalXRange = xScale.max - xScale.min;
+
+            // Estimar zoom baseado na altura visível da escala Y
+            const currentYRange = (eloChart.options.scales?.y?.max || yScale.max) -
+                (eloChart.options.scales?.y?.min || yScale.min);
+            const currentXRange = (eloChart.options.scales?.x?.max || xScale.max) -
+                (eloChart.options.scales?.x?.min || xScale.min);
+
+            const yZoomFactor = originalYRange / currentYRange;
+            const xZoomFactor = originalXRange / currentXRange;
+            const avgZoomFactor = (yZoomFactor + xZoomFactor) / 2;
+
+            // Ajustar thresholds baseado no zoom - quanto maior o zoom, menor o threshold
+            // Isso permite que labels se separem quando há zoom suficiente
+            const baseProximityThreshold = 25;
+            const baseEloThreshold = 15;
+
+            // Reduzir thresholds com zoom para permitir separação de labels
+            const proximityThreshold = Math.max(8, baseProximityThreshold / Math.sqrt(avgZoomFactor));
+            const eloThreshold = Math.max(3, baseEloThreshold / Math.sqrt(avgZoomFactor));
+
+            console.log(`Zoom factor: ${avgZoomFactor.toFixed(2)}, Proximity: ${proximityThreshold.toFixed(1)}px, ELO: ${eloThreshold.toFixed(1)}`);
+
+            const processedTeams = new Set();
+            const labelsToShow = [];
+
+            teamEndpoints.forEach((team, index) => {
+                if (processedTeams.has(index)) return;
+
+                // Encontrar equipas próximas
+                const nearbyTeams = [team];
+                const nearbyIndices = [index];
+
+                teamEndpoints.forEach((otherTeam, otherIndex) => {
+                    if (otherIndex === index || processedTeams.has(otherIndex)) return;
+
+                    const verticalDistance = Math.abs(team.yPixel - otherTeam.yPixel);
+                    const eloDistance = Math.abs(team.lastValue - otherTeam.lastValue);
+                    const horizontalDistance = Math.abs(team.xPosition - otherTeam.xPosition);
+
+                    // Lógica melhorada: equipas são consideradas próximas se:
+                    // 1. Estão visualmente próximas (pixels) E têm ELO similar
+                    // 2. OU estão muito próximas visualmente independente do ELO
+                    const isVisuallyClose = verticalDistance < proximityThreshold;
+                    const hasCloseELO = eloDistance < eloThreshold;
+                    const isVeryClose = verticalDistance < (proximityThreshold / 2);
+
+                    if ((isVisuallyClose && hasCloseELO) || isVeryClose) {
+                        // Adicionar verificação de distância horizontal para evitar agrupar linhas muito distantes horizontalmente
+                        if (horizontalDistance < 150) {
+                            nearbyTeams.push(otherTeam);
+                            nearbyIndices.push(otherIndex);
+                        }
+                    }
+                });
+
+                // Marcar todas as equipas próximas como processadas
+                nearbyIndices.forEach(idx => processedTeams.add(idx));
+
+                if (nearbyTeams.length === 1) {
+                    // Equipa isolada - mostrar normalmente
+                    labelsToShow.push(team);
+                } else {
+                    // Com zoom alto suficiente, mostrar labels individuais
+                    if (avgZoomFactor > 3) {
+                        // Zoom alto - mostrar todas as equipas individualmente
+                        nearbyTeams.forEach(nearbyTeam => {
+                            labelsToShow.push(nearbyTeam);
+                        });
+                    } else {
+                        // Zoom normal - agrupar equipas próximas e mostrar apenas a com ELO mais alto
+                        const highestEloTeam = nearbyTeams.reduce((highest, current) =>
+                            current.lastValue > highest.lastValue ? current : highest
+                        );
+
+                        // Criar label combinado com informação de múltiplas equipas
+                        const combinedTeam = {
+                            ...highestEloTeam,
+                            name: nearbyTeams.length > 3
+                                ? `${highestEloTeam.name} (+${nearbyTeams.length - 1} outras)`
+                                : nearbyTeams.map(t => t.name).join(', '),
+                            isGroup: nearbyTeams.length > 1,
+                            groupSize: nearbyTeams.length
+                        };
+
+                        labelsToShow.push(combinedTeam);
+                    }
+                }
+            });
+
+            // Criar os labels visuais para pontos relevantes
+            labelsToShow.forEach((team, index) => {
+                const label = document.createElement('div');
+                label.className = 'team-end-label visible';
+                if (team.isGroup) {
+                    label.classList.add('group-label');
+                }
+
+                label.style.borderColor = team.dataset.borderColor;
+                label.style.color = team.dataset.borderColor;
+
+                // As coordenadas xPosition e yPixel já são absolutas em relação ao canvas
+                // Calcular posição diretamente sem subtração adicional
+                let labelX = team.xPosition + 8; // Offset padrão de 8px à direita do ponto
+                let labelY = team.yPixel;
+
+                // Se o ponto estiver fora da área direita, colocar label na borda direita
+                if (team.xPosition > chartArea.right) {
+                    labelX = chartArea.right + 8; // Fixar logo após a borda direita
+                }
+
+                // Com zoom alto, adicionar pequeno offset vertical para labels individuais muito próximas
+                if (avgZoomFactor > 3) {
+                    // Verificar se há outras labels muito próximas e ajustar posição
+                    const otherLabels = labelsToShow.slice(0, index);
+                    const conflictingLabels = otherLabels.filter(other => {
+                        return Math.abs(labelY - other.yPixel) < 18 && Math.abs(labelX - (other.xPosition + 8)) < 60;
+                    });
+
+                    if (conflictingLabels.length > 0) {
+                        labelY += conflictingLabels.length * 18; // Offset de 18px por cada label conflitante
+                    }
+                }
+
+                // Garantir que a label fica dentro dos limites do canvas
+                labelX = Math.max(chartArea.left + 8, Math.min(chartArea.right + 100, labelX));
+                labelY = Math.max(chartArea.top, Math.min(chartArea.bottom - 20, labelY));
+
+                // Posicionamento final com offset correto (coordenadas já são absolutas)
+                label.style.left = (offsetX + labelX) + 'px';
+                label.style.top = (offsetY + labelY) + 'px';
+                label.textContent = team.name;
+
+                labelsContainer.appendChild(label);
+            });
+        }
+
+        // Funções de controle de zoom
+        function zoomChart(factor) {
+            if (!eloChart) return;
+
+            const chart = eloChart;
+            const xScale = chart.scales.x;
+            const yScale = chart.scales.y;
+
+            // Calcular novos limites do zoom
+            const xRange = xScale.max - xScale.min;
+            const yRange = yScale.max - yScale.min;
+
+            const newXRange = xRange / factor;
+            const newYRange = yRange / factor;
+
+            const xCenter = (xScale.max + xScale.min) / 2;
+            const yCenter = (yScale.max + yScale.min) / 2;
+
+            // Aplicar zoom
+            chart.options.scales.x.min = xCenter - newXRange / 2;
+            chart.options.scales.x.max = xCenter + newXRange / 2;
+            chart.options.scales.y.min = yCenter - newYRange / 2;
+            chart.options.scales.y.max = yCenter + newYRange / 2;
+
+            chart.update('none');
+
+            // Atualizar labels após zoom
+            setTimeout(() => {
+                updateDynamicTeamLabels();
+            }, 50);
+        }
+
+        function resetZoom() {
+            if (!eloChart) return;
+
+            // Remover limites personalizados
+            delete eloChart.options.scales.x.min;
+            delete eloChart.options.scales.x.max;
+            delete eloChart.options.scales.y.min;
+            delete eloChart.options.scales.y.max;
+
+            eloChart.update('none');
+
+            // Atualizar labels após reset
+            setTimeout(() => {
+                updateDynamicTeamLabels();
+            }, 50);
+        }
+
+        function togglePanMode() {
+            if (window.toggleManualPan) {
+                window.toggleManualPan();
+            }
+        }
+
+        // Atualizar tabela de classificações
+        function updateRankingsTable() {
+            const tbody = document.getElementById('rankingsBody');
+
+            if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #666;">Nenhum dado disponível</td></tr>';
+                return;
+            }
+
+            // Usar a primeira divisão disponível se currentDivision não existir
+            if (!sampleData.rankings[currentDivision]) {
+                currentDivision = Object.keys(sampleData.rankings)[0];
+            }
+
+            let teams = sampleData.rankings[currentDivision] || [];
+
+            // Filtrar por grupo se houver seleção de grupo
+            if (currentGroup !== null) {
+                teams = teams.filter(team => team.group === currentGroup);
+            }
+
+            tbody.innerHTML = '';
+
+            teams.forEach((team, index) => {
+                const row = document.createElement('tr');
+                const rankClass = index < 3 ? `rank-${index + 1}` : 'rank-other';
+                const goalDiff = (team.goals || 0) - (team.conceded || 0);
+                const goalDiffText = goalDiff > 0 ? `+${goalDiff}` : goalDiff.toString();
+                const totalGames = (team.wins || 0) + (team.draws || 0) + (team.losses || 0);
+
+                row.innerHTML = `
+                    <td><span class="rank-badge ${rankClass}">${index + 1}</span></td>
+                    <td><strong>${team.team}</strong></td>
+                    <td><strong>${team.points}</strong></td>
+                    <td>${totalGames}</td>
+                    <td>${team.wins || 0}</td>
+                    <td>${team.draws || 0}</td>
+                    <td>${team.losses || 0}</td>
+                    <td>${team.goals || 0}</td>
+                    <td>${team.conceded || 0}</td>
+                    <td style="color: ${goalDiff > 0 ? '#28a745' : goalDiff < 0 ? '#dc3545' : '#666'}">${goalDiffText}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Criar bracket de dados reais dos CSVs
+        function createRealBracket() {
+            if (!sampleData.rawEloData || sampleData.rawEloData.length === 0) {
+                console.log('Dados brutos de ELO não carregados');
+                createBracket();
+                return;
+            }
+
+            // Filtrar jogos de eliminação dos dados brutos (não do eloHistory processado)
+            const eliminationMatches = sampleData.rawEloData.filter(match =>
+                match.Jornada && (
+                    match.Jornada.startsWith('E1') ||  // Quartos
+                    match.Jornada.startsWith('E2') ||  // Meias
+                    match.Jornada.startsWith('E3')    // Final/3º lugar
+                )
+            ); if (eliminationMatches.length === 0) {
+                console.log('Nenhum jogo de eliminação encontrado');
+                sampleData.bracket = {};
+                createBracket();
+                return;
+            }
+
+            console.log('Jogos de eliminação encontrados:', eliminationMatches);
+
+            // Organizar jogos por fase na ordem de exibição correta
+            const bracketData = {};
+
+            // Quartos de Final (E1)
+            const quartos = eliminationMatches.filter(m => m.Jornada.startsWith('E1') && !m.Jornada.includes('L'));
+            if (quartos.length > 0) {
+                bracketData["Quartos de Final"] = quartos.map(match => ({
+                    team1: match['Equipa 1'],
+                    team2: match['Equipa 2'],
+                    score1: parseFloat(match['Golos 1']) || 0,
+                    score2: parseFloat(match['Golos 2']) || 0,
+                    winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2']
+                }));
+            }
+
+            // Meias-Finais (E2)
+            const meias = eliminationMatches.filter(m => m.Jornada.startsWith('E2') && !m.Jornada.includes('L'));
+            if (meias.length > 0) {
+                bracketData["Meias-Finais"] = meias.map(match => ({
+                    team1: match['Equipa 1'],
+                    team2: match['Equipa 2'],
+                    score1: parseFloat(match['Golos 1']) || 0,
+                    score2: parseFloat(match['Golos 2']) || 0,
+                    winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2']
+                }));
+            }
+
+            // Jogo do 3º lugar (E3L) - colocar antes da final
+            const terceiroLugar = eliminationMatches.filter(m => m.Jornada === 'E3L');
+            if (terceiroLugar.length > 0) {
+                bracketData["3º Lugar"] = terceiroLugar.map(match => ({
+                    team1: match['Equipa 1'],
+                    team2: match['Equipa 2'],
+                    score1: parseFloat(match['Golos 1']) || 0,
+                    score2: parseFloat(match['Golos 2']) || 0,
+                    winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2']
+                }));
+            }
+
+            // Final (E3)
+            const final = eliminationMatches.filter(m => m.Jornada === 'E3');
+            if (final.length > 0) {
+                bracketData["Final"] = final.map(match => ({
+                    team1: match['Equipa 1'],
+                    team2: match['Equipa 2'],
+                    score1: parseFloat(match['Golos 1']) || 0,
+                    score2: parseFloat(match['Golos 2']) || 0,
+                    winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2']
+                }));
+            }
+
+            sampleData.bracket = bracketData;
+            console.log('Bracket real criado:', bracketData);
+            createBracket();
+        }
+
+        // Criar bracket de exemplo
+        function createSampleBracket() {
+            if (!sampleData.teams || sampleData.teams.length === 0) {
+                sampleData.bracket = {};
+                createBracket();
+                return;
+            }
+
+            // Criar bracket de exemplo com as equipas disponíveis
+            const teams = sampleData.teams.slice(0, 8); // Usar até 8 equipas
+
+            sampleData.bracket = {
+                "Quartos de Final": [
+                    {
+                        team1: teams[0]?.name || "Equipa 1",
+                        team2: teams[1]?.name || "Equipa 2",
+                        score1: 2,
+                        score2: 1,
+                        winner: teams[0]?.name || "Equipa 1"
+                    },
+                    {
+                        team1: teams[2]?.name || "Equipa 3",
+                        team2: teams[3]?.name || "Equipa 4",
+                        score1: 3,
+                        score2: 0,
+                        winner: teams[2]?.name || "Equipa 3"
+                    },
+                    {
+                        team1: teams[4]?.name || "Equipa 5",
+                        team2: teams[5]?.name || "Equipa 6",
+                        score1: 1,
+                        score2: 2,
+                        winner: teams[5]?.name || "Equipa 6"
+                    },
+                    {
+                        team1: teams[6]?.name || "Equipa 7",
+                        team2: teams[7]?.name || "Equipa 8",
+                        score1: 4,
+                        score2: 1,
+                        winner: teams[6]?.name || "Equipa 7"
+                    }
+                ],
+                "Meias-Finais": [
+                    {
+                        team1: teams[0]?.name || "Equipa 1",
+                        team2: teams[2]?.name || "Equipa 3",
+                        score1: 2,
+                        score2: 3,
+                        winner: teams[2]?.name || "Equipa 3"
+                    },
+                    {
+                        team1: teams[5]?.name || "Equipa 6",
+                        team2: teams[6]?.name || "Equipa 7",
+                        score1: 1,
+                        score2: 0,
+                        winner: teams[5]?.name || "Equipa 6"
+                    }
+                ],
+                "Final": [
+                    {
+                        team1: teams[2]?.name || "Equipa 3",
+                        team2: teams[5]?.name || "Equipa 6",
+                        score1: null,
+                        score2: null,
+                        winner: null
+                    }
+                ]
+            };
+
+            createBracket();
+        }
+
+        // Criar bracket
+        function createBracket() {
+            const container = document.getElementById('bracketContainer');
+
+            if (!sampleData.bracket || Object.keys(sampleData.bracket).length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Bracket não disponível para esta modalidade</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            Object.entries(sampleData.bracket).forEach(([round, matches]) => {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'bracket-round';
+
+                const title = document.createElement('h3');
+                title.textContent = round;
+                roundDiv.appendChild(title);
+
+                matches.forEach(match => {
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'bracket-match';
+
+                    const team1Div = document.createElement('div');
+                    team1Div.className = `bracket-team ${match.winner === match.team1 ? 'winner' : ''}`;
+                    team1Div.innerHTML = `
+                        <span>${match.team1}</span>
+                        <span class="score">${match.score1 !== null ? match.score1 : '-'}</span>
+                    `;
+
+                    const team2Div = document.createElement('div');
+                    team2Div.className = `bracket-team ${match.winner === match.team2 ? 'winner' : ''}`;
+                    team2Div.innerHTML = `
+                        <span>${match.team2}</span>
+                        <span class="score">${match.score2 !== null ? match.score2 : '-'}</span>
+                    `;
+
+                    matchDiv.appendChild(team1Div);
+                    matchDiv.appendChild(team2Div);
+                    roundDiv.appendChild(matchDiv);
+                });
+
+                container.appendChild(roundDiv);
+            });
+        }
+
+        // Atualizar filtros rápidos baseado na estrutura da modalidade
+        function updateQuickFilters() {
+            console.log('Atualizando filtros rápidos...');
+            const structure = analyzeModalityStructure();
+            console.log('Estrutura detectada:', structure);
+            const filtersContainer = document.getElementById('quickFilters');
+
+            // Limpar filtros existentes
+            filtersContainer.innerHTML = '<button class="filter-btn" onclick="filterTop3()">Top 3</button>';
+
+            // Adicionar filtros baseados na estrutura
+            if (structure.hasDivisions) {
+                structure.divisions.forEach(division => {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn';
+                    btn.textContent = `Divisão ${division}`;
+                    btn.onclick = () => filterDivision(division);
+                    filtersContainer.appendChild(btn);
+                });
+            }
+
+            if (structure.hasGroups) {
+                structure.groups.forEach(group => {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn';
+                    btn.textContent = `Grupo ${group}`;
+                    btn.onclick = () => filterGroup(group);
+                    filtersContainer.appendChild(btn);
+                });
+            }
+
+            // Adicionar filtros finais
+            const playoffsBtn = document.createElement('button');
+            playoffsBtn.className = 'filter-btn';
+            playoffsBtn.textContent = 'Playoffs';
+            playoffsBtn.onclick = filterPlayoffs;
+            filtersContainer.appendChild(playoffsBtn);
+
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'filter-btn';
+            resetBtn.textContent = 'Resetar Filtro';
+            resetBtn.onclick = resetFilter;
+            filtersContainer.appendChild(resetBtn);
+        }
+        function analyzeModalityStructure() {
+            const structure = {
+                hasDivisions: false,
+                hasGroups: false,
+                divisions: [],
+                groups: [],
+                type: 'unknown'
+            };
+
+            console.log('Analisando estrutura da modalidade...');
+            console.log('Rankings disponíveis:', Object.keys(sampleData.rankings));
+
+            // Verificar estrutura baseada nos dados de classificação
+            Object.keys(sampleData.rankings).forEach(key => {
+                if (!isNaN(key)) {
+                    // É um número, então é divisão
+                    structure.hasDivisions = true;
+                    structure.divisions.push(key);
+                } else {
+                    // É letra/string, então é grupo
+                    structure.hasGroups = true;
+                    structure.groups.push(key);
+                }
+            });
+
+            // Verificar grupos dentro das equipas para casos especiais
+            const groupsInTeams = new Set();
+            sampleData.teams.forEach(team => {
+                if (team.group && team.group !== team.division) {
+                    groupsInTeams.add(team.group);
+                }
+            });
+
+            if (groupsInTeams.size > 0) {
+                structure.hasGroups = true;
+                groupsInTeams.forEach(group => {
+                    if (!structure.groups.includes(group)) {
+                        structure.groups.push(group);
+                    }
+                });
+            }
+
+            // Determinar tipo de estrutura
+            if (structure.hasDivisions && structure.hasGroups) {
+                structure.type = 'divisions-and-groups'; // Ex: Futsal Masculino
+            } else if (structure.hasDivisions) {
+                structure.type = 'divisions-only'; // Ex: Andebol
+            } else if (structure.hasGroups) {
+                structure.type = 'groups-only'; // Ex: Futsal Feminino
+            }
+
+            console.log('Estrutura da modalidade:', structure);
+            return structure;
+        }
+
+        // Função auxiliar para ativar só certas equipas
+        function setActiveTeams(teamNames) {
+            const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
+            checkboxes.forEach((checkbox, index) => {
+                const label = checkbox.parentElement;
+                if (teamNames.includes(sampleData.teams[index].name)) {
+                    checkbox.checked = true;
+                    label.classList.add('active');
+                } else {
+                    checkbox.checked = false;
+                    label.classList.remove('active');
+                }
+            });
+            updateEloChart();
+            updateTeamCountIndicator();
+        }
+
+        // Filtro Top 3 (da divisão atual)
+        function filterTop3() {
+            const top3 = sampleData.rankings[currentDivision].slice(0, 3).map(t => t.team);
+            setActiveTeams(top3);
+        }
+
+        // Filtro por divisão
+        function filterDivision(division) {
+            if (!sampleData.rankings[division]) return;
+            const divisionTeams = sampleData.rankings[division].map(t => t.team);
+            setActiveTeams(divisionTeams);
+        }
+
+        // Filtro por grupo
+        function filterGroup(group) {
+            const groupTeams = [];
+            // Procurar em todas as divisões por equipas do grupo especificado
+            Object.values(sampleData.rankings).forEach(divisionTeams => {
+                divisionTeams.forEach(team => {
+                    if (team.group === group) {
+                        groupTeams.push(team.team);
+                    }
+                });
+            });
+            setActiveTeams(groupTeams);
+        }
+
+        // Filtro equipas que passaram aos playoffs (estão no bracket)
+        function filterPlayoffs() {
+            const playoffTeams = new Set();
+
+            // Usar dados brutos para encontrar equipas nos playoffs
+            if (sampleData.rawEloData && sampleData.rawEloData.length > 0) {
+                sampleData.rawEloData.forEach(match => {
+                    if (match.Jornada && match.Jornada.startsWith('E')) {
+                        if (match["Equipa 1"]) playoffTeams.add(match["Equipa 1"]);
+                        if (match["Equipa 2"]) playoffTeams.add(match["Equipa 2"]);
+                    }
+                });
+            } else {
+                // Fallback para usar dados do bracket se disponível
+                Object.values(sampleData.bracket).forEach(round =>
+                    round.forEach(match => {
+                        playoffTeams.add(match.team1);
+                        playoffTeams.add(match.team2);
+                    })
+                );
+            }
+
+            console.log('Equipas dos playoffs encontradas:', [...playoffTeams]);
+            setActiveTeams([...playoffTeams]);
+        }
+
+        // Resetar filtro -> ativa todas as equipas
+        function resetFilter() {
+            const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                const label = checkbox.parentElement;
+                checkbox.checked = true;
+                label.classList.add('active');
+            });
+            updateEloChart();
+        }
+
+        let sampleData = { teams: [], rankings: {}, eloHistory: {}, matches: [], gamesDates: [], rawEloData: [] };
+
+        function changeModalidade(mod) {
+            if (!mod) return;
+
+            // Caminhos relativos
+            const classificacaoPath = `elo_ratings/classificacao_${mod}.csv`;
+            const detalhePath = `elo_ratings/detalhe_${mod}.csv`;
+            const jogosPath = `csv_modalidades/${mod}.csv`;
+
+            // Reset dos dados e variáveis globais
+            sampleData = { teams: [], rankings: {}, eloHistory: {}, matches: [], bracket: {}, gamesDates: [], rawEloData: [] };
+            currentModalityHasAdjustments = false;
+
+            // Mostrar loading
+            document.getElementById('teamSelector').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando dados...</div>';
+            document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="10" class="loading">Carregando classificação...</td></tr>';
+
+            let loadedFiles = 0;
+            const totalFiles = 3;
+
+            function checkAllLoaded() {
+                loadedFiles++;
+                console.log(`Arquivo carregado ${loadedFiles}/${totalFiles}`);
+                if (loadedFiles === totalFiles) {
+                    console.log('Todos os arquivos carregados, atualizando interface...');
+                    console.log('Estado dos dados:', sampleData);
+                    // Todos os arquivos carregados, atualizar interface
+                    setTimeout(() => {
+                        createTeamSelector();
+                        createDivisionSelector();
+                        updateQuickFilters(); // Atualizar filtros baseados na estrutura
+                        updateRankingsTable();
+                        if (eloChart) {
+                            updateEloChart();
+                        }
+                        createRealBracket(); // Criar bracket com dados reais
+                    }, 500);
+                }
+            }
+
+            // Carregar CSVs
+            Papa.parse(classificacaoPath, {
+                download: true,
+                header: true,
+                complete: results => {
+                    processRankings(results.data);
+                    checkAllLoaded();
+                },
+                error: error => {
+                    console.error('Erro ao carregar classificação:', error);
+                    checkAllLoaded();
+                }
+            });
+
+            Papa.parse(jogosPath, {
+                download: true,
+                header: true,
+                complete: results => {
+                    processMatches(results.data);
+                    checkAllLoaded();
+                },
+                error: error => {
+                    console.error('Erro ao carregar jogos:', error);
+                    checkAllLoaded();
+                }
+            });
+
+            Papa.parse(detalhePath, {
+                download: true,
+                header: true,
+                complete: results => {
+                    processEloHistory(results.data);
+                    checkAllLoaded();
+                },
+                error: error => {
+                    console.error('Erro ao carregar detalhes ELO:', error);
+                    checkAllLoaded();
+                }
+            });
+        }
+
+        // Funções processadoras (iguais às que já te preparei)
+        function processRankings(data) {
+            console.log('Processando rankings...', data.length, 'entradas');
+            console.log('Primeira entrada:', data[0]);
+
+            // Gerar cores aleatórias para as equipas
+            const generateRandomColor = () => {
+                const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            };
+
+            data.forEach(row => {
+                if (!row.Equipa) return;
+
+                // Determinar a chave principal (Divisao ou Grupo)
+                const mainKey = row.Divisao || row.Grupo;
+                if (!mainKey) {
+                    console.warn('Equipa sem divisão ou grupo:', row.Equipa);
+                    return;
+                }
+
+                // Tratar grupo "nan" 
+                let grupo = row.Grupo;
+                if (!grupo || grupo === 'nan' || grupo === 'NaN') {
+                    grupo = row.Divisao || mainKey; // Usar divisão como grupo se não houver grupo específico
+                }
+
+                const team = {
+                    name: row.Equipa.trim(),
+                    division: row.Divisao || mainKey,
+                    group: grupo,
+                    color: generateRandomColor()
+                };
+
+                if (!sampleData.teams.find(t => t.name === team.name)) {
+                    sampleData.teams.push(team);
+                    sampleData.eloHistory[team.name] = [];
+                }
+
+                if (!sampleData.rankings[mainKey]) sampleData.rankings[mainKey] = [];
+                sampleData.rankings[mainKey].push({
+                    team: row.Equipa,
+                    points: parseInt(row.pontos) || 0,
+                    wins: parseInt(row.vitorias) || 0,
+                    draws: parseInt(row.empates) || 0,
+                    losses: parseInt(row.derrotas) || 0,
+                    goals: parseInt(row.golos_marcados) || 0,
+                    conceded: parseInt(row.golos_sofridos) || 0,
+                    group: grupo
+                });
+            });
+
+            console.log('Rankings processados:', sampleData.rankings);
+            console.log('Equipas processadas:', sampleData.teams.length);
+        }
+
+        function processMatches(data) {
+            data.forEach(row => {
+                if (!row["Equipa 1"] || !row["Equipa 2"]) return;
+                sampleData.matches.push({
+                    jornada: row.Jornada,
+                    team1: row["Equipa 1"],
+                    team2: row["Equipa 2"],
+                    score1: parseInt(row["Golos 1"]) || 0,
+                    score2: parseInt(row["Golos 2"]) || 0,
+                    division: row.Divisão || row.Grupo
+                });
+            });
+        }
+
+        // Função auxiliar para verificar se existem ajustes intergrupos reais (não-zero)
+        function hasRealInterGroupAdjustments(teamInterGroupAdjustments, rawEloData = null) {
+            // Método 1: Verificar através dos ajustes coletados
+            const hasAdjustmentsFromTeamData = Object.values(teamInterGroupAdjustments).some(adjustments =>
+                adjustments.some(adj => {
+                    // Verificar se há ajuste não-zero ou diferença significativa no ELO final
+                    const hasNonZeroAdjustment = adj.adjustment && adj.adjustment !== 0;
+                    const hasSignificantEloChange = adj.finalElo && adj.initialElo &&
+                        Math.abs(adj.finalElo - adj.initialElo) > 1; // Tolerância de 1 ponto
+                    return hasNonZeroAdjustment || hasSignificantEloChange;
+                })
+            );
+
+            // Método 2: Verificar diretamente nos dados brutos se disponível
+            let hasAdjustmentsFromRawData = false;
+            if (rawEloData && rawEloData.length > 0) {
+                hasAdjustmentsFromRawData = rawEloData.some(row => {
+                    // Verificar linhas "Inter-Group" com ajustes não-zero
+                    if (row.Jornada === "Inter-Group" && row["Equipa 1"]) {
+                        const adjustment = parseInt(row["Elo Delta 1"]) || 0;
+                        return adjustment !== 0;
+                    }
+                    // Verificar também ajustes nos jogos normais
+                    const interGroupAdj1 = parseInt(row["Inter Group Adjustment 1"]) || 0;
+                    const interGroupAdj2 = parseInt(row["Inter Group Adjustment 2"]) || 0;
+                    return interGroupAdj1 !== 0 || interGroupAdj2 !== 0;
+                });
+            }
+
+            const result = hasAdjustmentsFromTeamData || hasAdjustmentsFromRawData;
+            console.log('Verificação de ajustes intergrupos:', {
+                fromTeamData: hasAdjustmentsFromTeamData,
+                fromRawData: hasAdjustmentsFromRawData,
+                final: result
+            });
+
+            return result;
+        }
+
+        function processEloHistory(data) {
+            console.log('Processando histórico ELO...', data.length, 'jogos');
+
+            // Guardar dados brutos para processamento do bracket
+            sampleData.rawEloData = data;
+
+            // Primeiro, organizar dados por equipa, jornada e data
+            const teamEloByRound = {};
+            const teamInitialElo = {}; // Para guardar ELO inicial de cada equipa
+            const gamesDates = {}; // Para mapear jornada -> data
+            const teamInterGroupAdjustments = {}; // Para ajustes intergrupos
+
+            // Estruturas para organizar jornadas normais e playoffs separadamente
+            const playoffGames = {}; // Para organizar jogos de playoffs (E1, E2, E3)
+
+            data.forEach(row => {
+                // Processar ajustes intergrupos especiais (linhas "Inter-Group")
+                if (row.Jornada === "Inter-Group" && row["Equipa 1"]) {
+                    const teamName = row["Equipa 1"];
+                    const adjustment = parseInt(row["Elo Delta 1"]) || 0;
+                    const finalElo = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || 0;
+
+                    if (adjustment !== 0) {
+                        if (!teamInterGroupAdjustments[teamName]) teamInterGroupAdjustments[teamName] = [];
+                        teamInterGroupAdjustments[teamName].push({
+                            round: "Inter-Group",
+                            adjustment: adjustment,
+                            finalElo: finalElo,
+                            date: null // Será calculada depois
+                        });
+                        console.log(`Ajuste intergrupo encontrado: ${teamName} = ${adjustment}`);
+                    }
+                    return; // Não processar mais esta linha
+                }
+
+                if (!row["Equipa 1"] || !row["Equipa 2"]) return;
+
+                const round = row.Jornada; // Manter como string para processar E1, E2, etc.
+                const team1 = row["Equipa 1"];
+                const team2 = row["Equipa 2"];
+                const finalElo1 = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || 1500;
+                const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]) || 1500;
+                const initialElo1 = parseInt(row["Elo Antes 1"]) || 1500;
+                const initialElo2 = parseInt(row["Elo Antes 2"]) || 1500;
+                const gameDate = row.Dia ? new Date(row.Dia) : null;
+
+                // Processar ajustes intergrupos dos jogos normais (geralmente são 0)
+                const interGroupAdj1 = parseInt(row["Inter Group Adjustment 1"]) || 0;
+                const interGroupAdj2 = parseInt(row["Inter Group Adjustment 2"]) || 0;
+
+                // Guardar ELO inicial se ainda não foi definido
+                if (!teamInitialElo[team1]) {
+                    teamInitialElo[team1] = initialElo1;
+                }
+                if (!teamInitialElo[team2]) {
+                    teamInitialElo[team2] = initialElo2;
+                }
+
+                // Guardar ajustes intergrupos se existirem (normalmente só das linhas Inter-Group)
+                if (interGroupAdj1 !== 0) {
+                    if (!teamInterGroupAdjustments[team1]) teamInterGroupAdjustments[team1] = [];
+                    teamInterGroupAdjustments[team1].push({
+                        round: round,
+                        adjustment: interGroupAdj1,
+                        date: gameDate
+                    });
+                }
+                if (interGroupAdj2 !== 0) {
+                    if (!teamInterGroupAdjustments[team2]) teamInterGroupAdjustments[team2] = [];
+                    teamInterGroupAdjustments[team2].push({
+                        round: round,
+                        adjustment: interGroupAdj2,
+                        date: gameDate
+                    });
+                }
+
+                // Processar jornadas numéricas (fase de grupos)
+                const roundNum = parseInt(round);
+                if (!isNaN(roundNum)) {
+                    // Guardar data da jornada
+                    if (gameDate && !gamesDates[roundNum]) {
+                        gamesDates[roundNum] = gameDate;
+                    }
+
+                    if (!teamEloByRound[team1]) teamEloByRound[team1] = {};
+                    if (!teamEloByRound[team2]) teamEloByRound[team2] = {};
+
+                    // Guardar o ELO final mais recente por jornada
+                    teamEloByRound[team1][roundNum] = finalElo1;
+                    teamEloByRound[team2][roundNum] = finalElo2;
+                } else if (round.startsWith('E')) {
+                    // Processar jogos de playoffs (E1, E2, E3)
+                    if (!playoffGames[round]) {
+                        playoffGames[round] = [];
+                    }
+                    playoffGames[round].push({
+                        team1: team1,
+                        team2: team2,
+                        finalElo1: finalElo1,
+                        finalElo2: finalElo2,
+                        date: gameDate
+                    });
+                }
+            });
+
+            // Adicionar data inicial para o ELO de partida
+            const initialDate = new Date('2024-09-01'); // Data de início da época
+            const allDates = [initialDate];
+
+            // Guardar datas ordenadas para uso no gráfico (fase de grupos)
+            const sortedRounds = Object.keys(gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
+            sortedRounds.forEach(round => allDates.push(gamesDates[round]));
+
+            // Adicionar datas dos playoffs na ordem correta (E1 -> E2 -> E3 -> E3L)
+            const playoffOrder = ['E1', 'E2', 'E3', 'E3L'];
+            const playoffDates = {};
+
+            playoffOrder.forEach(phase => {
+                if (playoffGames[phase] && playoffGames[phase].length > 0) {
+                    // Usar a data do primeiro jogo da fase (assumindo que todos os jogos da mesma fase são no mesmo dia)
+                    const phaseDate = playoffGames[phase][0].date;
+                    if (phaseDate) {
+                        playoffDates[phase] = phaseDate;
+                        allDates.push(phaseDate);
+                    }
+                }
+            });
+
+            console.log('Jogos de playoffs encontrados:', Object.keys(playoffGames));
+            console.log('Datas dos playoffs:', playoffDates);
+
+            // Verificar se existem ajustes intergrupos reais (não-zero) usando a função auxiliar
+            const hasInterGroupAdjustments = hasRealInterGroupAdjustments(teamInterGroupAdjustments);
+
+            // Adicionar data para ajustes intergrupos só se existirem ajustes reais
+            if (hasInterGroupAdjustments && allDates.length > 1) {
+                const lastGameDate = allDates[allDates.length - 1];
+                const adjustmentDate = new Date(lastGameDate);
+                adjustmentDate.setDate(adjustmentDate.getDate() + 1); // Um dia depois
+                allDates.push(adjustmentDate);
+                console.log(`Ajustes intergrupos programados para: ${adjustmentDate.toLocaleDateString('pt-PT')}`);
+            } else if (hasInterGroupAdjustments) {
+                // Fallback se não há datas de jogos
+                const fallbackDate = new Date('2025-06-01');
+                allDates.push(fallbackDate);
+            }
+
+            console.log('Ajustes intergrupos reais encontrados:', hasInterGroupAdjustments);
+
+            // Atualizar variável global
+            currentModalityHasAdjustments = hasInterGroupAdjustments;
+
+            sampleData.gamesDates = allDates;
+
+            console.log('Equipas com histórico ELO:', Object.keys(teamEloByRound));
+            console.log('ELO inicial das equipas:', teamInitialElo);
+            console.log('Ajustes intergrupos:', teamInterGroupAdjustments);
+            console.log('Datas dos jogos:', sampleData.gamesDates);
+
+            // Converter para formato adequado para o gráfico
+            // Primeiro, obter todas as jornadas onde houve jogos (fase de grupos)
+            const allGameRounds = Object.keys(gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
+
+            Object.keys(teamEloByRound).forEach(teamName => {
+                const eloValues = [teamInitialElo[teamName] || 1500]; // Começar com ELO inicial correto
+                let currentElo = teamInitialElo[teamName] || 1500;
+
+                // Para cada jornada da fase de grupos, adicionar o ELO (se mudou) ou manter o anterior
+                allGameRounds.forEach(round => {
+                    if (teamEloByRound[teamName][round] !== undefined) {
+                        // ELO mudou nesta jornada
+                        currentElo = teamEloByRound[teamName][round];
+                    }
+                    // Adicionar o ELO atual (mudou ou manteve-se)
+                    eloValues.push(currentElo);
+                });
+
+                // Adicionar mudanças de ELO dos playoffs
+                playoffOrder.forEach(phase => {
+                    if (playoffGames[phase] && playoffDates[phase]) {
+                        // Verificar se esta equipa jogou nesta fase dos playoffs
+                        const teamGame = playoffGames[phase].find(game =>
+                            game.team1 === teamName || game.team2 === teamName
+                        );
+
+                        if (teamGame) {
+                            // Equipa jogou nesta fase - atualizar ELO
+                            currentElo = teamGame.team1 === teamName ? teamGame.finalElo1 : teamGame.finalElo2;
+                            console.log(`${teamName}: ELO após ${phase} = ${currentElo}`);
+                        }
+                        // Adicionar ponto ao gráfico (mudou ou manteve-se)
+                        eloValues.push(currentElo);
+                    }
+                });
+
+                // Adicionar ajustes intergrupos se existirem
+                if (hasInterGroupAdjustments) {
+                    const lastElo = eloValues[eloValues.length - 1];
+                    if (teamInterGroupAdjustments[teamName] && teamInterGroupAdjustments[teamName].length > 0) {
+                        // Procurar ajuste Inter-Group que tem finalElo
+                        const interGroupAdj = teamInterGroupAdjustments[teamName].find(adj => adj.finalElo && adj.finalElo > 0);
+
+                        if (interGroupAdj) {
+                            // Usar o ELO final das linhas Inter-Group
+                            const newElo = interGroupAdj.finalElo;
+                            const actualAdjustment = newElo - lastElo;
+                            eloValues.push(newElo);
+                            console.log(`${teamName}: ELO antes ajustes ${lastElo} -> ELO final ${newElo} (ajuste ${actualAdjustment})`);
+                        } else {
+                            // Fallback para cálculo manual se não há finalElo
+                            const totalAdjustment = teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
+                            const newElo = lastElo + totalAdjustment;
+                            eloValues.push(newElo);
+                            if (totalAdjustment !== 0) {
+                                console.log(`${teamName}: ELO antes ajustes ${lastElo} + ajuste ${totalAdjustment} = ${newElo}`);
+                            } else {
+                                console.log(`${teamName}: sem ajustes (ajuste = 0), mantendo ELO ${lastElo}`);
+                            }
+                        }
+                    } else {
+                        // Equipa sem ajustes - manter ELO anterior
+                        eloValues.push(lastElo);
+                        console.log(`${teamName}: sem ajustes intergrupos, mantendo ELO ${lastElo}`);
+                    }
+                }
+
+                // Guardar histórico processado
+                sampleData.eloHistory[teamName] = eloValues;
+                console.log(`${teamName}: ELO inicial ${eloValues[0]}, ${eloValues.length} pontos totais`);
+            });
+
+            // Para equipas que não jogaram (não têm dados em teamEloByRound mas existem em teams)
+            sampleData.teams.forEach(team => {
+                if (!teamEloByRound[team.name]) {
+                    const initialElo = teamInitialElo[team.name] || 1500;
+                    const totalPoints = 1 + allGameRounds.length + Object.keys(playoffDates).length + (hasInterGroupAdjustments ? 1 : 0);
+
+                    // Criar array com ELO inicial para todas as datas exceto ajustes
+                    let eloValues = new Array(totalPoints - (hasInterGroupAdjustments ? 1 : 0)).fill(initialElo);
+
+                    // Adicionar ajustes intergrupos se existirem para esta equipa
+                    if (hasInterGroupAdjustments) {
+                        if (teamInterGroupAdjustments[team.name] && teamInterGroupAdjustments[team.name].length > 0) {
+                            // Procurar ajuste Inter-Group que tem finalElo
+                            const interGroupAdj = teamInterGroupAdjustments[team.name].find(adj => adj.finalElo && adj.finalElo > 0);
+
+                            if (interGroupAdj) {
+                                // Usar o ELO final das linhas Inter-Group
+                                const newElo = interGroupAdj.finalElo;
+                                const actualAdjustment = newElo - initialElo;
+                                eloValues.push(newElo);
+                                console.log(`${team.name}: sem jogos, ELO inicial ${initialElo} -> ELO final ${newElo} (ajuste ${actualAdjustment})`);
+                            } else {
+                                // Fallback para cálculo manual se não há finalElo
+                                const totalAdjustment = teamInterGroupAdjustments[team.name].reduce((sum, adj) => sum + adj.adjustment, 0);
+                                const newElo = initialElo + totalAdjustment;
+                                eloValues.push(newElo);
+                                if (totalAdjustment !== 0) {
+                                    console.log(`${team.name}: sem jogos, ELO inicial ${initialElo} + ajuste ${totalAdjustment} = ${newElo}`);
+                                } else {
+                                    console.log(`${team.name}: sem jogos, sem ajustes (ajuste = 0), mantendo ELO inicial ${initialElo}`);
+                                }
+                            }
+                        } else {
+                            // Equipa sem ajustes - manter ELO inicial
+                            eloValues.push(initialElo);
+                            console.log(`${team.name}: sem jogos e sem ajustes, mantendo ELO inicial ${initialElo}`);
+                        }
+                    }
+
+                    sampleData.eloHistory[team.name] = eloValues;
+                }
+            });
+
+            // Garantir que todas as equipas têm o mesmo número de pontos no gráfico
+            const expectedPoints = 1 + allGameRounds.length + Object.keys(playoffDates).length + (hasInterGroupAdjustments ? 1 : 0);
+
+            sampleData.teams.forEach(team => {
+                if (sampleData.eloHistory[team.name] && sampleData.eloHistory[team.name].length < expectedPoints) {
+                    // Completar com o último ELO conhecido, mas verificar se precisa de ajustes
+                    const currentValues = sampleData.eloHistory[team.name];
+                    const lastElo = currentValues[currentValues.length - 1];
+
+                    while (currentValues.length < expectedPoints) {
+                        if (hasInterGroupAdjustments && currentValues.length === expectedPoints - 1) {
+                            // Este é o ponto de ajustes intergrupos
+                            if (teamInterGroupAdjustments[team.name] && teamInterGroupAdjustments[team.name].length > 0) {
+                                // Procurar ajuste Inter-Group que tem finalElo
+                                const interGroupAdj = teamInterGroupAdjustments[team.name].find(adj => adj.finalElo && adj.finalElo > 0);
+
+                                if (interGroupAdj) {
+                                    // Usar o ELO final das linhas Inter-Group
+                                    const newElo = interGroupAdj.finalElo;
+                                    const actualAdjustment = newElo - lastElo;
+                                    currentValues.push(newElo);
+                                    console.log(`${team.name}: completado com ELO final ${newElo} (ajuste ${actualAdjustment})`);
+                                } else {
+                                    // Fallback para cálculo manual se não há finalElo
+                                    const totalAdjustment = teamInterGroupAdjustments[team.name].reduce((sum, adj) => sum + adj.adjustment, 0);
+                                    const newElo = lastElo + totalAdjustment;
+                                    currentValues.push(newElo);
+                                    if (totalAdjustment !== 0) {
+                                        console.log(`${team.name}: completado com ajuste ${totalAdjustment}, ELO final ${newElo}`);
+                                    } else {
+                                        console.log(`${team.name}: completado sem ajustes (ajuste = 0), mantendo ELO ${lastElo}`);
+                                    }
+                                }
+                            } else {
+                                // Sem ajustes - manter ELO anterior
+                                currentValues.push(lastElo);
+                                console.log(`${team.name}: completado sem ajustes, mantendo ELO ${lastElo}`);
+                            }
+                        } else {
+                            currentValues.push(lastElo);
+                        }
+                    }
+                    console.log(`${team.name}: completado para ${expectedPoints} pontos`);
+                }
+            });
+
+            console.log('Histórico ELO final:', sampleData.eloHistory);
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        // Event listeners para controles de teclado
+        document.addEventListener('keydown', (event) => {
+            // Verificar se o usuário está editando texto
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            switch (event.key) {
+                case '+':
+                case '=':
+                    event.preventDefault();
+                    zoomChart(1.2);
+                    break;
+                case '-':
+                    event.preventDefault();
+                    zoomChart(0.8);
+                    break;
+                case '0':
+                    event.preventDefault();
+                    resetZoom();
+                    break;
+                case 'p':
+                case 'P':
+                    event.preventDefault();
+                    togglePanMode();
+                    break;
+            }
+        });
+
+        // Atualizar labels dinâmicos quando a janela for redimensionada
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                updateDynamicTeamLabels();
+            }, 200);
+        });
+    </script>
 </body>
 
 </html>
