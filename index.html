@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Torneio</title>
+    <title>Dashboard da Taça UA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -214,11 +214,11 @@
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
-            gap: 8px;
-            padding: 15px;
+            gap: 6px;
+            padding: 10px;
             background: #f8f9fa;
-            border-radius: 10px;
-            margin-top: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
             justify-content: center;
             align-items: center;
         }
@@ -226,22 +226,22 @@
         .team-checkbox {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
+            gap: 6px;
+            padding: 4px 8px;
             background: rgba(255, 255, 255, 0.95);
             border: 2px solid #e9ecef;
-            border-radius: 15px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             user-select: none;
             pointer-events: all;
             backdrop-filter: blur(5px);
-            font-size: 0.85em;
+            font-size: 0.75em;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            min-height: 32px;
+            min-height: 26px;
             white-space: nowrap;
             flex-shrink: 0;
-            margin: 2px;
+            margin: 1px;
         }
 
         .team-checkbox:hover {
@@ -275,6 +275,22 @@
             flex-shrink: 0;
         }
 
+        .team-emblem {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            object-fit: contain;
+            padding: 2px;
+            box-sizing: border-box;
+        }
+
+        .team-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         /* Layouts adaptativos para diferentes números de equipas */
         .team-selector.few-teams {
             max-height: none;
@@ -282,14 +298,13 @@
         }
 
         .team-selector.medium-teams {
-            max-height: 120px;
-            overflow-y: auto;
+            max-height: none;
+            overflow: visible;
         }
 
         .team-selector.many-teams {
-            max-height: 150px;
-            overflow-y: auto;
-            overflow-x: hidden;
+            max-height: none;
+            overflow: visible;
         }
 
         .team-selector.many-teams .team-checkbox {
@@ -323,24 +338,6 @@
         }
 
         /* Barra de scroll personalizada para muitas equipas */
-        .team-selector.many-teams::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .team-selector.many-teams::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-
-        .team-selector.many-teams::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 3px;
-        }
-
-        .team-selector.many-teams::-webkit-scrollbar-thumb:hover {
-            background: #5a6fd8;
-        }
-
         /* Labels dinâmicos posicionados no final das linhas */
         .team-end-labels {
             position: absolute;
@@ -397,19 +394,43 @@
             border-collapse: collapse;
             margin-top: 20px;
             font-size: 0.9em;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         .rankings-table th,
         .rankings-table td {
-            padding: 8px 6px;
+            padding: 1px 4px;
             text-align: center;
-            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+            line-height: 44px;
+            height: 46px;
+            box-sizing: border-box;
+            margin: 0;
+            position: relative;
         }
 
         .rankings-table th:nth-child(2),
         .rankings-table td:nth-child(2) {
             text-align: left;
-            padding-left: 12px;
+            padding: 1px 4px 1px 8px;
+            vertical-align: top;
+            white-space: nowrap;
+            line-height: 44px;
+            height: 46px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .rankings-table th:nth-child(2) {
+            text-align: center;
+            padding: 1px 4px;
+        }
+
+        .rankings-table tbody tr:last-child td {
+            border-bottom: none;
+            padding-bottom: 3px;
         }
 
         .rankings-table th {
@@ -459,6 +480,52 @@
 
         .rank-other {
             background: #667eea;
+        }
+
+        .team-emblem-table {
+            width: 68px;
+            height: 68px;
+            border-radius: 6px;
+            margin-right: 10px;
+            object-fit: contain;
+            vertical-align: middle;
+            padding: 4px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+
+        /* Ajuste específico para o emblema EGI que não tem margens internas */
+        .team-emblem[src*="EGI-07.png"],
+        .team-emblem-table[src*="EGI-07.png"] {
+            padding: 19px;
+        }
+
+        /* Ajuste específico do EGI para emblemas pequenos nos seletores */
+        .team-checkbox .team-emblem[src*="EGI-07.png"] {
+            padding: 6px;
+        }
+
+        .team-color-indicator {
+            width: 4px;
+            height: 28px;
+            border-radius: 2px;
+            margin-right: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .team-cell {
+            display: flex;
+            align-items: center;
+            text-align: left !important;
+        }
+
+        .team-name-table {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
         }
 
         .division-selector {
@@ -520,7 +587,7 @@
 
         .bracket {
             display: flex;
-            gap: 60px;
+            gap: 30px;
             min-width: 800px;
             justify-content: center;
         }
@@ -529,7 +596,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            min-width: 200px;
+            min-width: 280px;
         }
 
         .bracket-round h3 {
@@ -556,24 +623,48 @@
         }
 
         .bracket-team {
-            padding: 8px 12px;
+            padding: 12px 16px;
             margin: 3px 0;
             border-radius: 6px;
             background: #f8f9fa;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            border-left: 4px solid #dee2e6;
+            position: relative;
         }
 
         .bracket-team.winner {
-            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border-left-width: 6px;
         }
 
         .bracket-team:not(.winner):hover {
             background: #e9ecef;
+            transform: translateX(2px);
+        }
+
+        .bracket-team-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .bracket-team-emblem {
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .bracket-team-emblem[src*="EGI-07.png"] {
+            padding: 10px;
+            box-sizing: border-box;
         }
 
         .score {
@@ -639,7 +730,7 @@
             }
 
             .team-selector.many-teams {
-                max-height: 200px;
+                max-height: none;
             }
 
             .division-selector {
@@ -669,11 +760,16 @@
         .modalidade-selector {
             text-align: center;
             margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         .modalidade-selector label {
             font-weight: 600;
-            margin-right: 10px;
+            margin-right: 8px;
             font-size: 1.1em;
             color: #333;
         }
@@ -709,24 +805,19 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Dashboard de Torneio</h1>
-            <p>Análise de ELO, Classificações e Brackets em Tempo Real</p>
+            <h1>Dashboard da Taça UA</h1>
         </div>
 
         <div class="modalidade-selector">
-            <label for="modalidade">Escolhe a modalidade:</label>
-            <select id="modalidade" onchange="changeModalidade(this.value)">
-                <option value="">-- Selecionar --</option>
-                <option value="ANDEBOL MISTO_24_25">Andebol Misto</option>
-                <option value="BASQUETEBOL FEMININO_24_25">Basquetebol Feminino</option>
-                <option value="BASQUETEBOL MASCULINO_24_25">Basquetebol Masculino</option>
-                <option value="FUTEBOL DE 7 MASCULINO_24_25">Futebol 7 Masculino</option>
-                <option value="FUTSAL FEMININO_24_25">Futsal Feminino</option>
-                <option value="FUTSAL MASCULINO_24_25">Futsal Masculino</option>
-                <option value="VOLEIBOL FEMININO_24_25">Voleibol Feminino</option>
-                <option value="VOLEIBOL MASCULINO_24_25">Voleibol Masculino</option>
+            <label for="epoca">Época:</label>
+            <select id="epoca" onchange="changeEpoca(this.value)">
+                <!-- Épocas serão carregadas dinamicamente -->
             </select>
-            <button onclick="debugData()" style="margin-left: 10px; padding: 5px 10px;">Debug</button>
+
+            <label for="modalidade">Modalidade:</label>
+            <select id="modalidade" onchange="changeModalidade(this.value)">
+                <!-- Modalidades serão carregadas dinamicamente baseadas na época -->
+            </select>
         </div>
 
         <div class="dashboard-grid">
@@ -819,10 +910,43 @@
             // Testar análise de estrutura
             const structure = analyzeModalityStructure();
             console.log('Estrutura analisada:', structure);
+
+            // Debug das informações dos cursos
+            console.log('=== INFORMAÇÕES DOS CURSOS ===');
+            sampleData.teams.forEach(team => {
+                const courseInfo = getCourseInfo(team.name);
+                console.log(`${team.name}:`, {
+                    fullName: courseInfo.fullName,
+                    nucleus: courseInfo.nucleus,
+                    emblemPath: courseInfo.emblemPath,
+                    primaryColor: courseInfo.primaryColor,
+                    secondaryColor: courseInfo.secondaryColor
+                });
+            });
+
+            console.log('Todas as configurações de cursos:', getAllCoursesConfig());
+        }
+
+        // Função para verificar se emblemas estão carregando corretamente
+        function debugEmblemas() {
+            console.log('=== DEBUG DOS EMBLEMAS ===');
+            const emblemas = document.querySelectorAll('.team-emblem, .team-emblem-table');
+            emblemas.forEach((img, index) => {
+                console.log(`Emblema ${index + 1}:`, {
+                    src: img.src,
+                    alt: img.alt,
+                    naturalWidth: img.naturalWidth,
+                    naturalHeight: img.naturalHeight,
+                    loaded: img.complete && img.naturalHeight !== 0
+                });
+            });
         }
 
         // Inicializar aplicação
         function initApp() {
+            // Inicializar seletores de época e modalidade
+            initializeSelectors();
+
             // Não carregar dados inicialmente - aguardar seleção de modalidade
             document.getElementById('teamSelector').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Selecione uma modalidade para ver os dados</p>';
             document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="10" style="text-align: center; color: #666;">Selecione uma modalidade</td></tr>';
@@ -848,11 +972,19 @@
             sampleData.teams.forEach(team => {
                 const label = document.createElement('label');
                 label.className = 'team-checkbox active';
+
+                // Criar elemento para o emblema
+                const emblemHtml = team.emblemPath ?
+                    `<img src="${team.emblemPath}" alt="${team.name}" class="team-emblem" style="margin-right: 4px;" onerror="this.style.display='none'">` :
+                    '';
+
                 label.innerHTML = `
                     <input type="checkbox" checked onchange="toggleTeam('${team.name}')">
+                    ${emblemHtml}
                     <div class="team-dot" style="background-color: ${team.color}"></div>
-                    ${team.name}
+                    <span class="team-name" title="${team.fullName}">${team.name}</span>
                 `;
+                label.title = team.fullName; // Tooltip com nome completo
                 selector.appendChild(label);
             });
 
@@ -1272,7 +1404,7 @@
             if (sampleData.gamesDates && sampleData.gamesDates.length > 0) {
                 // Contadores para identificar fases dos playoffs
                 let playoffPhaseIndex = 0;
-                const playoffPhases = ['Quartos', 'Meias', 'Final', '3º Lugar']; // E1, E2, E3, E3L
+                const playoffPhases = ['Quartos', 'Meias', '3º Lugar', 'Final']; // E1, E2, E3L, E3
                 let regularSeasoneEnded = false;
 
                 // Calcular quantas jornadas de fase de grupos existem
@@ -1652,9 +1784,19 @@
                 const goalDiffText = goalDiff > 0 ? `+${goalDiff}` : goalDiff.toString();
                 const totalGames = (team.wins || 0) + (team.draws || 0) + (team.losses || 0);
 
+                // Obter informações do curso para emblema
+                const courseInfo = getCourseInfo(team.team);
+                const emblemHtml = courseInfo.emblemPath ?
+                    `<img src="${courseInfo.emblemPath}" alt="${team.team}" class="team-emblem-table" onerror="this.style.display='none'">` :
+                    '';
+
                 row.innerHTML = `
                     <td><span class="rank-badge ${rankClass}">${index + 1}</span></td>
-                    <td><strong>${team.team}</strong></td>
+                    <td class="team-cell">
+                        ${emblemHtml}
+                        <div class="team-color-indicator" style="background-color: ${courseInfo.primaryColor}"></div>
+                        <span class="team-name-table" title="${courseInfo.fullName}">${team.team}</span>
+                    </td>
                     <td><strong>${team.points}</strong></td>
                     <td>${totalGames}</td>
                     <td>${team.wins || 0}</td>
@@ -1806,6 +1948,15 @@
                         winner: teams[5]?.name || "Equipa 6"
                     }
                 ],
+                "3º Lugar": [
+                    {
+                        team1: teams[0]?.name || "Equipa 1",
+                        team2: teams[6]?.name || "Equipa 7",
+                        score1: null,
+                        score2: null,
+                        winner: null
+                    }
+                ],
                 "Final": [
                     {
                         team1: teams[2]?.name || "Equipa 3",
@@ -1843,17 +1994,54 @@
                     const matchDiv = document.createElement('div');
                     matchDiv.className = 'bracket-match';
 
+                    // Obter informações das equipas
+                    const team1Info = getCourseInfo(match.team1);
+                    const team2Info = getCourseInfo(match.team2);
+
+                    const team1Color = team1Info.colors ? team1Info.colors[0] : '#667eea';
+                    const team2Color = team2Info.colors ? team2Info.colors[0] : '#764ba2';
+
                     const team1Div = document.createElement('div');
                     team1Div.className = `bracket-team ${match.winner === match.team1 ? 'winner' : ''}`;
+
+                    // Definir cor de fundo se for vencedor, senão border colorida
+                    if (match.winner === match.team1) {
+                        team1Div.style.background = `linear-gradient(135deg, ${team1Color}, ${team1Color}dd)`;
+                        team1Div.style.borderLeftColor = team1Color;
+                    } else {
+                        team1Div.style.borderLeftColor = team1Color;
+                    }
+
                     team1Div.innerHTML = `
-                        <span>${match.team1}</span>
+                        <div class="bracket-team-content">
+                            ${team1Info.emblemPath ?
+                            `<img src="${team1Info.emblemPath}" alt="${match.team1}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                            ''
+                        }
+                            <span>${team1Info.displayName || match.team1}</span>
+                        </div>
                         <span class="score">${match.score1 !== null ? match.score1 : '-'}</span>
                     `;
 
                     const team2Div = document.createElement('div');
                     team2Div.className = `bracket-team ${match.winner === match.team2 ? 'winner' : ''}`;
+
+                    // Definir cor de fundo se for vencedor, senão border colorida
+                    if (match.winner === match.team2) {
+                        team2Div.style.background = `linear-gradient(135deg, ${team2Color}, ${team2Color}dd)`;
+                        team2Div.style.borderLeftColor = team2Color;
+                    } else {
+                        team2Div.style.borderLeftColor = team2Color;
+                    }
+
                     team2Div.innerHTML = `
-                        <span>${match.team2}</span>
+                        <div class="bracket-team-content">
+                            ${team2Info.emblemPath ?
+                            `<img src="${team2Info.emblemPath}" alt="${match.team2}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                            ''
+                        }
+                            <span>${team2Info.displayName || match.team2}</span>
+                        </div>
                         <span class="score">${match.score2 !== null ? match.score2 : '-'}</span>
                     `;
 
@@ -1982,10 +2170,37 @@
             updateTeamCountIndicator();
         }
 
-        // Filtro Top 3 (da divisão atual)
+        // Filtro Top 3 - equipas que chegaram à final e vencedor do 3º lugar
         function filterTop3() {
-            const top3 = sampleData.rankings[currentDivision].slice(0, 3).map(t => t.team);
-            setActiveTeams(top3);
+            const top3Teams = new Set();
+
+            // Procurar nos dados do bracket se existir
+            if (sampleData.bracket && Object.keys(sampleData.bracket).length > 0) {
+                // Adicionar finalistas
+                if (sampleData.bracket["Final"]) {
+                    sampleData.bracket["Final"].forEach(match => {
+                        top3Teams.add(match.team1);
+                        top3Teams.add(match.team2);
+                    });
+                }
+
+                // Adicionar vencedor do 3º lugar
+                if (sampleData.bracket["3º Lugar"]) {
+                    sampleData.bracket["3º Lugar"].forEach(match => {
+                        top3Teams.add(match.winner);
+                    });
+                }
+            }
+
+            // Se não há dados do bracket ou não encontrou 3 equipas, usar ranking
+            if (top3Teams.size < 3) {
+                console.log('Usando ranking para Top 3 pois bracket não tem dados suficientes');
+                const rankingTop3 = sampleData.rankings[currentDivision].slice(0, 3).map(t => t.team);
+                setActiveTeams(rankingTop3);
+            } else {
+                console.log('Top 3 do bracket:', [...top3Teams]);
+                setActiveTeams([...top3Teams]);
+            }
         }
 
         // Filtro por divisão
@@ -2046,7 +2261,490 @@
             updateEloChart();
         }
 
+        // Configuração dos cursos com emblemas e cores baseada nos núcleos da UA
+        const coursesConfig = {
+            'AP': {
+                displayName: 'Administração Pública',
+                nucleus: 'NEAP',
+                emblem: 'assets/Logos/NEAP-07.png',
+                colors: ['#1e4395', '#6c757d']
+            },
+            'Biologia': {
+                displayName: 'Biologia',
+                nucleus: 'NEB',
+                emblem: 'assets/Logos/NEB-07.png',
+                colors: ['#76c5bc', '#6c757d']
+            },
+            'Biologia e Geologia': {
+                displayName: 'Biologia e Geologia',
+                nucleus: 'NEBG',
+                emblem: 'assets/Logos/NEBG-07.png',
+                colors: ['#16a1dc', '#6c757d']
+            },
+            'Bioquímica': {
+                displayName: 'Bioquímica',
+                nucleus: 'NEQ',
+                emblem: 'assets/Logos/NEQ-07.png',
+                colors: ['#14a0db', '#6c757d']
+            },
+            'Biotecnologia': {
+                displayName: 'Biotecnologia',
+                nucleus: 'NECiB',
+                emblem: 'assets/Logos/NECiB-07.png',
+                colors: ['#14a0db', '#6c757d']
+            },
+            'CBM': {
+                displayName: 'Ciências Biomédicas',
+                nucleus: 'NECiB',
+                emblem: 'assets/Logos/NECiB-07.png',
+                colors: ['#14a0db', '#6c757d']
+            },
+            'CBM B': {
+                displayName: 'Ciências Biomédicas B',
+                nucleus: 'NECiB',
+                emblem: 'assets/Logos/NECiB-07.png',
+                colors: ['#14a0db', '#6c757d']
+            },
+            'Ciências do Mar': {
+                displayName: 'Ciências do Mar',
+                nucleus: 'NECM',
+                emblem: 'assets/Logos/NECM-07.png',
+                colors: ['#1c91a8', '#6c757d']
+            },
+            'Contabilidade': {
+                displayName: 'Contabilidade',
+                nucleus: 'NAE-ISCA',
+                emblem: 'assets/Logos/NAE_ISCA-07.png',
+                colors: ['#1e4395', '#6c757d']
+            },
+            'DPT': {
+                displayName: 'DPT',
+                nucleus: 'NAE-ESAN',
+                emblem: 'assets/Logos/NAE_ESAN-07.png',
+                colors: ['#14a0db', '#6c757d']
+            },
+            'Design': {
+                displayName: 'Design',
+                nucleus: 'NED',
+                emblem: 'assets/Logos/NED-07.png',
+                colors: ['#e73630', '#6c757d']
+            },
+            'ECT': {
+                displayName: 'Eng. Computadores e Telemática',
+                nucleus: 'NEECT',
+                emblem: 'assets/Logos/NEECT-07.png',
+                colors: ['#4c65a4', '#6c757d']
+            },
+            'EET': {
+                displayName: 'Eng. Eletrónica e Telecomunicações',
+                nucleus: 'NEEETA',
+                emblem: 'assets/Logos/NEEETA-07.png',
+                colors: ['#3362ae', '#6c757d']
+            },
+            'EET B': {
+                displayName: 'Eng. Eletrónica e Telecomunicações B',
+                nucleus: 'NEEETA',
+                emblem: 'assets/Logos/NEEETA-07.png',
+                colors: ['#3362ae', '#6c757d']
+            },
+            'EGI': {
+                displayName: 'Eng. e Gestão Industrial',
+                nucleus: 'AEGIA',
+                emblem: 'assets/Logos/EGI-07.png',
+                colors: ['#ff6d10', '#6c757d']
+            },
+            'EGI B': {
+                displayName: 'Eng. e Gestão Industrial B',
+                nucleus: 'AEGIA',
+                emblem: 'assets/Logos/EGI-07.png',
+                colors: ['#ff6d10', '#6c757d']
+            },
+            'Economia': {
+                displayName: 'Economia',
+                nucleus: 'NEEC',
+                emblem: 'assets/Logos/NEEC-07.png',
+                colors: ['#e73630', '#6c757d']
+            },
+            'Educaçao Básica': {
+                displayName: 'Educação Básica',
+                nucleus: 'NEEB',
+                emblem: 'assets/Logos/NEEB-07.png',
+                colors: ['#e94183', '#6c757d']
+            },
+            'Educação Básica': {
+                displayName: 'Educação Básica',
+                nucleus: 'NEEB',
+                emblem: 'assets/Logos/NEEB-07.png',
+                colors: ['#e94183', '#6c757d']
+            },
+            'Enfermagem': {
+                displayName: 'Enfermagem',
+                nucleus: 'NAE-ESSUA',
+                emblem: 'assets/Logos/NAE_ESSUA-07.png',
+                colors: ['#1ca152', '#6c757d']
+            },
+            'Eng. Aeroespacial': {
+                displayName: 'Eng. Aeroespacial',
+                nucleus: 'NEEMec',
+                emblem: 'assets/Logos/NEEMec-07.png',
+                colors: ['#f08344', '#6c757d']
+            },
+            'Eng. Ambiente': {
+                displayName: 'Eng. do Ambiente',
+                nucleus: 'NEEA',
+                emblem: 'assets/Logos/NEEA-07.png',
+                colors: ['#a05389', '#6c757d']
+            },
+            'Eng. Biomédica': {
+                displayName: 'Eng. Biomédica',
+                nucleus: 'NEEF',
+                emblem: 'assets/Logos/NEEF-07.png',
+                colors: ['#f9dd53', '#6c757d']
+            },
+            'Eng. Civil': {
+                displayName: 'Eng. Civil',
+                nucleus: 'NEBEC',
+                emblem: 'assets/Logos/NEBEC-07.png',
+                colors: ['#f08344', '#6c757d']
+            },
+            'Eng. Compotacional': {
+                displayName: 'Eng. Computacional',
+                nucleus: 'NEEF',
+                emblem: 'assets/Logos/NEEF-07.png',
+                colors: ['#f9dd53', '#6c757d']
+            },
+            'Eng. Computacional': {
+                displayName: 'Eng. Computacional',
+                nucleus: 'NEEF',
+                emblem: 'assets/Logos/NEEF-07.png',
+                colors: ['#f9dd53', '#6c757d']
+            },
+            'Eng. Cívil': {
+                displayName: 'Eng. Civil',
+                nucleus: 'NEBEC',
+                emblem: 'assets/Logos/NEBEC-07.png',
+                colors: ['#f08344', '#6c757d']
+            },
+            'Eng. Física': {
+                displayName: 'Eng. Física',
+                nucleus: 'NEEF',
+                emblem: 'assets/Logos/NEEF-07.png',
+                colors: ['#f9dd53', '#6c757d']
+            },
+            'Eng. Informática': {
+                displayName: 'Eng. Informática',
+                nucleus: 'NEI',
+                emblem: 'assets/Logos/NEI-07.png',
+                colors: ['#178d4a', '#6c757d']
+            },
+            'Eng. Informática ': {
+                displayName: 'Eng. Informática',
+                nucleus: 'NEI',
+                emblem: 'assets/Logos/NEI-07.png',
+                colors: ['#178d4a', '#6c757d']
+            },
+            'Eng. Informática B': {
+                displayName: 'Eng. Informática B',
+                nucleus: 'NEI',
+                emblem: 'assets/Logos/NEI-07.png',
+                colors: ['#178d4a', '#6c757d']
+            },
+            'Eng. Materiais': {
+                displayName: 'Eng. de Materiais',
+                nucleus: 'NEM',
+                emblem: 'assets/Logos/NEM-07.png',
+                colors: ['#e73630', '#6c757d']
+            },
+            'Eng. Materias': {
+                displayName: 'Eng. de Materiais',
+                nucleus: 'NEM',
+                emblem: 'assets/Logos/NEM-07.png',
+                colors: ['#e73630', '#6c757d']
+            },
+            'Eng. Mecânica': {
+                displayName: 'Eng. Mecânica',
+                nucleus: 'NEEMec',
+                emblem: 'assets/Logos/NEEMec-07.png',
+                colors: ['#f08344', '#6c757d']
+            },
+            'Eng. Mecânica B': {
+                displayName: 'Eng. Mecânica B',
+                nucleus: 'NEEMec',
+                emblem: 'assets/Logos/NEEMec-07.png',
+                colors: ['#f08344', '#6c757d']
+            },
+            'Eng. Química': {
+                displayName: 'Eng. Química',
+                nucleus: 'NEEQu',
+                emblem: 'assets/Logos/NEEQu-07.png',
+                colors: ['#f08344', '#6c757d']
+            },
+            'Eng.Cívil': {
+                displayName: 'Eng. Civil',
+                nucleus: 'NEBEC',
+                emblem: 'assets/Logos/NEBEC-07.png',
+                colors: ['#f08344', '#6c757d']
+            },
+            'Finanças': {
+                displayName: 'Finanças',
+                nucleus: 'NAE-ISCA',
+                emblem: 'assets/Logos/NAE_ISCA-07.png',
+                colors: ['#1e4395', '#6c757d']
+            },
+            'Fisioterapia': {
+                displayName: 'Fisioterapia',
+                nucleus: 'NAE-ESSUA',
+                emblem: 'assets/Logos/NAE_ESSUA-07.png',
+                colors: ['#1ca152', '#6c757d']
+            },
+            'Física': {
+                displayName: 'Física',
+                nucleus: 'NEEF',
+                emblem: 'assets/Logos/NEEF-07.png',
+                colors: ['#f9dd53', '#6c757d']
+            },
+            'GPT': {
+                displayName: 'Gestão e Planeamento em Turismo',
+                nucleus: 'NEGPT',
+                emblem: 'assets/Logos/NEGPT-07.png',
+                colors: ['#0d7b3e', '#6c757d']
+            },
+            'Geologia': {
+                displayName: 'Geologia',
+                nucleus: 'NEGeo',
+                emblem: 'assets/Logos/NEGeo-07.png',
+                colors: ['#b26b2c', '#6c757d']
+            },
+            'Gestao': {
+                displayName: 'Gestão',
+                nucleus: 'NEG',
+                emblem: 'assets/Logos/NEG-07.png',
+                colors: ['#be2628', '#6c757d']
+            },
+            'Gestao Comercial': {
+                displayName: 'Gestão Comercial',
+                nucleus: 'NEG',
+                emblem: 'assets/Logos/NEG-07.png',
+                colors: ['#be2628', '#6c757d']
+            },
+            'Gestao Pública': {
+                displayName: 'Gestão Pública',
+                nucleus: 'NAE-ESTGA',
+                emblem: 'assets/Logos/NAE_ESTGA-07.png',
+                colors: ['#14a0db', '#6c757d']
+            },
+            'Gestão': {
+                displayName: 'Gestão',
+                nucleus: 'NEG',
+                emblem: 'assets/Logos/NEG-07.png',
+                colors: ['#be2628', '#6c757d']
+            },
+            'LLC': {
+                displayName: 'Línguas, Literaturas e Culturas',
+                nucleus: 'NELLC',
+                emblem: 'assets/Logos/NELLC-07.png',
+                colors: ['#1e4395', '#6c757d']
+            },
+            'LRE': {
+                displayName: 'Línguas e Relações Empresariais',
+                nucleus: 'NELRE',
+                emblem: 'assets/Logos/NELRE-07.png',
+                colors: ['#e72a30', '#6c757d']
+            },
+            'MTC': {
+                displayName: 'MTC',
+                nucleus: 'NEMTC',
+                emblem: 'assets/Logos/NEMTC-07.png',
+                colors: ['#209548', '#6c757d']
+            },
+            'Matemática': {
+                displayName: 'Matemática',
+                nucleus: 'NEMAT',
+                emblem: 'assets/Logos/NEMAT-07.png',
+                colors: ['#16a1dc', '#6c757d']
+            },
+            'Música': {
+                displayName: 'Música',
+                nucleus: 'NEMu',
+                emblem: 'assets/Logos/NEMu-07.png',
+                colors: ['#1e4395', '#6c757d']
+            },
+            'Psicologia': {
+                displayName: 'Psicologia',
+                nucleus: 'NEP',
+                emblem: 'assets/Logos/NEP-07.png',
+                colors: ['#f08344', '#6c757d']
+            },
+            'Química': {
+                displayName: 'Química',
+                nucleus: 'NEQ',
+                emblem: 'assets/Logos/NEQ-07.png',
+                colors: ['#14a0db', '#6c757d']
+            },
+            'TI': {
+                displayName: 'Tecnologias de Informação',
+                nucleus: 'NEECT',
+                emblem: 'assets/Logos/NEECT-07.png',
+                colors: ['#4c65a4', '#6c757d']
+            },
+            'Traduçao': {
+                displayName: 'Tradução',
+                nucleus: 'NET',
+                emblem: 'assets/Logos/NET-07.png',
+                colors: ['#1e4395', '#6c757d']
+            },
+            'Tradução': {
+                displayName: 'Tradução',
+                nucleus: 'NET',
+                emblem: 'assets/Logos/NET-07.png',
+                colors: ['#1e4395', '#6c757d']
+            }
+        };        /**
+         * Obtém as informações de um curso pelo nome
+         * @param {string} courseName Nome do curso
+         * @returns {object} Informações do curso (nome completo, núcleo, emblema, cores)
+         */
+        function getCourseInfo(courseName) {
+            const courseKey = courseName.trim();
+            const courseInfo = coursesConfig[courseKey];
+
+            if (courseInfo) {
+                return {
+                    shortName: courseKey,
+                    fullName: courseInfo.displayName || courseKey,
+                    nucleus: courseInfo.nucleus,
+                    emblemPath: courseInfo.emblem,
+                    primaryColor: courseInfo.colors[0],
+                    secondaryColor: courseInfo.colors[1]
+                };
+            }
+
+            // Fallback para cursos não configurados - usar emblema padrão da UA
+            return {
+                shortName: courseKey,
+                fullName: courseKey,
+                nucleus: 'UA',
+                emblemPath: 'assets/Logos/NEI-07.png',
+                primaryColor: generateFallbackColor(courseKey),
+                secondaryColor: generateFallbackColor(courseKey, true)
+            };
+        }
+
+        /**
+         * Gera uma cor baseada no hash do nome do curso
+         * @param {string} courseName Nome do curso
+         * @param {boolean} lighter Se deve gerar uma cor mais clara
+         * @returns {string} Cor em formato hex
+         */
+        function generateFallbackColor(courseName, lighter = false) {
+            let hash = 0;
+            for (let i = 0; i < courseName.length; i++) {
+                hash = courseName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+
+            const hue = Math.abs(hash) % 360;
+            const saturation = lighter ? 50 : 70;
+            const lightness = lighter ? 70 : 50;
+
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        /**
+         * Obtém todas as configurações de cursos
+         * @returns {object} Objeto com todas as configurações de cursos
+         */
+        function getAllCoursesConfig() {
+            return coursesConfig;
+        }
+
         let sampleData = { teams: [], rankings: {}, eloHistory: {}, matches: [], gamesDates: [], rawEloData: [] };
+        let currentEpoca = '24_25'; // Época padrão
+        let availableEpocas = ['24_25']; // Épocas disponíveis (será preenchido dinamicamente)
+
+        // Função para detectar épocas disponíveis baseadas nos arquivos existentes
+        function detectAvailableEpocas() {
+            // Por enquanto, apenas 24_25 está disponível
+            // Esta função pode ser expandida no futuro para detectar mais épocas automaticamente
+            return ['24_25'];
+        }
+
+        // Função para obter modalidades disponíveis para uma época específica
+        function getModalidadesForEpoca(epoca) {
+            const modalidades = [
+                { value: 'ANDEBOL MISTO', label: 'Andebol Misto' },
+                { value: 'BASQUETEBOL FEMININO', label: 'Basquetebol Feminino' },
+                { value: 'BASQUETEBOL MASCULINO', label: 'Basquetebol Masculino' },
+                { value: 'FUTEBOL DE 7 MASCULINO', label: 'Futebol 7 Masculino' },
+                { value: 'FUTSAL FEMININO', label: 'Futsal Feminino' },
+                { value: 'FUTSAL MASCULINO', label: 'Futsal Masculino' },
+                { value: 'VOLEIBOL FEMININO', label: 'Voleibol Feminino' },
+                { value: 'VOLEIBOL MASCULINO', label: 'Voleibol Masculino' }
+            ];
+
+            // Adicionar a época ao final de cada modalidade
+            return modalidades.map(mod => ({
+                value: `${mod.value}_${epoca}`,
+                label: mod.label
+            }));
+        }
+
+        // Função para inicializar os seletores
+        function initializeSelectors() {
+            // Detectar épocas disponíveis
+            availableEpocas = detectAvailableEpocas();
+
+            // Preencher seletor de época
+            const epocaSelect = document.getElementById('epoca');
+            epocaSelect.innerHTML = '';
+
+            availableEpocas.forEach(epoca => {
+                const option = document.createElement('option');
+                option.value = epoca;
+                option.textContent = `20${epoca.replace('_', '/')}`; // Converter 24_25 para 2024/25
+                if (epoca === currentEpoca) {
+                    option.selected = true;
+                }
+                epocaSelect.appendChild(option);
+            });
+
+            // Preencher seletor de modalidade
+            updateModalidadeSelector();
+        }
+
+        // Função para atualizar o seletor de modalidade baseado na época
+        function updateModalidadeSelector() {
+            const modalidadeSelect = document.getElementById('modalidade');
+            modalidadeSelect.innerHTML = '';
+
+            const modalidades = getModalidadesForEpoca(currentEpoca);
+
+            modalidades.forEach((mod, index) => {
+                const option = document.createElement('option');
+                option.value = mod.value;
+                option.textContent = mod.label;
+
+                // Definir Futsal Masculino como padrão
+                if (mod.value.includes('FUTSAL MASCULINO')) {
+                    option.selected = true;
+                }
+
+                modalidadeSelect.appendChild(option);
+            });
+
+            // Carregar a modalidade padrão (Futsal Masculino) se existir
+            const defaultModalidade = modalidades.find(mod => mod.value.includes('FUTSAL MASCULINO'));
+            if (defaultModalidade) {
+                changeModalidade(defaultModalidade.value);
+            }
+        }
+
+        // Função para trocar época
+        function changeEpoca(epoca) {
+            if (!epoca || epoca === currentEpoca) return;
+
+            currentEpoca = epoca;
+            updateModalidadeSelector();
+        }
 
         function changeModalidade(mod) {
             if (!mod) return;
@@ -2133,12 +2831,6 @@
             console.log('Processando rankings...', data.length, 'entradas');
             console.log('Primeira entrada:', data[0]);
 
-            // Gerar cores aleatórias para as equipas
-            const generateRandomColor = () => {
-                const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'];
-                return colors[Math.floor(Math.random() * colors.length)];
-            };
-
             data.forEach(row => {
                 if (!row.Equipa) return;
 
@@ -2155,11 +2847,18 @@
                     grupo = row.Divisao || mainKey; // Usar divisão como grupo se não houver grupo específico
                 }
 
+                // Obter informações do curso
+                const courseInfo = getCourseInfo(row.Equipa.trim());
+
                 const team = {
                     name: row.Equipa.trim(),
                     division: row.Divisao || mainKey,
                     group: grupo,
-                    color: generateRandomColor()
+                    color: courseInfo.primaryColor,
+                    secondaryColor: courseInfo.secondaryColor,
+                    fullName: courseInfo.fullName,
+                    nucleus: courseInfo.nucleus,
+                    emblemPath: courseInfo.emblemPath
                 };
 
                 if (!sampleData.teams.find(t => t.name === team.name)) {
@@ -2350,8 +3049,8 @@
             const sortedRounds = Object.keys(gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
             sortedRounds.forEach(round => allDates.push(gamesDates[round]));
 
-            // Adicionar datas dos playoffs na ordem correta (E1 -> E2 -> E3 -> E3L)
-            const playoffOrder = ['E1', 'E2', 'E3', 'E3L'];
+            // Adicionar datas dos playoffs na ordem correta (E1 -> E2 -> E3L -> E3)
+            const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
             const playoffDates = {};
 
             playoffOrder.forEach(phase => {
