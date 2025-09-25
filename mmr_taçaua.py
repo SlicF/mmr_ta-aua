@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from enum import Enum
 import logging
+import unicodedata
 
 # Configuração de logging
 logging.basicConfig(
@@ -11,6 +12,97 @@ logging.basicConfig(
     filename="mmr_tacaua.log",
 )
 logger = logging.getLogger("mmr_tacaua")
+
+
+def normalize_team_name(team_name):
+    """
+    Normaliza nomes de equipas para evitar duplicações por variações de grafia.
+    Similar à lógica implementada no frontend JavaScript.
+
+    Args:
+        team_name: Nome da equipa a normalizar
+
+    Returns:
+        Nome da equipa normalizado ou None se inválido
+    """
+    if not team_name or pd.isna(team_name):
+        return None
+
+    # Remover espaços em branco
+    normalized = str(team_name).strip()
+
+    # Se ficou vazio após strip, retornar None
+    if not normalized:
+        return None
+
+    # Casos específicos conhecidos para Tradução
+    if normalized in ["Traduçao", "TRADUÇÃO", "TRADUÇAO"]:
+        return "Tradução"
+
+    # Normalização case-insensitive para Tradução
+    lower_name = normalized.lower()
+    if lower_name in ["tradução", "traduçao"]:
+        return "Tradução"
+
+    # Normalização removendo acentos para Tradução
+    without_accents = unicodedata.normalize("NFD", lower_name)
+    without_accents = "".join(
+        char for char in without_accents if unicodedata.category(char) != "Mn"
+    )
+
+    if without_accents == "traducao":
+        return "Tradução"
+
+    # Casos específicos para Eng. Informática (remover espaços extras no final)
+    if normalized.startswith("Eng. Informática") and normalized.endswith(" "):
+        return "Eng. Informática"
+
+    # Normalização para outros cursos de engenharia (remover espaços extras)
+    eng_courses = [
+        "Eng. Biomédica",
+        "Eng. Civil",
+        "Eng. Mecânica",
+        "Eng. Química",
+        "Eng. Física",
+        "Eng. Materiais",
+        "Eng. Ambiente",
+        "Eng. Aeroespacial",
+        "Eng. Computacional",
+        "Eng. Eletrónica",
+        "Eng. Industrial",
+    ]
+
+    for course in eng_courses:
+        if normalized.startswith(course) and normalized.endswith(" "):
+            return course
+
+    # Normalização geral para outros nomes (remover espaços extras no final)
+    if normalized.endswith(" ") and len(normalized) > 1:
+        normalized = normalized.rstrip()
+
+    # Normalização para acentos em outros cursos comuns
+    accent_mappings = {
+        "bioquimica": "Bioquímica",
+        "matematica": "Matemática",
+        "fisica": "Física",
+        "quimica": "Química",
+        "psicologia": "Psicologia",
+        "economia": "Economia",
+        "filosofia": "Filosofia",
+        "historia": "História",
+        "geografia": "Geografia",
+    }
+
+    # Verificar mapeamentos de acentos para nomes completos
+    without_accents_lower = unicodedata.normalize("NFD", normalized.lower())
+    without_accents_lower = "".join(
+        char for char in without_accents_lower if unicodedata.category(char) != "Mn"
+    )
+
+    if without_accents_lower in accent_mappings:
+        return accent_mappings[without_accents_lower]
+
+    return normalized
 
 
 class Sport(Enum):
@@ -226,7 +318,9 @@ class StandingsCalculator:
             # Obter equipas deste grupo
             teams_grp = set()
             for col in ["Equipa 1", "Equipa 2"]:
-                teams_grp.update(df_grp[col].dropna().unique())
+                teams_grp.update(
+                    normalize_team_name(team) for team in df_grp[col].dropna().unique()
+                )
 
             # Calcular classificação para este grupo
             grp_standings = self._calculate_single_standings(df_grp, teams_grp)
@@ -321,9 +415,11 @@ class StandingsCalculator:
 
         # Coletar equipas e conexões
         for _, row in df_div.iterrows():
-            team1, team2 = row.get("Equipa 1"), row.get("Equipa 2")
+            team1, team2 = normalize_team_name(
+                row.get("Equipa 1")
+            ), normalize_team_name(row.get("Equipa 2"))
 
-            if pd.notna(team1) and pd.notna(team2):
+            if team1 and team2:
                 teams.add(team1)
                 teams.add(team2)
                 connections.add((team1, team2))
@@ -398,16 +494,11 @@ class StandingsCalculator:
     def _process_games_for_stats(self, df_group, stats):
         """Processa os jogos para atualizar as estatísticas das equipas"""
         for _, row in df_group.iterrows():
-            team1 = row.get("Equipa 1")
-            team2 = row.get("Equipa 2")
+            team1 = normalize_team_name(row.get("Equipa 1"))
+            team2 = normalize_team_name(row.get("Equipa 2"))
 
             # Verificar dados válidos
-            if (
-                pd.isna(team1)
-                or pd.isna(team2)
-                or team1 not in stats
-                or team2 not in stats
-            ):
+            if not team1 or not team2 or team1 not in stats or team2 not in stats:
                 continue
 
             try:
@@ -428,7 +519,7 @@ class StandingsCalculator:
             )
 
             if has_absence:
-                absent_team = str(falta_comparencia).strip()
+                absent_team = normalize_team_name(str(falta_comparencia).strip())
                 if absent_team in stats:
                     stats[absent_team]["faltas_comparencia"] += 1
 
@@ -832,12 +923,12 @@ class InterGroupAdjuster:
 
         # Processar cada jogo
         for _, row in df_playoffs.iterrows():
-            team1 = row.get("Equipa 1")
-            team2 = row.get("Equipa 2")
+            team1 = normalize_team_name(row.get("Equipa 1"))
+            team2 = normalize_team_name(row.get("Equipa 2"))
 
             if (
-                pd.isna(team1)
-                or pd.isna(team2)
+                not team1
+                or not team2
                 or team1 not in team_to_group
                 or team2 not in team_to_group
             ):
@@ -1137,7 +1228,7 @@ class EloRatingSystem:
             # Processar equipa 1
             teams1 = df_group.dropna(subset=["Equipa 1"])
             for _, row in teams1.iterrows():
-                team = row["Equipa 1"]
+                team = normalize_team_name(row["Equipa 1"])
                 if team not in teams:
                     div = row.get(div_col)
                     teams[team] = self._get_initial_rating(div)
@@ -1145,7 +1236,7 @@ class EloRatingSystem:
             # Processar equipa 2
             teams2 = df_group.dropna(subset=["Equipa 2"])
             for _, row in teams2.iterrows():
-                team = row["Equipa 2"]
+                team = normalize_team_name(row["Equipa 2"])
                 if team not in teams:
                     div = row.get(div_col)
                     teams[team] = self._get_initial_rating(div)
@@ -1154,8 +1245,9 @@ class EloRatingSystem:
             for team_col in ["Equipa 1", "Equipa 2"]:
                 unique_teams = df[team_col].dropna().unique()
                 for team in unique_teams:
-                    if team not in teams:
-                        teams[team] = 750
+                    normalized_team = normalize_team_name(team)
+                    if normalized_team not in teams:
+                        teams[normalized_team] = 750
 
         return teams
 
@@ -1189,10 +1281,12 @@ class EloRatingSystem:
 
         # Processar cada jogo
         for index, row in df.iterrows():
-            team1, team2 = row.get("Equipa 1"), row.get("Equipa 2")
+            team1, team2 = normalize_team_name(
+                row.get("Equipa 1")
+            ), normalize_team_name(row.get("Equipa 2"))
 
             # Validar dados
-            if not self._is_valid_game(row, teams):
+            if not (team1 and team2 and team1 in teams and team2 in teams):
                 continue
 
             try:
@@ -1208,7 +1302,7 @@ class EloRatingSystem:
             )
 
             if has_absence:
-                absent_team = str(falta_comparencia).strip()
+                absent_team = normalize_team_name(str(falta_comparencia).strip())
                 if absent_team in absence_count:
                     absence_count[absent_team] += 1
 
@@ -1252,6 +1346,8 @@ class EloRatingSystem:
             # Registrar dados detalhados
             detailed_row = self._create_detailed_row(
                 row,
+                team1,
+                team2,
                 elo_before1,
                 elo_before2,
                 phase_multipliers,
@@ -1280,8 +1376,13 @@ class EloRatingSystem:
         """Conta o total de jogos por equipa na fase de grupos"""
         total_games = {}
         for team in teams:
-            jogos1 = ((df["Equipa 1"] == team) & is_group_phase).sum()
-            jogos2 = ((df["Equipa 2"] == team) & is_group_phase).sum()
+            # Normalizar nomes no DataFrame para comparação
+            jogos1 = (
+                (df["Equipa 1"].apply(normalize_team_name) == team) & is_group_phase
+            ).sum()
+            jogos2 = (
+                (df["Equipa 2"].apply(normalize_team_name) == team) & is_group_phase
+            ).sum()
             total_games[team] = jogos1 + jogos2
         return total_games
 
@@ -1308,10 +1409,12 @@ class EloRatingSystem:
             if winter_break_index is not None:
                 for team in teams:
                     jogos1 = (
-                        (df["Equipa 1"] == team) & (df.index < winter_break_index)
+                        (df["Equipa 1"].apply(normalize_team_name) == team)
+                        & (df.index < winter_break_index)
                     ).sum()
                     jogos2 = (
-                        (df["Equipa 2"] == team) & (df.index < winter_break_index)
+                        (df["Equipa 2"].apply(normalize_team_name) == team)
+                        & (df.index < winter_break_index)
                     ).sum()
                     games_before_winter[team] = jogos1 + jogos2
         except Exception as e:
@@ -1344,8 +1447,8 @@ class EloRatingSystem:
         games_before_winter,
     ):
         """Calcula os multiplicadores de fase da temporada para ambas equipas"""
-        team1 = row["Equipa 1"]
-        team2 = row["Equipa 2"]
+        team1 = normalize_team_name(row["Equipa 1"])
+        team2 = normalize_team_name(row["Equipa 2"])
         jornada = str(row.get("Jornada", ""))
         is_elimination = jornada.upper().startswith("E")
 
@@ -1421,6 +1524,8 @@ class EloRatingSystem:
     def _create_detailed_row(
         self,
         row,
+        team1,
+        team2,
         elo_before1,
         elo_before2,
         phase_multipliers,
@@ -1436,8 +1541,13 @@ class EloRatingSystem:
         elo_change1, elo_change2 = elo_changes
         elo_delta1, elo_delta2 = elo_deltas
 
+        # Criar nova row com nomes normalizados
+        normalized_row = dict(row)
+        normalized_row["Equipa 1"] = team1
+        normalized_row["Equipa 2"] = team2
+
         return {
-            **row,
+            **normalized_row,
             "Elo Antes 1": elo_before1,
             "Elo Antes 2": elo_before2,
             "Season Phase 1": phase_multiplier1,

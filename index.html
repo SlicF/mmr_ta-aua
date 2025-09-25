@@ -1002,6 +1002,7 @@
                             <th>V</th>
                             <th>E</th>
                             <th>D</th>
+                            <th style="color: red;">FC</th>
                             <th>GM</th>
                             <th>GS</th>
                             <th>±</th>
@@ -1061,7 +1062,7 @@
 
             // Não carregar dados inicialmente - aguardar seleção de modalidade
             document.getElementById('teamSelector').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Selecione uma modalidade para ver os dados</p>';
-            document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="10" style="text-align: center; color: #666;">Selecione uma modalidade</td></tr>';
+            document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="11" style="text-align: center; color: #666;">Selecione uma modalidade</td></tr>';
             document.getElementById('bracketContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Selecione uma modalidade para ver o bracket</p>';
 
             // Inicializar gráfico vazio
@@ -1872,7 +1873,7 @@
 
         // Função para obter ELO mais recente e posição no ranking geral
         function getTeamEloInfo(teamName) {
-            const normalizedTeamName = teamName.trim();
+            const normalizedTeamName = normalizeTeamName(teamName);
 
             // Obter ELO mais recente
             const teamHistory = sampleData.eloHistory[normalizedTeamName];
@@ -1907,7 +1908,7 @@
             const progressionLegend = document.getElementById('progressionLegend');
 
             if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #666;">Nenhum dado disponível</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #666;">Nenhum dado disponível</td></tr>';
                 progressionLegend.style.display = 'none';
                 return;
             }
@@ -1946,18 +1947,19 @@
                     getTeamProgression(position, totalTeams, structure) :
                     { type: 'safe', description: 'Zona segura' };
 
-                // Obter informações do curso para emblema
-                const courseInfo = getCourseInfo(team.team);
+                // Obter informações do curso para emblema - aplicar normalização
+                const normalizedTeamName = normalizeTeamName(team.team);
+                const courseInfo = getCourseInfo(normalizedTeamName);
                 const emblemHtml = courseInfo.emblemPath ?
-                    `<img src="${courseInfo.emblemPath}" alt="${team.team}" class="team-emblem-table" onerror="this.style.display='none'">` :
+                    `<img src="${courseInfo.emblemPath}" alt="${normalizedTeamName}" class="team-emblem-table" onerror="this.style.display='none'">` :
                     '';
 
                 // Criar indicador de progressão
                 const progressionClass = showProgressionIndicators ? `progression-${progression.type}` : 'progression-safe';
                 const badgeTitle = showProgressionIndicators ? progression.description : `${position}º lugar`;
 
-                // Obter informação do ELO
-                const eloInfo = getTeamEloInfo(team.team);
+                // Obter informação do ELO - aplicar normalização
+                const eloInfo = getTeamEloInfo(normalizedTeamName);
                 const eloDisplay = eloInfo.position ? `${eloInfo.elo} (#${eloInfo.position})` : `${eloInfo.elo}`;
 
                 row.innerHTML = `
@@ -1968,7 +1970,7 @@
                         ${emblemHtml}
                         <div class="team-color-indicator" style="background-color: ${courseInfo.primaryColor}"></div>
                         <div class="team-info-container">
-                            <span class="team-name-table" title="${courseInfo.fullName}">${team.team}</span>
+                            <span class="team-name-table" title="${courseInfo.fullName}">${normalizedTeamName}</span>
                             <span class="team-elo-info" title="ELO atual e posição no ranking geral">${eloDisplay}</span>
                         </div>
                     </td>
@@ -1977,6 +1979,7 @@
                     <td>${team.wins || 0}</td>
                     <td>${team.draws || 0}</td>
                     <td>${team.losses || 0}</td>
+                    <td style="color: red;">${team.noShows || 0}</td>
                     <td>${team.goals || 0}</td>
                     <td>${team.conceded || 0}</td>
                     <td style="color: ${goalDiff > 0 ? '#28a745' : goalDiff < 0 ? '#dc3545' : '#666'}">${goalDiffText}</td>
@@ -2169,9 +2172,9 @@
                     const matchDiv = document.createElement('div');
                     matchDiv.className = 'bracket-match';
 
-                    // Obter informações das equipas
-                    const team1Info = getCourseInfo(match.team1);
-                    const team2Info = getCourseInfo(match.team2);
+                    // Obter informações das equipas - aplicar normalização
+                    const team1Info = getCourseInfo(normalizeTeamName(match.team1));
+                    const team2Info = getCourseInfo(normalizeTeamName(match.team2));
 
                     const team1Color = team1Info.colors ? team1Info.colors[0] : '#667eea';
                     const team2Color = team2Info.colors ? team2Info.colors[0] : '#764ba2';
@@ -2190,10 +2193,10 @@
                     team1Div.innerHTML = `
                         <div class="bracket-team-content">
                             ${team1Info.emblemPath ?
-                            `<img src="${team1Info.emblemPath}" alt="${match.team1}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                            `<img src="${team1Info.emblemPath}" alt="${normalizeTeamName(match.team1)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
                             ''
                         }
-                            <span>${team1Info.displayName || match.team1}</span>
+                            <span>${team1Info.displayName || normalizeTeamName(match.team1)}</span>
                         </div>
                         <span class="score">${match.score1 !== null ? match.score1 : '-'}</span>
                     `;
@@ -2212,10 +2215,10 @@
                     team2Div.innerHTML = `
                         <div class="bracket-team-content">
                             ${team2Info.emblemPath ?
-                            `<img src="${team2Info.emblemPath}" alt="${match.team2}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                            `<img src="${team2Info.emblemPath}" alt="${normalizeTeamName(match.team2)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
                             ''
                         }
-                            <span>${team2Info.displayName || match.team2}</span>
+                            <span>${team2Info.displayName || normalizeTeamName(match.team2)}</span>
                         </div>
                         <span class="score">${match.score2 !== null ? match.score2 : '-'}</span>
                     `;
@@ -2917,12 +2920,6 @@
                 emblem: 'assets/Logos/NEECT-07.png',
                 colors: ['#4c65a4', '#6c757d']
             },
-            'Traduçao': {
-                displayName: 'Tradução',
-                nucleus: 'NET',
-                emblem: 'assets/Logos/NET-07.png',
-                colors: ['#1e4395', '#6c757d']
-            },
             'Tradução': {
                 displayName: 'Tradução',
                 nucleus: 'NET',
@@ -2930,12 +2927,58 @@
                 colors: ['#1e4395', '#6c757d']
             }
         };        /**
+         * Normaliza texto removendo acentos e convertendo para minúsculas
+         */
+        function normalizeText(text) {
+            return text.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        }
+
+        /**
+         * Normaliza nomes de equipas para resolver duplicações
+         */
+        function normalizeTeamName(teamName) {
+            if (!teamName) return teamName;
+
+            let normalized = teamName.trim();
+
+            // Casos específicos conhecidos
+            if (normalized === 'Traduçao' || normalized === 'TRADUÇÃO' || normalized === 'TRADUÇAO' ||
+                normalized.toLowerCase() === 'tradução' || normalized.toLowerCase() === 'traduçao') {
+                normalized = 'Tradução';
+            }
+
+            // Normalização adicional removendo acentos
+            const withoutAccents = normalizeText(normalized);
+            if (withoutAccents === 'traducao') {
+                normalized = 'Tradução';
+            }
+
+            return normalized;
+        }
+
+        /**
          * Obtém as informações de um curso pelo nome
          * @param {string} courseName Nome do curso
          * @returns {object} Informações do curso (nome completo, núcleo, emblema, cores)
          */
         function getCourseInfo(courseName) {
-            const courseKey = courseName.trim();
+            let courseKey = courseName.trim();
+
+            // Normalização específica para cursos com variações de grafia
+            if (courseKey === 'Traduçao' || courseKey === 'TRADUÇÃO' || courseKey === 'TRADUÇAO' ||
+                courseKey.toLowerCase() === 'tradução' || courseKey.toLowerCase() === 'traduçao') {
+                courseKey = 'Tradução';
+            }
+
+            // Normalização adicional para casos de variações de acentos
+            const normalizedInput = normalizeText(courseKey);
+            if (normalizedInput === 'traducao') {
+                courseKey = 'Tradução';
+            }
+
             const courseInfo = coursesConfig[courseKey];
 
             if (courseInfo) {
@@ -3090,7 +3133,7 @@
 
             // Mostrar loading
             document.getElementById('teamSelector').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando dados...</div>';
-            document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="10" class="loading">Carregando classificação...</td></tr>';
+            document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="11" class="loading">Carregando classificação...</td></tr>';
 
             let loadedFiles = 0;
             const totalFiles = 3;
@@ -3176,10 +3219,11 @@
                 }
 
                 // Obter informações do curso
-                const courseInfo = getCourseInfo(row.Equipa.trim());
+                const normalizedTeamName = normalizeTeamName(row.Equipa);
+                const courseInfo = getCourseInfo(normalizedTeamName);
 
                 const team = {
-                    name: row.Equipa.trim(),
+                    name: normalizedTeamName,
                     division: row.Divisao || mainKey,
                     group: grupo,
                     color: courseInfo.primaryColor,
@@ -3192,15 +3236,18 @@
                 if (!sampleData.teams.find(t => t.name === team.name)) {
                     sampleData.teams.push(team);
                     sampleData.eloHistory[team.name] = [];
+                } else {
+                    console.warn('Equipa duplicada detectada:', team.name, 'já existe em sampleData.teams');
                 }
 
                 if (!sampleData.rankings[mainKey]) sampleData.rankings[mainKey] = [];
                 sampleData.rankings[mainKey].push({
-                    team: row.Equipa.trim(),
+                    team: normalizedTeamName,
                     points: parseInt(row.pontos) || 0,
                     wins: parseInt(row.vitorias) || 0,
                     draws: parseInt(row.empates) || 0,
                     losses: parseInt(row.derrotas) || 0,
+                    noShows: parseInt(row.faltas_comparencia) || 0,
                     goals: parseInt(row.golos_marcados) || 0,
                     conceded: parseInt(row.golos_sofridos) || 0,
                     group: grupo
@@ -3208,6 +3255,21 @@
             });
 
             DebugUtils.debugFileLoading('rankings_processed', sampleData.rankings);
+
+            // Debug para verificar duplicatas
+            console.log('=== DEBUG: Equipas carregadas ===');
+            console.log('Teams array:', sampleData.teams.map(t => t.name));
+            console.log('ELO History keys:', Object.keys(sampleData.eloHistory));
+            console.log('Rankings keys:', Object.keys(sampleData.rankings));
+
+            // Verificar duplicatas na lista de teams
+            const teamNames = sampleData.teams.map(t => t.name);
+            const duplicateTeams = teamNames.filter((name, index) => teamNames.indexOf(name) !== index);
+            if (duplicateTeams.length > 0) {
+                console.error('DUPLICATAS ENCONTRADAS em sampleData.teams:', duplicateTeams);
+            } else {
+                console.log('✓ Nenhuma duplicata encontrada em sampleData.teams');
+            }
             DebugUtils.debugFileLoading('teams_processed', sampleData.teams.length);
         }
 
@@ -3266,13 +3328,6 @@
 
         function processEloHistory(data) {
             DebugUtils.debugProcessedData('histórico ELO', data.length, `${data.length} jogos`);
-
-            // Função para normalizar nomes de equipas (remover espaços no início e fim)
-            function normalizeTeamName(name) {
-                const normalized = name ? name.trim() : name;
-                DebugUtils.debugTeamNormalization(name, normalized);
-                return normalized;
-            }
 
             // Guardar dados brutos para processamento do bracket
             sampleData.rawEloData = data;
