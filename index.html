@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="debug.js"></script>
     <style>
         * {
             margin: 0;
@@ -454,6 +455,7 @@
             background: rgba(102, 126, 234, 0.05);
         }
 
+        /* Novos badges com indicadores de progressão integrados */
         .rank-badge {
             display: inline-flex;
             align-items: center;
@@ -464,22 +466,117 @@
             color: white;
             font-weight: bold;
             font-size: 0.9em;
+            position: relative;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
         }
 
-        .rank-1 {
-            background: #ffd700;
+        .rank-badge:hover {
+            transform: scale(1.1);
         }
 
-        .rank-2 {
-            background: #c0c0c0;
+        /* Cores base dos rankings removidas - agora usamos apenas as cores de progressão */
+
+        /* Indicadores de progressão com cores completas de fundo */
+        .rank-badge.progression-playoffs {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: 2px solid #1e7e34;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
         }
 
-        .rank-3 {
-            background: #cd7f32;
+        .rank-badge.progression-promotion {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: 2px solid #004085;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4);
         }
 
-        .rank-other {
-            background: #667eea;
+        .rank-badge.progression-relegation {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: 2px solid #a71e2a;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+            animation: pulse-danger 2s infinite;
+        }
+
+        .rank-badge.progression-safe {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            border: 2px solid #495057;
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+        }
+
+        /* Animação para zona de descida */
+        @keyframes pulse-danger {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15);
+            }
+
+            50% {
+                box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.4), 0 2px 12px rgba(220, 53, 69, 0.3);
+            }
+        }
+
+        /* Célula da posição volta ao normal */
+        .rankings-table td:first-child {
+            position: relative;
+            padding-right: 12px;
+        }
+
+        /* Legenda dos indicadores */
+        .progression-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.8));
+            border-radius: 10px;
+            font-size: 0.87em;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .legend-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            color: white;
+            font-size: 0.7em;
+            font-weight: bold;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .legend-badge.legend-playoffs {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: 2px solid #1e7e34;
+        }
+
+        .legend-badge.legend-promotion {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: 2px solid #004085;
+        }
+
+        .legend-badge.legend-relegation {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: 2px solid #a71e2a;
+        }
+
+        .legend-badge.legend-safe {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            border: 2px solid #495057;
         }
 
         .team-emblem-table {
@@ -526,6 +623,22 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 120px;
+        }
+
+        .team-info-container {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .team-elo-info {
+            font-size: 0.75em;
+            color: #999;
+            font-weight: normal;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-left: 2px;
+            margin-top: 4px;
         }
 
         .division-selector {
@@ -858,6 +971,27 @@
                 <div class="group-selector" id="groupSelector" style="display: none;">
                     <!-- Botões de grupo serão gerados dinamicamente -->
                 </div>
+
+                <!-- Legenda dos indicadores de progressão -->
+                <div class="progression-legend" id="progressionLegend" style="display: none;">
+                    <div class="legend-item">
+                        <div class="legend-badge legend-playoffs">P</div>
+                        <span>Play-offs</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-badge legend-promotion">↑</div>
+                        <span>Subida de divisão</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-badge legend-relegation">↓</div>
+                        <span>Descida de divisão</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-badge legend-safe">S</div>
+                        <span>Zona segura</span>
+                    </div>
+                </div>
+
                 <table class="rankings-table" id="rankingsTable">
                     <thead>
                         <tr>
@@ -891,56 +1025,34 @@
         </div>
     </div>
 
+    <!-- Debug Panel (oculto por padrão) -->
+    <div id="debug-panel"
+        style="display: none; position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 10px; border-radius: 5px; z-index: 10000; font-family: monospace; font-size: 12px;">
+        <div style="margin-bottom: 10px; font-weight: bold;">🐛 Debug Panel</div>
+        <button onclick="DebugUtils.setDebugEnabled(true, false)"
+            style="margin: 2px; padding: 5px; font-size: 11px;">Ativar Debug</button>
+        <button onclick="DebugUtils.setDebugEnabled(true, true)"
+            style="margin: 2px; padding: 5px; font-size: 11px;">Debug Verbose</button>
+        <button onclick="DebugUtils.setDebugEnabled(false)"
+            style="margin: 2px; padding: 5px; font-size: 11px;">Desativar</button>
+        <button onclick="document.getElementById('debug-panel').style.display='none'"
+            style="margin: 2px; padding: 5px; font-size: 11px;">Fechar</button>
+    </div>
+
     <script>
+        // Mostrar painel de debug com Ctrl+Shift+D
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                const panel = document.getElementById('debug-panel');
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
         let eloChart = null;
         let currentDivision = 'A';
         let currentGroup = null; // Para controlar grupo dentro da divisão
         let currentModalityHasAdjustments = false; // Para controlar se modalidade atual tem ajustes
-
-        // Função de debug temporária
-        function debugData() {
-            console.log('=== DEBUG DOS DADOS ===');
-            console.log('sampleData completo:', sampleData);
-            console.log('Teams:', sampleData.teams);
-            console.log('Rankings:', sampleData.rankings);
-            console.log('ELO History:', sampleData.eloHistory);
-            console.log('Games Dates:', sampleData.gamesDates);
-            console.log('Modalidade tem ajustes intergrupos:', currentModalityHasAdjustments);
-
-            // Testar análise de estrutura
-            const structure = analyzeModalityStructure();
-            console.log('Estrutura analisada:', structure);
-
-            // Debug das informações dos cursos
-            console.log('=== INFORMAÇÕES DOS CURSOS ===');
-            sampleData.teams.forEach(team => {
-                const courseInfo = getCourseInfo(team.name);
-                console.log(`${team.name}:`, {
-                    fullName: courseInfo.fullName,
-                    nucleus: courseInfo.nucleus,
-                    emblemPath: courseInfo.emblemPath,
-                    primaryColor: courseInfo.primaryColor,
-                    secondaryColor: courseInfo.secondaryColor
-                });
-            });
-
-            console.log('Todas as configurações de cursos:', getAllCoursesConfig());
-        }
-
-        // Função para verificar se emblemas estão carregando corretamente
-        function debugEmblemas() {
-            console.log('=== DEBUG DOS EMBLEMAS ===');
-            const emblemas = document.querySelectorAll('.team-emblem, .team-emblem-table');
-            emblemas.forEach((img, index) => {
-                console.log(`Emblema ${index + 1}:`, {
-                    src: img.src,
-                    alt: img.alt,
-                    naturalWidth: img.naturalWidth,
-                    naturalHeight: img.naturalHeight,
-                    loaded: img.complete && img.naturalHeight !== 0
-                });
-            });
-        }
 
         // Inicializar aplicação
         function initApp() {
@@ -1387,11 +1499,11 @@
         // Atualizar gráfico ELO
         function updateEloChart() {
             if (!eloChart || !sampleData.teams || sampleData.teams.length === 0) {
-                console.log('Não é possível atualizar gráfico - dados insuficientes');
+                DebugUtils.debugEloChart('insufficient_data');
                 return;
             }
 
-            console.log('Atualizando gráfico ELO...');
+            DebugUtils.debugEloChart('updating');
 
             const datasets = [];
             const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
@@ -1457,15 +1569,15 @@
                 }
             }
 
-            console.log('Labels do gráfico:', labels);
-            console.log('Ajustes encontrados:', hasAdjustments);
+            DebugUtils.debugEloChart('labels', labels);
+            DebugUtils.debugEloChart('adjustments', hasAdjustments);
 
             checkboxes.forEach((checkbox, index) => {
                 if (checkbox.checked && sampleData.teams[index]) {
                     const team = sampleData.teams[index];
                     const teamHistory = sampleData.eloHistory[team.name] || [1500];
 
-                    console.log(`Adicionando ${team.name} ao gráfico:`, teamHistory);
+                    DebugUtils.debugEloChart('team_added', { name: team.name, history: teamHistory });
 
                     datasets.push({
                         label: team.name,
@@ -1479,7 +1591,7 @@
                 }
             });
 
-            console.log('Total de datasets:', datasets.length);
+            DebugUtils.debugEloChart('datasets_total', datasets.length);
 
             eloChart.data.labels = labels;
             eloChart.data.datasets = datasets;
@@ -1583,7 +1695,11 @@
             const proximityThreshold = Math.max(8, baseProximityThreshold / Math.sqrt(avgZoomFactor));
             const eloThreshold = Math.max(3, baseEloThreshold / Math.sqrt(avgZoomFactor));
 
-            console.log(`Zoom factor: ${avgZoomFactor.toFixed(2)}, Proximity: ${proximityThreshold.toFixed(1)}px, ELO: ${eloThreshold.toFixed(1)}`);
+            DebugUtils.debugVisualization('zoom_info', {
+                zoom: avgZoomFactor.toFixed(2),
+                proximity: proximityThreshold.toFixed(1),
+                eloThreshold: eloThreshold.toFixed(1)
+            });
 
             const processedTeams = new Set();
             const labelsToShow = [];
@@ -1754,12 +1870,45 @@
             }
         }
 
+        // Função para obter ELO mais recente e posição no ranking geral
+        function getTeamEloInfo(teamName) {
+            const normalizedTeamName = teamName.trim();
+
+            // Obter ELO mais recente
+            const teamHistory = sampleData.eloHistory[normalizedTeamName];
+            if (!teamHistory || teamHistory.length === 0) {
+                return { elo: 1500, position: null };
+            }
+
+            const latestElo = Math.round(teamHistory[teamHistory.length - 1]);
+
+            // Calcular ranking geral de ELO
+            const allTeamsElo = [];
+            Object.keys(sampleData.eloHistory).forEach(team => {
+                const history = sampleData.eloHistory[team];
+                if (history && history.length > 0) {
+                    const currentElo = history[history.length - 1];
+                    allTeamsElo.push({ team, elo: currentElo });
+                }
+            });
+
+            // Ordenar por ELO (maior para menor)
+            allTeamsElo.sort((a, b) => b.elo - a.elo);
+
+            // Encontrar posição da equipa
+            const position = allTeamsElo.findIndex(entry => entry.team === normalizedTeamName) + 1;
+
+            return { elo: latestElo, position: position > 0 ? position : null };
+        }
+
         // Atualizar tabela de classificações
         function updateRankingsTable() {
             const tbody = document.getElementById('rankingsBody');
+            const progressionLegend = document.getElementById('progressionLegend');
 
             if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
                 tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #666;">Nenhum dado disponível</td></tr>';
+                progressionLegend.style.display = 'none';
                 return;
             }
 
@@ -1775,14 +1924,27 @@
                 teams = teams.filter(team => team.group === currentGroup);
             }
 
+            // Analisar estrutura da modalidade para determinar progressões
+            const structure = analyzeModalityStructure();
+            const totalTeams = teams.length;
+
+            // Mostrar legenda se houver equipes suficientes para progressões
+            const showProgressionIndicators = totalTeams >= 4;
+            progressionLegend.style.display = showProgressionIndicators ? 'flex' : 'none';
+
             tbody.innerHTML = '';
 
             teams.forEach((team, index) => {
+                const position = index + 1;
                 const row = document.createElement('tr');
-                const rankClass = index < 3 ? `rank-${index + 1}` : 'rank-other';
                 const goalDiff = (team.goals || 0) - (team.conceded || 0);
                 const goalDiffText = goalDiff > 0 ? `+${goalDiff}` : goalDiff.toString();
                 const totalGames = (team.wins || 0) + (team.draws || 0) + (team.losses || 0);
+
+                // Determinar progressão no torneio
+                const progression = showProgressionIndicators ?
+                    getTeamProgression(position, totalTeams, structure) :
+                    { type: 'safe', description: 'Zona segura' };
 
                 // Obter informações do curso para emblema
                 const courseInfo = getCourseInfo(team.team);
@@ -1790,12 +1952,25 @@
                     `<img src="${courseInfo.emblemPath}" alt="${team.team}" class="team-emblem-table" onerror="this.style.display='none'">` :
                     '';
 
+                // Criar indicador de progressão
+                const progressionClass = showProgressionIndicators ? `progression-${progression.type}` : 'progression-safe';
+                const badgeTitle = showProgressionIndicators ? progression.description : `${position}º lugar`;
+
+                // Obter informação do ELO
+                const eloInfo = getTeamEloInfo(team.team);
+                const eloDisplay = eloInfo.position ? `${eloInfo.elo} (#${eloInfo.position})` : `${eloInfo.elo}`;
+
                 row.innerHTML = `
-                    <td><span class="rank-badge ${rankClass}">${index + 1}</span></td>
+                    <td>
+                        <span class="rank-badge ${progressionClass}" title="${badgeTitle}">${position}</span>
+                    </td>
                     <td class="team-cell">
                         ${emblemHtml}
                         <div class="team-color-indicator" style="background-color: ${courseInfo.primaryColor}"></div>
-                        <span class="team-name-table" title="${courseInfo.fullName}">${team.team}</span>
+                        <div class="team-info-container">
+                            <span class="team-name-table" title="${courseInfo.fullName}">${team.team}</span>
+                            <span class="team-elo-info" title="ELO atual e posição no ranking geral">${eloDisplay}</span>
+                        </div>
                     </td>
                     <td><strong>${team.points}</strong></td>
                     <td>${totalGames}</td>
@@ -1813,7 +1988,7 @@
         // Criar bracket de dados reais dos CSVs
         function createRealBracket() {
             if (!sampleData.rawEloData || sampleData.rawEloData.length === 0) {
-                console.log('Dados brutos de ELO não carregados');
+                DebugUtils.debugBracket('no_elo_data');
                 createBracket();
                 return;
             }
@@ -1826,13 +2001,13 @@
                     match.Jornada.startsWith('E3')    // Final/3º lugar
                 )
             ); if (eliminationMatches.length === 0) {
-                console.log('Nenhum jogo de eliminação encontrado');
+                DebugUtils.debugBracket('no_elimination_games');
                 sampleData.bracket = {};
                 createBracket();
                 return;
             }
 
-            console.log('Jogos de eliminação encontrados:', eliminationMatches);
+            DebugUtils.debugBracket('elimination_games_found', eliminationMatches);
 
             // Organizar jogos por fase na ordem de exibição correta
             const bracketData = {};
@@ -1886,7 +2061,7 @@
             }
 
             sampleData.bracket = bracketData;
-            console.log('Bracket real criado:', bracketData);
+            DebugUtils.debugBracket('bracket_created', bracketData);
             createBracket();
         }
 
@@ -2056,9 +2231,9 @@
 
         // Atualizar filtros rápidos baseado na estrutura da modalidade
         function updateQuickFilters() {
-            console.log('Atualizando filtros rápidos...');
+            DebugUtils.debugModalityAnalysis('updating_filters');
             const structure = analyzeModalityStructure();
-            console.log('Estrutura detectada:', structure);
+            DebugUtils.debugModalityAnalysis('structure_detected', structure);
             const filtersContainer = document.getElementById('quickFilters');
 
             // Limpar filtros existentes
@@ -2098,6 +2273,161 @@
             resetBtn.onclick = resetFilter;
             filtersContainer.appendChild(resetBtn);
         }
+        // Determinar progressão no torneio baseada na estrutura
+        function getTeamProgression(position, totalTeams, structure) {
+            const progression = {
+                type: 'safe',
+                description: 'Zona segura'
+            };
+
+            DebugUtils.debugModalityAnalysis('calculating_progression', {
+                position,
+                totalTeams,
+                structure: structure.type,
+                divisions: structure.divisions,
+                groups: structure.groups,
+                currentDivision,
+                currentGroup
+            });
+
+            // Regras baseadas na estrutura do torneio
+            switch (structure.type) {
+                case 'groups-only':
+                    // Formato: Sem divisões, sempre 2 grupos
+                    // Passam os primeiros 4 de cada grupo aos play-offs
+                    if (position <= 4) {
+                        progression.type = 'playoffs';
+                        progression.description = 'Qualificação para play-offs';
+                    }
+                    break;
+
+                case 'divisions-only':
+                    // Formato: Múltiplas divisões sem grupos (ex: Andebol)
+                    const currentDiv = currentDivision || '1';
+
+                    if (currentDiv === '1') {
+                        // 1ª divisão - primeiros 4 vão aos play-offs, últimos 2 descem
+                        if (position <= 4 && totalTeams >= 8) {
+                            progression.type = 'playoffs';
+                            progression.description = 'Qualificação para play-offs';
+                        } else if (position >= Math.max(totalTeams - 1, Math.ceil(totalTeams * 0.85))) {
+                            progression.type = 'relegation';
+                            progression.description = 'Descida de divisão';
+                        }
+                    } else if (currentDiv === '2') {
+                        // 2ª divisão - primeiros 2 sobem, últimos 2 descem
+                        if (position <= 2) {
+                            progression.type = 'promotion';
+                            progression.description = 'Subida de divisão';
+                        } else if (position >= Math.max(totalTeams - 1, Math.ceil(totalTeams * 0.85))) {
+                            progression.type = 'relegation';
+                            progression.description = 'Descida de divisão';
+                        }
+                    } else if (currentDiv === '3' || parseInt(currentDiv) >= 3) {
+                        // 3ª divisão ou inferior - primeiros 2 sobem
+                        if (position <= 2) {
+                            progression.type = 'promotion';
+                            progression.description = 'Subida de divisão';
+                        }
+                    }
+                    break;
+
+                case 'divisions-and-groups':
+                    // Formato: Divisões com grupos (ex: Futsal Masculino)
+                    const divisionKey = currentDivision || '1';
+                    const secondDivisionGroups = structure.groups.filter(g =>
+                        sampleData.teams.some(team => team.division === '2' && team.group === g)
+                    ).length;
+
+                    if (divisionKey === '1') {
+                        // 1ª divisão - regras dependem da estrutura da 2ª divisão
+                        if (secondDivisionGroups === 1) {
+                            // 2ª divisão tem 1 grupo: passam 7 da 1ª, descem 2
+                            if (position <= 7) {
+                                progression.type = 'playoffs';
+                                progression.description = 'Qualificação para play-offs';
+                            } else if (position >= totalTeams - 1) {
+                                progression.type = 'relegation';
+                                progression.description = 'Descida de divisão';
+                            }
+                        } else if (secondDivisionGroups === 2) {
+                            // 2ª divisão tem 2 grupos: passam 6 da 1ª, descem 4
+                            if (position <= 6) {
+                                progression.type = 'playoffs';
+                                progression.description = 'Qualificação para play-offs';
+                            } else if (position >= totalTeams - 3) {
+                                progression.type = 'relegation';
+                                progression.description = 'Descida de divisão';
+                            }
+                        } else {
+                            // Fallback para estruturas não previstas
+                            if (position <= 4) {
+                                progression.type = 'playoffs';
+                                progression.description = 'Qualificação para play-offs';
+                            } else if (position >= totalTeams - 1) {
+                                progression.type = 'relegation';
+                                progression.description = 'Descida de divisão';
+                            }
+                        }
+                    } else if (divisionKey === '2') {
+                        // 2ª divisão - regras dependem do número de grupos
+                        if (secondDivisionGroups === 1) {
+                            // 1 grupo: sobem 2 (1 vai aos play-offs, 1 sobe direto)
+                            if (position === 1) {
+                                progression.type = 'playoffs';
+                                progression.description = 'Qualificação para play-offs';
+                            } else if (position === 2) {
+                                progression.type = 'promotion';
+                                progression.description = 'Subida de divisão';
+                            }
+                        } else if (secondDivisionGroups === 2) {
+                            // 2 grupos: 1º de cada grupo vai aos play-offs, 2º de cada grupo sobe
+                            if (position === 1) {
+                                progression.type = 'playoffs';
+                                progression.description = 'Qualificação para play-offs (1º do grupo)';
+                            } else if (position === 2) {
+                                progression.type = 'promotion';
+                                progression.description = 'Subida de divisão (2º do grupo)';
+                            }
+                        }
+                    } else {
+                        // 3ª divisão ou inferior - primeiro de cada grupo sobe
+                        if (position === 1) {
+                            progression.type = 'promotion';
+                            progression.description = 'Subida de divisão (1º do grupo)';
+                        }
+                    }
+                    break;
+
+                default:
+                    // Estrutura desconhecida - usar regras genéricas baseadas no tamanho
+                    if (totalTeams >= 8) {
+                        const playoffSpots = Math.ceil(totalTeams * 0.3);
+                        const relegationSpots = Math.max(2, Math.ceil(totalTeams * 0.2));
+
+                        if (position <= playoffSpots) {
+                            progression.type = 'playoffs';
+                            progression.description = 'Zona de play-offs';
+                        } else if (position >= totalTeams - relegationSpots + 1) {
+                            progression.type = 'relegation';
+                            progression.description = 'Zona de risco';
+                        }
+                    } else if (totalTeams >= 4) {
+                        if (position <= 2) {
+                            progression.type = 'playoffs';
+                            progression.description = 'Zona de play-offs';
+                        } else if (totalTeams > 4 && position >= totalTeams) {
+                            progression.type = 'relegation';
+                            progression.description = 'Zona de risco';
+                        }
+                    }
+                    break;
+            }
+
+            DebugUtils.debugModalityAnalysis('progression_determined', progression);
+            return progression;
+        }
+
         function analyzeModalityStructure() {
             const structure = {
                 hasDivisions: false,
@@ -2107,8 +2437,8 @@
                 type: 'unknown'
             };
 
-            console.log('Analisando estrutura da modalidade...');
-            console.log('Rankings disponíveis:', Object.keys(sampleData.rankings));
+            DebugUtils.debugModalityAnalysis('analyzing_structure');
+            DebugUtils.debugModalityAnalysis('rankings_available', Object.keys(sampleData.rankings));
 
             // Verificar estrutura baseada nos dados de classificação
             Object.keys(sampleData.rankings).forEach(key => {
@@ -2149,7 +2479,7 @@
                 structure.type = 'groups-only'; // Ex: Futsal Feminino
             }
 
-            console.log('Estrutura da modalidade:', structure);
+            DebugUtils.debugModalityAnalysis('structure_detected', structure);
             return structure;
         }
 
@@ -2194,11 +2524,11 @@
 
             // Se não há dados do bracket ou não encontrou 3 equipas, usar ranking
             if (top3Teams.size < 3) {
-                console.log('Usando ranking para Top 3 pois bracket não tem dados suficientes');
+                DebugUtils.debugBracket('using_ranking_fallback');
                 const rankingTop3 = sampleData.rankings[currentDivision].slice(0, 3).map(t => t.team);
                 setActiveTeams(rankingTop3);
             } else {
-                console.log('Top 3 do bracket:', [...top3Teams]);
+                DebugUtils.debugPlayoffs('top3_teams', [...top3Teams]);
                 setActiveTeams([...top3Teams]);
             }
         }
@@ -2246,7 +2576,7 @@
                 );
             }
 
-            console.log('Equipas dos playoffs encontradas:', [...playoffTeams]);
+            DebugUtils.debugPlayoffs('playoff_teams', [...playoffTeams]);
             setActiveTeams([...playoffTeams]);
         }
 
@@ -2767,10 +3097,9 @@
 
             function checkAllLoaded() {
                 loadedFiles++;
-                console.log(`Arquivo carregado ${loadedFiles}/${totalFiles}`);
+                DebugUtils.debugFileLoading('file_loaded', { current: loadedFiles, total: totalFiles });
                 if (loadedFiles === totalFiles) {
-                    console.log('Todos os arquivos carregados, atualizando interface...');
-                    console.log('Estado dos dados:', sampleData);
+                    DebugUtils.debugFileLoading('all_files_loaded', sampleData);
                     // Todos os arquivos carregados, atualizar interface
                     setTimeout(() => {
                         createTeamSelector();
@@ -2828,8 +3157,7 @@
 
         // Funções processadoras (iguais às que já te preparei)
         function processRankings(data) {
-            console.log('Processando rankings...', data.length, 'entradas');
-            console.log('Primeira entrada:', data[0]);
+            DebugUtils.debugProcessedData('rankings', data.length, data[0]);
 
             data.forEach(row => {
                 if (!row.Equipa) return;
@@ -2868,7 +3196,7 @@
 
                 if (!sampleData.rankings[mainKey]) sampleData.rankings[mainKey] = [];
                 sampleData.rankings[mainKey].push({
-                    team: row.Equipa,
+                    team: row.Equipa.trim(),
                     points: parseInt(row.pontos) || 0,
                     wins: parseInt(row.vitorias) || 0,
                     draws: parseInt(row.empates) || 0,
@@ -2879,8 +3207,8 @@
                 });
             });
 
-            console.log('Rankings processados:', sampleData.rankings);
-            console.log('Equipas processadas:', sampleData.teams.length);
+            DebugUtils.debugFileLoading('rankings_processed', sampleData.rankings);
+            DebugUtils.debugFileLoading('teams_processed', sampleData.teams.length);
         }
 
         function processMatches(data) {
@@ -2888,8 +3216,8 @@
                 if (!row["Equipa 1"] || !row["Equipa 2"]) return;
                 sampleData.matches.push({
                     jornada: row.Jornada,
-                    team1: row["Equipa 1"],
-                    team2: row["Equipa 2"],
+                    team1: row["Equipa 1"].trim(),
+                    team2: row["Equipa 2"].trim(),
                     score1: parseInt(row["Golos 1"]) || 0,
                     score2: parseInt(row["Golos 2"]) || 0,
                     division: row.Divisão || row.Grupo
@@ -2927,7 +3255,7 @@
             }
 
             const result = hasAdjustmentsFromTeamData || hasAdjustmentsFromRawData;
-            console.log('Verificação de ajustes intergrupos:', {
+            DebugUtils.debugProcessedData('ajustes intergrupos', result ? 1 : 0, {
                 fromTeamData: hasAdjustmentsFromTeamData,
                 fromRawData: hasAdjustmentsFromRawData,
                 final: result
@@ -2937,7 +3265,14 @@
         }
 
         function processEloHistory(data) {
-            console.log('Processando histórico ELO...', data.length, 'jogos');
+            DebugUtils.debugProcessedData('histórico ELO', data.length, `${data.length} jogos`);
+
+            // Função para normalizar nomes de equipas (remover espaços no início e fim)
+            function normalizeTeamName(name) {
+                const normalized = name ? name.trim() : name;
+                DebugUtils.debugTeamNormalization(name, normalized);
+                return normalized;
+            }
 
             // Guardar dados brutos para processamento do bracket
             sampleData.rawEloData = data;
@@ -2954,7 +3289,7 @@
             data.forEach(row => {
                 // Processar ajustes intergrupos especiais (linhas "Inter-Group")
                 if (row.Jornada === "Inter-Group" && row["Equipa 1"]) {
-                    const teamName = row["Equipa 1"];
+                    const teamName = normalizeTeamName(row["Equipa 1"]);
                     const adjustment = parseInt(row["Elo Delta 1"]) || 0;
                     const finalElo = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || 0;
 
@@ -2966,7 +3301,7 @@
                             finalElo: finalElo,
                             date: null // Será calculada depois
                         });
-                        console.log(`Ajuste intergrupo encontrado: ${teamName} = ${adjustment}`);
+                        DebugUtils.debugInterGroupAdjustment(teamName, adjustment);
                     }
                     return; // Não processar mais esta linha
                 }
@@ -2974,13 +3309,19 @@
                 if (!row["Equipa 1"] || !row["Equipa 2"]) return;
 
                 const round = row.Jornada; // Manter como string para processar E1, E2, etc.
-                const team1 = row["Equipa 1"];
-                const team2 = row["Equipa 2"];
+                const team1 = normalizeTeamName(row["Equipa 1"]);
+                const team2 = normalizeTeamName(row["Equipa 2"]);
                 const finalElo1 = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || 1500;
                 const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]) || 1500;
                 const initialElo1 = parseInt(row["Elo Antes 1"]) || 1500;
                 const initialElo2 = parseInt(row["Elo Antes 2"]) || 1500;
                 const gameDate = row.Dia ? new Date(row.Dia) : null;
+
+                // Debug específico para Informática
+                if (team1.toLowerCase().includes('informática') || team1.toLowerCase().includes('informatica') ||
+                    team2.toLowerCase().includes('informática') || team2.toLowerCase().includes('informatica')) {
+
+                }
 
                 // Processar ajustes intergrupos dos jogos normais (geralmente são 0)
                 const interGroupAdj1 = parseInt(row["Inter Group Adjustment 1"]) || 0;
@@ -3064,8 +3405,8 @@
                 }
             });
 
-            console.log('Jogos de playoffs encontrados:', Object.keys(playoffGames));
-            console.log('Datas dos playoffs:', playoffDates);
+            DebugUtils.debugProcessedData('jogos de playoffs', Object.keys(playoffGames).length, Object.keys(playoffGames));
+            DebugUtils.debugProcessedData('datas dos playoffs', Object.keys(playoffDates).length, playoffDates);
 
             // Verificar se existem ajustes intergrupos reais (não-zero) usando a função auxiliar
             const hasInterGroupAdjustments = hasRealInterGroupAdjustments(teamInterGroupAdjustments);
@@ -3076,24 +3417,24 @@
                 const adjustmentDate = new Date(lastGameDate);
                 adjustmentDate.setDate(adjustmentDate.getDate() + 1); // Um dia depois
                 allDates.push(adjustmentDate);
-                console.log(`Ajustes intergrupos programados para: ${adjustmentDate.toLocaleDateString('pt-PT')}`);
+                DebugUtils.debugProcessedData('ajustes intergrupos programados', 1, adjustmentDate.toLocaleDateString('pt-PT'));
             } else if (hasInterGroupAdjustments) {
                 // Fallback se não há datas de jogos
                 const fallbackDate = new Date('2025-06-01');
                 allDates.push(fallbackDate);
             }
 
-            console.log('Ajustes intergrupos reais encontrados:', hasInterGroupAdjustments);
+            DebugUtils.debugProcessedData('ajustes intergrupos encontrados', hasInterGroupAdjustments ? 1 : 0, hasInterGroupAdjustments);
 
             // Atualizar variável global
             currentModalityHasAdjustments = hasInterGroupAdjustments;
 
             sampleData.gamesDates = allDates;
 
-            console.log('Equipas com histórico ELO:', Object.keys(teamEloByRound));
-            console.log('ELO inicial das equipas:', teamInitialElo);
-            console.log('Ajustes intergrupos:', teamInterGroupAdjustments);
-            console.log('Datas dos jogos:', sampleData.gamesDates);
+            DebugUtils.debugProcessedData('equipas com histórico ELO', Object.keys(teamEloByRound).length, Object.keys(teamEloByRound));
+            DebugUtils.debugProcessedData('ELO inicial das equipas', Object.keys(teamInitialElo).length, teamInitialElo);
+            DebugUtils.debugProcessedData('ajustes intergrupos', Object.keys(teamInterGroupAdjustments).length, teamInterGroupAdjustments);
+            DebugUtils.debugProcessedData('datas dos jogos', sampleData.gamesDates ? sampleData.gamesDates.length : 0, sampleData.gamesDates);
 
             // Converter para formato adequado para o gráfico
             // Primeiro, obter todas as jornadas onde houve jogos (fase de grupos)
@@ -3102,6 +3443,9 @@
             Object.keys(teamEloByRound).forEach(teamName => {
                 const eloValues = [teamInitialElo[teamName] || 1500]; // Começar com ELO inicial correto
                 let currentElo = teamInitialElo[teamName] || 1500;
+
+                // Debug para processamento de equipa
+                DebugUtils.debugTeamEloProcessing(teamName, teamInitialElo[teamName] || 1500, currentElo, teamEloByRound[teamName], allGameRounds);
 
                 // Para cada jornada da fase de grupos, adicionar o ELO (se mudou) ou manter o anterior
                 allGameRounds.forEach(round => {
@@ -3124,7 +3468,7 @@
                         if (teamGame) {
                             // Equipa jogou nesta fase - atualizar ELO
                             currentElo = teamGame.team1 === teamName ? teamGame.finalElo1 : teamGame.finalElo2;
-                            console.log(`${teamName}: ELO após ${phase} = ${currentElo}`);
+                            DebugUtils.debugProcessedData(`${teamName} ELO`, 1, `após ${phase} = ${currentElo}`);
                         }
                         // Adicionar ponto ao gráfico (mudou ou manteve-se)
                         eloValues.push(currentElo);
@@ -3143,28 +3487,39 @@
                             const newElo = interGroupAdj.finalElo;
                             const actualAdjustment = newElo - lastElo;
                             eloValues.push(newElo);
-                            console.log(`${teamName}: ELO antes ajustes ${lastElo} -> ELO final ${newElo} (ajuste ${actualAdjustment})`);
+                            DebugUtils.debugEloAdjustments(teamName, 'before_adjustments', {
+                                before: lastElo,
+                                after: newElo,
+                                adjustment: actualAdjustment
+                            });
                         } else {
                             // Fallback para cálculo manual se não há finalElo
                             const totalAdjustment = teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
                             const newElo = lastElo + totalAdjustment;
                             eloValues.push(newElo);
                             if (totalAdjustment !== 0) {
-                                console.log(`${teamName}: ELO antes ajustes ${lastElo} + ajuste ${totalAdjustment} = ${newElo}`);
+                                DebugUtils.debugEloAdjustments(teamName, 'with_adjustment', {
+                                    before: lastElo,
+                                    adjustment: totalAdjustment,
+                                    after: newElo
+                                });
                             } else {
-                                console.log(`${teamName}: sem ajustes (ajuste = 0), mantendo ELO ${lastElo}`);
+                                DebugUtils.debugEloAdjustments(teamName, 'no_adjustment', { elo: lastElo });
                             }
                         }
                     } else {
                         // Equipa sem ajustes - manter ELO anterior
                         eloValues.push(lastElo);
-                        console.log(`${teamName}: sem ajustes intergrupos, mantendo ELO ${lastElo}`);
+                        DebugUtils.debugEloAdjustments(teamName, 'no_intergroup', { elo: lastElo });
                     }
                 }
 
                 // Guardar histórico processado
                 sampleData.eloHistory[teamName] = eloValues;
-                console.log(`${teamName}: ELO inicial ${eloValues[0]}, ${eloValues.length} pontos totais`);
+                DebugUtils.debugEloAdjustments(teamName, 'final_elo', {
+                    initial: eloValues[0],
+                    points: eloValues.length
+                });
             });
 
             // Para equipas que não jogaram (não têm dados em teamEloByRound mas existem em teams)
@@ -3187,22 +3542,30 @@
                                 const newElo = interGroupAdj.finalElo;
                                 const actualAdjustment = newElo - initialElo;
                                 eloValues.push(newElo);
-                                console.log(`${team.name}: sem jogos, ELO inicial ${initialElo} -> ELO final ${newElo} (ajuste ${actualAdjustment})`);
+                                DebugUtils.debugEloAdjustments(team.name, 'no_games_adjustment', {
+                                    initial: initialElo,
+                                    final: newElo,
+                                    adjustment: actualAdjustment
+                                });
                             } else {
                                 // Fallback para cálculo manual se não há finalElo
                                 const totalAdjustment = teamInterGroupAdjustments[team.name].reduce((sum, adj) => sum + adj.adjustment, 0);
                                 const newElo = initialElo + totalAdjustment;
                                 eloValues.push(newElo);
                                 if (totalAdjustment !== 0) {
-                                    console.log(`${team.name}: sem jogos, ELO inicial ${initialElo} + ajuste ${totalAdjustment} = ${newElo}`);
+                                    DebugUtils.debugEloAdjustments(team.name, 'no_games_with_adjustment', {
+                                        initial: initialElo,
+                                        adjustment: totalAdjustment,
+                                        final: newElo
+                                    });
                                 } else {
-                                    console.log(`${team.name}: sem jogos, sem ajustes (ajuste = 0), mantendo ELO inicial ${initialElo}`);
+                                    DebugUtils.debugEloAdjustments(team.name, 'no_games_no_adjustment', { initial: initialElo });
                                 }
                             }
                         } else {
                             // Equipa sem ajustes - manter ELO inicial
                             eloValues.push(initialElo);
-                            console.log(`${team.name}: sem jogos e sem ajustes, mantendo ELO inicial ${initialElo}`);
+                            DebugUtils.debugEloAdjustments(team.name, 'no_games_no_intergroup', { initial: initialElo });
                         }
                     }
 
@@ -3231,32 +3594,38 @@
                                     const newElo = interGroupAdj.finalElo;
                                     const actualAdjustment = newElo - lastElo;
                                     currentValues.push(newElo);
-                                    console.log(`${team.name}: completado com ELO final ${newElo} (ajuste ${actualAdjustment})`);
+                                    DebugUtils.debugEloAdjustments(team.name, 'completed_with_adjustment', {
+                                        final: newElo,
+                                        adjustment: actualAdjustment
+                                    });
                                 } else {
                                     // Fallback para cálculo manual se não há finalElo
                                     const totalAdjustment = teamInterGroupAdjustments[team.name].reduce((sum, adj) => sum + adj.adjustment, 0);
                                     const newElo = lastElo + totalAdjustment;
                                     currentValues.push(newElo);
                                     if (totalAdjustment !== 0) {
-                                        console.log(`${team.name}: completado com ajuste ${totalAdjustment}, ELO final ${newElo}`);
+                                        DebugUtils.debugEloAdjustments(team.name, 'completed_with_total_adjustment', {
+                                            adjustment: totalAdjustment,
+                                            final: newElo
+                                        });
                                     } else {
-                                        console.log(`${team.name}: completado sem ajustes (ajuste = 0), mantendo ELO ${lastElo}`);
+                                        DebugUtils.debugEloAdjustments(team.name, 'completed_no_adjustment', { elo: lastElo });
                                     }
                                 }
                             } else {
                                 // Sem ajustes - manter ELO anterior
                                 currentValues.push(lastElo);
-                                console.log(`${team.name}: completado sem ajustes, mantendo ELO ${lastElo}`);
+                                DebugUtils.debugEloAdjustments(team.name, 'completed_no_intergroup', { elo: lastElo });
                             }
                         } else {
                             currentValues.push(lastElo);
                         }
                     }
-                    console.log(`${team.name}: completado para ${expectedPoints} pontos`);
+                    DebugUtils.debugEloAdjustments(team.name, 'completed_points', { points: expectedPoints });
                 }
             });
 
-            console.log('Histórico ELO final:', sampleData.eloHistory);
+            DebugUtils.debugEloHistoryFinal(sampleData.eloHistory);
         }
 
         // Inicializar quando a página carregar
@@ -3296,6 +3665,11 @@
             setTimeout(() => {
                 updateDynamicTeamLabels();
             }, 200);
+        });
+        // Inicializar sistema de debug (desativado por padrão)
+        document.addEventListener('DOMContentLoaded', function () {
+            // Para ativar debug, descomente a linha abaixo:
+            // DebugUtils.setDebugEnabled(true, false, ['informática', 'informatica']);
         });
     </script>
 </body>
