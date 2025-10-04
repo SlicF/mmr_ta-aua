@@ -44,8 +44,8 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Grupo,Falta de Comparê
 E1,2025-05-15 00:00:00,15h00,,Eng. Materias,11,1,Eng. Mecânica,,
 E1,2025-05-15 00:00:00,16h00,,Bioquímica,3,2,Matemática,,
 E1,2025-05-15 00:00:00,17h00,,Eng. Civil,4,1,EGI,,
-E1,2025-05-15 00:00:00,18h00,,Eng. Biomédica,3,0,Fisioterapia,,
+E1,2025-05-15 00:00:00,18h00,,Eng. Biomédica,3,0,Fisioterapia,,?
 E2,2025-05-16 00:00:00,15h00,,Eng. Materias,4,0,Bioquímica,,
-E2,2025-05-16 00:00:00,16h00,,Eng. Civil,3,0,Eng. Biomédica,,
-E3L,2025-05-16 00:00:00,17h00,,Bioquímica,0,3,Eng. Biomédica,,
+E2,2025-05-16 00:00:00,16h00,,Eng. Civil,3,0,Eng. Biomédica,,?
+E3L,2025-05-16 00:00:00,17h00,,Bioquímica,0,3,Eng. Biomédica,,?
 E3,2025-05-16 00:00:00,18h00,,Eng. Materias,0,5,Eng. Civil,,

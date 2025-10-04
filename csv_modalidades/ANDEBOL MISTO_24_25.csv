@@ -131,11 +131,11 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Falta de Compa
 11,2025-05-14 00:00:00,22h00,PAH,EGI,13,22,EET,1,
 11,2025-05-14 00:00:00,23h00,PAH,Matemática,28,36,Biotecnologia,1,
 7,,,,Biologia,,,MTC,2,
-E1,2025-05-15 00:00:00,20h00,,Contabilidade,15,0,Gestao Comercial,,
+E1,2025-05-15 00:00:00,20h00,,Contabilidade,15,0,Gestao Comercial,,?
 E1,2025-05-15 00:00:00,21h00,,Eng. Mecânica,21,15,Biotecnologia,,
 E1,2025-05-15 00:00:00,22h00,,EET,27,10,Fisioterapia,,
 E1,2025-05-15 00:00:00,23h00,,EGI,26,15,Eng. Materiais,,
-E2,2025-05-16 00:00:00,20h00,,Contabilidade,0,15,Eng. Mecânica,,
+E2,2025-05-16 00:00:00,20h00,,Contabilidade,0,15,Eng. Mecânica,,?
 E2,2025-05-16 00:00:00,21h00,,EET,17,20,EGI,,
-E3L,2025-05-16 00:00:00,22h00,,Contabilidade,15,0,EET,,
-E3,2025-05-16 00:00:00,23h00,,Eng. Mecânica,28,27,EGI,,
+E3L,2025-05-16 00:00:00,22h00,,Contabilidade,15,0,EET,,?
+E3,2025-05-16 00:00:00,23h00,,Eng. Mecânica,27,28,EGI,,

@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard da Taça UA</title>
+    <link rel="icon" type="image/png" href="assets/taça_ua.png">
+    <link rel="shortcut icon" type="image/png" href="assets/taça_ua.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -785,6 +787,21 @@
             font-size: 0.9em;
         }
 
+        .unknown-result-indicator {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .unknown-result-indicator small {
+            color: #856404 !important;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -923,12 +940,12 @@
 
         <div class="modalidade-selector">
             <label for="epoca">Época:</label>
-            <select id="epoca" onchange="changeEpoca(this.value)">
+            <select id="epoca" name="epoca" onchange="changeEpoca(this.value)">
                 <!-- Épocas serão carregadas dinamicamente -->
             </select>
 
             <label for="modalidade">Modalidade:</label>
-            <select id="modalidade" onchange="changeModalidade(this.value)">
+            <select id="modalidade" name="modalidade" onchange="changeModalidade(this.value)">
                 <!-- Modalidades serão carregadas dinamicamente baseadas na época -->
             </select>
         </div>
@@ -1092,7 +1109,7 @@
                     '';
 
                 label.innerHTML = `
-                    <input type="checkbox" checked onchange="toggleTeam('${team.name}')">
+                    <input type="checkbox" id="team-${team.name.replace(/[^a-zA-Z0-9]/g, '_')}" name="team-${team.name.replace(/[^a-zA-Z0-9]/g, '_')}" checked onchange="toggleTeam('${team.name}')">
                     ${emblemHtml}
                     <div class="team-dot" style="background-color: ${team.color}"></div>
                     <span class="team-name" title="${team.fullName}">${team.name}</span>
@@ -1990,20 +2007,68 @@
 
         // Criar bracket de dados reais dos CSVs
         function createRealBracket() {
-            if (!sampleData.rawEloData || sampleData.rawEloData.length === 0) {
-                DebugUtils.debugBracket('no_elo_data');
+            // Carregar dados originais do CSV diretamente para detectar "?"
+            const modalidade = document.getElementById('modalidade').value;
+            if (!modalidade) {
+                sampleData.bracket = {};
                 createBracket();
                 return;
             }
 
-            // Filtrar jogos de eliminação dos dados brutos (não do eloHistory processado)
+            const jogosPath = `csv_modalidades/${modalidade}.csv`;
+
+            Papa.parse(jogosPath, {
+                download: true,
+                header: true,
+                complete: results => {
+                    // Filtrar jogos de eliminação dos dados originais
+                    const eliminationMatches = results.data.filter(match =>
+                        match.Jornada && (
+                            match.Jornada.startsWith('E1') ||  // Quartos
+                            match.Jornada.startsWith('E2') ||  // Meias
+                            match.Jornada.startsWith('E3')    // Final/3º lugar
+                        )
+                    );
+
+                    if (eliminationMatches.length === 0) {
+                        DebugUtils.debugBracket('no_elimination_games');
+                        sampleData.bracket = {};
+                        createBracket();
+                        return;
+                    }
+
+                    DebugUtils.debugBracket('elimination_games_found', eliminationMatches);
+                    processEliminationMatches(eliminationMatches);
+                },
+                error: error => {
+                    console.error('Erro ao carregar CSV para bracket:', error);
+                    // Fallback para dados processados se houver erro
+                    fallbackToProcessedData();
+                }
+            });
+        }
+
+        function fallbackToProcessedData() {
+            if (!sampleData.rawEloData || sampleData.rawEloData.length === 0) {
+                DebugUtils.debugBracket('no_elo_data');
+                sampleData.bracket = {};
+                createBracket();
+                return;
+            }
+
             const eliminationMatches = sampleData.rawEloData.filter(match =>
                 match.Jornada && (
-                    match.Jornada.startsWith('E1') ||  // Quartos
-                    match.Jornada.startsWith('E2') ||  // Meias
-                    match.Jornada.startsWith('E3')    // Final/3º lugar
+                    match.Jornada.startsWith('E1') ||
+                    match.Jornada.startsWith('E2') ||
+                    match.Jornada.startsWith('E3')
                 )
-            ); if (eliminationMatches.length === 0) {
+            );
+
+            processEliminationMatches(eliminationMatches, true);
+        }
+
+        function processEliminationMatches(eliminationMatches, isProcessedData = false) {
+            if (eliminationMatches.length === 0) {
                 DebugUtils.debugBracket('no_elimination_games');
                 sampleData.bracket = {};
                 createBracket();
@@ -2015,58 +2080,118 @@
             // Organizar jogos por fase na ordem de exibição correta
             const bracketData = {};
 
+            // Função auxiliar para detectar "?" nos dados originais ou processados
+            function detectUnknownResult(match) {
+                const allKeys = Object.keys(match);
+
+                // Verificar todas as chaves possíveis para encontrar "?"
+                for (let key of allKeys) {
+                    const value = match[key];
+                    if (value && value.toString().trim() === '?') {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             // Quartos de Final (E1)
-            const quartos = eliminationMatches.filter(m => m.Jornada.startsWith('E1') && !m.Jornada.includes('L'));
+            const quartos = eliminationMatches.filter(m =>
+                (m.Jornada || m.round) &&
+                (m.Jornada?.startsWith('E1') || m.round?.startsWith('E1')) &&
+                !(m.Jornada?.includes('L') || m.round?.includes('L'))
+            );
             if (quartos.length > 0) {
-                bracketData["Quartos de Final"] = quartos.map(match => ({
-                    team1: match['Equipa 1'],
-                    team2: match['Equipa 2'],
-                    score1: parseFloat(match['Golos 1']) || 0,
-                    score2: parseFloat(match['Golos 2']) || 0,
-                    winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2']
-                }));
+                bracketData["Quartos de Final"] = quartos.map(match => {
+                    const isUnknownResult = detectUnknownResult(match);
+                    return {
+                        team1: match['Equipa 1'],
+                        team2: match['Equipa 2'],
+                        score1: parseFloat(match['Golos 1']) || 0,
+                        score2: parseFloat(match['Golos 2']) || 0,
+                        winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2'],
+                        unknownResult: isUnknownResult
+                    };
+                });
             }
 
             // Meias-Finais (E2)
-            const meias = eliminationMatches.filter(m => m.Jornada.startsWith('E2') && !m.Jornada.includes('L'));
+            const meias = eliminationMatches.filter(m =>
+                (m.Jornada || m.round) &&
+                (m.Jornada?.startsWith('E2') || m.round?.startsWith('E2')) &&
+                !(m.Jornada?.includes('L') || m.round?.includes('L'))
+            );
             if (meias.length > 0) {
-                bracketData["Meias-Finais"] = meias.map(match => ({
-                    team1: match['Equipa 1'],
-                    team2: match['Equipa 2'],
-                    score1: parseFloat(match['Golos 1']) || 0,
-                    score2: parseFloat(match['Golos 2']) || 0,
-                    winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2']
-                }));
-            }
-
-            // Jogo do 3º lugar (E3L) - colocar antes da final
-            const terceiroLugar = eliminationMatches.filter(m => m.Jornada === 'E3L');
-            if (terceiroLugar.length > 0) {
-                bracketData["3º Lugar"] = terceiroLugar.map(match => ({
-                    team1: match['Equipa 1'],
-                    team2: match['Equipa 2'],
-                    score1: parseFloat(match['Golos 1']) || 0,
-                    score2: parseFloat(match['Golos 2']) || 0,
-                    winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2']
-                }));
+                bracketData["Meias-Finais"] = meias.map(match => {
+                    const isUnknownResult = detectUnknownResult(match);
+                    return {
+                        team1: match['Equipa 1'],
+                        team2: match['Equipa 2'],
+                        score1: parseFloat(match['Golos 1']) || 0,
+                        score2: parseFloat(match['Golos 2']) || 0,
+                        winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2'],
+                        unknownResult: isUnknownResult
+                    };
+                });
             }
 
             // Final (E3)
-            const final = eliminationMatches.filter(m => m.Jornada === 'E3');
+            const final = eliminationMatches.filter(m =>
+                (m.Jornada || m.round) &&
+                (m.Jornada?.startsWith('E3') || m.round?.startsWith('E3')) &&
+                !(m.Jornada?.includes('L') || m.round?.includes('L'))
+            );
+
+            // Jogo do 3º lugar (E3L) - na mesma ronda que a final
+            const terceiroLugar = eliminationMatches.filter(m =>
+                (m.Jornada || m.round) &&
+                (m.Jornada === 'E3L' || m.round === 'E3L')
+            );
+
+            // Criar array da ronda final que inclui ambos os jogos
+            const finalMatches = [];
+
+            // Adicionar final primeiro
             if (final.length > 0) {
-                bracketData["Final"] = final.map(match => ({
-                    team1: match['Equipa 1'],
-                    team2: match['Equipa 2'],
-                    score1: parseFloat(match['Golos 1']) || 0,
-                    score2: parseFloat(match['Golos 2']) || 0,
-                    winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2']
+                finalMatches.push(...final.map(match => {
+                    const isUnknownResult = detectUnknownResult(match);
+                    return {
+                        team1: match['Equipa 1'],
+                        team2: match['Equipa 2'],
+                        score1: parseFloat(match['Golos 1']) || 0,
+                        score2: parseFloat(match['Golos 2']) || 0,
+                        winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2'],
+                        unknownResult: isUnknownResult,
+                        isThirdPlace: false
+                    };
                 }));
+            }
+
+            // Adicionar 3º lugar depois
+            if (terceiroLugar.length > 0) {
+                finalMatches.push(...terceiroLugar.map(match => {
+                    const isUnknownResult = detectUnknownResult(match);
+                    return {
+                        team1: match['Equipa 1'],
+                        team2: match['Equipa 2'],
+                        score1: parseFloat(match['Golos 1']) || 0,
+                        score2: parseFloat(match['Golos 2']) || 0,
+                        winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2'],
+                        unknownResult: isUnknownResult,
+                        isThirdPlace: true
+                    };
+                }));
+            }
+
+            if (finalMatches.length > 0) {
+                bracketData["Final"] = finalMatches;
             }
 
             sampleData.bracket = bracketData;
             DebugUtils.debugBracket('bracket_created', bracketData);
             createBracket();
         }
+
+        // Criar bracket de exemplo
 
         // Criar bracket de exemplo
         function createSampleBracket() {
@@ -2168,7 +2293,25 @@
                 title.textContent = round;
                 roundDiv.appendChild(title);
 
-                matches.forEach(match => {
+                matches.forEach((match, index) => {
+                    // Adicionar subtítulo para o 3º lugar se for o caso
+                    if (match.isThirdPlace && !document.querySelector('.third-place-header')) {
+                        const thirdPlaceHeader = document.createElement('h4');
+                        thirdPlaceHeader.className = 'third-place-header';
+                        thirdPlaceHeader.textContent = '3º Lugar';
+                        thirdPlaceHeader.style.cssText = `
+                            text-align: center;
+                            color: #666;
+                            margin: 30px 0 10px 0;
+                            padding: 8px;
+                            background: #f5f5f5;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            font-size: 0.9em;
+                        `;
+                        roundDiv.appendChild(thirdPlaceHeader);
+                    }
+
                     const matchDiv = document.createElement('div');
                     matchDiv.className = 'bracket-match';
 
@@ -2225,6 +2368,15 @@
 
                     matchDiv.appendChild(team1Div);
                     matchDiv.appendChild(team2Div);
+
+                    // Adicionar indicação de resultado desconhecido se aplicável
+                    if (match.unknownResult) {
+                        const unknownIndicator = document.createElement('div');
+                        unknownIndicator.className = 'unknown-result-indicator';
+                        unknownIndicator.innerHTML = '<small style="color: #666; font-style: italic; text-align: center; margin-top: 5px;">⚠️ Resultado Desconhecido</small>';
+                        matchDiv.appendChild(unknownIndicator);
+                    }
+
                     roundDiv.appendChild(matchDiv);
                 });
 
@@ -2309,22 +2461,22 @@
                     const currentDiv = currentDivision || '1';
 
                     if (currentDiv === '1') {
-                        // 1ª divisão - primeiros 4 vão aos play-offs, últimos 2 descem
-                        if (position <= 4 && totalTeams >= 8) {
+                        // 1ª divisão - primeiros 7 vão aos play-offs, últimos 2 descem
+                        if (position <= 7 && totalTeams >= 8) {
                             progression.type = 'playoffs';
                             progression.description = 'Qualificação para play-offs';
-                        } else if (position >= Math.max(totalTeams - 1, Math.ceil(totalTeams * 0.85))) {
+                        } else if (position >= totalTeams - 1) {
                             progression.type = 'relegation';
                             progression.description = 'Descida de divisão';
                         }
                     } else if (currentDiv === '2') {
-                        // 2ª divisão - primeiros 2 sobem, últimos 2 descem
-                        if (position <= 2) {
+                        // 2ª divisão - primeiro vai aos play-offs, segundo sobe diretamente
+                        if (position === 1) {
+                            progression.type = 'playoffs';
+                            progression.description = 'Qualificação para play-offs';
+                        } else if (position === 2) {
                             progression.type = 'promotion';
                             progression.description = 'Subida de divisão';
-                        } else if (position >= Math.max(totalTeams - 1, Math.ceil(totalTeams * 0.85))) {
-                            progression.type = 'relegation';
-                            progression.description = 'Descida de divisão';
                         }
                     } else if (currentDiv === '3' || parseInt(currentDiv) >= 3) {
                         // 3ª divisão ou inferior - primeiros 2 sobem
@@ -3256,20 +3408,7 @@
 
             DebugUtils.debugFileLoading('rankings_processed', sampleData.rankings);
 
-            // Debug para verificar duplicatas
-            console.log('=== DEBUG: Equipas carregadas ===');
-            console.log('Teams array:', sampleData.teams.map(t => t.name));
-            console.log('ELO History keys:', Object.keys(sampleData.eloHistory));
-            console.log('Rankings keys:', Object.keys(sampleData.rankings));
-
-            // Verificar duplicatas na lista de teams
-            const teamNames = sampleData.teams.map(t => t.name);
-            const duplicateTeams = teamNames.filter((name, index) => teamNames.indexOf(name) !== index);
-            if (duplicateTeams.length > 0) {
-                console.error('DUPLICATAS ENCONTRADAS em sampleData.teams:', duplicateTeams);
-            } else {
-                console.log('✓ Nenhuma duplicata encontrada em sampleData.teams');
-            }
+            // Verificar duplicatas na lista de teams (apenas em modo debug)
             DebugUtils.debugFileLoading('teams_processed', sampleData.teams.length);
         }
 

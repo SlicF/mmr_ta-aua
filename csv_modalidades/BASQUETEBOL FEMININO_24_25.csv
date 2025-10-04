@@ -1,51 +1,51 @@
-Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Grupo
-1,2024-11-12 00:00:00,22h30,PAH,Eng. Física,4,10,EGI,A
-1,2024-11-12 00:00:00,22h30,PAH,Psicologia,2,8,Eng. Biomédica,A
-1,2024-11-12 00:00:00,22h50,PAH,Eng. Mecânica,19,4,Bioquímica,A
-2,2024-11-12 00:00:00,22h50,PAH,EGI,9,5,Psicologia,A
-2,2024-11-12 00:00:00,23h10,PAH,Eng. Biomédica,4,20,Eng. Mecânica,A
-1,2024-11-12 00:00:00,23h10,PAH,Traduçao,5,4,GPT,B
-1,2024-11-12 00:00:00,23h30,PAH,Fisioterapia,21,4,Biologia,B
-2,2024-11-12 00:00:00,23h30,PAH,Bioquímica,6,3,Economia,A
-1,2024-11-12 00:00:00,23h50,PAH,Educaçao Básica,5,6,EET,B
-2,2024-11-12 00:00:00,23h50,PAH,Biologia,15,3,Traduçao,B
-2,2024-11-12 00:00:00,0h10,PAH,GPT,7,6,Educaçao Básica,B
-2,2024-11-12 00:00:00,0h10,PAH,EET,3,5,LRE,B
-3,2025-03-12 00:00:00,19h00,PAH,Psicologia,0,9,Eng. Física,A
-3,2025-03-12 00:00:00,19h00,PAH,Eng. Mecânica,14,13,EGI,A
-3,2025-03-12 00:00:00,19h20,PAH,Economia,2,7,Eng. Biomédica,A
-4,2025-03-12 00:00:00,19h20,PAH,Eng. Física,6,8,Eng. Mecânica,A
-4,2025-03-12 00:00:00,19h40,PAH,Eng. Biomédica,10,8,Bioquímica,A
-4,2025-03-12 00:00:00,19h40,PAH,EGI,18,2,Economia,A
-5,2025-03-12 00:00:00,20h00,PAH,Economia,0,21,Eng. Física,A
-5,2025-03-12 00:00:00,20h00,PAH,Bioquímica,6,14,EGI,A
-3,2025-03-12 00:00:00,20h20,PAH,Educaçao Básica,3,12,Biologia,B
-5,2025-03-12 00:00:00,20h20,PAH,Eng. Mecânica,15,2,Psicologia,A
-3,2025-03-12 00:00:00,20h40,PAH,LRE,7,8,GPT,B
-3,2025-03-12 00:00:00,20h40,PAH,Traduçao,4,17,Fisioterapia,B
-4,2025-03-12 00:00:00,21h00,PAH,Biologia,4,10,LRE,B
-4,2025-03-12 00:00:00,21h00,PAH,Fisioterapia,19,4,Educaçao Básica,B
-4,2025-03-12 00:00:00,21h20,PAH,GPT,6,8,EET,B
-5,2025-03-12 00:00:00,21h20,PAH,LRE,5,21,Fisioterapia,B
-5,2025-03-12 00:00:00,21h40,PAH,EET,8,1,Biologia,B
-5,2025-03-12 00:00:00,21h40,PAH,Educaçao Básica,2,4,Traduçao,B
-6,2025-05-07 00:00:00,19h00,PAH,EGI,19,3,Eng. Biomédica,A
-6,2025-05-07 00:00:00,19h00,PAH,Eng. Física,6,4,Bioquímica,A
-7,2025-05-07 00:00:00,19h20,PAH,Eng. Biomédica,2,0,Eng. Física,A
-6,2025-05-07 00:00:00,19h20,PAH,Psicologia,1,9,Economia,A
-7,2025-05-07 00:00:00,19h40,PAH,Bioquímica,6,5,Psicologia,A
-7,2025-05-07 00:00:00,19h40,PAH,Economia,3,21,Eng. Mecânica,A
-6,2025-05-07 00:00:00,20h00,PAH,Fisioterapia,13,4,EET,B
-6,2025-05-07 00:00:00,20h00,PAH,Biologia,6,14,GPT,B
-6,2025-05-07 00:00:00,20h20,PAH,Traduçao,5,7,LRE,B
-7,2025-05-07 00:00:00,20h20,PAH,GPT,13,21,Fisioterapia,B
-7,2025-05-07 00:00:00,20h40,PAH,LRE,11,5,Educaçao Básica,B
-7,2025-05-07 00:00:00,20h40,PAH,EET,7,3,Traduçao,B
-E1,2025-05-08 00:00:00,20h20,,Eng. Mecânica,21,2,GPT,
-E1,2025-05-08 00:00:00,20h20,,Eng. Biomédica,21,0,LRE,
-E1,2025-05-08 00:00:00,20h40,,EGI,13,4,EET,
-E1,2025-05-08 00:00:00,20h40,,Eng. Física,0,21,Fisioterapia,
-E2,2025-05-09 00:00:00,20h20,,Eng. Mecânica,9,16,Eng. Biomédica,
-E2,2025-05-09 00:00:00,20h20,,EGI,10,6,Fisioterapia,
-E3L,2025-05-09 00:00:00,20h40,,Eng. Mecânica,0,21,Fisioterapia,
-E3,2025-05-09 00:00:00,20h40,,Eng. Biomédica,9,14,EGI,
+Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Grupo,
+1,2024-11-12 00:00:00,22h30,PAH,Eng. Física,4,10,EGI,A,
+1,2024-11-12 00:00:00,22h30,PAH,Psicologia,2,8,Eng. Biomédica,A,
+1,2024-11-12 00:00:00,22h50,PAH,Eng. Mecânica,19,4,Bioquímica,A,
+2,2024-11-12 00:00:00,22h50,PAH,EGI,9,5,Psicologia,A,
+2,2024-11-12 00:00:00,23h10,PAH,Eng. Biomédica,4,20,Eng. Mecânica,A,
+1,2024-11-12 00:00:00,23h10,PAH,Traduçao,5,4,GPT,B,
+1,2024-11-12 00:00:00,23h30,PAH,Fisioterapia,21,4,Biologia,B,
+2,2024-11-12 00:00:00,23h30,PAH,Bioquímica,6,3,Economia,A,
+1,2024-11-12 00:00:00,23h50,PAH,Educaçao Básica,5,6,EET,B,
+2,2024-11-12 00:00:00,23h50,PAH,Biologia,15,3,Traduçao,B,
+2,2024-11-12 00:00:00,0h10,PAH,GPT,7,6,Educaçao Básica,B,
+2,2024-11-12 00:00:00,0h10,PAH,EET,3,5,LRE,B,
+3,2025-03-12 00:00:00,19h00,PAH,Psicologia,0,9,Eng. Física,A,
+3,2025-03-12 00:00:00,19h00,PAH,Eng. Mecânica,14,13,EGI,A,
+3,2025-03-12 00:00:00,19h20,PAH,Economia,2,7,Eng. Biomédica,A,
+4,2025-03-12 00:00:00,19h20,PAH,Eng. Física,6,8,Eng. Mecânica,A,
+4,2025-03-12 00:00:00,19h40,PAH,Eng. Biomédica,10,8,Bioquímica,A,
+4,2025-03-12 00:00:00,19h40,PAH,EGI,18,2,Economia,A,
+5,2025-03-12 00:00:00,20h00,PAH,Economia,0,21,Eng. Física,A,
+5,2025-03-12 00:00:00,20h00,PAH,Bioquímica,6,14,EGI,A,
+3,2025-03-12 00:00:00,20h20,PAH,Educaçao Básica,3,12,Biologia,B,
+5,2025-03-12 00:00:00,20h20,PAH,Eng. Mecânica,15,2,Psicologia,A,
+3,2025-03-12 00:00:00,20h40,PAH,LRE,7,8,GPT,B,
+3,2025-03-12 00:00:00,20h40,PAH,Traduçao,4,17,Fisioterapia,B,
+4,2025-03-12 00:00:00,21h00,PAH,Biologia,4,10,LRE,B,
+4,2025-03-12 00:00:00,21h00,PAH,Fisioterapia,19,4,Educaçao Básica,B,
+4,2025-03-12 00:00:00,21h20,PAH,GPT,6,8,EET,B,
+5,2025-03-12 00:00:00,21h20,PAH,LRE,5,21,Fisioterapia,B,
+5,2025-03-12 00:00:00,21h40,PAH,EET,8,1,Biologia,B,
+5,2025-03-12 00:00:00,21h40,PAH,Educaçao Básica,2,4,Traduçao,B,
+6,2025-05-07 00:00:00,19h00,PAH,EGI,19,3,Eng. Biomédica,A,
+6,2025-05-07 00:00:00,19h00,PAH,Eng. Física,6,4,Bioquímica,A,
+7,2025-05-07 00:00:00,19h20,PAH,Eng. Biomédica,2,0,Eng. Física,A,
+6,2025-05-07 00:00:00,19h20,PAH,Psicologia,1,9,Economia,A,
+7,2025-05-07 00:00:00,19h40,PAH,Bioquímica,6,5,Psicologia,A,
+7,2025-05-07 00:00:00,19h40,PAH,Economia,3,21,Eng. Mecânica,A,
+6,2025-05-07 00:00:00,20h00,PAH,Fisioterapia,13,4,EET,B,
+6,2025-05-07 00:00:00,20h00,PAH,Biologia,6,14,GPT,B,
+6,2025-05-07 00:00:00,20h20,PAH,Traduçao,5,7,LRE,B,
+7,2025-05-07 00:00:00,20h20,PAH,GPT,13,21,Fisioterapia,B,
+7,2025-05-07 00:00:00,20h40,PAH,LRE,11,5,Educaçao Básica,B,
+7,2025-05-07 00:00:00,20h40,PAH,EET,7,3,Traduçao,B,
+E1,2025-05-08 00:00:00,20h20,,Eng. Mecânica,21,2,GPT,,
+E1,2025-05-08 00:00:00,20h20,,Eng. Biomédica,21,0,LRE,,?
+E1,2025-05-08 00:00:00,20h40,,EGI,13,4,EET,,
+E1,2025-05-08 00:00:00,20h40,,Eng. Física,0,21,Fisioterapia,,?
+E2,2025-05-09 00:00:00,20h20,,Eng. Mecânica,9,16,Eng. Biomédica,,
+E2,2025-05-09 00:00:00,20h20,,EGI,10,6,Fisioterapia,,
+E3L,2025-05-09 00:00:00,20h40,,Eng. Mecânica,0,21,Fisioterapia,,?
+E3,2025-05-09 00:00:00,20h40,,Eng. Biomédica,9,14,EGI,,
