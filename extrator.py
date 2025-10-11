@@ -4,6 +4,10 @@ import os
 import re
 import shutil
 import hashlib
+import json
+import logging
+from datetime import datetime
+import requests
 from openpyxl import load_workbook
 from pathlib import Path
 from typing import Dict, Tuple, Optional, List
@@ -54,17 +58,167 @@ def extract_season_from_filename(filename: str) -> str:
     return ""  # Retorna string vazia se não encontrar nada
 
 
+def normalize_results_url(url: str) -> str:
+    """Normaliza links comuns (Google Sheets/Drive, OneDrive/SharePoint) para download direto em XLSX quando possível."""
+    if not url:
+        return url
+
+    try:
+        lower = url.lower()
+
+        # Google Sheets -> exportar como xlsx
+        if "docs.google.com/spreadsheets" in lower:
+            # Formato: https://docs.google.com/spreadsheets/d/<ID>/edit#... -> export?format=xlsx
+            m = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", url)
+            if m:
+                file_id = m.group(1)
+                return f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=xlsx"
+
+        # Google Drive file -> uc?export=download
+        if "drive.google.com" in lower:
+            m = re.search(r"/file/d/([a-zA-Z0-9-_]+)/", url)
+            if m:
+                file_id = m.group(1)
+                return f"https://drive.google.com/uc?export=download&id={file_id}"
+            m = re.search(r"[?&]id=([a-zA-Z0-9-_]+)", url)
+            if m:
+                file_id = m.group(1)
+                return f"https://drive.google.com/uc?export=download&id={file_id}"
+
+        # OneDrive curto 1drv.ms -> ?download=1
+        if "1drv.ms" in lower:
+            return url + ("&download=1" if "?" in url else "?download=1")
+
+        # OneDrive/SharePoint -> adicionar download=1
+        if "sharepoint.com" in lower or "onedrive.live.com" in lower:
+            return url + ("&download=1" if "?" in url else "?download=1")
+
+    except Exception as e:
+        logging.error(f"Erro ao normalizar URL '{url}': {e}", exc_info=True)
+
+    return url
+
+
+def download_results_excel(url: str, dest_dir: Optional[Path] = None) -> Path:
+    """Descarrega o ficheiro de resultados para o diretório atual (ou dado) e devolve o caminho."""
+    dest_dir = dest_dir or Path(".")
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    # Nome base a partir do URL
+    basename = Path(re.sub(r"[?#].*$", "", url)).name or "Resultados_Taca_UA.xlsx"
+    # Garantir extensão .xlsx
+    if not basename.lower().endswith(".xlsx"):
+        basename += ".xlsx"
+
+    target = dest_dir / basename
+
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+    with requests.get(url, headers=headers, stream=True, timeout=60) as r:
+        r.raise_for_status()
+        with open(target, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+    return target
+
+
+def _parse_season_tokens(text: str) -> Optional[Tuple[int, int]]:
+    """Extrai tokens de época do texto, devolvendo (ano_inicial, ano_final) em forma completa (ex.: 2024, 2025)."""
+    if not text:
+        return None
+    m = re.search(r"(\d{2,4})[_-](\d{2})", text)
+    if not m:
+        return None
+    y1, y2 = m.groups()
+    try:
+        y1i = int(y1[-2:])  # usar últimos 2 dígitos se vier 4
+        y2i = int(y2)
+        # Normalizar para base 2000 para ordenação consistente
+        start = 2000 + y1i if y1i < 100 else y1i
+        end = 2000 + y2i if y2i < 100 else y2i
+        # Se o intervalo de dois dígitos cruza o século (ex.: 99_00), somar 100 ao ano final
+        # Regra clara: quando end < start, end += 100
+        if end < start:
+            end += 100
+        return (start, end)
+    except Exception:
+        return None
+
+
+def detect_latest_season_from_sheet_names(sheet_names: List[str]) -> Optional[str]:
+    """Deteta a época mais recente com base nos nomes das folhas (ex.: '... 24_25')."""
+    best: Optional[Tuple[int, int]] = None
+    for name in sheet_names:
+        tokens = _parse_season_tokens(str(name))
+        if tokens:
+            if best is None or tokens > best:
+                best = tokens
+    if not best:
+        return None
+    # Voltar a formato curto 24_25
+    y1_short = str(best[0])[-2:]
+    y2_short = str(best[1])[-2:]
+    return f"{y1_short}_{y2_short}"
+
+
+def choose_sheets_for_season(
+    sheet_names: List[str], season: Optional[str]
+) -> List[str]:
+    """Filtra folhas a processar pela época. Se nenhuma época for encontrada, devolve todas."""
+    if not season:
+        # Ver se pelo menos alguma folha tem época; se sim, escolher a mais recente
+        detected = detect_latest_season_from_sheet_names(sheet_names)
+        if not detected:
+            return list(sheet_names)
+        season = detected
+
+    # Usar regex com word boundaries para evitar falsos positivos
+    pattern = re.compile(r"\b" + re.escape(season) + r"\b", re.IGNORECASE)
+    selected = [s for s in sheet_names if pattern.search(str(s))]
+    # Se não encontrar nenhuma com a época explícita, processar todas (compatibilidade)
+    return selected if selected else list(sheet_names)
+
+
+def current_season_token(today: Optional[datetime] = None) -> str:
+    """Calcula a época atual no formato 'YY_YY' com base na data atual.
+
+    Regra: épocas começam em agosto. De ago a dez -> ano_atual_ano+1; de jan a jul -> ano-1_ano.
+    """
+    d = today or datetime.today()
+    year = d.year
+    month = d.month
+    if month >= 8:
+        y1 = year % 100
+        y2 = (year + 1) % 100
+    else:
+        y1 = (year - 1) % 100
+        y2 = year % 100
+    return f"{y1:02d}_{y2:02d}"
+
+
 class ExcelProcessor:
     """Classe para processar ficheiros Excel de resultados desportivos."""
 
-    def __init__(self, file_path: str, output_dir: str = "csv_modalidades"):
+    def __init__(
+        self,
+        file_path: str,
+        output_dir: str = "csv_modalidades",
+        season_override: Optional[str] = None,
+        sheets_to_process: Optional[List[str]] = None,
+    ):
         self.file_path = Path(file_path)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
         self.xls = pd.ExcelFile(file_path)
 
         # Extrai a época do nome do arquivo
-        self.season = extract_season_from_filename(str(self.file_path))
+        self.season = season_override or extract_season_from_filename(
+            str(self.file_path)
+        )
+
+        # Lista de folhas alvo (opcional)
+        self._sheets_to_process = sheets_to_process
 
         # Padrões regex compilados para melhor performance
         self.divisao_pattern = re.compile(r"(\d)ª DIVISÃO")
@@ -154,16 +308,20 @@ class ExcelProcessor:
                     equipa_faltou = equipas_faltaram[0]
                     equipa1 = row["Equipa 1"]
                     equipa2 = row["Equipa 2"]
+                    # usar o índice diretamente
+                    idx_i = idx
 
                     # Verifica qual equipa faltou e aplica o resultado
                     if equipa_faltou == equipa1:
                         # Equipa 1 faltou, Equipa 2 ganha
-                        df.at[idx, "Golos 1"] = golos_perdedor
-                        df.at[idx, "Golos 2"] = golos_vencedor
+                        mask = df.index == idx_i
+                        df.loc[mask, "Golos 1"] = golos_perdedor
+                        df.loc[mask, "Golos 2"] = golos_vencedor
                     elif equipa_faltou == equipa2:
                         # Equipa 2 faltou, Equipa 1 ganha
-                        df.at[idx, "Golos 1"] = golos_vencedor
-                        df.at[idx, "Golos 2"] = golos_perdedor
+                        mask = df.index == idx_i
+                        df.loc[mask, "Golos 1"] = golos_vencedor
+                        df.loc[mask, "Golos 2"] = golos_perdedor
 
         return df
 
@@ -322,8 +480,97 @@ class ExcelProcessor:
             except Exception:
                 return pd.Timestamp.max
 
+        # Coluna auxiliar para data/hora
         df["DataHoraSort"] = df.apply(parse_data_hora, axis=1)
-        df = df.sort_values("DataHoraSort").drop(columns=["DataHoraSort"])
+
+        # Coluna auxiliar para ordenar por jornada quando não há data
+        def parse_jornada_sort(val):
+            if pd.isna(val):
+                return 10**9
+            if isinstance(val, (int, float)):
+                try:
+                    return int(val)
+                except Exception:
+                    return 10**9
+            if isinstance(val, str):
+                s = val.strip()
+                m = re.match(r"^(\d+)", s)
+                if m:
+                    try:
+                        return int(m.group(1))
+                    except Exception:
+                        return 10**9
+                # Jornadas tipo 'E...' (eliminatórias) vão para o fim do grupo sem data
+                return 10**9
+            return 10**9
+
+        df["JornadaSort"] = df["Jornada"].apply(parse_jornada_sort)
+
+        # Colunas auxiliares para Divisão e Grupo (caso existam)
+        def parse_divisao_sort(val):
+            if pd.isna(val):
+                return 10**6
+            if isinstance(val, (int, float)):
+                try:
+                    return int(val)
+                except Exception:
+                    return 10**6
+            if isinstance(val, str):
+                m = re.search(r"(\d+)", val)
+                if m:
+                    try:
+                        return int(m.group(1))
+                    except Exception:
+                        return 10**6
+            return 10**6
+
+        def parse_grupo_sort(val):
+            if pd.isna(val):
+                return 10**6
+            # Aceita letras (A->1, B->2, ...) ou números diretamente
+            if isinstance(val, (int, float)):
+                try:
+                    return int(val)
+                except Exception:
+                    return 10**6
+            if isinstance(val, str) and val:
+                v = val.strip().upper()
+                # Se começar por letra
+                if v[0].isalpha():
+                    return ord(v[0]) - ord("A") + 1
+                # Se contiver número
+                m = re.search(r"(\d+)", v)
+                if m:
+                    try:
+                        return int(m.group(1))
+                    except Exception:
+                        return 10**6
+            return 10**6
+
+        df["DivisaoSort"] = (
+            df["Divisão"].apply(parse_divisao_sort)
+            if "Divisão" in df.columns
+            else 10**6
+        )
+        df["GrupoSort"] = (
+            df["Grupo"].apply(parse_grupo_sort) if "Grupo" in df.columns else 10**6
+        )
+
+        # Ordenar por data/hora, depois jornada, depois Divisão e Grupo, e por fim nomes de equipas
+        df = df.sort_values(
+            [
+                "DataHoraSort",
+                "JornadaSort",
+                "DivisaoSort",
+                "GrupoSort",
+                "Equipa 1",
+                "Equipa 2",
+            ],
+            ascending=[True, True, True, True, True, True],
+        )
+        df = df.drop(
+            columns=["DataHoraSort", "JornadaSort", "DivisaoSort", "GrupoSort"]
+        )
 
         return df
 
@@ -341,22 +588,13 @@ class ExcelProcessor:
         ]
         df = df.dropna(subset=colunas_principais, how="all")
 
-        # Verifica se há faltas de comparência e remove a coluna se estiver vazia
-        if "Falta de Comparência" in df.columns:
-            # Verifica se a coluna tem algum conteúdo (não vazia e não apenas strings vazias)
-            tem_faltas = (
-                df["Falta de Comparência"].notna().any()
-                and (df["Falta de Comparência"] != "").any()
-            )
+        # Garantir coluna "Falta de Comparência" presente e no fim, mesmo vazia
+        if "Falta de Comparência" not in df.columns:
+            df["Falta de Comparência"] = ""
 
-            if tem_faltas:
-                # Move "Falta de Comparência" para o fim
-                colunas = [col for col in df.columns if col != "Falta de Comparência"]
-                colunas.append("Falta de Comparência")
-                df = df[colunas]
-            else:
-                # Remove a coluna se não houver faltas
-                df = df.drop(columns=["Falta de Comparência"])
+        colunas = [col for col in df.columns if col != "Falta de Comparência"]
+        colunas.append("Falta de Comparência")
+        df = df[colunas]
 
         return df
 
@@ -411,6 +649,8 @@ class ExcelProcessor:
         df = self.apply_default_scores(df, sheet_name)
         df = self.finalize_dataframe(df)
 
+        # Não adicionar coluna de Época nos CSVs
+
         # Salva resultado
         if self.season:
             filename = f"{sheet_name}_{self.season}.csv"
@@ -426,7 +666,10 @@ class ExcelProcessor:
     def process_all_sheets(self):
         """Processa todas as folhas do Excel."""
         processed_count = 0
-        for sheet_name in self.xls.sheet_names:
+        target_sheets = (
+            self._sheets_to_process if self._sheets_to_process else self.xls.sheet_names
+        )
+        for sheet_name in target_sheets:
             if self.process_sheet(str(sheet_name)):
                 processed_count += 1
 
@@ -435,33 +678,123 @@ class ExcelProcessor:
 
 def main():
     """Função principal."""
-    file_path = "Resultados Taça UA 24_25.xlsx"
-    backup_file = "backup_Resultados Taça UA 24_25.xlsx"
+    # 1) Ler config/env para obter a URL do documento de resultados
+    config_url: Optional[str] = None
+    config_path = Path("config.json")
+    if config_path.exists():
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                config_url = cfg.get("results_url")
+        except Exception as e:
+            print(f"Aviso: Não foi possível ler config.json: {e}")
 
-    # Verificar se o arquivo Excel existe
-    if not os.path.exists(file_path):
-        print(f"Erro: Arquivo '{file_path}' não encontrado!")
-        return
+    # Variável de ambiente como fallback
+    env_url = os.environ.get("RESULTS_URL")
+    if not config_url and env_url:
+        config_url = env_url
 
-    # Verificar se o arquivo Excel mudou desde a última execução
+    downloaded_file: Optional[Path] = None
+    season_detected: Optional[str] = None
+
+    # 2) Se houver URL, descarregar o ficheiro atualizado
+    if config_url:
+        try:
+            url = normalize_results_url(config_url)
+            downloaded_file = download_results_excel(url)
+            print(f"Documento descarregado para: {downloaded_file}")
+
+            # Abrir para detetar época mais recente a partir das folhas
+            xls_temp = pd.ExcelFile(str(downloaded_file))
+            season_detected = detect_latest_season_from_sheet_names(
+                list(map(str, xls_temp.sheet_names))
+            )
+            # Fechar o handler do Excel antes de renomear em Windows
+            try:
+                xls_temp.close()
+            except Exception:
+                pass
+
+            # Se detetou época, renomear o ficheiro local com a época
+            if season_detected:
+                target_name = f"Resultados Taça UA {season_detected}.xlsx"
+            else:
+                # fallback se não houver época nas folhas -> tentar a partir do nome
+                extracted = extract_season_from_filename(downloaded_file.name)
+                if not extracted:
+                    extracted = current_season_token()
+                target_name = f"Resultados Taça UA {extracted}.xlsx"
+
+            target_path = downloaded_file.parent / target_name
+            if downloaded_file.name != target_name:
+                try:
+                    # Substitui se já existir
+                    if target_path.exists():
+                        target_path.unlink()
+                    downloaded_file.rename(target_path)
+                    downloaded_file = target_path
+                except Exception as e:
+                    print(
+                        f"Aviso: Não foi possível renomear o ficheiro descarregado: {e}"
+                    )
+
+        except Exception as e:
+            print(f"Erro ao descarregar o documento: {e}")
+            downloaded_file = None
+
+    # 3) Determinar o caminho do ficheiro a processar
+    if downloaded_file and downloaded_file.exists():
+        file_path = str(downloaded_file)
+    else:
+        # fallback: usar ficheiro local existente (compatibilidade antiga)
+        # tentar usar padrão com época corrente
+        default_local = f"Resultados Taça UA {current_season_token()}.xlsx"
+        if not os.path.exists(default_local):
+            print("Erro: Nenhum ficheiro local encontrado e URL não disponível/valida.")
+            print(
+                "Defina 'results_url' em config.json ou a variável de ambiente RESULTS_URL."
+            )
+            return
+        file_path = default_local
+
+    # 4) Preparar backup e verificação de mudanças
+    # Tenta inferir época para nome do backup
+    season_for_backup = (
+        season_detected
+        or extract_season_from_filename(Path(file_path).name)
+        or "latest"
+    )
+    backup_file = f"backup_Resultados Taça UA {season_for_backup}.xlsx"
+
     if os.path.exists(backup_file) and files_are_identical(file_path, backup_file):
         print(
             "O arquivo Excel não mudou desde a última execução. Nenhum processamento necessário."
         )
         return
 
-    # Se chegou aqui, o arquivo mudou ou é a primeira execução
     print("Arquivo Excel mudou ou primeira execução. Processando dados...")
 
-    # Criar cópia de backup do arquivo Excel
     try:
         shutil.copy2(file_path, backup_file)
         print(f"Backup criado: {backup_file}")
     except Exception as e:
         print(f"Aviso: Não foi possível criar backup: {e}")
 
-    # Processar o arquivo
-    processor = ExcelProcessor(file_path)
+    # 5) Selecionar folhas a processar com base na época
+    xls_all = pd.ExcelFile(file_path)
+    if not season_detected:
+        season_detected = detect_latest_season_from_sheet_names(
+            list(map(str, xls_all.sheet_names))
+        )
+
+    sheets_to_process = choose_sheets_for_season(
+        list(map(str, xls_all.sheet_names)), season_detected
+    )
+
+    # 6) Processar o ficheiro
+    processor = ExcelProcessor(
+        file_path, season_override=season_detected, sheets_to_process=sheets_to_process
+    )
     processor.process_all_sheets()
 
 
