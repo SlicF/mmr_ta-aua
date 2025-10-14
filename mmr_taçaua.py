@@ -1,9 +1,11 @@
 import math
 import pandas as pd
 import os
+import re
 from enum import Enum
 import logging
 import unicodedata
+import json
 
 # Configuração de logging
 logging.basicConfig(
@@ -14,10 +16,192 @@ logging.basicConfig(
 logger = logging.getLogger("mmr_tacaua")
 
 
+# Carregar configuração de cursos do ficheiro JSON
+def load_courses_config(config_path="config_cursos.json"):
+    """
+    Carrega a configuração dos cursos do ficheiro JSON
+
+    Args:
+        config_path: Caminho para o ficheiro de configuração JSON
+
+    Returns:
+        Dict com configuração dos cursos
+    """
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            logger.info(
+                f"Configuração de cursos carregada: {len(data.get('courses', {}))} cursos"
+            )
+            return data.get("courses", {})
+    except FileNotFoundError:
+        logger.error(f"Ficheiro {config_path} não encontrado!")
+        return {}
+    except json.JSONDecodeError as e:
+        logger.error(f"Erro ao ler JSON: {e}")
+        return {}
+
+
+# Carregar configuração global
+COURSES_CONFIG = load_courses_config()
+
+
+def is_playoff_jornada(jornada_value) -> bool:
+    """Determina se a jornada é um jogo de playoff (E*, MP*, LP*)."""
+    try:
+        s = str(jornada_value).strip().upper()
+    except Exception:
+        return False
+    if not s:
+        return False
+    return s.startswith("E") or s.startswith("MP") or s.startswith("LP")
+
+
+def detect_latest_season_from_csv_files(input_dir="csv_modalidades"):
+    """
+    Detecta a época mais recente com base nos nomes dos arquivos CSV
+
+    Args:
+        input_dir: Diretório contendo os arquivos CSV
+
+    Returns:
+        String da época mais recente (ex: "25_26") ou None se não encontrar
+    """
+    season_pattern = re.compile(r"(\d{2})_(\d{2})\.csv$")
+    seasons = []
+
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".csv"):
+            match = season_pattern.search(filename)
+            if match:
+                y1, y2 = match.groups()
+                # Converter para anos completos para ordenação
+                year1 = 2000 + int(y1)
+                year2 = 2000 + int(y2)
+                if year2 < year1:  # Cruza século
+                    year2 += 100
+                seasons.append((year1, year2, f"{y1}_{y2}"))
+
+    if not seasons:
+        logger.warning("Nenhuma época detectada nos arquivos CSV")
+        return None
+
+    # Retornar a época mais recente
+    latest = max(seasons, key=lambda x: (x[0], x[1]))
+    logger.info(f"Época mais recente detectada: {latest[2]}")
+    return latest[2]
+
+
+def create_team_name_mapping():
+    """
+    Cria mapeamento de nomes de equipas para lidar com mudanças e casos especiais.
+    Usa o ficheiro config_cursos.json como fonte de verdade para nomes dos cursos.
+
+    Returns:
+        Dict com mapeamentos de nomes antigos -> novos
+    """
+    mappings = {}
+
+    # Gerar mapeamentos automaticamente a partir do JSON
+    # Isto garante que todas as variantes apontam para o mesmo nome canónico
+    if COURSES_CONFIG:
+        # Agrupar cursos pelo displayName (nome canónico)
+        canonical_names = {}
+        for course_key, course_data in COURSES_CONFIG.items():
+            display_name = course_data.get("displayName", course_key)
+            if display_name not in canonical_names:
+                canonical_names[display_name] = []
+            canonical_names[display_name].append(course_key)
+
+        # Criar mapeamentos: todas as variantes apontam para a primeira entrada (nome preferido)
+        for display_name, variants in canonical_names.items():
+            # Ordenar para garantir consistência (nomes completos antes de abreviaturas)
+            variants_sorted = sorted(variants, key=lambda x: (len(x), x), reverse=True)
+            canonical = variants_sorted[
+                0
+            ]  # Nome mais longo (geralmente o mais completo)
+
+            for variant in variants:
+                if variant != canonical:
+                    mappings[variant] = canonical
+
+    # Casos específicos adicionais que podem não estar no JSON
+    additional_mappings = {
+        # Variações de acentos
+        "Administracao Publica": "Administração Pública",
+        "Adminstração Pública": "Administração Pública",
+        "Adminstracao Publica": "Administração Pública",
+        "Educacao Basica": "Educação Básica",
+        "Gestao Comercial": "Gestão Comercial",
+        "Gestao": "Gestão",
+        "Gestao Pública": "Gestão Pública",
+        # Variações de ortografia
+        "Eng.Materias": "Eng. Materiais",
+        "Edcucação Básica": "Educação Básica",
+        "Eng. Compotacional": "Eng. Computacional",
+        # Siglas para nomes completos
+        "Engenharia Informática": "EI",
+        "Engenharia Informatica": "EI",
+        "Eng. Informatica": "EI",
+        "AUTOMAÇÃO E SISTEMAS DE PRODUÇÃO": "ASP",
+        # Erros conhecidos
+        "EGO": "EGI",  # Erro tipográfico
+    }
+
+    # Adicionar mapeamentos adicionais (não sobrescrever os do JSON)
+    for old_name, new_name in additional_mappings.items():
+        if old_name not in mappings:
+            mappings[old_name] = new_name
+
+    logger.info(f"Mapeamento de equipas criado com {len(mappings)} entradas")
+    return mappings
+
+
+def handle_special_team_transitions(old_teams, sport_name):
+    """
+    Lida com transições especiais de equipas entre épocas
+
+    Args:
+        old_teams: Dict com ELOs das equipas da época anterior
+        sport_name: Nome do desporto (para detectar casos específicos)
+
+    Returns:
+        Dict com ELOs ajustados considerando transições especiais
+    """
+    adjusted_teams = old_teams.copy()
+    logger.info(f"Processando transições especiais para {sport_name}")
+    logger.info(f"Equipas disponíveis: {list(old_teams.keys())}")
+
+    # Caso especial: Contabilidade -> Marketing no andebol misto
+    if "andebol" in sport_name.lower() and "misto" in sport_name.lower():
+        logger.info(
+            "Detectado andebol misto - verificando transição Contabilidade->Marketing"
+        )
+        if "Contabilidade" in adjusted_teams:
+            logger.info(
+                f"Contabilidade encontrada com ELO: {adjusted_teams['Contabilidade']}"
+            )
+            if "Marketing" not in adjusted_teams:
+                # Transferir ELO de Contabilidade para Marketing
+                adjusted_teams["Marketing"] = adjusted_teams["Contabilidade"]
+                logger.info(
+                    f"Transferido ELO de Contabilidade para Marketing no andebol misto: {adjusted_teams['Contabilidade']}"
+                )
+                # Remover Contabilidade apenas se Marketing foi adicionado
+                del adjusted_teams["Contabilidade"]
+                logger.info("Contabilidade removida dos ELOs após transferência")
+            else:
+                logger.info("Marketing já existe nos ELOs - transição não aplicada")
+        else:
+            logger.info("Contabilidade não encontrada nos ELOs da época anterior")
+
+    return adjusted_teams
+
+
 def normalize_team_name(team_name):
     """
     Normaliza nomes de equipas para evitar duplicações por variações de grafia.
-    Similar à lógica implementada no frontend JavaScript.
+    Inclui mapeamentos para mudanças de nomes entre épocas.
 
     Args:
         team_name: Nome da equipa a normalizar
@@ -34,6 +218,23 @@ def normalize_team_name(team_name):
     # Se ficou vazio após strip, retornar None
     if not normalized:
         return None
+
+    # Filtrar placeholders de playoffs (ex: "1º Class. 1ª Div.", "Vencedor QF1", etc.)
+    placeholder_patterns = [
+        r"^\d+º\s+Class\.",  # Padrões como "1º Class.", "2º Class."
+        r"^Vencedor\s+",  # Padrões como "Vencedor QF1"
+        r"^Vencido\s+",  # Padrões como "Vencido MF1"
+        r"^\d+º\s+Grupo\s+",  # Padrões como "1º Grupo A"
+    ]
+
+    for pattern in placeholder_patterns:
+        if re.match(pattern, normalized):
+            return None
+
+    # Aplicar mapeamentos de nomes
+    team_mappings = create_team_name_mapping()
+    if normalized in team_mappings:
+        return team_mappings[normalized]
 
     # Casos específicos conhecidos para Tradução
     if normalized in ["Traduçao", "TRADUÇÃO", "TRADUÇAO"]:
@@ -55,7 +256,7 @@ def normalize_team_name(team_name):
 
     # Casos específicos para Eng. Informática (remover espaços extras no final)
     if normalized.startswith("Eng. Informática") and normalized.endswith(" "):
-        return "Eng. Informática"
+        return "EI"  # Usar a sigla mapeada
 
     # Normalização para outros cursos de engenharia (remover espaços extras)
     eng_courses = [
@@ -74,7 +275,7 @@ def normalize_team_name(team_name):
 
     for course in eng_courses:
         if normalized.startswith(course) and normalized.endswith(" "):
-            return course
+            return course.rstrip()
 
     # Normalização geral para outros nomes (remover espaços extras no final)
     if normalized.endswith(" ") and len(normalized) > 1:
@@ -245,10 +446,8 @@ class StandingsCalculator:
 
     def calculate_standings(self):
         """Calcula classificação considerando divisões e grupos"""
-        # Filtrar apenas jogos da fase de grupos
-        group_phase_mask = (
-            ~self.df["Jornada"].astype(str).str.upper().str.startswith("E")
-        )
+        # Filtrar apenas jogos da fase de grupos (exclui E*, MP*, LP*)
+        group_phase_mask = ~self.df["Jornada"].apply(is_playoff_jornada)
         df_group = self.df[group_phase_mask].copy()
 
         # Se não houver divisões nem grupos, criar uma classificação única
@@ -265,10 +464,15 @@ class StandingsCalculator:
         """Cria uma coluna-chave para agrupar as equipas"""
         if self.div_col and self.group_col:
             # Usar combinação divisão + grupo
+            # Converter divisão para int apenas quando não for NaN
             df_group["Group_Key"] = (
-                df_group[self.div_col].astype(int).astype(str)
+                df_group[self.div_col]
+                .fillna(-1)
+                .astype(int)
+                .astype(str)
+                .replace("-1", "")
                 + "_"
-                + df_group[self.group_col].astype(str)
+                + df_group[self.group_col].fillna("").astype(str)
             )
             return "Group_Key"
         elif self.group_col:
@@ -278,8 +482,13 @@ class StandingsCalculator:
             # Caso tenha divisão, mas não tenha grupos explícitos
             if self.div_col:
                 # Criar grupos inferidos por divisão
+                # Converter divisão para int apenas quando não for NaN
                 df_group["Inferred_Group"] = (
-                    df_group[self.div_col].astype(int).astype(str)
+                    df_group[self.div_col]
+                    .fillna(-1)
+                    .astype(int)
+                    .astype(str)
+                    .replace("-1", "")
                 )
                 logger.info(
                     f"Grupos inferidos a partir da coluna de divisão: {self.div_col}"
@@ -860,8 +1069,8 @@ class InterGroupAdjuster:
         if not group_col:
             return {}  # Sem grupos, sem ajustes
 
-        # Filtrar jogos de playoffs e fase de grupos
-        playoffs_mask = self.df["Jornada"].astype(str).str.upper().str.startswith("E")
+        # Filtrar jogos de playoffs e fase de grupos (considera E*, MP*, LP*)
+        playoffs_mask = self.df["Jornada"].apply(is_playoff_jornada)
         df_playoffs = self.df[playoffs_mask]
 
         if len(df_playoffs) == 0:
@@ -1087,6 +1296,56 @@ class EloRatingSystem:
     def __init__(self):
         """Inicializa o sistema de ratings ELO"""
         self.k_base = 100  # Fator K base
+        self.previous_ratings = {}  # ELOs da época anterior
+
+    def load_previous_ratings(self, ratings_dict):
+        """
+        Carrega ratings da época anterior para preservar ELOs entre épocas
+
+        Args:
+            ratings_dict: Dict com {nome_equipa: elo_rating}
+        """
+        self.previous_ratings = ratings_dict.copy()
+        logger.info(
+            f"Carregados {len(self.previous_ratings)} ratings da época anterior"
+        )
+
+    def get_initial_rating(self, team_name, division=None):
+        """
+        Obtém rating inicial para uma equipa, usando ELO da época anterior se disponível
+
+        Args:
+            team_name: Nome da equipa
+
+        Returns:
+            Rating inicial da equipa
+        """
+        # Normalizar nome da equipa
+        normalized_name = normalize_team_name(team_name)
+
+        # Verificar se tem rating da época anterior
+        if normalized_name in self.previous_ratings:
+            rating = self.previous_ratings[normalized_name]
+            logger.info(
+                f"Usando ELO da época anterior para {normalized_name}: {rating}"
+            )
+            return rating
+
+        # Rating padrão para equipas novas baseado na divisão (se disponível)
+        if division is not None:
+            if division == 1:
+                default_rating = 1000
+            elif division == 2:
+                default_rating = 500
+            else:
+                default_rating = 750  # Default para outras divisões
+        else:
+            # Se não temos divisão, usar 750 (padrão para modalidades sem divisões)
+            default_rating = 750
+        logger.info(
+            f"Usando ELO padrão para equipa nova {normalized_name}: {default_rating} (divisão: {division})"
+        )
+        return default_rating
 
     def calculate_season_phase_multiplier(
         self,
@@ -1220,39 +1479,62 @@ class EloRatingSystem:
 
         if div_col:
             # Inicializar equipas apenas nas linhas da fase de grupos
-            group_phase_mask = (
-                ~df["Jornada"].astype(str).str.upper().str.startswith("E")
-            )
+            group_phase_mask = ~df["Jornada"].apply(is_playoff_jornada)
             df_group = df[group_phase_mask]
 
             # Processar equipa 1
             teams1 = df_group.dropna(subset=["Equipa 1"])
             for _, row in teams1.iterrows():
                 team = normalize_team_name(row["Equipa 1"])
-                if team not in teams:
+                if team and team not in teams:  # Ignorar strings vazias
                     div = row.get(div_col)
-                    teams[team] = self._get_initial_rating(div)
+                    teams[team] = self._get_division_adjusted_rating(team, div)
 
             # Processar equipa 2
             teams2 = df_group.dropna(subset=["Equipa 2"])
             for _, row in teams2.iterrows():
                 team = normalize_team_name(row["Equipa 2"])
-                if team not in teams:
+                if team and team not in teams:  # Ignorar strings vazias
                     div = row.get(div_col)
-                    teams[team] = self._get_initial_rating(div)
+                    teams[team] = self._get_division_adjusted_rating(team, div)
         else:
-            # Sem divisões, inicializar todas as equipas com rating 750
+            # Sem divisões, inicializar apenas equipas da fase de grupos
+            group_phase_mask = ~df["Jornada"].apply(is_playoff_jornada)
+            df_group = df[group_phase_mask]
+
             for team_col in ["Equipa 1", "Equipa 2"]:
-                unique_teams = df[team_col].dropna().unique()
+                unique_teams = df_group[team_col].dropna().unique()
                 for team in unique_teams:
                     normalized_team = normalize_team_name(team)
-                    if normalized_team not in teams:
-                        teams[normalized_team] = 750
+                    if (
+                        normalized_team and normalized_team not in teams
+                    ):  # Ignorar strings vazias
+                        teams[normalized_team] = self.get_initial_rating(
+                            normalized_team
+                        )
 
         return teams
 
+    def _get_division_adjusted_rating(self, team_name, division):
+        """
+        Obtém rating inicial ajustado por divisão, considerando ELOs da época anterior
+
+        Args:
+            team_name: Nome da equipa
+            division: Divisão da equipa (1, 2, etc.)
+
+        Returns:
+            Rating inicial ajustado
+        """
+        # Primeiro verificar se tem rating da época anterior
+        initial_rating = self.get_initial_rating(team_name, division)
+
+        # Se não tem rating da época anterior (equipa nova), o get_initial_rating já retorna
+        # o valor correto baseado na divisão
+        return initial_rating
+
     def _get_initial_rating(self, division):
-        """Determina o rating inicial baseado na divisão"""
+        """Determina o rating inicial baseado na divisão (método legado)"""
         if division == 1:
             return 1000
         elif division == 2:
@@ -1270,7 +1552,7 @@ class EloRatingSystem:
         absence_count = {team: 0 for team in teams}
 
         # Calcular total de jogos da fase de grupos por equipa
-        is_group_phase = ~df["Jornada"].astype(str).str.upper().str.startswith("E")
+        is_group_phase = ~df["Jornada"].apply(is_playoff_jornada)
         total_group_games_per_team = self._count_team_games(df, teams, is_group_phase)
 
         # Identificar parada de inverno
@@ -1450,7 +1732,8 @@ class EloRatingSystem:
         team1 = normalize_team_name(row["Equipa 1"])
         team2 = normalize_team_name(row["Equipa 2"])
         jornada = str(row.get("Jornada", ""))
-        is_elimination = jornada.upper().startswith("E")
+        # Tratar todas jornadas de playoffs (E*, MP*, LP*) como eliminatórias
+        is_elimination = is_playoff_jornada(jornada)
 
         # Verificar se está após a parada de inverno
         after_winter_break1 = (
@@ -1697,7 +1980,118 @@ class TournamentProcessor:
         os.makedirs(output_dir, exist_ok=True)
 
     def process_all_tournaments(self):
-        """Processa todos os arquivos CSV na pasta de entrada"""
+        """Processa todos os arquivos CSV da época mais recente"""
+        # Detectar época mais recente
+        latest_season = detect_latest_season_from_csv_files(self.input_dir)
+        if not latest_season:
+            logger.error("Nenhuma época detectada. Processando todos os arquivos.")
+            return self._process_all_files()
+
+        logger.info(f"Processando apenas arquivos da época {latest_season}")
+
+        # Filtrar apenas arquivos da época mais recente
+        season_pattern = re.compile(rf".*_{re.escape(latest_season)}\.csv$")
+        current_season_files = []
+
+        for filename in sorted(os.listdir(self.input_dir)):
+            if season_pattern.match(filename):
+                current_season_files.append(filename)
+
+        if not current_season_files:
+            logger.warning(f"Nenhum arquivo encontrado para a época {latest_season}")
+            return [], []
+
+        logger.info(
+            f"Encontrados {len(current_season_files)} arquivos para a época {latest_season}"
+        )
+
+        # Carregar ELOs da época anterior se existirem
+        previous_season_elos = self._load_previous_season_elos(latest_season)
+
+        processed_files = []
+        failed_files = []
+
+        for filename in current_season_files:
+            filepath = os.path.join(self.input_dir, filename)
+            logger.info(f"A processar arquivo: {filename}")
+
+            try:
+                # Tentar diferentes codificações
+                encodings = ["utf-8", "latin1", "cp1252", "iso-8859-1"]
+                df = None
+
+                for encoding in encodings:
+                    try:
+                        df = pd.read_csv(filepath, encoding=encoding)
+                        logger.info(
+                            f"Arquivo carregado com sucesso usando codificação {encoding}. Shape: {df.shape}"
+                        )
+                        break
+                    except UnicodeDecodeError:
+                        continue
+
+                if df is None:
+                    logger.error(
+                        f"Não foi possível decodificar o arquivo {filename} com nenhuma codificação."
+                    )
+                    failed_files.append((filename, "Problema de codificação"))
+                    continue
+
+                # Limpar nomes de colunas para remover caracteres especiais
+                df.columns = [
+                    col.replace("ç", "c").replace("ã", "a").replace("é", "e")
+                    for col in df.columns
+                ]
+
+                # Aplicar ELOs da época anterior se disponíveis
+                sport_name = self._extract_sport_from_filename(filename)
+                logger.info(f"Verificando ELOs anteriores para {sport_name}")
+                logger.info(f"ELOs disponíveis: {list(previous_season_elos.keys())}")
+                if sport_name in previous_season_elos:
+                    logger.info(f"ELOs encontrados para {sport_name}")
+
+                    # Aplicar transições especiais de equipas
+                    adjusted_elos = handle_special_team_transitions(
+                        previous_season_elos[sport_name], sport_name
+                    )
+
+                    self.elo_system.load_previous_ratings(adjusted_elos)
+                    logger.info(
+                        f"Carregados ELOs da época anterior para {sport_name}: {len(adjusted_elos)} equipas"
+                    )
+                else:
+                    logger.info(f"Nenhum ELO anterior encontrado para {sport_name}")
+
+                # Processar o torneio
+                teams, elo_history, detailed_rows, real_standings = (
+                    self.elo_system.process_tournament(df, filename)
+                )
+
+                # Salvar resultados
+                self._save_tournament_results(
+                    filename, teams, elo_history, detailed_rows, real_standings
+                )
+
+                logger.info(f"Arquivo {filename} processado com sucesso")
+                processed_files.append(filename)
+
+            except Exception as e:
+                logger.exception(f"Erro ao processar {filename}: {str(e)}")
+                failed_files.append((filename, str(e)))
+
+        # Resumo final
+        logger.info(
+            f"Processamento da época {latest_season} concluído. Arquivos processados: {len(processed_files)}"
+        )
+        if failed_files:
+            logger.warning(f"Arquivos com falha: {len(failed_files)}")
+            for failed_file, error in failed_files:
+                logger.warning(f"  - {failed_file}: {error}")
+
+        return processed_files, failed_files
+
+    def _process_all_files(self):
+        """Processa todos os arquivos CSV (fallback para quando não há época detectada)"""
         processed_files = []
         failed_files = []
 
@@ -1764,6 +2158,118 @@ class TournamentProcessor:
 
         return processed_files, failed_files
 
+    def _load_previous_season_elos(self, current_season):
+        """
+        Carrega ELOs da época anterior para preservar ratings entre épocas
+
+        Args:
+            current_season: Época atual (ex: "25_26")
+
+        Returns:
+            Dict com ELOs por modalidade da época anterior
+        """
+        # Calcular época anterior
+        try:
+            y1, y2 = current_season.split("_")
+            prev_y1 = str(int(y1) - 1).zfill(2)
+            prev_y2 = str(int(y2) - 1).zfill(2)
+            previous_season = f"{prev_y1}_{prev_y2}"
+        except (ValueError, IndexError):
+            logger.warning(
+                f"Não foi possível calcular época anterior para {current_season}"
+            )
+            return {}
+
+        logger.info(f"Procurando ELOs da época anterior: {previous_season}")
+
+        previous_elos = {}
+        elo_pattern = re.compile(rf"elo_.*_{re.escape(previous_season)}\.csv$")
+
+        for filename in os.listdir(self.output_dir):
+            if elo_pattern.match(filename):
+                try:
+                    filepath = os.path.join(self.output_dir, filename)
+                    df = pd.read_csv(filepath, index_col=0)
+
+                    # Extrair modalidade do nome do arquivo
+                    sport_name = self._extract_sport_from_filename(filename)
+                    # Remover prefixo "elo_" se presente
+                    if sport_name.startswith("elo_"):
+                        sport_name = sport_name[4:]
+
+                    # Usar a última linha (ELOs finais)
+                    if not df.empty:
+                        final_elos = df.iloc[-1].to_dict()
+
+                        # Incluir também o valor do índice (primeira coluna do CSV original)
+                        if df.index.name or len(df.index) > 0:
+                            # O nome da primeira coluna está no nome do índice ou podemos inferir
+                            first_col_name = (
+                                df.index.name if df.index.name else "index_col"
+                            )
+                            if hasattr(df.index, "name") and not df.index.name:
+                                # Se não há nome explícito, tentar obter do CSV original
+                                try:
+                                    csv_header = pd.read_csv(filepath, nrows=0)
+                                    first_col_name = csv_header.columns[0]
+                                except:
+                                    first_col_name = "index_col"
+
+                            # Adicionar o valor do índice aos ELOs finais
+                            final_elos[first_col_name] = int(
+                                float(df.index[-1])
+                            )  # Converter para int nativo do Python
+
+                            # CORREÇÃO ESPECÍFICA PARA EGI:
+                            # Se o primeiro nome de coluna é EGI ou se o ficheiro tem índices numéricos
+                            # que representam ELOs progressivos, então EGI está no índice
+                            if first_col_name == "EGI" or (
+                                len(df.index) > 1
+                                and all(
+                                    isinstance(idx, (int, float)) for idx in df.index
+                                )
+                                and sport_name
+                                == "ANDEBOL MISTO"  # caso específico conhecido
+                            ):
+                                final_elos["EGI"] = int(
+                                    float(df.index[-1])
+                                )  # Converter para int nativo do Python
+
+                        # Filtrar valores válidos (números) e normalizar nomes das equipas
+                        normalized_elos = {}
+                        for team, elo in final_elos.items():
+                            if pd.notna(elo) and isinstance(elo, (int, float)):
+                                normalized_team = normalize_team_name(team)
+                                if normalized_team:
+                                    normalized_elos[normalized_team] = elo
+
+                        previous_elos[sport_name] = normalized_elos
+                        logger.info(
+                            f"Carregados ELOs de {sport_name} da época {previous_season}: {len(normalized_elos)} equipas"
+                        )
+
+                except Exception as e:
+                    logger.warning(f"Erro ao carregar ELOs de {filename}: {e}")
+
+        return previous_elos
+
+    def _extract_sport_from_filename(self, filename):
+        """
+        Extrai o nome da modalidade do nome do arquivo
+
+        Args:
+            filename: Nome do arquivo (ex: "FUTSAL_MASCULINO_25_26.csv")
+
+        Returns:
+            Nome da modalidade extraído
+        """
+        # Remover extensão e época
+        base_name = filename.replace(".csv", "")
+        # Remover padrão de época no final (ex: "_25_26")
+        season_pattern = re.compile(r"_\d{2}_\d{2}$")
+        sport_name = season_pattern.sub("", base_name)
+        return sport_name
+
     def _save_tournament_results(
         self, filename, teams, elo_history, detailed_rows, real_standings
     ):
@@ -1775,7 +2281,14 @@ class TournamentProcessor:
             if isinstance(real_standings, pd.DataFrame):
                 # Converter a coluna Divisao para inteiro quando existir
                 if "Divisao" in real_standings.columns:
-                    real_standings["Divisao"] = real_standings["Divisao"].astype(int)
+                    # Filtrar apenas linhas com divisão válida antes de converter
+                    real_standings["Divisao"] = (
+                        pd.to_numeric(real_standings["Divisao"], errors="coerce")
+                        .fillna(-1)
+                        .astype(int)
+                    )
+                    # Remover linhas com divisão inválida (-1)
+                    real_standings = real_standings[real_standings["Divisao"] != -1]
 
                 real_standings.to_csv(
                     os.path.join(self.output_dir, f"classificacao_{filename}"),

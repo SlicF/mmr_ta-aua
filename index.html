@@ -487,6 +487,31 @@
             box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
         }
 
+        .rank-badge.progression-maintenance-playoffs {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            border: 2px solid #e68900;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+        }
+
+        .rank-badge.progression-maintenance-league {
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
+            border: 2px solid #e65100;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
+        }
+
+        /* Playoff/Liguilha de Promoção (2ª divisão) - Azul claro */
+        .rank-badge.progression-promotion-playoffs {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            border: 2px solid #0f6674;
+            box-shadow: 0 2px 8px rgba(23, 162, 184, 0.4);
+        }
+
+        .rank-badge.progression-promotion-league {
+            background: linear-gradient(135deg, #20c997, #17a085);
+            border: 2px solid #0e7c68;
+            box-shadow: 0 2px 8px rgba(32, 201, 151, 0.4);
+        }
+
         .rank-badge.progression-promotion {
             background: linear-gradient(135deg, #007bff, #0056b3);
             border: 2px solid #004085;
@@ -564,6 +589,27 @@
         .legend-badge.legend-playoffs {
             background: linear-gradient(135deg, #28a745, #20c997);
             border: 2px solid #1e7e34;
+        }
+
+        .legend-badge.legend-maintenance-playoffs {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            border: 2px solid #e68900;
+        }
+
+        .legend-badge.legend-maintenance-league {
+            background: linear-gradient(135deg, #ff9800, #ff6f00);
+            border: 2px solid #e65100;
+        }
+
+        /* Playoff/Liguilha de Promoção (2ª divisão) - Azul claro */
+        .legend-badge.legend-promotion-playoffs {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            border: 2px solid #0f6674;
+        }
+
+        .legend-badge.legend-promotion-league {
+            background: linear-gradient(135deg, #20c997, #17a085);
+            border: 2px solid #0e7c68;
         }
 
         .legend-badge.legend-promotion {
@@ -802,6 +848,173 @@
             font-weight: 500;
         }
 
+        /* Labels de qualificação nos brackets */
+        .qualification-label {
+            font-size: 0.7em;
+            color: #666;
+            font-style: italic;
+            padding: 2px 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 3px;
+            text-align: center;
+            margin: 2px 0;
+        }
+
+        .qualification-label-top {
+            margin-bottom: 5px;
+            margin-top: -5px;
+        }
+
+        .qualification-label-bottom {
+            margin-top: 5px;
+            margin-bottom: -5px;
+        }
+
+        .bracket-legend {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .bracket-legend h4 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 0.95em;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .bracket-legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .bracket-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 0.85em;
+            border-left: 4px solid #667eea;
+        }
+
+        .bracket-legend-item.playoff {
+            border-left-color: #28a745;
+        }
+
+        .bracket-legend-item.promotion-playoff,
+        .bracket-legend-item.promotion-league {
+            border-left-color: #17a2b8;
+        }
+
+        .bracket-legend-item.maintenance-playoff,
+        .bracket-legend-item.maintenance-league {
+            border-left-color: #ffc107;
+        }
+
+        .bracket-legend-badge {
+            font-weight: bold;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .bracket-league-table {
+            background: white;
+            border-radius: 10px;
+            padding: 35px;
+            margin-top: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .bracket-league-table h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .bracket-league-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 17px;
+        }
+
+        .bracket-league-table th {
+            background: #667eea;
+            color: white;
+            padding: 14px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .bracket-league-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        .bracket-league-table td.team-cell {
+            text-align: left;
+        }
+
+        .bracket-league-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .bracket-league-table .position {
+            font-weight: bold;
+            text-align: center;
+            width: 40px;
+        }
+
+        .bracket-league-table .team-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bracket-league-table .team-emblem {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-right: 10px;
+        }
+
+        .bracket-league-table .team-qualification-label {
+            display: inline-block;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .bracket-league-table .qual-1div {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #1976d2;
+        }
+
+        .bracket-league-table .qual-2div {
+            background: #fff3e0;
+            color: #f57c00;
+            border: 1px solid #f57c00;
+        }
+
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -989,24 +1202,9 @@
                     <!-- Botões de grupo serão gerados dinamicamente -->
                 </div>
 
-                <!-- Legenda dos indicadores de progressão -->
+                <!-- Legenda dos indicadores de progressão (gerada dinamicamente) -->
                 <div class="progression-legend" id="progressionLegend" style="display: none;">
-                    <div class="legend-item">
-                        <div class="legend-badge legend-playoffs">P</div>
-                        <span>Play-offs</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-badge legend-promotion">↑</div>
-                        <span>Subida de divisão</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-badge legend-relegation">↓</div>
-                        <span>Descida de divisão</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-badge legend-safe">S</div>
-                        <span>Zona segura</span>
-                    </div>
+                    <!-- Será preenchido dinamicamente via JavaScript -->
                 </div>
 
                 <table class="rankings-table" id="rankingsTable">
@@ -1038,6 +1236,16 @@
             <div class="bracket-container">
                 <div class="bracket" id="bracketContainer">
                     <!-- Bracket será gerado dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Bracket Secundário (Manutenção/Promoção) -->
+        <div class="card" id="secondaryBracketCard" style="display: none;">
+            <div class="card-title" id="secondaryBracketTitle">Playoff/Liguilha</div>
+            <div class="bracket-container">
+                <div class="bracket" id="secondaryBracketContainer">
+                    <!-- Bracket secundário será gerado dinamicamente -->
                 </div>
             </div>
         </div>
@@ -1073,7 +1281,10 @@
         let currentModalityHasAdjustments = false; // Para controlar se modalidade atual tem ajustes
 
         // Inicializar aplicação
-        function initApp() {
+        async function initApp() {
+            // Carregar configuração dos cursos
+            await loadCoursesConfig();
+
             // Inicializar seletores de época e modalidade
             initializeSelectors();
 
@@ -1280,6 +1491,13 @@
             const divisions = Object.keys(sampleData.rankings);
             currentDivision = divisions[0]; // Definir primeira divisão como padrão
 
+            // Se for liga única, ocultar o seletor de divisão
+            if (structure.type === 'single-league') {
+                selector.style.display = 'none';
+                return;
+            }
+
+            selector.style.display = 'flex';
             selector.innerHTML = '';
             divisions.forEach(division => {
                 const btn = document.createElement('button');
@@ -1948,7 +2166,9 @@
 
             // Mostrar legenda se houver equipes suficientes para progressões
             const showProgressionIndicators = totalTeams >= 4;
-            progressionLegend.style.display = showProgressionIndicators ? 'flex' : 'none';
+
+            // Atualizar legenda dinâmica
+            updateProgressionLegend(showProgressionIndicators, structure);
 
             tbody.innerHTML = '';
 
@@ -1959,9 +2179,9 @@
                 const goalDiffText = goalDiff > 0 ? `+${goalDiff}` : goalDiff.toString();
                 const totalGames = (team.wins || 0) + (team.draws || 0) + (team.losses || 0);
 
-                // Determinar progressão no torneio
+                // Determinar progressão no torneio - AGORA passa o nome da equipa para verificar se é B
                 const progression = showProgressionIndicators ?
-                    getTeamProgression(position, totalTeams, structure) :
+                    getTeamProgression(position, totalTeams, structure, team.team, currentGroup) :
                     { type: 'safe', description: 'Zona segura' };
 
                 // Obter informações do curso para emblema - aplicar normalização
@@ -2005,6 +2225,486 @@
             });
         }
 
+        /**
+         * Atualiza a legenda de progressão dinamicamente baseada no contexto
+         */
+        function updateProgressionLegend(show, structure) {
+            const progressionLegend = document.getElementById('progressionLegend');
+
+            if (!show) {
+                progressionLegend.style.display = 'none';
+                return;
+            }
+
+            progressionLegend.style.display = 'flex';
+
+            // Determinar quais legendas mostrar baseado no contexto
+            const legendItems = [];
+            const divisionNum = parseInt(currentDivision) || 1;
+            const isSecondDivision = divisionNum === 2;
+
+            // Detectar se há sistema de playoff/liguilha
+            const hasWinnerPlayoffs = playoffSystemInfo.hasWinnerPlayoffs || false;
+            const hasMaintenancePlayoffs = playoffSystemInfo.hasMaintenancePlayoffs || false;
+            const hasMaintenanceLeague = playoffSystemInfo.hasMaintenanceLeague || false;
+
+            // Época atual para determinar compatibilidade
+            const is25_26 = currentEpoca === '25_26';
+
+            // Legendas para 1ª divisão
+            if (divisionNum === 1) {
+                // Play-offs para o vencedor (sempre 8 equipas)
+                legendItems.push({
+                    badge: 'P',
+                    cssClass: 'legend-playoffs',
+                    text: 'Play-offs'
+                });
+
+                // Playoff/Liguilha de manutenção - SÓ mostrar se realmente existir
+                if (hasMaintenancePlayoffs) {
+                    legendItems.push({
+                        badge: 'PM',
+                        cssClass: 'legend-maintenance-playoffs',
+                        text: 'Play-off de Manutenção'
+                    });
+                } else if (hasMaintenanceLeague) {
+                    legendItems.push({
+                        badge: 'LM',
+                        cssClass: 'legend-maintenance-league',
+                        text: 'Liguilha de Manutenção'
+                    });
+                }
+
+                // Sempre mostrar descida direta (últimos 2 ou 3 dependendo de haver PM/LM)
+                legendItems.push({
+                    badge: '↓',
+                    cssClass: 'legend-relegation',
+                    text: 'Descida de divisão'
+                });
+            }
+            // Legendas para 2ª divisão
+            else if (isSecondDivision) {
+                // 1º de cada grupo vai aos playoffs + promoção
+                legendItems.push({
+                    badge: 'P',
+                    cssClass: 'legend-playoffs',
+                    text: 'Play-offs + Promoção'
+                });
+
+                // 2º lugar: depende se há PM/LM ou não
+                if (hasMaintenancePlayoffs) {
+                    legendItems.push({
+                        badge: 'PP',
+                        cssClass: 'legend-promotion-playoffs',
+                        text: 'Play-off de Promoção'
+                    });
+                } else if (hasMaintenanceLeague) {
+                    legendItems.push({
+                        badge: 'LP',
+                        cssClass: 'legend-promotion-league',
+                        text: 'Liguilha de Promoção'
+                    });
+                } else {
+                    // Sem PM/LM: 2º sobe direto
+                    legendItems.push({
+                        badge: '↑',
+                        cssClass: 'legend-promotion',
+                        text: 'Subida de divisão'
+                    });
+                }
+            }
+            // Legendas para 3ª+ divisão
+            else {
+                legendItems.push({
+                    badge: '↑',
+                    cssClass: 'legend-promotion',
+                    text: 'Subida de divisão'
+                });
+            }
+
+            // Sempre adicionar zona segura
+            legendItems.push({
+                badge: 'S',
+                cssClass: 'legend-safe',
+                text: 'Zona segura'
+            });
+
+            // Gerar HTML da legenda
+            progressionLegend.innerHTML = legendItems.map(item => `
+                <div class="legend-item">
+                    <div class="legend-badge ${item.cssClass}">${item.badge}</div>
+                    <span>${item.text}</span>
+                </div>
+            `).join('');
+        }
+
+        // Cache para equipas qualificadas
+        let qualifiedTeamsCache = null;
+
+        // Obter equipas qualificadas baseado na classificação
+        function getQualifiedTeams(forceRefresh = false) {
+            // Usar cache se disponível e não for forçado refresh
+            if (qualifiedTeamsCache && !forceRefresh) {
+                return qualifiedTeamsCache;
+            }
+
+            // Função auxiliar para verificar se é equipa B
+            function isTeamB(teamName) {
+                // Verifica se o nome termina com " B" (com espaço antes)
+                return /\sB$/i.test(teamName.trim());
+            }
+
+            // Função auxiliar para obter a equipa A correspondente
+            function getTeamA(teamBName) {
+                // Remove o " B" do final para obter o nome da equipa A
+                return teamBName.replace(/\sB$/i, '').trim();
+            }
+
+            // Função para verificar se equipa A está em posição de descida
+            function isTeamAInRelegation(teamBName, div1Teams) {
+                const teamAName = getTeamA(teamBName);
+                // Encontrar posição da equipa A na 1ª divisão
+                const teamAIndex = div1Teams.findIndex(t => t.team === teamAName);
+                if (teamAIndex === -1) return false; // Equipa A não está na 1ª divisão
+
+                // Considerar em risco de descida se está nos últimos 3 lugares (10º, 11º, 12º)
+                return teamAIndex >= div1Teams.length - 3;
+            }
+
+            const structure = analyzeModalityStructure();
+            const qualified = {
+                playoffs: [],           // Top 8 para playoffs principais
+                maintenancePlayoff: [], // Equipas para PM
+                promotionPlayoff: [],   // Equipas para PP (2ª divisão)
+                legend: []              // Legenda dos lugares
+            };
+
+            DebugUtils.debugBracket('qualified_teams', {
+                rankingsAvailable: sampleData.rankings ? Object.keys(sampleData.rankings) : [],
+                structure: structure
+            });
+
+            DebugUtils.debugQualification('structure_detected', structure);
+            DebugUtils.debugQualification('rankings_keys', Object.keys(sampleData.rankings));
+
+            if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
+                console.warn('⚠️ getQualifiedTeams: rankings não disponíveis ainda');
+                return qualified;
+            }
+
+            // Liga única - top 8 vão para playoffs
+            if (structure.type === 'single-league') {
+                const ranking = sampleData.rankings['geral'] || [];
+
+                // Os rankings já vêm ordenados do CSV, mas garantir ordenação por pontos
+                ranking.sort((a, b) => {
+                    if (b.points !== a.points) return b.points - a.points;
+                    const diffA = (a.goals || 0) - (a.conceded || 0);
+                    const diffB = (b.goals || 0) - (b.conceded || 0);
+                    return diffB - diffA;
+                });
+
+                qualified.playoffs = ranking.slice(0, 8).map(team => team.team);
+
+                DebugUtils.debugQualification('single_league_playoffs', qualified.playoffs);
+
+                // Criar legenda
+                for (let i = 0; i < Math.min(8, ranking.length); i++) {
+                    qualified.legend.push({
+                        position: i + 1,
+                        team: ranking[i].team,
+                        type: 'playoff'
+                    });
+                }
+                return qualified;
+            }
+
+            // Sistema com divisões
+            if (structure.hasDivisions) {
+                DebugUtils.debugQualification('has_divisions');
+                const div1Teams = [];
+                const div2Teams = [];
+
+                DebugUtils.debugQualification('available_keys', Object.keys(sampleData.rankings));
+
+                // Processar cada divisão - busca flexível por padrões
+                Object.entries(sampleData.rankings).forEach(([key, ranking]) => {
+                    DebugUtils.debugQualification('processing_key', { key, count: ranking.length });
+
+                    // Buscar 1ª divisão
+                    const is1stDiv = key.includes('1ª Divisão') ||
+                        key === '1' ||
+                        key.match(/1[ªa]\s*div/i);
+
+                    if (is1stDiv) {
+                        DebugUtils.debugQualification('match_1st_division', ranking.length);
+                        div1Teams.push(...ranking);
+                    }
+                    // Buscar 2ª divisão - QUALQUER grupo
+                    else {
+                        const is2ndDiv = key.includes('2ª Divisão') ||
+                            key === '2' ||
+                            key.match(/2[ªa]\s*div/i);
+
+                        if (is2ndDiv) {
+                            DebugUtils.debugQualification('match_2nd_division', ranking.length);
+                            div2Teams.push(...ranking);
+                        } else {
+                            DebugUtils.debugQualification('no_match', key);
+                        }
+                    }
+                });
+
+                // Ordenar por pontos (não por ELO que pode não existir ainda)
+                div1Teams.sort((a, b) => {
+                    if (b.points !== a.points) return b.points - a.points;
+                    // Desempate por diferença de golos
+                    const diffA = (a.goals || 0) - (a.conceded || 0);
+                    const diffB = (b.goals || 0) - (b.conceded || 0);
+                    return diffB - diffA;
+                });
+
+                div2Teams.sort((a, b) => {
+                    if (b.points !== a.points) return b.points - a.points;
+                    const diffA = (a.goals || 0) - (a.conceded || 0);
+                    const diffB = (b.goals || 0) - (b.conceded || 0);
+                    return diffB - diffA;
+                });
+
+                DebugUtils.debugQualification('teams_sorted', { div1: div1Teams.map(t => `${t.team} (${t.points}pts)`), div2: div2Teams.map(t => `${t.team} (${t.points}pts)`) });
+
+                // Determinar número de equipas para playoffs baseado na estrutura
+                // Contar APENAS grupos da 2ª divisão
+                const numGroups2ndDiv = Object.keys(sampleData.rankings).filter(key =>
+                    key.match(/^2[ªa]?\s*(div|divisão|divisao)?\s*-?\s*grupo/i)
+                ).length || 2;
+                const playoffSlots1stDiv = Math.max(0, 8 - numGroups2ndDiv);
+
+                DebugUtils.debugQualification('playoff_slots', { first: playoffSlots1stDiv, second: numGroups2ndDiv, total: 8 });
+
+                // Top da 1ª divisão vão para playoffs (excluindo equipas B)
+                if (playoffSlots1stDiv > 0 && div1Teams.length > 0) {
+                    let qualifiedCount = 0;
+                    let currentPos = 0;
+                    let skippedBTeams = 0;
+
+                    DebugUtils.debugQualification('selecting_1st_division');
+
+                    while (qualifiedCount < playoffSlots1stDiv && currentPos < div1Teams.length) {
+                        const team = div1Teams[currentPos];
+
+                        if (isTeamB(team.team)) {
+                            DebugUtils.debugQualification('team_b_skip', { position: currentPos + 1, team: team.team });
+                            skippedBTeams++;
+                            currentPos++;
+                            continue;
+                        }
+
+                        DebugUtils.debugQualification('team_qualified', { position: currentPos + 1, team: team.team });
+                        qualified.playoffs.push(team.team);
+                        qualified.legend.push({
+                            position: currentPos + 1,
+                            team: team.team,
+                            type: 'playoff',
+                            division: '1ª',
+                            isSubstitute: skippedBTeams > 0 && qualifiedCount >= (currentPos + 1 - skippedBTeams)
+                        });
+
+                        qualifiedCount++;
+                        currentPos++;
+                    }
+
+                    if (qualifiedCount < playoffSlots1stDiv) {
+                        console.warn(`⚠️ Apenas ${qualifiedCount} de ${playoffSlots1stDiv} equipas qualificadas da 1ª divisão`);
+                    }
+                }
+
+                // 1º de cada grupo da 2ª divisão vão para playoffs (excluindo equipas B)
+                const groups2ndDiv = {};
+                Object.entries(sampleData.rankings).forEach(([key, ranking]) => {
+                    // Busca flexível por 2ª divisão COM GRUPO
+                    if (key.match(/^2[ªa]?\s*(div|divisão|divisao)?\s*-?\s*grupo\s+([A-Z])/i)) {
+                        const groupMatch = key.match(/grupo\s+([A-Z])/i);
+                        if (groupMatch && ranking.length > 0) {
+                            const group = groupMatch[1].toUpperCase();
+
+                            // Encontrar primeiro não-B
+                            let teamIndex = 0;
+                            while (teamIndex < ranking.length && isTeamB(ranking[teamIndex].team)) {
+                                DebugUtils.debugQualification('group_team_b_skip', { group, position: teamIndex + 1, team: ranking[teamIndex].team });
+                                teamIndex++;
+                            }
+
+                            if (teamIndex < ranking.length) {
+                                groups2ndDiv[group] = {
+                                    team: ranking[teamIndex],
+                                    actualPosition: teamIndex + 1,  // Posição real da equipa substituta
+                                    placeholderPosition: 1          // SEMPRE usa 1º para o placeholder!
+                                };
+                                DebugUtils.debugQualification('group_winner', { group, team: ranking[teamIndex].team, position: teamIndex + 1 });
+                                if (teamIndex > 0) {
+                                    DebugUtils.debugQualification('group_winner', { group, team: ranking[teamIndex].team, position: teamIndex + 1, replaces: ranking[0].team });
+                                }
+                            } else {
+                                console.warn(`  ⚠️ Grupo ${group}: Todas as equipas são B!`);
+                            }
+                        }
+                    }
+                });
+
+                Object.entries(groups2ndDiv).forEach(([group, data]) => {
+                    qualified.playoffs.push(data.team.team);
+                    qualified.legend.push({
+                        position: data.placeholderPosition,  // USA 1 para o placeholder
+                        actualPosition: data.actualPosition,  // Guarda posição real para exibição
+                        team: data.team.team,
+                        type: 'playoff',
+                        division: '2ª',
+                        group: isNaN(group) ? group : undefined,
+                        isSubstitute: data.actualPosition > 1  // Flag indicando que é substituto
+                    });
+                });
+
+                // Equipas para playoff/liguilha de manutenção ou promoção
+                if (playoffSystemInfo.hasMaintenancePlayoffs || playoffSystemInfo.hasMaintenanceLeague) {
+                    // 5º pior da 1ª divisão (penúltimo = 9º lugar em 12 equipas) para playoff de manutenção
+                    const worstPos = div1Teams.length - 4; // 5º pior (índice 8 = 9º lugar)
+                    if (worstPos >= 0 && worstPos < div1Teams.length) {
+                        qualified.maintenancePlayoff.push(div1Teams[worstPos].team);
+                        qualified.legend.push({
+                            position: worstPos + 1,
+                            team: div1Teams[worstPos].team,
+                            type: playoffSystemInfo.hasMaintenancePlayoffs ? 'maintenance-playoff' : 'maintenance-league',
+                            division: '1ª'
+                        });
+                    }
+
+                    // 2º de cada grupo da 2ª divisão vão para PP/LP (excluindo equipas B, a menos que equipa A esteja em descida)
+                    DebugUtils.debugQualification('selecting_2nd_places');
+                    Object.entries(sampleData.rankings).forEach(([key, ranking]) => {
+                        // Busca flexível por 2ª divisão COM GRUPO
+                        if (key.match(/^2[ªa]?\s*(div|divisão|divisao)?\s*-?\s*grupo\s+([A-Z])/i) && ranking.length > 1) {
+                            const groupMatch = key.match(/grupo\s+([A-Z])/i);
+                            if (groupMatch) {
+                                const group = groupMatch[1].toUpperCase();
+
+                                // Encontrar equipa elegível (não-B, não já qualificada para playoffs, ou B com A em descida)
+                                let teamIndex = 1; // Começar do 2º lugar
+                                let selectedTeam = null;
+                                let selectedPosition = null;
+
+                                while (teamIndex < ranking.length && !selectedTeam) {
+                                    const team = ranking[teamIndex];
+
+                                    // ⚠️ VERIFICAR SE JÁ FOI PARA PLAYOFFS DE VENCEDORES
+                                    if (qualified.playoffs.includes(team.team)) {
+                                        DebugUtils.debugQualification('already_in_playoffs', { group, position: teamIndex + 1, team: team.team });
+                                        teamIndex++;
+                                        continue;
+                                    }
+
+                                    if (isTeamB(team.team)) {
+                                        // Verificar se equipa A está em descida
+                                        if (isTeamAInRelegation(team.team, div1Teams)) {
+                                            DebugUtils.debugQualification('team_b_with_relegation', { group, position: teamIndex + 1, team: team.team });
+                                            selectedTeam = team;
+                                            selectedPosition = teamIndex + 1;
+                                        } else {
+                                            DebugUtils.debugQualification('team_b_no_relegation', { group, position: teamIndex + 1, team: team.team });
+                                            teamIndex++;
+                                        }
+                                    } else {
+                                        DebugUtils.debugQualification('team_qualified', { position: teamIndex + 1, team: team.team });
+                                        selectedTeam = team;
+                                        selectedPosition = teamIndex + 1;
+                                    }
+                                }
+
+                                if (selectedTeam) {
+                                    qualified.promotionPlayoff.push(selectedTeam.team);
+                                    qualified.legend.push({
+                                        position: 2,  // SEMPRE usa 2º para o placeholder
+                                        actualPosition: selectedPosition,  // Posição real
+                                        team: selectedTeam.team,
+                                        type: playoffSystemInfo.hasMaintenancePlayoffs ? 'promotion-playoff' : 'promotion-league',
+                                        division: '2ª',
+                                        group: group,
+                                        isSubstitute: selectedPosition > 2  // Flag se não é o 2º real
+                                    });
+                                } else {
+                                    console.warn(`  ⚠️ Grupo ${group}: Nenhuma equipa elegível encontrada!`);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            DebugUtils.debugBracket('qualified_teams_result', {
+                playoffs: qualified.playoffs,
+                maintenancePlayoff: qualified.maintenancePlayoff,
+                promotionPlayoff: qualified.promotionPlayoff,
+                legendCount: qualified.legend.length
+            });
+
+            DebugUtils.debugQualification('qualified_complete', qualified.legend);
+
+            // Cachear resultado
+            qualifiedTeamsCache = qualified;
+
+            return qualified;
+        }
+
+        // Função global para resolver nomes de equipas (substituir placeholders)
+        function resolveTeamName(teamName) {
+            // Obter mapa de substituições atual
+            const qualified = getQualifiedTeams();
+            const qualifiedMap = {};
+
+            DebugUtils.debugTeamResolution('resolving_team', teamName);
+            DebugUtils.debugTeamResolution('qualified_legend', qualified.legend);
+
+            // Criar mapa de placeholders para equipas reais
+            qualified.legend.forEach(item => {
+                let placeholder = '';
+                DebugUtils.debugTeamResolution('legend_item', item);
+                if (item.division === '1ª') {
+                    placeholder = `${item.position}º Class. 1ª Div.`;
+                } else if (item.division === '2ª') {
+                    if (item.group) {
+                        // ✅ CORRIGIDO: Criar placeholders para AMBOS os formatos (com e sem "Gr.")
+                        // Formato 1: "2º Class. 2ª Div. Gr. A" (usado em PM 25_26)
+                        const placeholderWithGr = `${item.position}º Class. 2ª Div. Gr. ${item.group}`;
+                        qualifiedMap[placeholderWithGr] = item.team;
+
+                        // Formato 2: "2º Class. 2ª Div. A" (usado em LM 24_25)
+                        const placeholderNoGr = `${item.position}º Class. 2ª Div. ${item.group}`;
+                        qualifiedMap[placeholderNoGr] = item.team;
+
+                        DebugUtils.debugTeamResolution('creating_placeholders_with_group', { withGr: placeholderWithGr, noGr: placeholderNoGr, team: item.team });
+                        placeholder = null; // Não criar novamente abaixo
+                    } else {
+                        placeholder = `${item.position}º Class. 2ª Div.`;
+                    }
+                }
+                // Só criar placeholder se não foi criado acima
+                if (placeholder) {
+                    DebugUtils.debugTeamResolution('creating_placeholder', { placeholder, team: item.team });
+                    qualifiedMap[placeholder] = item.team;
+                }
+            });
+
+            DebugUtils.debugTeamResolution('complete_map', qualifiedMap);
+
+            // Se for placeholder, substituir
+            if (qualifiedMap[teamName]) {
+                DebugUtils.debugTeamResolution('resolved', { from: teamName, to: qualifiedMap[teamName] });
+                return qualifiedMap[teamName];
+            }
+            DebugUtils.debugTeamResolution('not_found', teamName);
+            return teamName;
+        }
+
         // Criar bracket de dados reais dos CSVs
         function createRealBracket() {
             // Carregar dados originais do CSV diretamente para detectar "?"
@@ -2021,7 +2721,7 @@
                 download: true,
                 header: true,
                 complete: results => {
-                    // Filtrar jogos de eliminação dos dados originais
+                    // Filtrar jogos de eliminação dos dados originais (E*)
                     const eliminationMatches = results.data.filter(match =>
                         match.Jornada && (
                             match.Jornada.startsWith('E1') ||  // Quartos
@@ -2030,15 +2730,31 @@
                         )
                     );
 
+                    // Filtrar jogos secundários (PM* ou LM*)
+                    const secondaryMatches = results.data.filter(match =>
+                        match.Jornada && (
+                            match.Jornada.startsWith('PM') ||  // Playoff Manutenção/Promoção
+                            match.Jornada.startsWith('LM')     // Liguilha Manutenção/Promoção
+                        )
+                    );
+
                     if (eliminationMatches.length === 0) {
                         DebugUtils.debugBracket('no_elimination_games');
                         sampleData.bracket = {};
                         createBracket();
-                        return;
+                    } else {
+                        DebugUtils.debugBracket('elimination_games_found', eliminationMatches);
+                        processEliminationMatches(eliminationMatches);
                     }
 
-                    DebugUtils.debugBracket('elimination_games_found', eliminationMatches);
-                    processEliminationMatches(eliminationMatches);
+                    // Processar bracket secundário se houver
+                    if (secondaryMatches.length > 0) {
+                        DebugUtils.debugBracket('secondary_games_found', secondaryMatches);
+                        processSecondaryMatches(secondaryMatches);
+                    } else {
+                        sampleData.secondaryBracket = {};
+                        createSecondaryBracket();
+                    }
                 },
                 error: error => {
                     console.error('Erro ao carregar CSV para bracket:', error);
@@ -2068,9 +2784,51 @@
         }
 
         function processEliminationMatches(eliminationMatches, isProcessedData = false) {
+            DebugUtils.debugEliminationGames('processing_start', eliminationMatches.length);
+            if (eliminationMatches.length > 0) {
+                DebugUtils.debugEliminationGames('first_game', { game: eliminationMatches[0], team1: eliminationMatches[0]['Equipa 1'], team2: eliminationMatches[0]['Equipa 2'] });
+            }
+
             if (eliminationMatches.length === 0) {
                 DebugUtils.debugBracket('no_elimination_games');
-                sampleData.bracket = {};
+
+                // Preencher bracket automaticamente com equipas qualificadas
+                const qualified = getQualifiedTeams();
+
+                // Criar bracket se houver equipas qualificadas suficientes (mesmo sem pontos)
+                const canCreateBracket = qualified.playoffs.length >= 8 && sampleData.rankings;
+
+                if (canCreateBracket) {
+                    // Criar placeholders a partir do legend (em vez de usar nomes reais)
+                    const playoffPlaceholders = qualified.legend
+                        .filter(item => item.type === 'playoff')
+                        .sort((a, b) => {
+                            // Ordenar: 1ª divisão primeiro, depois 2ª divisão
+                            if (a.division !== b.division) return a.division === '1ª' ? -1 : 1;
+                            // Dentro da divisão, ordenar por posição
+                            if (a.position !== b.position) return a.position - b.position;
+                            // Se mesmo grupo, ordenar alfabeticamente
+                            if (a.group && b.group) return a.group.localeCompare(b.group);
+                            return 0;
+                        })
+                        .map(item => {
+                            if (item.division === '1ª') {
+                                return `${item.position}º Class. 1ª Div.`;
+                            } else if (item.group) {
+                                return `${item.position}º Class. 2ª Div. Gr. ${item.group}`;
+                            } else {
+                                return `${item.position}º Class. 2ª Div.`;
+                            }
+                        });
+
+                    DebugUtils.debugEliminationGames('placeholders_created', playoffPlaceholders);
+                    DebugUtils.debugBracket('auto_filling_bracket', playoffPlaceholders);
+                    sampleData.bracket = createPredictedBracket(playoffPlaceholders);
+                } else {
+                    DebugUtils.debugEliminationGames('insufficient_teams');
+                    sampleData.bracket = {};
+                }
+
                 createBracket();
                 return;
             }
@@ -2079,6 +2837,39 @@
 
             // Organizar jogos por fase na ordem de exibição correta
             const bracketData = {};
+
+            // Obter equipas qualificadas para substituir placeholders
+            const qualified = getQualifiedTeams();
+            const qualifiedMap = {};
+
+            // Criar mapa de placeholders para equipas reais
+            qualified.legend.forEach(item => {
+                let placeholder = '';
+                if (item.division === '1ª') {
+                    placeholder = `${item.position}º Class. 1ª Div.`;
+                } else if (item.division === '2ª') {
+                    if (item.group) {
+                        placeholder = `${item.position}º Class. 2ª Div. Gr. ${item.group}`;
+                    } else {
+                        placeholder = `${item.position}º Class. 2ª Div.`;
+                    }
+                }
+                if (placeholder) {
+                    qualifiedMap[placeholder] = item.team;
+                }
+            });
+
+            DebugUtils.debugEliminationGames('substitution_map', qualifiedMap);
+
+            // Função para substituir placeholder por equipa real
+            function resolveTeamName(teamName) {
+                // Se for placeholder, substituir
+                if (qualifiedMap[teamName]) {
+                    DebugUtils.debugEliminationGames('substituting', { from: teamName, to: qualifiedMap[teamName] });
+                    return qualifiedMap[teamName];
+                }
+                return teamName;
+            }
 
             // Função auxiliar para detectar "?" nos dados originais ou processados
             function detectUnknownResult(match) {
@@ -2101,14 +2892,22 @@
                 !(m.Jornada?.includes('L') || m.round?.includes('L'))
             );
             if (quartos.length > 0) {
+                DebugUtils.debugEliminationGames('quarters_info', { count: quartos.length, first: quartos[0] });
                 bracketData["Quartos de Final"] = quartos.map(match => {
                     const isUnknownResult = detectUnknownResult(match);
+                    DebugUtils.debugEliminationGames('before_resolve', { team1: match['Equipa 1'], team2: match['Equipa 2'] });
+                    const team1 = resolveTeamName(match['Equipa 1']);
+                    const team2 = resolveTeamName(match['Equipa 2']);
+                    DebugUtils.debugEliminationGames('after_resolve', { team1, team2 });
+                    // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
+                    const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
+                    const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
                     return {
-                        team1: match['Equipa 1'],
-                        team2: match['Equipa 2'],
-                        score1: parseFloat(match['Golos 1']) || 0,
-                        score2: parseFloat(match['Golos 2']) || 0,
-                        winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2'],
+                        team1: team1,
+                        team2: team2,
+                        score1: score1Val,
+                        score2: score2Val,
+                        winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
                         unknownResult: isUnknownResult
                     };
                 });
@@ -2123,12 +2922,17 @@
             if (meias.length > 0) {
                 bracketData["Meias-Finais"] = meias.map(match => {
                     const isUnknownResult = detectUnknownResult(match);
+                    const team1 = resolveTeamName(match['Equipa 1']);
+                    const team2 = resolveTeamName(match['Equipa 2']);
+                    // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
+                    const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
+                    const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
                     return {
-                        team1: match['Equipa 1'],
-                        team2: match['Equipa 2'],
-                        score1: parseFloat(match['Golos 1']) || 0,
-                        score2: parseFloat(match['Golos 2']) || 0,
-                        winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2'],
+                        team1: team1,
+                        team2: team2,
+                        score1: score1Val,
+                        score2: score2Val,
+                        winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
                         unknownResult: isUnknownResult
                     };
                 });
@@ -2154,12 +2958,17 @@
             if (final.length > 0) {
                 finalMatches.push(...final.map(match => {
                     const isUnknownResult = detectUnknownResult(match);
+                    const team1 = resolveTeamName(match['Equipa 1']);
+                    const team2 = resolveTeamName(match['Equipa 2']);
+                    // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
+                    const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
+                    const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
                     return {
-                        team1: match['Equipa 1'],
-                        team2: match['Equipa 2'],
-                        score1: parseFloat(match['Golos 1']) || 0,
-                        score2: parseFloat(match['Golos 2']) || 0,
-                        winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2'],
+                        team1: team1,
+                        team2: team2,
+                        score1: score1Val,
+                        score2: score2Val,
+                        winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
                         unknownResult: isUnknownResult,
                         isThirdPlace: false
                     };
@@ -2170,12 +2979,17 @@
             if (terceiroLugar.length > 0) {
                 finalMatches.push(...terceiroLugar.map(match => {
                     const isUnknownResult = detectUnknownResult(match);
+                    const team1 = resolveTeamName(match['Equipa 1']);
+                    const team2 = resolveTeamName(match['Equipa 2']);
+                    // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
+                    const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
+                    const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
                     return {
-                        team1: match['Equipa 1'],
-                        team2: match['Equipa 2'],
-                        score1: parseFloat(match['Golos 1']) || 0,
-                        score2: parseFloat(match['Golos 2']) || 0,
-                        winner: parseFloat(match['Golos 1']) > parseFloat(match['Golos 2']) ? match['Equipa 1'] : match['Equipa 2'],
+                        team1: team1,
+                        team2: team2,
+                        score1: score1Val,
+                        score2: score2Val,
+                        winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
                         unknownResult: isUnknownResult,
                         isThirdPlace: true
                     };
@@ -2191,7 +3005,311 @@
             createBracket();
         }
 
-        // Criar bracket de exemplo
+        // Processar jogos secundários (PM/LM)
+        function processSecondaryMatches(secondaryMatches) {
+            const bracketData = {};
+
+            // Função auxiliar para detectar "?" nos dados
+            function detectUnknownResult(match) {
+                const allKeys = Object.keys(match);
+                for (let key of allKeys) {
+                    const value = match[key];
+                    if (value && value.toString().trim() === '?') {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // Determinar o tipo de bracket secundário
+            const hasPM = secondaryMatches.some(m => m.Jornada && m.Jornada.startsWith('PM'));
+            const hasLM = secondaryMatches.some(m => m.Jornada && m.Jornada.startsWith('LM'));
+
+            DebugUtils.debugSecondaryBracket('analyzing_games', {
+                totalMatches: secondaryMatches.length,
+                hasPM: hasPM,
+                hasLM: hasLM,
+                pmMatches: secondaryMatches.filter(m => m.Jornada && m.Jornada.startsWith('PM')).map(m => ({
+                    jornada: m.Jornada,
+                    equipa1: m['Equipa 1'],
+                    equipa2: m['Equipa 2'],
+                    golos1: m['Golos 1'],
+                    golos2: m['Golos 2']
+                }))
+            });
+
+            // Verificar se é manutenção ou promoção baseado na estrutura
+            const structure = analyzeModalityStructure();
+            const isPromotion = structure.hasDivisions && structure.divisions.includes('2ª Divisão');
+
+            if (hasPM) {
+                sampleData.secondaryBracketType = isPromotion ? 'promotion-playoff' : 'maintenance-playoff';
+
+                // PM1 (similar a quartos)
+                const pm1 = secondaryMatches.filter(m => m.Jornada && m.Jornada.startsWith('PM1'));
+                if (pm1.length > 0) {
+                    bracketData["1ª Fase"] = pm1.map(match => {
+                        // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
+                        const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
+                        const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+                        return {
+                            team1: match['Equipa 1'],
+                            team2: match['Equipa 2'],
+                            score1: score1Val,
+                            score2: score2Val,
+                            winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? match['Equipa 1'] : match['Equipa 2']) : null,
+                            unknownResult: detectUnknownResult(match)
+                        };
+                    });
+                }
+
+                // PM2 (similar a meias/final)
+                const pm2 = secondaryMatches.filter(m => m.Jornada && m.Jornada.startsWith('PM2'));
+                if (pm2.length > 0) {
+                    bracketData["Final"] = pm2.map(match => {
+                        // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
+                        const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
+                        const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+                        return {
+                            team1: match['Equipa 1'],
+                            team2: match['Equipa 2'],
+                            score1: score1Val,
+                            score2: score2Val,
+                            winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? match['Equipa 1'] : match['Equipa 2']) : null,
+                            unknownResult: detectUnknownResult(match)
+                        };
+                    });
+                }
+
+                // ✅ ATRIBUIR bracketData para PM (playoff)
+                DebugUtils.debugSecondaryBracket('before_assign', {
+                    hasPM: hasPM,
+                    hasStandings: false,
+                    matchesCount: (bracketData["1ª Fase"]?.length || 0) + (bracketData["Final"]?.length || 0)
+                });
+
+                sampleData.secondaryBracket = bracketData;
+
+                DebugUtils.debugSecondaryBracket('after_assign', {
+                    hasPromotionPlayoffs: hasPM,
+                    hasStandings: false
+                });
+            } else if (hasLM) {
+                sampleData.secondaryBracketType = isPromotion ? 'promotion-league' : 'maintenance-league';
+
+                // Calcular tabela de classificação da liguilha
+                const teamStats = new Map();
+                const lmMatches = [];
+
+                // Processar todos os jogos LM
+                secondaryMatches.forEach(match => {
+                    if (match.Jornada && match.Jornada.startsWith('LM')) {
+                        // ✅ RESOLVER placeholders antes de processar estatísticas
+                        const team1 = resolveTeamName(match['Equipa 1']);
+                        const team2 = resolveTeamName(match['Equipa 2']);
+                        // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
+                        const score1 = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
+                        const score2 = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+                        const isUnknown = detectUnknownResult(match);
+                        const winner = (score1 !== null && score2 !== null) ? (score1 > score2 ? team1 : (score2 > score1 ? team2 : null)) : null;
+
+                        DebugUtils.debugSecondaryBracket('lm_match', { team1, team2, score1, score2, winner });
+
+                        lmMatches.push({
+                            team1: team1,
+                            team2: team2,
+                            score1: score1,
+                            score2: score2,
+                            unknownResult: isUnknown
+                        });
+
+                        // Inicializar equipas SEMPRE (mesmo que jogo não tenha acontecido)
+                        if (!teamStats.has(team1)) {
+                            teamStats.set(team1, {
+                                team: team1,
+                                played: 0,
+                                wins: 0,
+                                draws: 0,
+                                losses: 0,
+                                goalsFor: 0,
+                                goalsAgainst: 0,
+                                goalDiff: 0,
+                                points: 0
+                            });
+                        }
+                        if (!teamStats.has(team2)) {
+                            teamStats.set(team2, {
+                                team: team2,
+                                played: 0,
+                                wins: 0,
+                                draws: 0,
+                                losses: 0,
+                                goalsFor: 0,
+                                goalsAgainst: 0,
+                                goalDiff: 0,
+                                points: 0
+                            });
+                        }
+
+                        // Apenas contar estatísticas se resultado conhecido
+                        if (!isUnknown && score1 !== null && score2 !== null) {
+                            const stats1 = teamStats.get(team1);
+                            const stats2 = teamStats.get(team2);
+
+                            // Atualizar jogos disputados
+                            stats1.played++;
+                            stats2.played++;
+
+                            // Atualizar golos
+                            stats1.goalsFor += score1;
+                            stats1.goalsAgainst += score2;
+                            stats2.goalsFor += score2;
+                            stats2.goalsAgainst += score1;
+
+                            // Determinar resultado
+                            if (score1 > score2) {
+                                stats1.wins++;
+                                stats1.points += 3;
+                                stats2.losses++;
+                            } else if (score2 > score1) {
+                                stats2.wins++;
+                                stats2.points += 3;
+                                stats1.losses++;
+                            } else {
+                                stats1.draws++;
+                                stats2.draws++;
+                                stats1.points++;
+                                stats2.points++;
+                            }
+
+                            // Calcular diferença de golos
+                            stats1.goalDiff = stats1.goalsFor - stats1.goalsAgainst;
+                            stats2.goalDiff = stats2.goalsFor - stats2.goalsAgainst;
+                        }
+                    }
+                });
+
+                // Converter para array e ordenar
+                const standings = Array.from(teamStats.values()).sort((a, b) => {
+                    // Ordenar por pontos (desc), depois diferença golos (desc), depois golos marcados (desc)
+                    if (b.points !== a.points) return b.points - a.points;
+                    if (b.goalDiff !== a.goalDiff) return b.goalDiff - a.goalDiff;
+                    return b.goalsFor - a.goalsFor;
+                });
+
+                // Guardar tabela e jogos para exibição
+                sampleData.secondaryBracket = {
+                    isTable: true,
+                    standings: standings,
+                    matches: lmMatches
+                };
+            }
+
+            DebugUtils.debugSecondaryBracket('created', {
+                type: sampleData.secondaryBracketType,
+                hasPM: hasPM,
+                hasLM: hasLM,
+                bracketDataKeys: Object.keys(bracketData),
+                bracketData: bracketData,
+                secondaryBracket: sampleData.secondaryBracket,
+                secondaryBracketKeys: Object.keys(sampleData.secondaryBracket || {}),
+                secondaryBracketLength: Object.keys(sampleData.secondaryBracket || {}).length
+            });
+
+            DebugUtils.debugBracket('secondary_bracket_created', { type: sampleData.secondaryBracketType, data: sampleData.secondaryBracket });
+            createSecondaryBracket();
+        }
+
+        // Criar bracket previsto com base nas equipas qualificadas
+        function createPredictedBracket(qualifiedTeams) {
+            DebugUtils.debugPredictedBracket('called', qualifiedTeams);
+
+            if (!qualifiedTeams || qualifiedTeams.length < 8) {
+                console.warn('⚠️ createPredictedBracket: equipas insuficientes', qualifiedTeams ? qualifiedTeams.length : 0);
+                return {};
+            }
+
+            DebugUtils.debugPredictedBracket('creating');
+
+            // Gerar confrontos dos quartos de final (1º vs 8º, 4º vs 5º, 2º vs 7º, 3º vs 6º)
+            const bracketData = {
+                "Quartos de Final": [
+                    {
+                        team1: qualifiedTeams[0],  // 1º
+                        team2: qualifiedTeams[7],  // 8º
+                        score1: null,
+                        score2: null,
+                        winner: null,
+                        predicted: true
+                    },
+                    {
+                        team1: qualifiedTeams[3],  // 4º
+                        team2: qualifiedTeams[4],  // 5º
+                        score1: null,
+                        score2: null,
+                        winner: null,
+                        predicted: true
+                    },
+                    {
+                        team1: qualifiedTeams[1],  // 2º
+                        team2: qualifiedTeams[6],  // 7º
+                        score1: null,
+                        score2: null,
+                        winner: null,
+                        predicted: true
+                    },
+                    {
+                        team1: qualifiedTeams[2],  // 3º
+                        team2: qualifiedTeams[5],  // 6º
+                        score1: null,
+                        score2: null,
+                        winner: null,
+                        predicted: true
+                    }
+                ],
+                "Meias-Finais": [
+                    {
+                        team1: "Vencedor Q1",
+                        team2: "Vencedor Q2",
+                        score1: null,
+                        score2: null,
+                        winner: null,
+                        predicted: true
+                    },
+                    {
+                        team1: "Vencedor Q3",
+                        team2: "Vencedor Q4",
+                        score1: null,
+                        score2: null,
+                        winner: null,
+                        predicted: true
+                    }
+                ],
+                "3º Lugar": [
+                    {
+                        team1: "Perdedor M1",
+                        team2: "Perdedor M2",
+                        score1: null,
+                        score2: null,
+                        winner: null,
+                        predicted: true,
+                        isThirdPlace: true
+                    }
+                ],
+                "Final": [
+                    {
+                        team1: "Vencedor M1",
+                        team2: "Vencedor M2",
+                        score1: null,
+                        score2: null,
+                        winner: null,
+                        predicted: true
+                    }
+                ]
+            };
+
+            return bracketData;
+        }
 
         // Criar bracket de exemplo
         function createSampleBracket() {
@@ -2285,6 +3403,25 @@
 
             container.innerHTML = '';
 
+            // Obter mapa de equipas qualificadas para mostrar labels - forçar refresh
+            const qualified = getQualifiedTeams(true);
+            DebugUtils.debugBracket('qualified_teams', qualified);
+            const qualificationLabels = {};
+
+            qualified.legend.forEach(item => {
+                if (item.type === 'playoff') {
+                    let label = `${item.position}º`;
+                    if (item.division === '2ª' && item.group) {
+                        label += ` Grupo ${item.group}`;
+                    } else if (item.division === '2ª') {
+                        label += ` 2ª Div`;
+                    } else if (item.division === '1ª') {
+                        label += ` 1ª Div`;
+                    }
+                    qualificationLabels[item.team] = label;
+                }
+            });
+
             Object.entries(sampleData.bracket).forEach(([round, matches]) => {
                 const roundDiv = document.createElement('div');
                 roundDiv.className = 'bracket-round';
@@ -2315,18 +3452,25 @@
                     const matchDiv = document.createElement('div');
                     matchDiv.className = 'bracket-match';
 
-                    // Obter informações das equipas - aplicar normalização
-                    const team1Info = getCourseInfo(normalizeTeamName(match.team1));
-                    const team2Info = getCourseInfo(normalizeTeamName(match.team2));
+                    // Resolver nomes (substituir placeholders por equipas reais)
+                    const resolvedTeam1 = resolveTeamName(match.team1);
+                    const resolvedTeam2 = resolveTeamName(match.team2);
 
-                    const team1Color = team1Info.colors ? team1Info.colors[0] : '#667eea';
-                    const team2Color = team2Info.colors ? team2Info.colors[0] : '#764ba2';
+                    // Obter informações das equipas - aplicar normalização
+                    const team1Info = getCourseInfo(normalizeTeamName(resolvedTeam1));
+                    const team2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
+
+                    // Usar cor da equipa ou cinza neutro como fallback
+                    const team1Color = team1Info.colors ? team1Info.colors[0] : '#6c757d';
+                    const team2Color = team2Info.colors ? team2Info.colors[0] : '#6c757d';
 
                     const team1Div = document.createElement('div');
-                    team1Div.className = `bracket-team ${match.winner === match.team1 ? 'winner' : ''}`;
+                    // ⚠️ NÃO mostrar vencedor se jogo não foi realizado (score null ou predicted/unknownResult)
+                    const matchPlayed = (match.score1 !== null && match.score2 !== null) && !match.predicted && !match.unknownResult;
+                    team1Div.className = `bracket-team ${matchPlayed && match.winner === match.team1 ? 'winner' : ''}`;
 
-                    // Definir cor de fundo se for vencedor, senão border colorida
-                    if (match.winner === match.team1) {
+                    // Definir cor de fundo se for vencedor E jogo foi realizado, senão border colorida
+                    if (matchPlayed && match.winner === match.team1) {
                         team1Div.style.background = `linear-gradient(135deg, ${team1Color}, ${team1Color}dd)`;
                         team1Div.style.borderLeftColor = team1Color;
                     } else {
@@ -2336,19 +3480,45 @@
                     team1Div.innerHTML = `
                         <div class="bracket-team-content">
                             ${team1Info.emblemPath ?
-                            `<img src="${team1Info.emblemPath}" alt="${normalizeTeamName(match.team1)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                            `<img src="${team1Info.emblemPath}" alt="${normalizeTeamName(resolvedTeam1)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
                             ''
                         }
-                            <span>${team1Info.displayName || normalizeTeamName(match.team1)}</span>
+                            <span>${team1Info.displayName || normalizeTeamName(resolvedTeam1)}</span>
                         </div>
-                        <span class="score">${match.score1 !== null ? match.score1 : '-'}</span>
+                        <span class="score">${matchPlayed ? match.score1 : '-'}</span>
                     `;
 
-                    const team2Div = document.createElement('div');
-                    team2Div.className = `bracket-team ${match.winner === match.team2 ? 'winner' : ''}`;
+                    // Adicionar label de qualificação acima da equipa 1 (mesma lógica da liguilha - todas as rondas)
+                    const legendItem1 = qualified.legend.find(item =>
+                        normalizeTeamName(item.team) === normalizeTeamName(resolvedTeam1)
+                    );
 
-                    // Definir cor de fundo se for vencedor, senão border colorida
-                    if (match.winner === match.team2) {
+                    if (legendItem1) {
+                        let qualLabel = '';
+                        if (legendItem1.division === '1ª') {
+                            qualLabel = `${legendItem1.position}º 1ª Div`;
+                        } else if (legendItem1.division === '2ª') {
+                            if (legendItem1.group) {
+                                qualLabel = `${legendItem1.actualPosition || legendItem1.position}º Gr. ${legendItem1.group}`;
+                            } else {
+                                qualLabel = `${legendItem1.actualPosition || legendItem1.position}º 2ª Div`;
+                            }
+                        }
+
+                        if (qualLabel) {
+                            const label1 = document.createElement('div');
+                            label1.className = 'qualification-label qualification-label-top';
+                            label1.textContent = qualLabel;
+                            matchDiv.appendChild(label1);
+                        }
+                    }
+
+                    const team2Div = document.createElement('div');
+                    // ⚠️ NÃO mostrar vencedor se jogo não foi realizado (já calculado acima)
+                    team2Div.className = `bracket-team ${matchPlayed && match.winner === match.team2 ? 'winner' : ''}`;
+
+                    // Definir cor de fundo se for vencedor E jogo foi realizado, senão border colorida
+                    if (matchPlayed && match.winner === match.team2) {
                         team2Div.style.background = `linear-gradient(135deg, ${team2Color}, ${team2Color}dd)`;
                         team2Div.style.borderLeftColor = team2Color;
                     } else {
@@ -2358,16 +3528,49 @@
                     team2Div.innerHTML = `
                         <div class="bracket-team-content">
                             ${team2Info.emblemPath ?
-                            `<img src="${team2Info.emblemPath}" alt="${normalizeTeamName(match.team2)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                            `<img src="${team2Info.emblemPath}" alt="${normalizeTeamName(resolvedTeam2)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
                             ''
                         }
-                            <span>${team2Info.displayName || normalizeTeamName(match.team2)}</span>
+                            <span>${team2Info.displayName || normalizeTeamName(resolvedTeam2)}</span>
                         </div>
-                        <span class="score">${match.score2 !== null ? match.score2 : '-'}</span>
+                        <span class="score">${matchPlayed ? match.score2 : '-'}</span>
                     `;
 
                     matchDiv.appendChild(team1Div);
                     matchDiv.appendChild(team2Div);
+
+                    // Adicionar label de qualificação abaixo da equipa 2 (mesma lógica da liguilha - todas as rondas)
+                    const legendItem2 = qualified.legend.find(item =>
+                        normalizeTeamName(item.team) === normalizeTeamName(resolvedTeam2)
+                    );
+
+                    if (legendItem2) {
+                        let qualLabel = '';
+                        if (legendItem2.division === '1ª') {
+                            qualLabel = `${legendItem2.position}º 1ª Div`;
+                        } else if (legendItem2.division === '2ª') {
+                            if (legendItem2.group) {
+                                qualLabel = `${legendItem2.actualPosition || legendItem2.position}º Gr. ${legendItem2.group}`;
+                            } else {
+                                qualLabel = `${legendItem2.actualPosition || legendItem2.position}º 2ª Div`;
+                            }
+                        }
+
+                        if (qualLabel) {
+                            const label2 = document.createElement('div');
+                            label2.className = 'qualification-label qualification-label-bottom';
+                            label2.textContent = qualLabel;
+                            matchDiv.appendChild(label2);
+                        }
+                    }
+
+                    // Adicionar indicação de bracket previsto se aplicável
+                    if (match.predicted) {
+                        const predictedIndicator = document.createElement('div');
+                        predictedIndicator.className = 'predicted-match-indicator';
+                        predictedIndicator.innerHTML = '<small style="color: #2196F3; font-style: italic; text-align: center; margin-top: 5px;">📅 Confronto Previsto</small>';
+                        matchDiv.appendChild(predictedIndicator);
+                    }
 
                     // Adicionar indicação de resultado desconhecido se aplicável
                     if (match.unknownResult) {
@@ -2382,6 +3585,286 @@
 
                 container.appendChild(roundDiv);
             });
+        }
+
+        // Criar bracket secundário (Manutenção/Promoção/Liguilha)
+        function createSecondaryBracket() {
+            const container = document.getElementById('secondaryBracketContainer');
+            const card = document.getElementById('secondaryBracketCard');
+            const title = document.getElementById('secondaryBracketTitle');
+
+            DebugUtils.debugSecondaryBracket('started', {
+                secondaryBracket: sampleData.secondaryBracket,
+                secondaryBracketKeys: Object.keys(sampleData.secondaryBracket || {}),
+                isEmpty: !sampleData.secondaryBracket || Object.keys(sampleData.secondaryBracket).length === 0,
+                bracketType: sampleData.secondaryBracketType
+            });
+
+            if (!sampleData.secondaryBracket || Object.keys(sampleData.secondaryBracket).length === 0) {
+                console.warn('⚠️ Bracket secundário VAZIO - escondendo card');
+                card.style.display = 'none';
+                return;
+            }
+
+            // Determinar título baseado no tipo de bracket secundário
+            const bracketType = sampleData.secondaryBracketType || 'playoff';
+            if (bracketType === 'maintenance-playoff') {
+                title.textContent = 'Playoff de Manutenção';
+            } else if (bracketType === 'maintenance-league') {
+                title.textContent = 'Liguilha de Manutenção';
+            } else if (bracketType === 'promotion-playoff') {
+                title.textContent = 'Playoff de Promoção';
+            } else if (bracketType === 'promotion-league') {
+                title.textContent = 'Liguilha de Promoção';
+            } else {
+                title.textContent = 'Playoff/Liguilha';
+            }
+
+            card.style.display = 'block';
+            container.innerHTML = '';
+
+            // Criar mapa de qualificationLabels para o bracket secundário - forçar refresh
+            const qualified = getQualifiedTeams(true);
+            DebugUtils.debugSecondaryBracket('qualified_teams', qualified);
+            const qualificationLabels = {};
+
+            qualified.legend.forEach(item => {
+                const relevantTypes = ['maintenance-playoff', 'maintenance-league', 'promotion-playoff', 'promotion-league'];
+                if (relevantTypes.includes(item.type)) {
+                    let label = `${item.position}º`;
+                    if (item.division === '2ª' && item.group) {
+                        label += ` Grupo ${item.group}`;
+                    } else if (item.division === '2ª') {
+                        label += ` 2ª Div`;
+                    } else if (item.division === '1ª') {
+                        label += ` 1ª Div`;
+                    }
+                    qualificationLabels[item.team] = label;
+                }
+            });
+
+            // Verificar se é uma tabela (liguilha) ou bracket (playoff)
+            if (sampleData.secondaryBracket.isTable) {
+                // Criar tabela de classificação para liguilhas
+                const tableDiv = document.createElement('div');
+                tableDiv.className = 'bracket-league-table';
+
+                const table = document.createElement('table');
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Equipa</th>
+                            <th>J</th>
+                            <th>V</th>
+                            <th>E</th>
+                            <th>D</th>
+                            <th>GM</th>
+                            <th>GS</th>
+                            <th>±</th>
+                            <th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                `;
+
+                const tbody = table.querySelector('tbody');
+
+                // Obter informações de qualificação
+                const qualified = getQualifiedTeams();
+
+                sampleData.secondaryBracket.standings.forEach((stats, index) => {
+                    // Resolver nome da equipa
+                    const resolvedTeam = resolveTeamName(stats.team);
+                    const teamInfo = getCourseInfo(normalizeTeamName(resolvedTeam));
+
+                    // Encontrar de onde veio esta equipa
+                    let qualLabel = '';
+                    let qualClass = '';
+                    const legendItem = qualified.legend.find(item =>
+                        item.team === resolvedTeam &&
+                        (item.type === 'maintenance-league' || item.type === 'promotion-league')
+                    );
+
+                    if (legendItem) {
+                        if (legendItem.division === '1ª') {
+                            qualLabel = `${legendItem.position}º 1ª Div`;
+                            qualClass = 'qual-1div';
+                        } else if (legendItem.division === '2ª') {
+                            if (legendItem.group) {
+                                qualLabel = `${legendItem.actualPosition || legendItem.position}º Gr. ${legendItem.group}`;
+                            } else {
+                                qualLabel = `${legendItem.actualPosition || legendItem.position}º 2ª Div`;
+                            }
+                            qualClass = 'qual-2div';
+                        }
+                    }
+
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td class="position">${index + 1}</td>
+                        <td class="team-cell">
+                            ${qualLabel ? `<span class="team-qualification-label ${qualClass}">${qualLabel}</span>` : ''}
+                            ${teamInfo.emblemPath ?
+                            `<img src="${teamInfo.emblemPath}" alt="${resolvedTeam}" class="team-emblem" onerror="this.style.display='none'">` :
+                            ''
+                        }
+                            <span>${teamInfo.displayName || resolvedTeam}</span>
+                        </td>
+                        <td>${stats.played}</td>
+                        <td>${stats.wins}</td>
+                        <td>${stats.draws}</td>
+                        <td>${stats.losses}</td>
+                        <td>${stats.goalsFor}</td>
+                        <td>${stats.goalsAgainst}</td>
+                        <td class="${stats.goalDiff > 0 ? 'positive' : stats.goalDiff < 0 ? 'negative' : ''}">${stats.goalDiff > 0 ? '+' : ''}${stats.goalDiff}</td>
+                        <td class="points"><strong>${stats.points}</strong></td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+
+                tableDiv.appendChild(table);
+                container.appendChild(tableDiv);
+            } else {
+                // Exibir como bracket tradicional
+                Object.entries(sampleData.secondaryBracket).forEach(([round, matches]) => {
+                    const roundDiv = document.createElement('div');
+                    roundDiv.className = 'bracket-round';
+
+                    const roundTitle = document.createElement('h3');
+                    roundTitle.textContent = round;
+                    roundDiv.appendChild(roundTitle);
+
+                    matches.forEach(match => {
+                        const matchDiv = document.createElement('div');
+                        matchDiv.className = 'bracket-match';
+
+                        // Resolver nomes (substituir placeholders por equipas reais)
+                        const resolvedTeam1 = resolveTeamName(match.team1);
+                        const resolvedTeam2 = resolveTeamName(match.team2);
+
+                        // Obter informações das equipas
+                        const team1Info = getCourseInfo(normalizeTeamName(resolvedTeam1));
+                        const team2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
+
+                        // Usar cor da equipa ou cinza neutro como fallback
+                        const team1Color = team1Info.colors ? team1Info.colors[0] : '#6c757d';
+                        const team2Color = team2Info.colors ? team2Info.colors[0] : '#6c757d';
+
+                        const team1Div = document.createElement('div');
+                        // ⚠️ NÃO mostrar vencedor se jogo não foi realizado
+                        const matchPlayed = (match.score1 !== null && match.score2 !== null) && !match.predicted && !match.unknownResult;
+                        team1Div.className = `bracket-team ${matchPlayed && match.winner === match.team1 ? 'winner' : ''}`;
+
+                        if (matchPlayed && match.winner === match.team1) {
+                            team1Div.style.background = `linear-gradient(135deg, ${team1Color}, ${team1Color}dd)`;
+                            team1Div.style.borderLeftColor = team1Color;
+                        } else {
+                            team1Div.style.borderLeftColor = team1Color;
+                        }
+
+                        team1Div.innerHTML = `
+                        <div class="bracket-team-content">
+                            ${team1Info.emblemPath ?
+                                `<img src="${team1Info.emblemPath}" alt="${normalizeTeamName(resolvedTeam1)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                                ''
+                            }
+                            <span>${team1Info.displayName || normalizeTeamName(resolvedTeam1)}</span>
+                        </div>
+                        <span class="score">${matchPlayed ? match.score1 : '-'}</span>
+                    `;
+
+                        // Adicionar label de qualificação acima da equipa 1 (mesma lógica da liguilha)
+                        const legendItem1 = qualified.legend.find(item =>
+                            normalizeTeamName(item.team) === normalizeTeamName(resolvedTeam1)
+                        );
+
+                        if (legendItem1) {
+                            let qualLabel = '';
+                            if (legendItem1.division === '1ª') {
+                                qualLabel = `${legendItem1.position}º 1ª Div`;
+                            } else if (legendItem1.division === '2ª') {
+                                if (legendItem1.group) {
+                                    qualLabel = `${legendItem1.actualPosition || legendItem1.position}º Gr. ${legendItem1.group}`;
+                                } else {
+                                    qualLabel = `${legendItem1.actualPosition || legendItem1.position}º 2ª Div`;
+                                }
+                            }
+
+                            if (qualLabel) {
+                                const label1 = document.createElement('div');
+                                label1.className = 'qualification-label qualification-label-top';
+                                label1.textContent = qualLabel;
+                                matchDiv.appendChild(label1);
+                            }
+                        }
+
+                        const team2Div = document.createElement('div');
+                        // ⚠️ NÃO mostrar vencedor se jogo não foi realizado (já calculado acima)
+                        team2Div.className = `bracket-team ${matchPlayed && match.winner === match.team2 ? 'winner' : ''}`;
+
+                        if (matchPlayed && match.winner === match.team2) {
+                            team2Div.style.background = `linear-gradient(135deg, ${team2Color}, ${team2Color}dd)`;
+                            team2Div.style.borderLeftColor = team2Color;
+                        } else {
+                            team2Div.style.borderLeftColor = team2Color;
+                        }
+
+                        team2Div.innerHTML = `
+                        <div class="bracket-team-content">
+                            ${team2Info.emblemPath ?
+                                `<img src="${team2Info.emblemPath}" alt="${normalizeTeamName(resolvedTeam2)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                                ''
+                            }
+                            <span>${team2Info.displayName || normalizeTeamName(resolvedTeam2)}</span>
+                        </div>
+                        <span class="score">${matchPlayed ? match.score2 : '-'}</span>
+                    `;
+
+                        matchDiv.appendChild(team1Div);
+                        matchDiv.appendChild(team2Div);
+
+                        // Adicionar label de qualificação abaixo da equipa 2 (mesma lógica da liguilha)
+                        const legendItem2 = qualified.legend.find(item =>
+                            normalizeTeamName(item.team) === normalizeTeamName(resolvedTeam2)
+                        );
+
+                        if (legendItem2) {
+                            let qualLabel = '';
+                            if (legendItem2.division === '1ª') {
+                                qualLabel = `${legendItem2.position}º 1ª Div`;
+                            } else if (legendItem2.division === '2ª') {
+                                if (legendItem2.group) {
+                                    qualLabel = `${legendItem2.actualPosition || legendItem2.position}º Gr. ${legendItem2.group}`;
+                                } else {
+                                    qualLabel = `${legendItem2.actualPosition || legendItem2.position}º 2ª Div`;
+                                }
+                            }
+
+                            if (qualLabel) {
+                                const label2 = document.createElement('div');
+                                label2.className = 'qualification-label qualification-label-bottom';
+                                label2.textContent = qualLabel;
+                                matchDiv.appendChild(label2);
+                            }
+                        }
+
+                        if (match.unknownResult) {
+                            const unknownIndicator = document.createElement('div');
+                            unknownIndicator.className = 'unknown-result-indicator';
+                            unknownIndicator.innerHTML = '<small style="color: #666; font-style: italic; text-align: center; margin-top: 5px;">⚠️ Resultado Desconhecido</small>';
+                            matchDiv.appendChild(unknownIndicator);
+                        }
+
+                        roundDiv.appendChild(matchDiv);
+                    });
+
+                    container.appendChild(roundDiv);
+                });
+            }
         }
 
         // Atualizar filtros rápidos baseado na estrutura da modalidade
@@ -2429,7 +3912,7 @@
             filtersContainer.appendChild(resetBtn);
         }
         // Determinar progressão no torneio baseada na estrutura
-        function getTeamProgression(position, totalTeams, structure) {
+        function getTeamProgression(position, totalTeams, structure, teamName = null, teamGroup = null) {
             const progression = {
                 type: 'safe',
                 description: 'Zona segura'
@@ -2442,11 +3925,86 @@
                 divisions: structure.divisions,
                 groups: structure.groups,
                 currentDivision,
-                currentGroup
+                currentGroup,
+                playoffSystem: playoffSystemInfo,
+                teamName,
+                teamGroup
             });
+
+            const divisionNum = parseInt(currentDivision) || 1;
+            const isSecondDivision = divisionNum === 2;
+            const hasWinnerPlayoffs = playoffSystemInfo.hasWinnerPlayoffs || false;
+            const hasMaintenancePlayoffs = playoffSystemInfo.hasMaintenancePlayoffs || false;
+            const hasMaintenanceLeague = playoffSystemInfo.hasMaintenanceLeague || false;
+
+            // ⚠️ VERIFICAÇÃO DE EQUIPA B - Se for B team, verificar se realmente qualifica
+            const isTeamB = (name) => /\sB$/i.test(name);
+
+            if (teamName && isTeamB(teamName)) {
+                // Esta é uma equipa B - precisamos verificar se ela realmente qualifica
+                const qualified = getQualifiedTeams();
+
+                // Verificar se esta equipa B específica está na lista de qualificados
+                const isInPlayoffs = qualified.playoffs.some(t => t === teamName);
+                const isInMaintenancePlayoff = qualified.maintenancePlayoff.some(t => t === teamName);
+                const isInPromotionPlayoff = qualified.promotionPlayoff.some(t => t === teamName);
+
+                // Se equipa B NÃO está qualificada, marcar como safe
+                if (!isInPlayoffs && !isInMaintenancePlayoff && !isInPromotionPlayoff) {
+                    DebugUtils.debugTeamBStatus('team_b_not_qualified', { team: teamName, position });
+                    progression.type = 'safe';
+                    progression.description = `Zona segura (${position}º lugar - equipa B não qualifica)`;
+                    return progression;
+                }
+                // Se qualifica, continuar lógica normal
+                DebugUtils.debugTeamBStatus('team_b_qualified', { team: teamName, position });
+            }
+
+            // 🔍 VERIFICAÇÃO DE EQUIPA SUBSTITUTA - Se não for B, mas estiver em posição de B substituída
+            if (teamName && !isTeamB(teamName) && isSecondDivision && (position === 2 || position >= 3)) {
+                const qualified = getQualifiedTeams();
+
+                // Verificar se esta equipa está nos playoffs (substituindo o 1º)
+                const isInPlayoffs = qualified.playoffs.some(t => t === teamName);
+
+                // Se está nos playoffs mas não é 1º, é substituta!
+                if (isInPlayoffs && position > 1) {
+                    DebugUtils.debugTeamBStatus('in_playoffs_replaced', { team: teamName, position });
+                    progression.type = 'playoffs';
+                    progression.description = `Play-offs + Promoção (substitui ${position}º do grupo)`;
+                    return progression;
+                }
+
+                // Verificar se está no promotion playoff (2º lugar normal ou substituindo)
+                const isInPromotionPlayoff = qualified.promotionPlayoff.some(t => t === teamName);
+
+                if (isInPromotionPlayoff && position > 2) {
+                    DebugUtils.debugTeamBStatus('in_promotion_replaced', { team: teamName, position });
+                    if (hasMaintenancePlayoffs) {
+                        progression.type = 'promotion-playoffs';
+                        progression.description = `Play-off de Promoção (substitui ${position}º do grupo)`;
+                    } else if (hasMaintenanceLeague) {
+                        progression.type = 'promotion-league';
+                        progression.description = `Liguilha de Promoção (substitui ${position}º do grupo)`;
+                    } else {
+                        progression.type = 'promotion';
+                        progression.description = `Subida de divisão (substitui ${position}º do grupo)`;
+                    }
+                    return progression;
+                }
+            }
 
             // Regras baseadas na estrutura do torneio
             switch (structure.type) {
+                case 'single-league':
+                    // Liga única sem divisões nem grupos (ex: Basquetebol Feminino 25_26, Futsal Feminino 25_26)
+                    // REGRA: Passam sempre 8 aos playoffs
+                    if (position <= 8) {
+                        progression.type = 'playoffs';
+                        progression.description = 'Qualificação para play-offs';
+                    }
+                    break;
+
                 case 'groups-only':
                     // Formato: Sem divisões, sempre 2 grupos
                     // Passam os primeiros 4 de cada grupo aos play-offs
@@ -2458,27 +4016,58 @@
 
                 case 'divisions-only':
                     // Formato: Múltiplas divisões sem grupos (ex: Andebol)
-                    const currentDiv = currentDivision || '1';
+                    if (divisionNum === 1) {
+                        // 1ª divisão
+                        // REGRA: Passam sempre 8 aos playoffs (se houver 2ª divisão, senão os 7 primeiros)
+                        // Quando há PM/LM: últimos 3 descem direto, 4º pior vai ao PM/LM
+                        // Quando não há PM/LM: últimos 2 descem direto
 
-                    if (currentDiv === '1') {
-                        // 1ª divisão - primeiros 7 vão aos play-offs, últimos 2 descem
-                        if (position <= 7 && totalTeams >= 8) {
+                        const has2ndDivision = structure.divisions.includes('2');
+                        const playoffSpots = has2ndDivision ? 7 : 8; // Se há 2ª divisão, 7 da 1ª + 1 da 2ª = 8 total
+
+                        if (position <= playoffSpots && totalTeams >= 8) {
                             progression.type = 'playoffs';
                             progression.description = 'Qualificação para play-offs';
-                        } else if (position >= totalTeams - 1) {
-                            progression.type = 'relegation';
-                            progression.description = 'Descida de divisão';
+                        } else if (hasMaintenancePlayoffs || hasMaintenanceLeague) {
+                            // Com PM/LM: últimos 3 descem, 4º pior vai ao PM/LM
+                            if (position >= totalTeams - 2) {
+                                progression.type = 'relegation';
+                                progression.description = 'Descida de divisão';
+                            } else if (position === totalTeams - 3) {
+                                if (hasMaintenancePlayoffs) {
+                                    progression.type = 'maintenance-playoffs';
+                                    progression.description = 'Play-off de manutenção';
+                                } else {
+                                    progression.type = 'maintenance-league';
+                                    progression.description = 'Liguilha de manutenção';
+                                }
+                            }
+                        } else {
+                            // Sem PM/LM: últimos 2 descem direto
+                            if (position >= totalTeams - 1) {
+                                progression.type = 'relegation';
+                                progression.description = 'Descida de divisão';
+                            }
                         }
-                    } else if (currentDiv === '2') {
-                        // 2ª divisão - primeiro vai aos play-offs, segundo sobe diretamente
+                    } else if (isSecondDivision) {
+                        // 2ª divisão - promoção
+                        // REGRA: 1º vai aos playoffs + promoção (com 7 da 1ª = 8 total), 2º vai ao PM/LM ou sobe direto
                         if (position === 1) {
                             progression.type = 'playoffs';
-                            progression.description = 'Qualificação para play-offs';
+                            progression.description = 'Play-offs + Promoção';
                         } else if (position === 2) {
-                            progression.type = 'promotion';
-                            progression.description = 'Subida de divisão';
+                            if (hasMaintenancePlayoffs) {
+                                progression.type = 'promotion-playoffs';
+                                progression.description = 'Play-off de Promoção';
+                            } else if (hasMaintenanceLeague) {
+                                progression.type = 'promotion-league';
+                                progression.description = 'Liguilha de Promoção';
+                            } else {
+                                progression.type = 'promotion';
+                                progression.description = 'Subida de divisão';
+                            }
                         }
-                    } else if (currentDiv === '3' || parseInt(currentDiv) >= 3) {
+                    } else if (divisionNum >= 3) {
                         // 3ª divisão ou inferior - primeiros 2 sobem
                         if (position <= 2) {
                             progression.type = 'promotion';
@@ -2489,58 +4078,58 @@
 
                 case 'divisions-and-groups':
                     // Formato: Divisões com grupos (ex: Futsal Masculino)
-                    const divisionKey = currentDivision || '1';
+                    // REGRA: Passam sempre 8 aos playoffs (1º de cada grupo da 2ª + melhores da 1ª)
+                    // Manutenção: Últimos 3 descem direto, 4º pior vai ao PM/LM, 2º de cada grupo da 2ª vão ao PM/LM
+
                     const secondDivisionGroups = structure.groups.filter(g =>
                         sampleData.teams.some(team => team.division === '2' && team.group === g)
                     ).length;
 
-                    if (divisionKey === '1') {
-                        // 1ª divisão - regras dependem da estrutura da 2ª divisão
-                        if (secondDivisionGroups === 1) {
-                            // 2ª divisão tem 1 grupo: passam 7 da 1ª, descem 2
-                            if (position <= 7) {
-                                progression.type = 'playoffs';
-                                progression.description = 'Qualificação para play-offs';
-                            } else if (position >= totalTeams - 1) {
+                    if (divisionNum === 1) {
+                        // 1ª divisão
+                        // Calcular quantos da 1ª passam aos playoffs (8 total - nº de grupos da 2ª)
+                        const playoffSpotsFrom1st = Math.max(4, 8 - secondDivisionGroups);
+
+                        if (position <= playoffSpotsFrom1st) {
+                            progression.type = 'playoffs';
+                            progression.description = 'Qualificação para play-offs';
+                        } else if (hasMaintenancePlayoffs || hasMaintenanceLeague) {
+                            // Com PM/LM: últimos 3 descem direto, 4º pior vai ao PM/LM
+                            if (position >= totalTeams - 2) {
                                 progression.type = 'relegation';
                                 progression.description = 'Descida de divisão';
-                            }
-                        } else if (secondDivisionGroups === 2) {
-                            // 2ª divisão tem 2 grupos: passam 6 da 1ª, descem 4
-                            if (position <= 6) {
-                                progression.type = 'playoffs';
-                                progression.description = 'Qualificação para play-offs';
-                            } else if (position >= totalTeams - 3) {
-                                progression.type = 'relegation';
-                                progression.description = 'Descida de divisão';
+                            } else if (position === totalTeams - 3) {
+                                if (hasMaintenancePlayoffs) {
+                                    progression.type = 'maintenance-playoffs';
+                                    progression.description = 'Play-off de manutenção';
+                                } else {
+                                    progression.type = 'maintenance-league';
+                                    progression.description = 'Liguilha de manutenção';
+                                }
                             }
                         } else {
-                            // Fallback para estruturas não previstas
-                            if (position <= 4) {
-                                progression.type = 'playoffs';
-                                progression.description = 'Qualificação para play-offs';
-                            } else if (position >= totalTeams - 1) {
+                            // Sem PM/LM: últimos 2 descem direto (descidas diretas)
+                            if (position >= totalTeams - 1) {
                                 progression.type = 'relegation';
                                 progression.description = 'Descida de divisão';
                             }
                         }
-                    } else if (divisionKey === '2') {
-                        // 2ª divisão - regras dependem do número de grupos
-                        if (secondDivisionGroups === 1) {
-                            // 1 grupo: sobem 2 (1 vai aos play-offs, 1 sobe direto)
-                            if (position === 1) {
-                                progression.type = 'playoffs';
-                                progression.description = 'Qualificação para play-offs';
-                            } else if (position === 2) {
-                                progression.type = 'promotion';
-                                progression.description = 'Subida de divisão';
-                            }
-                        } else if (secondDivisionGroups === 2) {
-                            // 2 grupos: 1º de cada grupo vai aos play-offs, 2º de cada grupo sobe
-                            if (position === 1) {
-                                progression.type = 'playoffs';
-                                progression.description = 'Qualificação para play-offs (1º do grupo)';
-                            } else if (position === 2) {
+                    } else if (isSecondDivision) {
+                        // 2ª divisão com grupos
+                        // REGRA: 1º de cada grupo vai aos playoffs + promoção (8 total)
+                        // 2º de cada grupo vai ao PM/LM de promoção (se existir) ou sobe direto (se não existir)
+
+                        if (position === 1) {
+                            progression.type = 'playoffs';
+                            progression.description = 'Play-offs + Promoção (1º do grupo)';
+                        } else if (position === 2) {
+                            if (hasMaintenancePlayoffs) {
+                                progression.type = 'promotion-playoffs';
+                                progression.description = 'Play-off de Promoção (2º do grupo)';
+                            } else if (hasMaintenanceLeague) {
+                                progression.type = 'promotion-league';
+                                progression.description = 'Liguilha de Promoção (2º do grupo)';
+                            } else {
                                 progression.type = 'promotion';
                                 progression.description = 'Subida de divisão (2º do grupo)';
                             }
@@ -2597,14 +4186,25 @@
 
             // Verificar estrutura baseada nos dados de classificação
             Object.keys(sampleData.rankings).forEach(key => {
-                if (!isNaN(key)) {
-                    // É um número, então é divisão
+                // Detectar divisões: "1ª Divisão", "2ª Divisão", "1", "2"
+                if (key.includes('Divisão') || key.match(/^[12][ªa]?\s*(div|divisão)?$/i) || ['1', '2'].includes(key)) {
                     structure.hasDivisions = true;
-                    structure.divisions.push(key);
-                } else {
-                    // É letra/string, então é grupo
+                    if (!structure.divisions.includes(key)) {
+                        structure.divisions.push(key);
+                    }
+                }
+
+                // Detectar grupos: "2ª Divisão - Grupo A", ou qualquer chave com "Grupo"
+                if (key.includes('Grupo') || key.match(/grupo\s+[A-Z]/i)) {
                     structure.hasGroups = true;
-                    structure.groups.push(key);
+                    if (!structure.groups.includes(key)) {
+                        structure.groups.push(key);
+                    }
+                }
+
+                // "geral" é liga única
+                if (key === 'geral') {
+                    structure.type = 'single-league';
                 }
             });
 
@@ -2631,7 +4231,9 @@
             } else if (structure.hasDivisions) {
                 structure.type = 'divisions-only'; // Ex: Andebol
             } else if (structure.hasGroups) {
-                structure.type = 'groups-only'; // Ex: Futsal Feminino
+                structure.type = 'groups-only'; // Ex: Futsal Feminino 24_25 (2 grupos)
+            } else if (Object.keys(sampleData.rankings).length === 1 && Object.keys(sampleData.rankings)[0] === 'geral') {
+                structure.type = 'single-league'; // Ex: Basquetebol Feminino 25_26, Futsal Feminino 25_26 (liga única)
             }
 
             DebugUtils.debugModalityAnalysis('structure_detected', structure);
@@ -2746,339 +4348,27 @@
             updateEloChart();
         }
 
-        // Configuração dos cursos com emblemas e cores baseada nos núcleos da UA
-        const coursesConfig = {
-            'AP': {
-                displayName: 'Administração Pública',
-                nucleus: 'NEAP',
-                emblem: 'assets/Logos/NEAP-07.png',
-                colors: ['#1e4395', '#6c757d']
-            },
-            'Biologia': {
-                displayName: 'Biologia',
-                nucleus: 'NEB',
-                emblem: 'assets/Logos/NEB-07.png',
-                colors: ['#76c5bc', '#6c757d']
-            },
-            'Biologia e Geologia': {
-                displayName: 'Biologia e Geologia',
-                nucleus: 'NEBG',
-                emblem: 'assets/Logos/NEBG-07.png',
-                colors: ['#16a1dc', '#6c757d']
-            },
-            'Bioquímica': {
-                displayName: 'Bioquímica',
-                nucleus: 'NEQ',
-                emblem: 'assets/Logos/NEQ-07.png',
-                colors: ['#14a0db', '#6c757d']
-            },
-            'Biotecnologia': {
-                displayName: 'Biotecnologia',
-                nucleus: 'NECiB',
-                emblem: 'assets/Logos/NECiB-07.png',
-                colors: ['#14a0db', '#6c757d']
-            },
-            'CBM': {
-                displayName: 'Ciências Biomédicas',
-                nucleus: 'NECiB',
-                emblem: 'assets/Logos/NECiB-07.png',
-                colors: ['#14a0db', '#6c757d']
-            },
-            'CBM B': {
-                displayName: 'Ciências Biomédicas B',
-                nucleus: 'NECiB',
-                emblem: 'assets/Logos/NECiB-07.png',
-                colors: ['#14a0db', '#6c757d']
-            },
-            'Ciências do Mar': {
-                displayName: 'Ciências do Mar',
-                nucleus: 'NECM',
-                emblem: 'assets/Logos/NECM-07.png',
-                colors: ['#1c91a8', '#6c757d']
-            },
-            'Contabilidade': {
-                displayName: 'Contabilidade',
-                nucleus: 'NAE-ISCA',
-                emblem: 'assets/Logos/NAE_ISCA-07.png',
-                colors: ['#1e4395', '#6c757d']
-            },
-            'DPT': {
-                displayName: 'DPT',
-                nucleus: 'NAE-ESAN',
-                emblem: 'assets/Logos/NAE_ESAN-07.png',
-                colors: ['#14a0db', '#6c757d']
-            },
-            'Design': {
-                displayName: 'Design',
-                nucleus: 'NED',
-                emblem: 'assets/Logos/NED-07.png',
-                colors: ['#e73630', '#6c757d']
-            },
-            'ECT': {
-                displayName: 'Eng. Computadores e Telemática',
-                nucleus: 'NEECT',
-                emblem: 'assets/Logos/NEECT-07.png',
-                colors: ['#4c65a4', '#6c757d']
-            },
-            'EET': {
-                displayName: 'Eng. Eletrónica e Telecomunicações',
-                nucleus: 'NEEETA',
-                emblem: 'assets/Logos/NEEETA-07.png',
-                colors: ['#3362ae', '#6c757d']
-            },
-            'EET B': {
-                displayName: 'Eng. Eletrónica e Telecomunicações B',
-                nucleus: 'NEEETA',
-                emblem: 'assets/Logos/NEEETA-07.png',
-                colors: ['#3362ae', '#6c757d']
-            },
-            'EGI': {
-                displayName: 'Eng. e Gestão Industrial',
-                nucleus: 'AEGIA',
-                emblem: 'assets/Logos/EGI-07.png',
-                colors: ['#ff6d10', '#6c757d']
-            },
-            'EGI B': {
-                displayName: 'Eng. e Gestão Industrial B',
-                nucleus: 'AEGIA',
-                emblem: 'assets/Logos/EGI-07.png',
-                colors: ['#ff6d10', '#6c757d']
-            },
-            'Economia': {
-                displayName: 'Economia',
-                nucleus: 'NEEC',
-                emblem: 'assets/Logos/NEEC-07.png',
-                colors: ['#e73630', '#6c757d']
-            },
-            'Educaçao Básica': {
-                displayName: 'Educação Básica',
-                nucleus: 'NEEB',
-                emblem: 'assets/Logos/NEEB-07.png',
-                colors: ['#e94183', '#6c757d']
-            },
-            'Educação Básica': {
-                displayName: 'Educação Básica',
-                nucleus: 'NEEB',
-                emblem: 'assets/Logos/NEEB-07.png',
-                colors: ['#e94183', '#6c757d']
-            },
-            'Enfermagem': {
-                displayName: 'Enfermagem',
-                nucleus: 'NAE-ESSUA',
-                emblem: 'assets/Logos/NAE_ESSUA-07.png',
-                colors: ['#1ca152', '#6c757d']
-            },
-            'Eng. Aeroespacial': {
-                displayName: 'Eng. Aeroespacial',
-                nucleus: 'NEEMec',
-                emblem: 'assets/Logos/NEEMec-07.png',
-                colors: ['#f08344', '#6c757d']
-            },
-            'Eng. Ambiente': {
-                displayName: 'Eng. do Ambiente',
-                nucleus: 'NEEA',
-                emblem: 'assets/Logos/NEEA-07.png',
-                colors: ['#a05389', '#6c757d']
-            },
-            'Eng. Biomédica': {
-                displayName: 'Eng. Biomédica',
-                nucleus: 'NEEF',
-                emblem: 'assets/Logos/NEEF-07.png',
-                colors: ['#f9dd53', '#6c757d']
-            },
-            'Eng. Civil': {
-                displayName: 'Eng. Civil',
-                nucleus: 'NEBEC',
-                emblem: 'assets/Logos/NEBEC-07.png',
-                colors: ['#f08344', '#6c757d']
-            },
-            'Eng. Compotacional': {
-                displayName: 'Eng. Computacional',
-                nucleus: 'NEEF',
-                emblem: 'assets/Logos/NEEF-07.png',
-                colors: ['#f9dd53', '#6c757d']
-            },
-            'Eng. Computacional': {
-                displayName: 'Eng. Computacional',
-                nucleus: 'NEEF',
-                emblem: 'assets/Logos/NEEF-07.png',
-                colors: ['#f9dd53', '#6c757d']
-            },
-            'Eng. Cívil': {
-                displayName: 'Eng. Civil',
-                nucleus: 'NEBEC',
-                emblem: 'assets/Logos/NEBEC-07.png',
-                colors: ['#f08344', '#6c757d']
-            },
-            'Eng. Física': {
-                displayName: 'Eng. Física',
-                nucleus: 'NEEF',
-                emblem: 'assets/Logos/NEEF-07.png',
-                colors: ['#f9dd53', '#6c757d']
-            },
-            'Eng. Informática': {
-                displayName: 'Eng. Informática',
-                nucleus: 'NEI',
-                emblem: 'assets/Logos/NEI-07.png',
-                colors: ['#178d4a', '#6c757d']
-            },
-            'Eng. Informática ': {
-                displayName: 'Eng. Informática',
-                nucleus: 'NEI',
-                emblem: 'assets/Logos/NEI-07.png',
-                colors: ['#178d4a', '#6c757d']
-            },
-            'Eng. Informática B': {
-                displayName: 'Eng. Informática B',
-                nucleus: 'NEI',
-                emblem: 'assets/Logos/NEI-07.png',
-                colors: ['#178d4a', '#6c757d']
-            },
-            'Eng. Materiais': {
-                displayName: 'Eng. de Materiais',
-                nucleus: 'NEM',
-                emblem: 'assets/Logos/NEM-07.png',
-                colors: ['#e73630', '#6c757d']
-            },
-            'Eng. Materias': {
-                displayName: 'Eng. de Materiais',
-                nucleus: 'NEM',
-                emblem: 'assets/Logos/NEM-07.png',
-                colors: ['#e73630', '#6c757d']
-            },
-            'Eng. Mecânica': {
-                displayName: 'Eng. Mecânica',
-                nucleus: 'NEEMec',
-                emblem: 'assets/Logos/NEEMec-07.png',
-                colors: ['#f08344', '#6c757d']
-            },
-            'Eng. Mecânica B': {
-                displayName: 'Eng. Mecânica B',
-                nucleus: 'NEEMec',
-                emblem: 'assets/Logos/NEEMec-07.png',
-                colors: ['#f08344', '#6c757d']
-            },
-            'Eng. Química': {
-                displayName: 'Eng. Química',
-                nucleus: 'NEEQu',
-                emblem: 'assets/Logos/NEEQu-07.png',
-                colors: ['#f08344', '#6c757d']
-            },
-            'Eng.Cívil': {
-                displayName: 'Eng. Civil',
-                nucleus: 'NEBEC',
-                emblem: 'assets/Logos/NEBEC-07.png',
-                colors: ['#f08344', '#6c757d']
-            },
-            'Finanças': {
-                displayName: 'Finanças',
-                nucleus: 'NAE-ISCA',
-                emblem: 'assets/Logos/NAE_ISCA-07.png',
-                colors: ['#1e4395', '#6c757d']
-            },
-            'Fisioterapia': {
-                displayName: 'Fisioterapia',
-                nucleus: 'NAE-ESSUA',
-                emblem: 'assets/Logos/NAE_ESSUA-07.png',
-                colors: ['#1ca152', '#6c757d']
-            },
-            'Física': {
-                displayName: 'Física',
-                nucleus: 'NEEF',
-                emblem: 'assets/Logos/NEEF-07.png',
-                colors: ['#f9dd53', '#6c757d']
-            },
-            'GPT': {
-                displayName: 'Gestão e Planeamento em Turismo',
-                nucleus: 'NEGPT',
-                emblem: 'assets/Logos/NEGPT-07.png',
-                colors: ['#0d7b3e', '#6c757d']
-            },
-            'Geologia': {
-                displayName: 'Geologia',
-                nucleus: 'NEGeo',
-                emblem: 'assets/Logos/NEGeo-07.png',
-                colors: ['#b26b2c', '#6c757d']
-            },
-            'Gestao': {
-                displayName: 'Gestão',
-                nucleus: 'NEG',
-                emblem: 'assets/Logos/NEG-07.png',
-                colors: ['#be2628', '#6c757d']
-            },
-            'Gestao Comercial': {
-                displayName: 'Gestão Comercial',
-                nucleus: 'NEG',
-                emblem: 'assets/Logos/NEG-07.png',
-                colors: ['#be2628', '#6c757d']
-            },
-            'Gestao Pública': {
-                displayName: 'Gestão Pública',
-                nucleus: 'NAE-ESTGA',
-                emblem: 'assets/Logos/NAE_ESTGA-07.png',
-                colors: ['#14a0db', '#6c757d']
-            },
-            'Gestão': {
-                displayName: 'Gestão',
-                nucleus: 'NEG',
-                emblem: 'assets/Logos/NEG-07.png',
-                colors: ['#be2628', '#6c757d']
-            },
-            'LLC': {
-                displayName: 'Línguas, Literaturas e Culturas',
-                nucleus: 'NELLC',
-                emblem: 'assets/Logos/NELLC-07.png',
-                colors: ['#1e4395', '#6c757d']
-            },
-            'LRE': {
-                displayName: 'Línguas e Relações Empresariais',
-                nucleus: 'NELRE',
-                emblem: 'assets/Logos/NELRE-07.png',
-                colors: ['#e72a30', '#6c757d']
-            },
-            'MTC': {
-                displayName: 'MTC',
-                nucleus: 'NEMTC',
-                emblem: 'assets/Logos/NEMTC-07.png',
-                colors: ['#209548', '#6c757d']
-            },
-            'Matemática': {
-                displayName: 'Matemática',
-                nucleus: 'NEMAT',
-                emblem: 'assets/Logos/NEMAT-07.png',
-                colors: ['#16a1dc', '#6c757d']
-            },
-            'Música': {
-                displayName: 'Música',
-                nucleus: 'NEMu',
-                emblem: 'assets/Logos/NEMu-07.png',
-                colors: ['#1e4395', '#6c757d']
-            },
-            'Psicologia': {
-                displayName: 'Psicologia',
-                nucleus: 'NEP',
-                emblem: 'assets/Logos/NEP-07.png',
-                colors: ['#f08344', '#6c757d']
-            },
-            'Química': {
-                displayName: 'Química',
-                nucleus: 'NEQ',
-                emblem: 'assets/Logos/NEQ-07.png',
-                colors: ['#14a0db', '#6c757d']
-            },
-            'TI': {
-                displayName: 'Tecnologias de Informação',
-                nucleus: 'NEECT',
-                emblem: 'assets/Logos/NEECT-07.png',
-                colors: ['#4c65a4', '#6c757d']
-            },
-            'Tradução': {
-                displayName: 'Tradução',
-                nucleus: 'NET',
-                emblem: 'assets/Logos/NET-07.png',
-                colors: ['#1e4395', '#6c757d']
+        // Configuração dos cursos carregada de ficheiro externo
+        let coursesConfig = {};
+
+        /**
+         * Carrega a configuração dos cursos do ficheiro JSON
+         */
+        async function loadCoursesConfig() {
+            try {
+                const response = await fetch('config_cursos.json');
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar config_cursos.json');
+                }
+                const data = await response.json();
+                coursesConfig = data.courses;
+                DebugUtils.debugFileLoading('courses_loaded', { count: Object.keys(coursesConfig).length });
+            } catch (error) {
+                console.error('Erro ao carregar configuração de cursos:', error);
             }
-        };        /**
+        }
+
+        /**
          * Normaliza texto removendo acentos e convertendo para minúsculas
          */
         function normalizeText(text) {
@@ -3131,7 +4421,8 @@
                 courseKey = 'Tradução';
             }
 
-            const courseInfo = coursesConfig[courseKey];
+            // CORRIGIDO: Acessar coursesConfig.courses ao invés de coursesConfig diretamente
+            const courseInfo = coursesConfig.courses ? coursesConfig.courses[courseKey] : coursesConfig[courseKey];
 
             if (courseInfo) {
                 return {
@@ -3139,6 +4430,7 @@
                     fullName: courseInfo.displayName || courseKey,
                     nucleus: courseInfo.nucleus,
                     emblemPath: courseInfo.emblem,
+                    colors: courseInfo.colors, // Retornar o array completo
                     primaryColor: courseInfo.colors[0],
                     secondaryColor: courseInfo.colors[1]
                 };
@@ -3149,7 +4441,7 @@
                 shortName: courseKey,
                 fullName: courseKey,
                 nucleus: 'UA',
-                emblemPath: 'assets/Logos/NEI-07.png',
+                emblemPath: 'assets/taça_ua.png',
                 primaryColor: generateFallbackColor(courseKey),
                 secondaryColor: generateFallbackColor(courseKey, true)
             };
@@ -3182,15 +4474,35 @@
             return coursesConfig;
         }
 
-        let sampleData = { teams: [], rankings: {}, eloHistory: {}, matches: [], gamesDates: [], rawEloData: [] };
-        let currentEpoca = '24_25'; // Época padrão
-        let availableEpocas = ['24_25']; // Épocas disponíveis (será preenchido dinamicamente)
+        let sampleData = {
+            teams: [],
+            rankings: {},
+            eloHistory: {},
+            matches: [],
+            bracket: {},
+            secondaryBracket: {},  // ← ADICIONADO para playoffs/liguilhas secundários
+            secondaryBracketType: null,  // ← ADICIONADO para tipo do bracket secundário
+            gamesDates: [],
+            rawEloData: []
+        };
+        let currentEpoca = null; // Será definido automaticamente para a época mais recente
+        let availableEpocas = []; // Épocas disponíveis (será preenchido dinamicamente)
+        let playoffSystemInfo = {}; // Informações sobre o sistema de playoff/liguilha por modalidade
 
         // Função para detectar épocas disponíveis baseadas nos arquivos existentes
-        function detectAvailableEpocas() {
-            // Por enquanto, apenas 24_25 está disponível
-            // Esta função pode ser expandida no futuro para detectar mais épocas automaticamente
-            return ['24_25'];
+        async function detectAvailableEpocas() {
+            // Épocas conhecidas (não fazer requests para épocas futuras)
+            const knownEpocas = ['24_25', '25_26'];
+
+            // Ordenar épocas por ano (mais recente primeiro)
+            const sortedEpocas = knownEpocas.sort((a, b) => {
+                const [yearA] = a.split('_').map(n => parseInt(n));
+                const [yearB] = b.split('_').map(n => parseInt(n));
+                return yearB - yearA; // Ordem decrescente
+            });
+
+            DebugUtils.debugFileLoading('epochs_detected', { epochs: sortedEpocas });
+            return sortedEpocas;
         }
 
         // Função para obter modalidades disponíveis para uma época específica
@@ -3214,9 +4526,15 @@
         }
 
         // Função para inicializar os seletores
-        function initializeSelectors() {
+        async function initializeSelectors() {
             // Detectar épocas disponíveis
-            availableEpocas = detectAvailableEpocas();
+            availableEpocas = await detectAvailableEpocas();
+
+            // Definir época atual como a mais recente (primeira do array ordenado)
+            if (!currentEpoca && availableEpocas.length > 0) {
+                currentEpoca = availableEpocas[0];
+                DebugUtils.debugFileLoading('default_epoch_set', { epoch: currentEpoca });
+            }
 
             // Preencher seletor de época
             const epocaSelect = document.getElementById('epoca');
@@ -3277,18 +4595,32 @@
             // Caminhos relativos
             const classificacaoPath = `elo_ratings/classificacao_${mod}.csv`;
             const detalhePath = `elo_ratings/detalhe_${mod}.csv`;
+            const eloPath = `elo_ratings/elo_${mod}.csv`;
             const jogosPath = `csv_modalidades/${mod}.csv`;
 
             // Reset dos dados e variáveis globais
-            sampleData = { teams: [], rankings: {}, eloHistory: {}, matches: [], bracket: {}, gamesDates: [], rawEloData: [] };
+            sampleData = {
+                teams: [],
+                rankings: {},
+                eloHistory: {},
+                matches: [],
+                bracket: {},
+                secondaryBracket: {},  // ← ADICIONADO para playoffs/liguilhas secundários
+                secondaryBracketType: null,  // ← ADICIONADO para tipo do bracket secundário
+                gamesDates: [],
+                rawEloData: []
+            };
             currentModalityHasAdjustments = false;
 
+            // Variável para guardar ELOs iniciais (usada quando detalhe_*.csv está vazio)
+            let initialElosFromFile = {};
+
             // Mostrar loading
-            document.getElementById('teamSelector').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando dados...</div>';
-            document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="11" class="loading">Carregando classificação...</td></tr>';
+            document.getElementById('teamSelector').innerHTML = '<div class="loading"><div class="spinner"></div>A carregar dados...</div>';
+            document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="11" class="loading">A carregar classificação...</td></tr>';
 
             let loadedFiles = 0;
-            const totalFiles = 3;
+            const totalFiles = 4; // Agora são 4 ficheiros
 
             function checkAllLoaded() {
                 loadedFiles++;
@@ -3304,7 +4636,7 @@
                         if (eloChart) {
                             updateEloChart();
                         }
-                        createRealBracket(); // Criar bracket com dados reais
+                        // Brackets serão carregados depois de processar rankings
                     }, 500);
                 }
             }
@@ -3336,11 +4668,37 @@
                 }
             });
 
+            // Carregar ficheiro elo_*.csv com ELOs iniciais
+            Papa.parse(eloPath, {
+                download: true,
+                header: false, // Sem cabeçalho - primeira linha é nomes, segunda é valores
+                complete: results => {
+                    if (results.data && results.data.length >= 2) {
+                        const teams = results.data[0]; // Primeira linha: nomes das equipas
+                        const elos = results.data[1];  // Segunda linha: valores ELO
+
+                        // Criar mapa equipa -> ELO inicial
+                        teams.forEach((team, index) => {
+                            if (team && elos[index]) {
+                                initialElosFromFile[team] = parseFloat(elos[index]);
+                            }
+                        });
+
+                        DebugUtils.debugFileLoading('initial_elos_loaded', initialElosFromFile);
+                    }
+                    checkAllLoaded();
+                },
+                error: error => {
+                    console.error('Erro ao carregar ELOs iniciais:', error);
+                    checkAllLoaded();
+                }
+            });
+
             Papa.parse(detalhePath, {
                 download: true,
                 header: true,
                 complete: results => {
-                    processEloHistory(results.data);
+                    processEloHistory(results.data, initialElosFromFile);
                     checkAllLoaded();
                 },
                 error: error => {
@@ -3357,18 +4715,35 @@
             data.forEach(row => {
                 if (!row.Equipa) return;
 
-                // Determinar a chave principal (Divisao ou Grupo)
-                const mainKey = row.Divisao || row.Grupo;
-                if (!mainKey) {
-                    console.warn('Equipa sem divisão ou grupo:', row.Equipa);
-                    return;
+                // Determinar a chave principal baseada em Divisão + Grupo
+                let mainKey;
+                let divisao = row.Divisao || row['Divisão'];
+                let grupo = row.Grupo;
+
+                // Tratar valores vazios ou nan
+                if (!divisao || divisao === 'nan' || divisao === 'NaN' || divisao === '') {
+                    divisao = null;
+                }
+                if (!grupo || grupo === 'nan' || grupo === 'NaN' || grupo === '') {
+                    grupo = null;
                 }
 
-                // Tratar grupo "nan" 
-                let grupo = row.Grupo;
-                if (!grupo || grupo === 'nan' || grupo === 'NaN') {
-                    grupo = row.Divisao || mainKey; // Usar divisão como grupo se não houver grupo específico
+                // Determinar mainKey
+                if (!divisao && !grupo) {
+                    // Liga única sem divisões nem grupos
+                    mainKey = 'geral';
+                } else if (divisao && grupo) {
+                    // Tem divisão e grupo: "2ª Divisão - Grupo A"
+                    mainKey = `${divisao}ª Divisão - Grupo ${grupo}`;
+                } else if (divisao) {
+                    // Só tem divisão: "1ª Divisão" ou "2ª Divisão"
+                    mainKey = `${divisao}ª Divisão`;
+                } else {
+                    // Só tem grupo (caso raro)
+                    mainKey = `Grupo ${grupo}`;
                 }
+
+                DebugUtils.debugRankingsProcessing('processing_row', { team: row.Equipa, divisao, grupo, key: mainKey });
 
                 // Obter informações do curso
                 const normalizedTeamName = normalizeTeamName(row.Equipa);
@@ -3376,7 +4751,7 @@
 
                 const team = {
                     name: normalizedTeamName,
-                    division: row.Divisao || mainKey,
+                    division: divisao || mainKey,
                     group: grupo,
                     color: courseInfo.primaryColor,
                     secondaryColor: courseInfo.secondaryColor,
@@ -3406,13 +4781,27 @@
                 });
             });
 
+            DebugUtils.debugRankingsProcessing('rankings_complete', { keys: Object.keys(sampleData.rankings), details: sampleData.rankings });
+
             DebugUtils.debugFileLoading('rankings_processed', sampleData.rankings);
+
+            // Limpar cache de equipas qualificadas quando rankings mudam
+            qualifiedTeamsCache = null;
 
             // Verificar duplicatas na lista de teams (apenas em modo debug)
             DebugUtils.debugFileLoading('teams_processed', sampleData.teams.length);
+
+            // Carregar brackets depois de processar classificações
+            // Isso garante que getQualifiedTeams() terá dados disponíveis
+            setTimeout(() => {
+                createRealBracket();
+            }, 100);
         }
 
         function processMatches(data) {
+            // Analisar sistema de playoff/liguilha ao processar os jogos
+            analyzePlayoffSystem(data);
+
             data.forEach(row => {
                 if (!row["Equipa 1"] || !row["Equipa 2"]) return;
                 sampleData.matches.push({
@@ -3424,6 +4813,52 @@
                     division: row.Divisão || row.Grupo
                 });
             });
+        }
+
+        /**
+         * Analisa os dados dos jogos para detectar o sistema de playoff/liguilha usado
+         * Identifica se usa: playoffs (E*), playoff de manutenção (PM*), ou liguilha de manutenção (LM*)
+         */
+        function analyzePlayoffSystem(matchesData) {
+            const systems = {
+                hasWinnerPlayoffs: false,    // E1, E2, E3L, E3
+                hasMaintenancePlayoffs: false, // PM1, PM2
+                hasMaintenanceLeague: false,   // LM1, LM2, LM3...
+                hasPromotionSystem: false,     // Sistema de promoção direto
+                divisions: new Set(),
+                groups: new Set()
+            };
+
+            matchesData.forEach(row => {
+                const jornada = (row.Jornada || '').toString().trim().toUpperCase();
+                const divisao = row['Divisão'] || row['Divisao'];
+                const grupo = row.Grupo;
+
+                // Detectar divisões e grupos
+                if (divisao) systems.divisions.add(divisao);
+                if (grupo && grupo !== 'nan' && grupo !== 'NaN') systems.groups.add(grupo);
+
+                // Detectar tipos de playoff/liguilha
+                if (jornada.startsWith('E') && /^E\d/.test(jornada)) {
+                    systems.hasWinnerPlayoffs = true;
+                } else if (jornada.startsWith('PM')) {
+                    systems.hasMaintenancePlayoffs = true;
+                } else if (jornada.startsWith('LM')) {
+                    systems.hasMaintenanceLeague = true;
+                }
+            });
+
+            // Determinar se há sistema de promoção baseado na estrutura
+            systems.hasPromotionSystem = systems.divisions.size > 1;
+
+            // Salvar informações globalmente
+            playoffSystemInfo = {
+                ...systems,
+                divisions: Array.from(systems.divisions),
+                groups: Array.from(systems.groups)
+            };
+
+            DebugUtils.debugRankingsProcessing('playoff_system_detected', playoffSystemInfo);
         }
 
         // Função auxiliar para verificar se existem ajustes intergrupos reais (não-zero)
@@ -3465,11 +4900,29 @@
             return result;
         }
 
-        function processEloHistory(data) {
+        function processEloHistory(data, initialElosFromFile = {}) {
             DebugUtils.debugProcessedData('histórico ELO', data.length, `${data.length} jogos`);
 
             // Guardar dados brutos para processamento do bracket
             sampleData.rawEloData = data;
+
+            // Verificar se o ficheiro detalhe_*.csv está vazio (só tem cabeçalho)
+            const hasNoGames = !data || data.length === 0 ||
+                (data.length === 1 && Object.values(data[0]).every(v => !v || v === ''));
+
+            if (hasNoGames && Object.keys(initialElosFromFile).length > 0) {
+                // Sem jogos ainda - usar ELOs iniciais do ficheiro elo_*.csv
+                DebugUtils.debugProcessedData('sem jogos', Object.keys(initialElosFromFile).length, 'usar ELOs iniciais do ficheiro');
+
+                // Criar histórico simples com apenas o ELO inicial
+                Object.keys(initialElosFromFile).forEach(teamName => {
+                    const initialElo = initialElosFromFile[teamName];
+                    // Uma única entrada no histórico com o ELO inicial
+                    sampleData.eloHistory[teamName] = [initialElo];
+                });
+
+                return; // Terminar aqui, não há dados de jogos para processar
+            }
 
             // Primeiro, organizar dados por equipa, jornada e data
             const teamEloByRound = {};
@@ -3576,8 +5029,8 @@
                 }
             });
 
-            // Adicionar data inicial para o ELO de partida
-            const initialDate = new Date('2024-09-01'); // Data de início da época
+            // Adicionar data inicial para o ELO de partida baseada na época
+            const initialDate = currentEpoca === '25_26' ? new Date('2025-09-01') : new Date('2024-09-01');
             const allDates = [initialDate];
 
             // Guardar datas ordenadas para uso no gráfico (fase de grupos)

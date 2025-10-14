@@ -225,9 +225,27 @@ function debugBracket(action, data = null) {
                 console.log('🏆 BRACKET: jogos de eliminação encontrados:', data);
             }
             break;
+        case 'secondary_games_found':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🏆 BRACKET SECUNDÁRIO: jogos PM/LM encontrados:', data);
+            }
+            break;
         case 'bracket_created':
             if (DEBUG_CONFIG.verbose && data) {
                 console.log('🏆 BRACKET: estrutura criada:', data);
+            }
+            break;
+        case 'secondary_bracket_created':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🏆 BRACKET SECUNDÁRIO: estrutura criada:', data);
+            }
+            break;
+        case 'auto_filling_bracket':
+            console.log('🤖 BRACKET: preenchendo automaticamente com equipas qualificadas:', data);
+            break;
+        case 'qualified_teams':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('✅ BRACKET: equipas qualificadas detectadas:', data);
             }
             break;
         case 'using_ranking_fallback':
@@ -299,6 +317,21 @@ function debugFileLoading(action, data = null) {
     if (!DEBUG_CONFIG.enabled) return;
 
     switch (action) {
+        case 'epochs_detected':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('📅 ÉPOCAS: detectadas', data.epochs);
+            }
+            break;
+        case 'default_epoch_set':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`📅 ÉPOCA: padrão definida como ${data.epoch}`);
+            }
+            break;
+        case 'courses_loaded':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`📚 CURSOS: ${data.count} cursos carregados`);
+            }
+            break;
         case 'file_loaded':
             if (data) {
                 console.log(`📁 ARQUIVO: carregado ${data.current}/${data.total}`);
@@ -404,6 +437,334 @@ function debugEloHistoryFinal(history) {
     console.log('📊 Histórico ELO final:', history);
 }
 
+/**
+ * Debug para qualificação de equipas
+ */
+function debugQualification(action, data = null) {
+    if (!DEBUG_CONFIG.enabled) return;
+
+    switch (action) {
+        case 'structure_detected':
+            if (DEBUG_CONFIG.verbose) {
+                console.log('🔍 Structure detected:', data);
+            }
+            break;
+        case 'rankings_keys':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔍 Rankings keys:', data);
+            }
+            break;
+        case 'single_league_playoffs':
+            console.log('🏆 Liga única - Qualificados para playoffs:', data);
+            break;
+        case 'has_divisions':
+            console.log('✅ Sistema TEM divisões, processando...');
+            break;
+        case 'available_keys':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔍 Chaves disponíveis em rankings:', data);
+            }
+            break;
+        case 'processing_key':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`📁 Processando chave: "${data.key}" com ${data.count} equipas`);
+            }
+            break;
+        case 'match_1st_division':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ✅ MATCH 1ª Divisão! Adicionando ${data} equipas`);
+            }
+            break;
+        case 'match_2nd_division':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ✅ MATCH 2ª Divisão! Adicionando ${data} equipas`);
+            }
+            break;
+        case 'no_match':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ❌ Não match. Key: "${data}"`);
+            }
+            break;
+        case 'teams_sorted':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔢 Equipas 1ª Divisão ordenadas:', data.div1);
+                console.log('🔢 Equipas 2ª Divisão ordenadas:', data.div2);
+            }
+            break;
+        case 'playoff_slots':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`📊 Slots playoffs: ${data.first} da 1ª div + ${data.second} da 2ª div = ${data.total} total`);
+            }
+            break;
+        case 'selecting_1st_division':
+            if (DEBUG_CONFIG.verbose) {
+                console.log('🔍 Selecionando equipas da 1ª divisão para playoffs...');
+            }
+            break;
+        case 'team_b_skip':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ⚠️ ${data.position}º lugar: "${data.team}" é equipa B - PULANDO`);
+            }
+            break;
+        case 'team_qualified':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ✅ ${data.position}º lugar: "${data.team}" qualificado`);
+            }
+            break;
+        case 'group_team_b_skip':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ⚠️ Grupo ${data.group} - ${data.position}º: "${data.team}" é equipa B - PULANDO`);
+            }
+            break;
+        case 'group_winner':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  🏆 Grupo ${data.group}: ${data.team} (${data.position}º classificado)`);
+                if (data.replaces) {
+                    console.log(`    ℹ️ Substitui "${data.replaces}" que é equipa B`);
+                }
+            }
+            break;
+        case 'selecting_2nd_places':
+            if (DEBUG_CONFIG.verbose) {
+                console.log('🔍 Selecionando 2º lugares da 2ª divisão para promotion-playoff...');
+            }
+            break;
+        case 'already_in_playoffs':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ⚠️ Grupo ${data.group} - ${data.position}º: "${data.team}" JÁ foi para playoffs de vencedores - PULANDO`);
+            }
+            break;
+        case 'team_b_with_relegation':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ✅ Grupo ${data.group} - ${data.position}º: "${data.team}" é B mas equipa A em descida - QUALIFICA`);
+            }
+            break;
+        case 'team_b_no_relegation':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ⚠️ Grupo ${data.group} - ${data.position}º: "${data.team}" é B e equipa A NÃO em descida - PULANDO`);
+            }
+            break;
+        case 'qualified_complete':
+            console.log('✅ getQualifiedTeams COMPLETO. Legend:', data);
+            break;
+    }
+}
+
+/**
+ * Debug para resolução de nomes de equipas
+ */
+function debugTeamResolution(action, data = null) {
+    if (!DEBUG_CONFIG.enabled) return;
+
+    switch (action) {
+        case 'resolving_team':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔍 resolveTeamName para:', data);
+            }
+            break;
+        case 'qualified_legend':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('📋 Qualified legend:', data);
+            }
+            break;
+        case 'legend_item':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('  🔹 Item:', data);
+            }
+            break;
+        case 'creating_placeholders_with_group':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`    ✅ Criando placeholders: "${data.withGr}" e "${data.noGr}" → "${data.team}"`);
+            }
+            break;
+        case 'creating_placeholder':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`    ✅ Criando placeholder: "${data.placeholder}" → "${data.team}"`);
+            }
+            break;
+        case 'complete_map':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🗺️ Mapa completo:', data);
+            }
+            break;
+        case 'resolved':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ✅ Resolvendo: "${data.from}" → "${data.to}"`);
+            }
+            break;
+        case 'not_found':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  ⚠️ Não encontrado, mantendo: "${data}"`);
+            }
+            break;
+    }
+}
+
+/**
+ * Debug para processamento de jogos de eliminação
+ */
+function debugEliminationGames(action, data = null) {
+    if (!DEBUG_CONFIG.enabled) return;
+
+    switch (action) {
+        case 'processing_start':
+            console.log('🎯 processEliminationMatches INICIADO. Número de jogos:', data);
+            break;
+        case 'first_game':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🎯 Primeiro jogo:', data.game);
+                console.log('🎯 Equipa 1 do primeiro jogo:', data.team1);
+                console.log('🎯 Equipa 2 do primeiro jogo:', data.team2);
+            }
+            break;
+        case 'placeholders_created':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('📝 Placeholders criados para bracket:', data);
+            }
+            break;
+        case 'insufficient_teams':
+            console.log('⚠️ Bracket automático não criado: equipas qualificadas insuficientes');
+            break;
+        case 'substitution_map':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔄 Mapa de substituições:', data);
+            }
+            break;
+        case 'substituting':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`  🔄 Substituindo "${data.from}" → "${data.to}"`);
+            }
+            break;
+        case 'quarters_info':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🎯 Quartos de Final - Número de jogos:', data.count);
+                console.log('🎯 Primeiro jogo dos quartos:', data.first);
+            }
+            break;
+        case 'before_resolve':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔍 Antes de resolveTeamName - Equipa 1:', data.team1);
+                console.log('🔍 Antes de resolveTeamName - Equipa 2:', data.team2);
+            }
+            break;
+        case 'after_resolve':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('✅ Depois de resolveTeamName - Team 1:', data.team1);
+                console.log('✅ Depois de resolveTeamName - Team 2:', data.team2);
+            }
+            break;
+    }
+}
+
+/**
+ * Debug para bracket secundário
+ */
+function debugSecondaryBracket(action, data = null) {
+    if (!DEBUG_CONFIG.enabled) return;
+
+    switch (action) {
+        case 'analyzing_games':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔍 Analisando jogos secundários:', data);
+            }
+            break;
+        case 'before_assign':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔧 ANTES de atribuir - bracketData:', data);
+            }
+            break;
+        case 'after_assign':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🔧 DEPOIS de atribuir - sampleData.secondaryBracket:', data);
+            }
+            break;
+        case 'lm_match':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🏆 LM match:', data);
+            }
+            break;
+        case 'created':
+            console.log('🏆 Bracket secundário criado:', data);
+            break;
+        case 'started':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log('🎨 createSecondaryBracket INICIADO:', data);
+            }
+            break;
+        case 'qualified_teams':
+            console.log('🏆 Qualified teams ao criar bracket secundário:', data);
+            break;
+    }
+}
+
+/**
+ * Debug para bracket previsto
+ */
+function debugPredictedBracket(action, data = null) {
+    if (!DEBUG_CONFIG.enabled) return;
+
+    switch (action) {
+        case 'called':
+            console.log('🤖 createPredictedBracket chamada com:', data);
+            break;
+        case 'creating':
+            console.log('✅ Criando bracket previsto com 8 equipas');
+            break;
+    }
+}
+
+/**
+ * Debug para equipas B e progressão
+ */
+function debugTeamBStatus(action, data = null) {
+    if (!DEBUG_CONFIG.enabled) return;
+
+    switch (action) {
+        case 'team_b_not_qualified':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`⚠️ Equipa B "${data.team}" em posição ${data.position} NÃO qualifica - marcando como SAFE`);
+            }
+            break;
+        case 'team_b_qualified':
+            console.log(`✅ Equipa B "${data.team}" em posição ${data.position} QUALIFICA`);
+            break;
+        case 'in_playoffs_replaced':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`🔄 Equipa "${data.team}" (${data.position}º) está nos PLAYOFFS - substituiu equipa B do 1º lugar`);
+            }
+            break;
+        case 'in_promotion_replaced':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`🔄 Equipa "${data.team}" (${data.position}º) está no PROMOTION PLAYOFF - substituiu equipa B do 2º lugar`);
+            }
+            break;
+    }
+}
+
+/**
+ * Debug para processamento de rankings CSV
+ */
+function debugRankingsProcessing(action, data = null) {
+    if (!DEBUG_CONFIG.enabled) return;
+
+    switch (action) {
+        case 'processing_row':
+            if (DEBUG_CONFIG.verbose && data) {
+                console.log(`📝 Processando ${data.team}: divisao=${data.divisao}, grupo=${data.grupo} → mainKey="${data.key}"`);
+            }
+            break;
+        case 'rankings_complete':
+            console.log('📊 Rankings processados. Chaves criadas:', data.keys);
+            if (DEBUG_CONFIG.verbose) {
+                console.log('📊 Detalhes:', data.details);
+            }
+            break;
+        case 'playoff_system_detected':
+            console.log('Sistema de playoff detectado:', data);
+            break;
+    }
+}
+
 // Exportar funções globalmente
 window.DebugUtils = {
     setDebugEnabled,
@@ -421,5 +782,12 @@ window.DebugUtils = {
     debugFileLoading,
     debugPlayoffs,
     debugEloAdjustments,
-    debugEloHistoryFinal
+    debugEloHistoryFinal,
+    debugQualification,
+    debugTeamResolution,
+    debugEliminationGames,
+    debugSecondaryBracket,
+    debugPredictedBracket,
+    debugTeamBStatus,
+    debugRankingsProcessing
 };

@@ -216,6 +216,15 @@ class ExcelProcessor:
         self.season = season_override or extract_season_from_filename(
             str(self.file_path)
         )
+        # Fallback: tentar detetar pelas folhas; se ainda assim vazio, usar época corrente
+        if not self.season:
+            try:
+                detected = detect_latest_season_from_sheet_names(
+                    list(map(str, self.xls.sheet_names))
+                )
+            except Exception:
+                detected = None
+            self.season = detected or current_season_token()
 
         # Lista de folhas alvo (opcional)
         self._sheets_to_process = sheets_to_process
@@ -269,6 +278,726 @@ class ExcelProcessor:
                         linhas_faltas[row_num] = str(cell.value)
 
         return linhas_faltas
+
+    def is_playoff_jornada(self, jornada_value) -> bool:
+        """Verifica se uma jornada é de playoff (qualquer tipo)."""
+        if not isinstance(jornada_value, str):
+            return False
+
+        jornada_upper = jornada_value.upper().strip()
+
+        # Playoffs dos vencedores: E1, E2, E3L, E3
+        if jornada_upper.startswith("E") and jornada_upper[1:] in ["1", "2", "3L", "3"]:
+            return True
+
+        # Playoffs de manutenção/promoção: PM1, PM2 (compat: MP1, MP2)
+        if (
+            jornada_upper.startswith("PM") or jornada_upper.startswith("MP")
+        ) and re.match(r"^\d+$", jornada_upper[2:]):
+            return True
+
+        # Liguilhas: LM1, LM2, LM3, ... (compat: LP1, LP2, LP3, ...)
+        # Aceita qualquer número de jornadas
+        if (
+            jornada_upper.startswith("LM") or jornada_upper.startswith("LP")
+        ) and re.match(r"^\d+$", jornada_upper[2:]):
+            return True
+
+        return False
+
+    def is_playoff_team_name(self, team_name: str) -> bool:
+        """Verifica se o nome da equipa é uma legenda de playoff que deve ser removida."""
+        if not isinstance(team_name, str):
+            return False
+
+        team_upper = team_name.upper().strip()
+
+        # Padrões de legendas de playoffs que devem ser removidas
+        # (indicam que os jogos ainda não foram definidos)
+        playoff_patterns = [
+            r"^\d+º CLASS\.",  # "1º Class.", "2º Class.", etc.
+            r"^VENCEDOR",  # "Vencedor QF1", "Vencedor SF1", etc.
+            r"^VENCIDO",  # "Vencido QF1", etc.
+            r"^FINALISTA",  # "Finalista A", etc.
+            r"^MELHOR",  # "Melhor 3º", etc.
+            r"^PIOR",  # "Pior classificado", etc.
+        ]
+
+        for pattern in playoff_patterns:
+            if re.search(pattern, team_upper):
+                return True
+
+        return False
+
+    def filter_playoff_games(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Remove apenas jogos que contêm legendas de playoffs nas equipas (jogos não definidos)
+        e que NÃO sejam linhas de playoff (E*/MP*/LP*). Mantém placeholders quando a jornada é de playoff.
+        """
+        if df.empty:
+            return df
+
+        # Identifica linhas com legendas de playoffs (jogos não definidos)
+        placeholder_mask = df["Equipa 1"].apply(self.is_playoff_team_name) | df[
+            "Equipa 2"
+        ].apply(self.is_playoff_team_name)
+
+        # Identifica linhas cujas jornadas já são playoffs (E*, MP*, LP*)
+        jornada_is_playoff = df["Jornada"].apply(self.is_playoff_jornada)
+
+        # Remover apenas placeholders que NÃO pertençam a linhas de playoff
+        remove_mask = placeholder_mask & ~jornada_is_playoff
+        filtered_df = df[~remove_mask].copy()
+
+        # Log das linhas removidas para debug
+        if remove_mask.any():
+            removed_count = remove_mask.sum()
+            print(
+                f"  - Removidos {removed_count} jogos de playoffs com legendas não definidas"
+            )
+
+        # Log dos jogos de playoffs preservados
+        if not filtered_df.empty:
+            playoff_games = filtered_df[
+                filtered_df["Jornada"].apply(self.is_playoff_jornada)
+            ]
+            if not playoff_games.empty:
+                playoff_count = len(playoff_games)
+                playoff_types = playoff_games["Jornada"].unique()
+                print(
+                    f"  - Preservados {playoff_count} jogos de playoffs definidos: {list(playoff_types)}"
+                )
+
+        return filtered_df
+
+    def _detect_base_modality_for_playoffs(self, sheet_name: str) -> Optional[str]:
+        """Dada uma folha '* | PLAYOFFS', tenta descobrir a modalidade base (ex.: 'ANDEBOL MISTO')."""
+        if "|" not in sheet_name:
+            return None
+        prefix = sheet_name.split("|")[0].strip()  # ex: 'ANDEBOL'
+
+        # Procurar nas folhas desta workbook por nomes que comecem por este prefixo e tenham um sufixo mais específico
+        candidates: List[str] = []
+        for name in map(str, self.xls.sheet_names):
+            if name == sheet_name:
+                continue
+            if name.upper().startswith(prefix.upper() + " ") and "|" in name:
+                # Ex.: 'ANDEBOL MISTO | 1ª DIVISÃO' -> base 'ANDEBOL MISTO'
+                base = name.split("|")[0].strip()
+                candidates.append(base)
+
+        if not candidates:
+            # fallback: usa o próprio prefixo (menos desejável)
+            return prefix
+
+        # Escolher o mais longo (maior especificidade), ex.: 'ANDEBOL MISTO' em vez de 'ANDEBOL'
+        candidates.sort(key=len, reverse=True)
+        return candidates[0]
+
+    def _parse_playoffs_sheet(self, sheet_name: str) -> Optional[pd.DataFrame]:
+        """Transforma a folha de PLAYOFFS num DataFrame normalizado com jornadas E1/E2/E3L/E3, PM*, LM*."""
+        try:
+            df_raw = pd.read_excel(self.xls, sheet_name=sheet_name)
+        except Exception as e:
+            print(
+                f"Aviso: Não foi possível ler a folha de playoffs '{sheet_name}': {e}"
+            )
+            return None
+
+        if df_raw.empty:
+            return None
+
+        # Detetar o contexto inicial a partir do nome da folha
+        sheet_lower = sheet_name.lower()
+        initial_context = None
+        if any(
+            k in sheet_lower for k in ["manuten", "manutençao", "manutenção", "promo"]
+        ):
+            initial_context = "PM"
+        elif any(k in sheet_lower for k in ["ligu", "ligui"]):
+            initial_context = "LM"
+        else:
+            initial_context = "E"  # Playoffs de vencedores por defeito
+
+        # Mapear colunas prováveis
+        cols_lower = {c: str(c).lower() for c in df_raw.columns}
+        col_first = df_raw.columns[0]
+
+        def find_col(substrs: List[str]) -> Optional[str]:
+            for c in df_raw.columns:
+                cl = str(c).lower()
+                if any(s in cl for s in substrs):
+                    return c
+            return None
+
+        col_dia = find_col(["dia"])  # opcional
+        col_hora = find_col(["hora"])  # opcional
+        col_local = find_col(["local"])  # opcional
+        col_home = (
+            find_col(["visitad"])
+            or find_col(["equipa visit"])
+            or find_col(["equipa 1"])
+        )  # equipa visitada
+        col_away = (
+            find_col(["visitant"])
+            or find_col(["equipa visitan"])
+            or find_col(["equipa 2"])
+        )  # equipa visitante
+
+        if not col_home or not col_away:
+            # tentar heurística por posições usuais
+            try:
+                col_home = df_raw.columns[4]
+                col_away = (
+                    df_raw.columns[8] if len(df_raw.columns) > 8 else df_raw.columns[7]
+                )
+            except Exception:
+                pass
+
+        # Helpers de mapeamento de estágios com contexto (principal E, manutenção PM, liguilha LM)
+        bracket_context = (
+            initial_context  # Usar contexto inicial detectado do nome da folha
+        )
+
+        def map_stage_to_jornada(stage: str) -> Optional[str]:
+            s = (stage or "").strip().lower()
+            if not s:
+                return None
+            nonlocal bracket_context
+
+            # Detetar contexto de bracket pelo nome da folha ou cabeçalho
+            # Manutenção/Promoção tem prioridade sobre outros contextos
+            if any(k in s for k in ["manuten", "manutençao", "promo"]):
+                bracket_context = "PM"
+            # Liguilha tem segunda prioridade
+            elif any(k in s for k in ["ligu", "ligui"]):
+                bracket_context = "LM"
+            # PLAYOFFS sem menção de manutenção/liguilha = playoffs de vencedores
+            elif "playoff" in s and bracket_context is None:
+                bracket_context = "E"
+
+            # Mapeamento de estágios baseado no contexto
+            if bracket_context == "PM":
+                # Playoff de Manutenção: PM1 = Meias Finais, PM2 = Final
+                if s.startswith("meias") or "semi" in s:
+                    return "PM1"
+                if s.startswith("final"):
+                    return "PM2"
+            elif bracket_context == "LM":
+                # Liguilha: LM + número da jornada (será extraído depois)
+                return "LM"
+            elif bracket_context == "E":
+                # Playoffs de vencedores: E1, E2, E3L, E3
+                if s.startswith("quartos"):
+                    return "E1"
+                if s.startswith("meias") or "semi" in s:
+                    return "E2"
+                if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
+                    return "E3L"
+                if s.startswith("final"):
+                    return "E3"
+
+            # Fallback: tentar detetar pelo padrão do texto
+            if s.startswith("quartos") and bracket_context != "PM":
+                bracket_context = "E"
+                return "E1"
+            if s.startswith("meias") or "semi" in s:
+                if bracket_context == "PM":
+                    return "PM1"
+                elif bracket_context == "E":
+                    return "E2"
+            if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
+                bracket_context = "E"
+                return "E3L"
+            if s.startswith("final"):
+                if bracket_context == "PM":
+                    return "PM2"
+                elif bracket_context == "E":
+                    return "E3"
+
+            return None
+
+        def extract_teams_from_row(row: pd.Series) -> Tuple[str, str]:
+            # Tenta pelos nomes de coluna mapeados
+            t1 = (
+                str(row.get(col_home)).strip()
+                if col_home and pd.notna(row.get(col_home))
+                else ""
+            )
+            t2 = (
+                str(row.get(col_away)).strip()
+                if col_away and pd.notna(row.get(col_away))
+                else ""
+            )
+            # Fallback robusto: procurar os dois primeiros textos relevantes na linha
+            if not t1 or not t2:
+                texts: List[str] = []
+                banned_tokens = {
+                    "vs",
+                    "v s",
+                    "v.s.",
+                    "x",
+                    "jornada",
+                    "resultado",
+                    "equipa visitada",
+                    "equipa visitante",
+                    "playoffs",
+                    "playoff",
+                    "dia",
+                    "hora",
+                    "local",
+                }
+                # Adicionar também o nome da modalidade aos banned tokens
+                sheet_tokens = sheet_name.lower().split()
+                for token in sheet_tokens:
+                    if len(token) > 3:  # Ignorar palavras muito curtas como "de"
+                        banned_tokens.add(token.strip())
+
+                colnames_lower = {str(c).lower() for c in df_raw.columns}
+                for c in df_raw.columns:
+                    val = row.get(c)
+                    if pd.isna(val):
+                        continue
+                    s = str(val).strip()
+                    if not s:
+                        continue
+                    s_low = s.lower()
+                    c_low = str(c).lower()
+                    if c_low.startswith(("jornada", "dia", "hora", "local")):
+                        continue
+                    if "result" in c_low or s_low in banned_tokens:
+                        continue
+                    # Ignorar números simples (números de jornada)
+                    if s.isdigit() and len(s) <= 2:
+                        continue
+                    # Ignorar se o texto contém o nome da modalidade ou pipeline
+                    if any(token in s_low for token in banned_tokens) or "|" in s:
+                        continue
+                    if s_low.startswith(("quartos", "meias", "final")) or (
+                        "3" in s_low and "4" in s_low
+                    ):
+                        continue
+                    if s_low in {cn.lower() for cn in map(str, df_raw.columns)}:
+                        continue
+                    texts.append(s)
+                if len(texts) >= 2:
+                    t1 = texts[0] or t1
+                    t2 = texts[-1] or t2
+                elif len(texts) == 1:
+                    t1 = t1 or texts[0]
+            return t1, t2
+
+        rows: List[dict] = []
+        current_stage = None  # guarda código (E1/E2/E3L/E3/MP1/MP2/LP)
+
+        for _, row in df_raw.iterrows():
+            header_cell = row.get(col_first)
+            header_text = str(header_cell).strip() if pd.notna(header_cell) else ""
+
+            # Troca de bloco/estágio
+            maybe_stage = map_stage_to_jornada(header_text)
+            if maybe_stage:
+                current_stage = maybe_stage
+                # não dar continue aqui; a mesma linha pode já conter equipas (ex.: "Quartos de Final" + par)
+
+            # Para liguilha: 'Jornada 1' ou apenas '1' etc. no primeiro campo
+            lp_number = None
+            if (current_stage == "LM") and header_text:
+                # Tentar extrair número da jornada de diferentes formatos
+                m = re.search(r"jornada\s*(\d+)", header_text, flags=re.I)
+                if m:
+                    lp_number = m.group(1)
+                elif header_text.isdigit():
+                    # Se for apenas um número (1, 2, 3, etc.)
+                    lp_number = header_text
+                elif re.match(r"^\d+$", header_text.strip()):
+                    lp_number = header_text.strip()
+
+            # Ler equipas (robusto)
+            team1, team2 = extract_teams_from_row(row)
+
+            if not team1 and not team2:
+                continue  # linha informativa/vazia
+
+            # Validação adicional: ignorar se as equipas forem inválidas (cabeçalhos, etc.)
+            invalid_team_patterns = [
+                "jornada",
+                "dia",
+                "hora",
+                "local",
+                "resultado",
+                "equipa visitada",
+                "equipa visitante",
+                "|",  # Contém pipe (separador de título)
+            ]
+            team1_lower = team1.lower() if team1 else ""
+            team2_lower = team2.lower() if team2 else ""
+
+            if any(pattern in team1_lower for pattern in invalid_team_patterns):
+                continue
+            if any(pattern in team2_lower for pattern in invalid_team_patterns):
+                continue
+
+            # Determinar Jornada
+            if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:
+                jornada_val = current_stage
+            elif current_stage == "LM" and lp_number:
+                jornada_val = f"LM{lp_number}"
+            else:
+                # fallback: se o próprio header_text for algo como 'E1' etc.
+                jornada_val = (
+                    header_text if self.is_playoff_jornada(header_text) else ""
+                )
+
+            out_row = {
+                "Jornada": jornada_val,
+                "Dia": str(row.get(col_dia)) if col_dia else "",
+                "Hora": str(row.get(col_hora)) if col_hora else "",
+                "Local": str(row.get(col_local)) if col_local else "",
+                "Equipa 1": team1,
+                "Golos 1": pd.NA,
+                "Golos 2": pd.NA,
+                "Equipa 2": team2,
+                "Falta de Comparência": "",
+            }
+            rows.append(out_row)
+
+        if not rows:
+            return None
+
+        df_out = pd.DataFrame(rows)
+        # Manter apenas linhas com Jornada válida de playoff
+        df_out = df_out[df_out["Jornada"].apply(self.is_playoff_jornada)]
+        return df_out.reset_index(drop=True)
+
+    def _append_playoffs_to_target_csv(
+        self, base_modality: str, playoffs_df: pd.DataFrame
+    ):
+        """Anexa as linhas de playoffs ao CSV da modalidade (no fim)."""
+        # Construir caminho do CSV alvo
+        if self.season:
+            target_filename = f"{base_modality}_{self.season}.csv"
+        else:
+            target_filename = f"{base_modality}.csv"
+        target_path = self.output_dir / target_filename
+
+        # Se não existir, criar com cabeçalho conforme base_headers
+        if not target_path.exists():
+            empty = pd.DataFrame(columns=self.base_headers)
+            empty.to_csv(target_path, index=False)
+
+        try:
+            base_df = pd.read_csv(target_path)
+        except Exception:
+            base_df = pd.DataFrame(columns=self.base_headers)
+
+        # Remover coluna 'Época' antiga se existir, para padronizar saída
+        if "Época" in base_df.columns:
+            base_df = base_df.drop(columns=["Época"])  # normalizar
+
+        # Garantir que playoffs_df possui todas as colunas do base_df
+        for c in base_df.columns:
+            if c not in playoffs_df.columns:
+                # Preencher defaults: NA para golos, vazio para strings
+                if c in ("Golos 1", "Golos 2"):
+                    playoffs_df[c] = pd.NA
+                else:
+                    playoffs_df[c] = ""
+        # Ordem de colunas igual ao base_df
+        playoffs_df = playoffs_df[base_df.columns]
+
+        # Concatenar mantendo ordem
+        combined = pd.concat([base_df, playoffs_df], ignore_index=True)
+        # Evitar duplicados caso este método seja chamado várias vezes
+        combined = combined.drop_duplicates(subset=self.base_headers)
+        combined.to_csv(target_path, index=False)
+        print(f"  - Playoffs adicionados ao ficheiro: {target_path}")
+
+    def _extract_playoffs_from_dataframe(
+        self, df: pd.DataFrame
+    ) -> Optional[pd.DataFrame]:
+        """Tenta extrair blocos de playoffs embutidos numa folha regular de modalidade.
+        Mapeia cabeçalhos como 'Quartos de Final', 'Meias Finais', '3º/4º Lugar', 'Final',
+        'Manutenção' e 'Liguilha/Jornada N' para jornadas E1/E2/E3L/E3, MP1/MP2, LP1-3.
+        """
+        if df is None or df.empty:
+            return None
+
+        # A primeira coluna costuma conter numeração de jornada ou cabeçalhos de estágio
+        col_first = df.columns[0]
+
+        def find_col(substrs: List[str]) -> Optional[str]:
+            for c in df.columns:
+                cl = str(c).lower()
+                if any(s in cl for s in substrs):
+                    return c
+            return None
+
+        col_dia = find_col(["dia"])  # opcional
+        col_hora = find_col(["hora"])  # opcional
+        col_local = find_col(["local"])  # opcional
+        col_home = find_col(["visitad", "equipa visitad", "equipa 1"])  # equipa casa
+        col_away = find_col(["visitant", "equipa visitan", "equipa 2"])  # visitante
+
+        # Fallback posicional: se não encontrou pelos nomes, tenta colunas típicas (4 e última)
+        if not col_home or not col_away:
+            try:
+                cols = list(df.columns)
+                if not col_home and len(cols) > 4:
+                    col_home = cols[4]
+                if not col_away and len(cols) > 5:
+                    col_away = cols[-1]
+            except Exception:
+                pass
+
+        # Se ainda assim não conseguir identificar colunas de equipa, abortar
+        if not col_home or not col_away:
+            return None
+
+        # Helpers de mapeamento de estágios com contexto (E/PM/LM)
+        bracket_context = None  # 'E', 'PM', 'LM'
+
+        def map_stage_to_jornada(stage: str) -> Optional[str]:
+            s = (stage or "").strip().lower()
+            if not s:
+                return None
+            nonlocal bracket_context
+
+            # Detetar contexto de bracket pelo nome da folha ou cabeçalho
+            # Manutenção/Promoção tem prioridade sobre outros contextos
+            if any(k in s for k in ["manuten", "manutençao", "promo"]):
+                bracket_context = "PM"
+            # Liguilha tem segunda prioridade
+            elif any(k in s for k in ["ligu", "ligui"]):
+                bracket_context = "LM"
+            # PLAYOFFS sem menção de manutenção/liguilha = playoffs de vencedores
+            elif "playoff" in s and bracket_context is None:
+                bracket_context = "E"
+
+            # Mapeamento de estágios baseado no contexto
+            if bracket_context == "PM":
+                # Playoff de Manutenção: PM1 = Meias Finais, PM2 = Final
+                if s.startswith("meias") or "semi" in s:
+                    return "PM1"
+                if s.startswith("final"):
+                    return "PM2"
+            elif bracket_context == "LM":
+                # Liguilha: LM + número da jornada (será extraído depois)
+                return "LM"
+            elif bracket_context == "E":
+                # Playoffs de vencedores: E1, E2, E3L, E3
+                if s.startswith("quartos"):
+                    return "E1"
+                if s.startswith("meias") or "semi" in s:
+                    return "E2"
+                if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
+                    return "E3L"
+                if s.startswith("final"):
+                    return "E3"
+
+            # Fallback: tentar detetar pelo padrão do texto
+            if s.startswith("quartos") and bracket_context != "PM":
+                bracket_context = "E"
+                return "E1"
+            if s.startswith("meias") or "semi" in s:
+                if bracket_context == "PM":
+                    return "PM1"
+                bracket_context = "E"
+                return "E2"
+            if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
+                bracket_context = "E"
+                return "E3L"
+            if s.startswith("final"):
+                if bracket_context == "PM":
+                    return "PM2"
+                bracket_context = "E"
+                return "E3"
+
+            return None
+
+        def extract_teams_from_row(r: pd.Series) -> Tuple[str, str]:
+            # Primeiro tenta com nomes de colunas
+            t1 = (
+                str(r.get(col_home)).strip()
+                if col_home and pd.notna(r.get(col_home))
+                else ""
+            )
+            t2 = (
+                str(r.get(col_away)).strip()
+                if col_away and pd.notna(r.get(col_away))
+                else ""
+            )
+            # Fallback: varrer textos na linha e escolher os dois relevantes
+            if not t1 or not t2:
+                texts: List[str] = []
+                banned_tokens = {
+                    "vs",
+                    "v s",
+                    "v.s.",
+                    "x",
+                    "jornada",
+                    "resultado",
+                    "equipa visitada",
+                    "equipa visitante",
+                    "playoffs",
+                    "playoff",
+                    "dia",
+                    "hora",
+                    "local",
+                }
+                colnames_lower = {str(c).lower() for c in df.columns}
+                for c in df.columns:
+                    val = r.get(c)
+                    if pd.isna(val):
+                        continue
+                    s = str(val).strip()
+                    if not s:
+                        continue
+                    s_low = s.lower()
+                    c_low = str(c).lower()
+                    if c_low.startswith(("jornada", "dia", "hora", "local")):
+                        continue
+                    if "result" in c_low or s_low in banned_tokens:
+                        continue
+                    # Ignorar números simples (números de jornada)
+                    if s.isdigit() and len(s) <= 2:
+                        continue
+                    # Ignorar se o texto contém pipeline
+                    if "|" in s:
+                        continue
+                    if s_low.startswith(("quartos", "meias", "final")) or (
+                        "3" in s_low and "4" in s_low
+                    ):
+                        continue
+                    if s_low in colnames_lower:
+                        continue
+                    texts.append(s)
+                if len(texts) >= 2:
+                    t1 = texts[0] or t1
+                    t2 = texts[-1] or t2
+                elif len(texts) == 1:
+                    t1 = t1 or texts[0]
+            return t1, t2
+
+        rows: List[dict] = []
+        current_stage = None  # guarda código (E1/E2/E3L/E3/MP1/MP2/LP)
+
+        for _, r in df.iterrows():
+            header_cell = r.get(col_first)
+            header_text = str(header_cell).strip() if pd.notna(header_cell) else ""
+
+            # Verificar se esta linha é um cabeçalho de seção (contém "|")
+            # Se for, verificar todas as células da linha para detetar mudança de contexto
+            is_section_header = False
+            for val in r.values:
+                if pd.notna(val) and "|" in str(val):
+                    is_section_header = True
+                    section_text = str(val).lower()
+                    # Resetar contexto baseado no cabeçalho da seção
+                    if any(k in section_text for k in ["ligu", "ligui"]):
+                        bracket_context = "LM"
+                    elif any(
+                        k in section_text for k in ["manuten", "manutençao", "promo"]
+                    ):
+                        # Verificar se é liguilha ou playoff de manutenção
+                        if any(k in section_text for k in ["ligu", "ligui"]):
+                            bracket_context = "LM"
+                        else:
+                            bracket_context = "PM"
+                    elif "playoff" in section_text and not any(
+                        k in section_text
+                        for k in ["manuten", "manutençao", "promo", "ligu", "ligui"]
+                    ):
+                        bracket_context = "E"
+                    break
+
+            # Se for cabeçalho de seção, saltar esta linha
+            if is_section_header:
+                continue
+
+            # Troca de bloco/estágio se a primeira coluna trouxer um cabeçalho textual
+            maybe_stage = map_stage_to_jornada(header_text)
+            if maybe_stage:
+                current_stage = maybe_stage
+                # não saltar a linha; pode conter já o par de equipas na mesma linha do cabeçalho
+
+            # Para liguilha: 'Jornada 1' ou apenas '1' etc. na primeira coluna
+            lp_number = None
+            if current_stage == "LM" and header_text:
+                # Tentar extrair número da jornada de diferentes formatos
+                m = re.search(r"jornada\s*(\d+)", header_text, flags=re.I)
+                if m:
+                    lp_number = m.group(1)
+                elif header_text.isdigit():
+                    # Se for apenas um número (1, 2, 3, etc.)
+                    lp_number = header_text
+                elif re.match(r"^\d+$", header_text.strip()):
+                    lp_number = header_text.strip()
+
+            # Ler equipas (robusto)
+            team1, team2 = extract_teams_from_row(r)
+
+            # ignorar linhas sem equipas
+            if not team1 and not team2:
+                continue
+
+            # Validação adicional: ignorar se as equipas forem inválidas (cabeçalhos, etc.)
+            invalid_team_patterns = [
+                "jornada",
+                "dia",
+                "hora",
+                "local",
+                "resultado",
+                "equipa visitada",
+                "equipa visitante",
+                "|",  # Contém pipe (separador de título)
+            ]
+            team1_lower = team1.lower() if team1 else ""
+            team2_lower = team2.lower() if team2 else ""
+
+            if any(pattern in team1_lower for pattern in invalid_team_patterns):
+                continue
+            if any(pattern in team2_lower for pattern in invalid_team_patterns):
+                continue
+
+            # Determinar Jornada
+            if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:
+                jornada_val = current_stage
+            elif current_stage == "LM" and lp_number:
+                jornada_val = f"LM{lp_number}"
+            else:
+                # Se a própria célula já trouxer um código (ex.: E1)
+                jornada_val = (
+                    header_text if self.is_playoff_jornada(header_text) else ""
+                )
+
+            if not jornada_val:
+                # Não é linha de playoff
+                continue
+
+            out_row = {
+                "Jornada": jornada_val,
+                "Dia": str(r.get(col_dia)) if col_dia else "",
+                "Hora": str(r.get(col_hora)) if col_hora else "",
+                "Local": str(r.get(col_local)) if col_local else "",
+                "Equipa 1": team1,
+                "Golos 1": pd.NA,
+                "Golos 2": pd.NA,
+                "Equipa 2": team2,
+                "Falta de Comparência": "",
+            }
+            rows.append(out_row)
+
+        if not rows:
+            return None
+
+        df_out = pd.DataFrame(rows)
+        # Manter apenas linhas com Jornada válida de playoff
+        df_out = df_out[df_out["Jornada"].apply(self.is_playoff_jornada)]
+        # Remover duplicadas eventuais
+        df_out = df_out.drop_duplicates(
+            subset=["Jornada", "Equipa 1", "Equipa 2"]
+        ).reset_index(drop=True)
+        return df_out
 
     def get_sport_default_score(self, sheet_name: str) -> Tuple[int, int]:
         """Retorna o resultado padrão baseado no desporto."""
@@ -612,7 +1341,7 @@ class ExcelProcessor:
         # Extrai células vermelhas
         linhas_faltas = self.extract_red_cells(sheet_name)
 
-        # Carrega dados
+        # Carrega dados (mantendo cabeçalhos originais para reconhecer estágios)
         df = pd.read_excel(
             self.xls, sheet_name=sheet_name, usecols=[0, 1, 2, 3, 4, 5, 7, 8]
         )
@@ -626,6 +1355,9 @@ class ExcelProcessor:
 
         # Limpa DataFrame inicial
         df = df.dropna(how="all").reset_index(drop=True)
+
+        # Antes de qualquer limpeza, tentar extrair blocos de playoffs embutidos
+        playoffs_df_embedded = self._extract_playoffs_from_dataframe(df.copy())
 
         # Processa divisões e grupos
         if has_div:
@@ -647,9 +1379,12 @@ class ExcelProcessor:
         df = self.adjust_journeys(df)
         df = self.sort_by_datetime(df)
         df = self.apply_default_scores(df, sheet_name)
+        df = self.filter_playoff_games(df)  # Filtrar jogos de playoffs
         df = self.finalize_dataframe(df)
 
-        # Não adicionar coluna de Época nos CSVs
+        # Garantir que não existe coluna 'Época' nos CSVs
+        if "Época" in df.columns:
+            df = df.drop(columns=["Época"])  # normalizar
 
         # Salva resultado
         if self.season:
@@ -661,6 +1396,18 @@ class ExcelProcessor:
         df.to_csv(output_file, index=False)
 
         print(f"Folha '{sheet_name}' processada e salva em '{output_file}'")
+
+        # Se foram encontrados playoffs embutidos, anexar ao CSV desta modalidade
+        if playoffs_df_embedded is not None and not playoffs_df_embedded.empty:
+            # Garantir colunas esperadas e ordem
+            expected_cols = self.base_headers
+            for c in expected_cols:
+                if c not in playoffs_df_embedded.columns:
+                    playoffs_df_embedded[c] = (
+                        "" if c not in ("Golos 1", "Golos 2") else pd.NA
+                    )
+            playoffs_df_embedded = playoffs_df_embedded[expected_cols]
+            self._append_playoffs_to_target_csv(sheet_name, playoffs_df_embedded)
         return True
 
     def process_all_sheets(self):
@@ -669,11 +1416,46 @@ class ExcelProcessor:
         target_sheets = (
             self._sheets_to_process if self._sheets_to_process else self.xls.sheet_names
         )
-        for sheet_name in target_sheets:
-            if self.process_sheet(str(sheet_name)):
+
+        playoffs_accumulator: List[Tuple[str, pd.DataFrame]] = []
+
+        # 1) Processar folhas normais (com divisões/grupos)
+        for sheet in map(str, target_sheets):
+            if "PLAYOFFS" in sheet.upper():
+                # Adiar para a 2ª fase
+                continue
+            if self.process_sheet(sheet):
                 processed_count += 1
 
-        print(f"\nProcessamento concluído! {processed_count} folhas processadas.")
+        # 2) Processar folhas de PLAYOFFS e anexar aos CSVs alvo
+        for sheet in map(str, target_sheets):
+            if "PLAYOFFS" not in sheet.upper():
+                continue
+
+            base_modality = self._detect_base_modality_for_playoffs(sheet)
+            if not base_modality:
+                print(
+                    f"Aviso: Não foi possível determinar a modalidade base para '{sheet}'. Ignorado."
+                )
+                continue
+
+            df_playoffs = self._parse_playoffs_sheet(sheet)
+            if df_playoffs is None or df_playoffs.empty:
+                print(f"Aviso: Folha de playoffs '{sheet}' sem linhas válidas.")
+                continue
+
+            # Garantir colunas esperadas e ordem
+            expected_cols = self.base_headers
+            for c in expected_cols:
+                if c not in df_playoffs.columns:
+                    df_playoffs[c] = "" if c != "Golos 1" and c != "Golos 2" else pd.NA
+            df_playoffs = df_playoffs[expected_cols]
+
+            self._append_playoffs_to_target_csv(base_modality, df_playoffs)
+
+        print(
+            f"\nProcessamento concluído! {processed_count} folhas processadas e playoffs anexados (se existirem)."
+        )
 
 
 def main():
@@ -715,15 +1497,14 @@ def main():
             except Exception:
                 pass
 
-            # Se detetou época, renomear o ficheiro local com a época
-            if season_detected:
-                target_name = f"Resultados Taça UA {season_detected}.xlsx"
-            else:
+            # Definir o nome alvo do Excel como 'Resultados Taça UA <época>.xlsx'
+            if not season_detected:
                 # fallback se não houver época nas folhas -> tentar a partir do nome
                 extracted = extract_season_from_filename(downloaded_file.name)
                 if not extracted:
                     extracted = current_season_token()
-                target_name = f"Resultados Taça UA {extracted}.xlsx"
+                season_detected = extracted
+            target_name = f"Resultados Taça UA {season_detected}.xlsx"
 
             target_path = downloaded_file.parent / target_name
             if downloaded_file.name != target_name:
@@ -737,6 +1518,12 @@ def main():
                     print(
                         f"Aviso: Não foi possível renomear o ficheiro descarregado: {e}"
                     )
+                    # fallback: copiar para o destino com o nome correto, mantendo o original
+                    try:
+                        shutil.copy2(downloaded_file, target_path)
+                        downloaded_file = target_path
+                    except Exception as e2:
+                        print(f"Aviso: Falhou também o fallback de cópia: {e2}")
 
         except Exception as e:
             print(f"Erro ao descarregar o documento: {e}")
@@ -762,7 +1549,7 @@ def main():
     season_for_backup = (
         season_detected
         or extract_season_from_filename(Path(file_path).name)
-        or "latest"
+        or current_season_token()
     )
     backup_file = f"backup_Resultados Taça UA {season_for_backup}.xlsx"
 
