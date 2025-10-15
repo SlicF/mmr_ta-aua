@@ -147,6 +147,7 @@
             position: relative;
             height: 550px;
             margin-bottom: 20px;
+            padding-left: 30px;
         }
 
         .chart-header {
@@ -390,6 +391,58 @@
             z-index: 20;
             max-width: none;
             overflow: visible;
+        }
+
+        .previous-season-btn {
+            position: absolute;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            white-space: nowrap;
+            pointer-events: auto;
+        }
+
+        .next-season-btn {
+            position: absolute;
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            white-space: nowrap;
+            pointer-events: auto;
+        }
+
+        .season-nav-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .season-nav-btn:active {
+            transform: scale(0.98);
+        }
+
+        .previous-season-btn:hover {
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .next-season-btn:hover {
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.6);
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
         }
 
         .rankings-table {
@@ -1503,15 +1556,8 @@
                 const btn = document.createElement('button');
                 btn.className = `division-btn ${division === currentDivision ? 'active' : ''}`;
 
-                // Escolher nomenclatura baseada na estrutura
-                let label = division;
-                if (structure.type === 'groups-only') {
-                    label = `Grupo ${division}`;
-                } else if (structure.type === 'divisions-only' || structure.type === 'divisions-and-groups') {
-                    label = `Divisão ${division}`;
-                }
-
-                btn.textContent = label;
+                // O label já vem formatado do CSV (ex: "1ª Divisão", "2ª Divisão - Grupo A")
+                btn.textContent = division;
                 btn.onclick = () => switchDivision(division);
                 selector.appendChild(btn);
             });
@@ -1599,6 +1645,9 @@
                         legend: {
                             display: false
                         },
+                        tooltip: {
+                            enabled: false
+                        },
                         zoom: {
                             pan: {
                                 enabled: false,
@@ -1630,6 +1679,9 @@
                     scales: {
                         y: {
                             beginAtZero: false,
+                            ticks: {
+                                padding: 10
+                            },
                             grid: {
                                 color: 'rgba(0,0,0,0.1)'
                             }
@@ -1637,6 +1689,9 @@
                         x: {
                             grid: {
                                 color: 'rgba(0,0,0,0.1)'
+                            },
+                            ticks: {
+                                padding: 5
                             }
                         }
                     },
@@ -1757,12 +1812,15 @@
 
                 // Calcular quantas jornadas de fase de grupos existem
                 let regularSeasonGames = 0;
-                if (sampleData.rawEloData) {
+                if (sampleData.rawEloData && sampleData.rawEloData.length > 0) {
                     const regularRounds = sampleData.rawEloData
                         .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
                         .map(match => parseInt(match.Jornada));
                     regularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;
                 }
+
+                // NÃO calcular automaticamente - usar apenas o número real de jornadas dos dados
+                // (modalidades têm estruturas diferentes: divisões, grupos, etc)
 
                 labels = sampleData.gamesDates.map((date, index) => {
                     if (date instanceof Date) {
@@ -1789,6 +1847,27 @@
                     }
                     return index === 0 ? 'Início' : 'Data desconhecida';
                 });
+
+                // Adicionar labels vazias = (jogos previstos - jornadas já feitas)
+                // labels.length - 1 porque o primeiro é "Início", não uma jornada
+                const jornadasFeitas = labels.length - 1;
+                const labelsVazias = regularSeasonGames - jornadasFeitas;
+
+                if (labelsVazias > 0) {
+                    for (let i = 0; i < labelsVazias; i++) {
+                        labels.push('');
+                    }
+                }
+
+                // Adicionar ponto extra no início para "Época Anterior" (só se houver época anterior)
+                const currentEpochElement = document.getElementById('epoca');
+                if (currentEpochElement) {
+                    const currentEpoch = currentEpochElement.value;
+                    const currentIndex = availableEpocas.indexOf(currentEpoch);
+                    if (currentIndex < availableEpocas.length - 1) {
+                        labels.unshift('Época Anterior');
+                    }
+                }
             } else {
                 // Fallback para jornadas se não houver datas
                 let maxRounds = 0;
@@ -1803,6 +1882,42 @@
                 if (hasAdjustments && labels.length > 1) {
                     labels[labels.length - 1] = 'Ajustes';
                 }
+
+                // Calcular número de jornadas regulares previstas
+                // Primeiro tentar do calendário (csv_modalidades), depois dos resultados (detalhe)
+                let regularSeasonGames = sampleData.totalRegularSeasonGames || 0;
+
+                // Se não temos do calendário, tentar dos resultados já jogados
+                if (regularSeasonGames === 0 && sampleData.rawEloData && sampleData.rawEloData.length > 0) {
+                    const regularRounds = sampleData.rawEloData
+                        .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
+                        .map(match => parseInt(match.Jornada));
+                    regularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;
+                }
+
+                // NÃO calcular automaticamente - usar apenas o número real de jornadas dos dados
+                // (modalidades têm estruturas diferentes: divisões, grupos, etc)
+
+                // Adicionar labels vazias = (jogos previstos - jornadas já feitas)
+                // labels.length - 1 porque o primeiro é "Início", não uma jornada
+                const jornadasFeitas = labels.length - 1;
+                const labelsVazias = regularSeasonGames - jornadasFeitas;
+
+                if (labelsVazias > 0) {
+                    for (let i = 0; i < labelsVazias; i++) {
+                        labels.push('');
+                    }
+                }
+
+                // Adicionar ponto extra no início para "Época Anterior" (só se houver época anterior)
+                const currentEpochElement = document.getElementById('epoca');
+                if (currentEpochElement) {
+                    const currentEpoch = currentEpochElement.value;
+                    const currentIndex = availableEpocas.indexOf(currentEpoch);
+                    if (currentIndex < availableEpocas.length - 1) {
+                        labels.unshift('Época Anterior');
+                    }
+                }
             }
 
             DebugUtils.debugEloChart('labels', labels);
@@ -1815,9 +1930,20 @@
 
                     DebugUtils.debugEloChart('team_added', { name: team.name, history: teamHistory });
 
+                    // Duplicar o primeiro valor para criar o ponto "Época Anterior" (só se houver época anterior)
+                    let dataToUse = teamHistory;
+                    const currentEpochElement = document.getElementById('epoca');
+                    if (currentEpochElement) {
+                        const currentEpoch = currentEpochElement.value;
+                        const currentIndex = availableEpocas.indexOf(currentEpoch);
+                        if (currentIndex < availableEpocas.length - 1) {
+                            dataToUse = [teamHistory[0], ...teamHistory];
+                        }
+                    }
+
                     datasets.push({
                         label: team.name,
-                        data: teamHistory,
+                        data: dataToUse,
                         borderColor: team.color,
                         backgroundColor: team.color + '20',
                         fill: false,
@@ -1831,6 +1957,27 @@
 
             eloChart.data.labels = labels;
             eloChart.data.datasets = datasets;
+
+            // Calcular min e max dos dados e adicionar padding de 5%
+            if (datasets.length > 0) {
+                let allValues = [];
+                datasets.forEach(dataset => {
+                    if (dataset.data) {
+                        allValues = allValues.concat(dataset.data.filter(v => v !== null && v !== undefined));
+                    }
+                });
+
+                if (allValues.length > 0) {
+                    const minValue = Math.min(...allValues);
+                    const maxValue = Math.max(...allValues);
+                    const range = maxValue - minValue;
+                    const padding = range * 0.05;
+
+                    eloChart.options.scales.y.min = minValue - padding;
+                    eloChart.options.scales.y.max = maxValue + padding;
+                }
+            }
+
             eloChart.update('active');
 
             // Atualizar labels dinâmicos após o gráfico ser renderizado
@@ -2049,6 +2196,102 @@
 
                 labelsContainer.appendChild(label);
             });
+
+            // Adicionar botão de época anterior
+            addPreviousSeasonButton();
+        }
+
+        // Função para adicionar botão de época anterior
+        function addPreviousSeasonButton() {
+            const labelsContainer = document.getElementById('teamEndLabels');
+            const chartInstance = eloChart;
+
+            if (!chartInstance || !labelsContainer) return;
+
+            const chartArea = chartInstance.chartArea;
+            const canvas = chartInstance.canvas;
+            const canvasRect = canvas.getBoundingClientRect();
+            const containerRect = labelsContainer.getBoundingClientRect();
+
+            const offsetX = canvasRect.left - containerRect.left;
+            const offsetY = canvasRect.top - containerRect.top;
+
+            // Remover botões existentes
+            const existingButtons = labelsContainer.querySelectorAll('.season-nav-btn');
+            existingButtons.forEach(btn => btn.remove());
+
+            // Obter época atual
+            const currentEpochElement = document.getElementById('epoca');
+            if (!currentEpochElement) return;
+
+            const currentEpoch = currentEpochElement.value;
+            const currentIndex = availableEpocas.indexOf(currentEpoch);
+
+            const yPosition = offsetY + chartArea.top - 40; // 40px acima do gráfico
+
+            // Botão Época Anterior (só se houver época anterior)
+            if (currentIndex < availableEpocas.length - 1) {
+                const previousEpoch = availableEpocas[currentIndex + 1];
+                const btnPrev = document.createElement('button');
+                btnPrev.className = 'season-nav-btn previous-season-btn';
+                btnPrev.textContent = '← Época Anterior';
+                btnPrev.title = `Ver época 20${previousEpoch.replace('_', '/')}`;
+
+                // Posicionar à esquerda
+                btnPrev.style.left = (offsetX + chartArea.left) + 'px';
+                btnPrev.style.top = yPosition + 'px';
+
+                btnPrev.onclick = () => {
+                    // Obter modalidade atual (sem a época)
+                    const modalidadeSelect = document.getElementById('modalidade');
+                    const currentMod = modalidadeSelect.value.replace(`_${currentEpoch}`, '');
+
+                    // Mudar época
+                    currentEpochElement.value = previousEpoch;
+                    changeEpoca(previousEpoch);
+
+                    // Selecionar a mesma modalidade na nova época
+                    setTimeout(() => {
+                        const newModValue = `${currentMod}_${previousEpoch}`;
+                        modalidadeSelect.value = newModValue;
+                        changeModalidade(newModValue);
+                    }, 100);
+                };
+
+                labelsContainer.appendChild(btnPrev);
+            }
+
+            // Botão Época Seguinte (só se houver época seguinte)
+            if (currentIndex > 0) {
+                const nextEpoch = availableEpocas[currentIndex - 1];
+                const btnNext = document.createElement('button');
+                btnNext.className = 'season-nav-btn next-season-btn';
+                btnNext.textContent = 'Época Seguinte →';
+                btnNext.title = `Ver época 20${nextEpoch.replace('_', '/')}`;
+
+                // Posicionar à direita do gráfico
+                btnNext.style.right = '20px'; // 20px da borda direita do container
+                btnNext.style.top = yPosition + 'px';
+
+                btnNext.onclick = () => {
+                    // Obter modalidade atual (sem a época)
+                    const modalidadeSelect = document.getElementById('modalidade');
+                    const currentMod = modalidadeSelect.value.replace(`_${currentEpoch}`, '');
+
+                    // Mudar época
+                    currentEpochElement.value = nextEpoch;
+                    changeEpoca(nextEpoch);
+
+                    // Selecionar a mesma modalidade na nova época
+                    setTimeout(() => {
+                        const newModValue = `${currentMod}_${nextEpoch}`;
+                        modalidadeSelect.value = newModValue;
+                        changeModalidade(newModValue);
+                    }, 100);
+                };
+
+                labelsContainer.appendChild(btnNext);
+            }
         }
 
         // Funções de controle de zoom
@@ -2721,6 +2964,12 @@
                 download: true,
                 header: true,
                 complete: results => {
+                    // Calcular número máximo de jornadas do calendário (antes dos jogos acontecerem)
+                    const regularRounds = results.data
+                        .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
+                        .map(match => parseInt(match.Jornada));
+                    sampleData.totalRegularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;
+
                     // Filtrar jogos de eliminação dos dados originais (E*)
                     const eliminationMatches = results.data.filter(match =>
                         match.Jornada && (
@@ -3877,23 +4126,17 @@
             // Limpar filtros existentes
             filtersContainer.innerHTML = '<button class="filter-btn" onclick="filterTop3()">Top 3</button>';
 
-            // Adicionar filtros baseados na estrutura
-            if (structure.hasDivisions) {
-                structure.divisions.forEach(division => {
-                    const btn = document.createElement('button');
-                    btn.className = 'filter-btn';
-                    btn.textContent = `Divisão ${division}`;
-                    btn.onclick = () => filterDivision(division);
-                    filtersContainer.appendChild(btn);
-                });
-            }
+            // Usar a mesma lógica da tabela de classificação
+            const divisions = Object.keys(sampleData.rankings);
 
-            if (structure.hasGroups) {
-                structure.groups.forEach(group => {
+            // Se for liga única, não adicionar filtros de divisão/grupo
+            if (structure.type !== 'single-league') {
+                divisions.forEach(division => {
                     const btn = document.createElement('button');
                     btn.className = 'filter-btn';
-                    btn.textContent = `Grupo ${group}`;
-                    btn.onclick = () => filterGroup(group);
+                    // Usar o label original sem adicionar prefixos
+                    btn.textContent = division;
+                    btn.onclick = () => filterDivision(division);
                     filtersContainer.appendChild(btn);
                 });
             }
@@ -3994,6 +4237,77 @@
                 }
             }
 
+            // 🔧 Obter regras de descida baseadas na época e modalidade
+            function getRelegationRules() {
+                const epochSelector = document.getElementById('epoca');
+                const modalidadeSelector = document.getElementById('modalidade');
+
+                if (!epochSelector || !modalidadeSelector) {
+                    // Padrão se seletores não existirem
+                    console.warn('⚠️ getRelegationRules: seletores não encontrados');
+                    return { directRelegation: 3, maintenancePosition: 1 };
+                }
+
+                const currentEpoch = epochSelector.value;
+                const currentModality = modalidadeSelector.value;
+
+                // Regras específicas para época 24_25
+                if (currentEpoch === '24_25') {
+                    // Andebol: 2 descem direto
+                    if (currentModality && currentModality.includes('ANDEBOL')) {
+                        return {
+                            directRelegation: 2,  // Últimos 2 descem direto
+                            maintenancePosition: 0 // Sem PM/LM
+                        };
+                    }
+                    // Outras modalidades: 4 descem direto
+                    return {
+                        directRelegation: 4,  // Últimos 4 descem direto
+                        maintenancePosition: 0 // Sem PM/LM
+                    };
+                }
+
+                // Regras específicas para ANDEBOL em qualquer época (exceto 24_25)
+                if (currentModality && currentModality.includes('ANDEBOL')) {
+                    return {
+                        directRelegation: 2,  // Últimos 2 descem direto
+                        maintenancePosition: 1 // 1 ao PM/LM
+                    };
+                }
+
+                // Regra padrão para outras épocas: 3 descem, 1 ao PM/LM
+                return {
+                    directRelegation: 3,
+                    maintenancePosition: 1
+                };
+            }
+
+            // 🔧 Obter número de vagas para playoffs baseado na época e modalidade
+            function getPlayoffSpots() {
+                const epochSelector = document.getElementById('epoca');
+                const modalidadeSelector = document.getElementById('modalidade');
+
+                if (!epochSelector || !modalidadeSelector) {
+                    return 7; // Padrão
+                }
+
+                const currentEpoch = epochSelector.value;
+                const currentModality = modalidadeSelector.value;
+
+                // Regras específicas para época 24_25 - 1ª divisão
+                if (currentEpoch === '24_25') {
+                    // Andebol: 7 aos playoffs
+                    if (currentModality && currentModality.includes('ANDEBOL')) {
+                        return 7;
+                    }
+                    // Outras modalidades: 6 aos playoffs
+                    return 6;
+                }
+
+                // Padrão para outras épocas: 7 aos playoffs (se houver 2ª divisão)
+                return 7;
+            }
+
             // Regras baseadas na estrutura do torneio
             switch (structure.type) {
                 case 'single-league':
@@ -4018,22 +4332,44 @@
                     // Formato: Múltiplas divisões sem grupos (ex: Andebol)
                     if (divisionNum === 1) {
                         // 1ª divisão
-                        // REGRA: Passam sempre 8 aos playoffs (se houver 2ª divisão, senão os 7 primeiros)
-                        // Quando há PM/LM: últimos 3 descem direto, 4º pior vai ao PM/LM
-                        // Quando não há PM/LM: últimos 2 descem direto
+                        // REGRA: Vagas de playoffs variam por época/modalidade
+                        // Regras de descida também variam por época/modalidade
 
                         const has2ndDivision = structure.divisions.includes('2');
-                        const playoffSpots = has2ndDivision ? 7 : 8; // Se há 2ª divisão, 7 da 1ª + 1 da 2ª = 8 total
+                        const relegationRules = getRelegationRules();
+
+                        // Determinar vagas de playoffs
+                        let playoffSpots;
+                        const epochSelector = document.getElementById('epoca');
+                        const currentEpoch = epochSelector ? epochSelector.value : null;
+                        const modalidadeSelector = document.getElementById('modalidade');
+                        const currentModality = modalidadeSelector ? modalidadeSelector.value : '';
+
+                        if (currentEpoch === '24_25') {
+                            // Época 24_25: usar função específica
+                            playoffSpots = getPlayoffSpots();
+                        } else if (currentModality.includes('ANDEBOL')) {
+                            // Andebol: SEMPRE 7 da 1ª divisão (+ 1 da 2ª = 8 total)
+                            playoffSpots = 7;
+                        } else {
+                            // Outras épocas: regra padrão (7 da 1ª + 1 da 2ª = 8 total)
+                            playoffSpots = has2ndDivision ? 7 : 8;
+                        }
 
                         if (position <= playoffSpots && totalTeams >= 8) {
                             progression.type = 'playoffs';
                             progression.description = 'Qualificação para play-offs';
                         } else if (hasMaintenancePlayoffs || hasMaintenanceLeague) {
-                            // Com PM/LM: últimos 3 descem, 4º pior vai ao PM/LM
-                            if (position >= totalTeams - 2) {
+                            // Aplicar regras de descida configuradas
+                            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
+                            const maintenanceStart = totalTeams - (relegationRules.directRelegation + relegationRules.maintenancePosition) + 1;
+
+                            if (position >= directRelegationStart) {
+                                // Descida direta
                                 progression.type = 'relegation';
                                 progression.description = 'Descida de divisão';
-                            } else if (position === totalTeams - 3) {
+                            } else if (relegationRules.maintenancePosition > 0 && position >= maintenanceStart) {
+                                // PM/LM de manutenção (se configurado)
                                 if (hasMaintenancePlayoffs) {
                                     progression.type = 'maintenance-playoffs';
                                     progression.description = 'Play-off de manutenção';
@@ -4043,8 +4379,10 @@
                                 }
                             }
                         } else {
-                            // Sem PM/LM: últimos 2 descem direto
-                            if (position >= totalTeams - 1) {
+                            // Sem PM/LM: aplicar regras de descida configuradas
+                            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
+
+                            if (position >= directRelegationStart) {
                                 progression.type = 'relegation';
                                 progression.description = 'Descida de divisão';
                             }
@@ -4078,8 +4416,8 @@
 
                 case 'divisions-and-groups':
                     // Formato: Divisões com grupos (ex: Futsal Masculino)
-                    // REGRA: Passam sempre 8 aos playoffs (1º de cada grupo da 2ª + melhores da 1ª)
-                    // Manutenção: Últimos 3 descem direto, 4º pior vai ao PM/LM, 2º de cada grupo da 2ª vão ao PM/LM
+                    // REGRA: Vagas de playoffs variam por época/modalidade
+                    // Regras de descida também variam por época/modalidade
 
                     const secondDivisionGroups = structure.groups.filter(g =>
                         sampleData.teams.some(team => team.division === '2' && team.group === g)
@@ -4087,18 +4425,40 @@
 
                     if (divisionNum === 1) {
                         // 1ª divisão
-                        // Calcular quantos da 1ª passam aos playoffs (8 total - nº de grupos da 2ª)
-                        const playoffSpotsFrom1st = Math.max(4, 8 - secondDivisionGroups);
+                        const relegationRules = getRelegationRules();
+
+                        // Determinar vagas de playoffs
+                        let playoffSpotsFrom1st;
+                        const epochSelector = document.getElementById('epoca');
+                        const currentEpoch = epochSelector ? epochSelector.value : null;
+
+                        if (currentEpoch === '24_25') {
+                            // Época 24_25: TODAS as vagas são da 1ª divisão (não há promoção da 2ª)
+                            playoffSpotsFrom1st = getPlayoffSpots();
+                        } else {
+                            // Outras épocas: 8 total - nº de grupos da 2ª (cada grupo manda 1º classificado)
+                            // Se não há grupos (secondDivisionGroups = 0), mas há 2ª divisão, então são 7 da 1ª + 1 da 2ª
+                            if (secondDivisionGroups === 0 && structure.divisions.includes('2')) {
+                                playoffSpotsFrom1st = 7; // 7 da 1ª + 1 da 2ª (sem grupos) = 8 total
+                            } else {
+                                playoffSpotsFrom1st = Math.max(4, 8 - secondDivisionGroups);
+                            }
+                        }
 
                         if (position <= playoffSpotsFrom1st) {
                             progression.type = 'playoffs';
                             progression.description = 'Qualificação para play-offs';
                         } else if (hasMaintenancePlayoffs || hasMaintenanceLeague) {
-                            // Com PM/LM: últimos 3 descem direto, 4º pior vai ao PM/LM
-                            if (position >= totalTeams - 2) {
+                            // Aplicar regras de descida configuradas
+                            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
+                            const maintenanceStart = totalTeams - (relegationRules.directRelegation + relegationRules.maintenancePosition) + 1;
+
+                            if (position >= directRelegationStart) {
+                                // Descida direta
                                 progression.type = 'relegation';
                                 progression.description = 'Descida de divisão';
-                            } else if (position === totalTeams - 3) {
+                            } else if (relegationRules.maintenancePosition > 0 && position >= maintenanceStart) {
+                                // PM/LM de manutenção (se configurado)
                                 if (hasMaintenancePlayoffs) {
                                     progression.type = 'maintenance-playoffs';
                                     progression.description = 'Play-off de manutenção';
@@ -4108,8 +4468,10 @@
                                 }
                             }
                         } else {
-                            // Sem PM/LM: últimos 2 descem direto (descidas diretas)
-                            if (position >= totalTeams - 1) {
+                            // Sem PM/LM: aplicar regras de descida configuradas
+                            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
+
+                            if (position >= directRelegationStart) {
                                 progression.type = 'relegation';
                                 progression.description = 'Descida de divisão';
                             }
@@ -4608,7 +4970,8 @@
                 secondaryBracket: {},  // ← ADICIONADO para playoffs/liguilhas secundários
                 secondaryBracketType: null,  // ← ADICIONADO para tipo do bracket secundário
                 gamesDates: [],
-                rawEloData: []
+                rawEloData: [],
+                totalRegularSeasonGames: 0  // ← ADICIONADO para número de jornadas do calendário
             };
             currentModalityHasAdjustments = false;
 
