@@ -2,7 +2,7 @@ name: Atualizar dados Taça UA
 
 on:
   schedule:
-    - cron: "0 8 * * *"  # todos os dias às 8h UTC
+    - cron: "0 1 * * *"  # todos os dias às 1h UTC
   workflow_dispatch:      # também permite correr manualmente
 
 jobs:
