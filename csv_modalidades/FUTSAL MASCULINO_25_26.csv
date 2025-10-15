@@ -1,8 +1,8 @@
 Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Falta de Comparência
-1,2025-10-13 00:00:00,20h00,Caixa UA,Eng. Materiais,,,Psicologia,2,A,
-1,2025-10-13 00:00:00,21h00,Caixa UA,Economia,,,ASP,2,A,
-1,2025-10-13 00:00:00,22h00,Caixa UA,Música,,,Design,2,A,
-1,2025-10-13 00:00:00,23h00,Caixa UA,Ciências do Mar,,,Eng. Informática,2,A,
+1,2025-10-13 00:00:00,20h00,Caixa UA,Eng. Materiais,12.0,1.0,Psicologia,2,A,
+1,2025-10-13 00:00:00,21h00,Caixa UA,Economia,12.0,3.0,ASP,2,A,
+1,2025-10-13 00:00:00,22h00,Caixa UA,Música,3.0,1.0,Design,2,A,
+1,2025-10-13 00:00:00,23h00,Caixa UA,Ciências do Mar,0.0,4.0,Eng. Informática,2,A,
 1,2025-10-14 00:00:00,21h00,Caixa UA,Eng. Civil,,,ECT,2,C,
 1,2025-10-14 00:00:00,22h00,Caixa UA,Administração Pública,,,Marketing,2,C,
 1,2025-10-14 00:00:00,23h00,Caixa UA,Eng. Mecânica B,,,CBM,2,C,
