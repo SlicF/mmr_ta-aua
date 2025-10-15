@@ -715,21 +715,25 @@
         .team-cell {
             display: flex;
             align-items: center;
+            gap: 8px;
             text-align: left !important;
+            padding: 8px 0;
         }
 
         .team-name-table {
             font-weight: bold;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 120px;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.3;
+            max-width: 300px;
         }
 
         .team-info-container {
             display: flex;
+            flex-direction: row;
             align-items: center;
-            gap: 2px;
+            gap: 8px;
+            flex: 1;
         }
 
         .team-elo-info {
@@ -737,9 +741,7 @@
             color: #999;
             font-weight: normal;
             white-space: nowrap;
-            flex-shrink: 0;
-            margin-left: 2px;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .division-selector {
@@ -1697,7 +1699,7 @@
                     },
                     elements: {
                         line: {
-                            tension: 0.4
+                            tension: 0.3
                         },
                         point: {
                             radius: 4,
@@ -1811,8 +1813,11 @@
                 let regularSeasoneEnded = false;
 
                 // Calcular quantas jornadas de fase de grupos existem
-                let regularSeasonGames = 0;
-                if (sampleData.rawEloData && sampleData.rawEloData.length > 0) {
+                // Usar o valor pré-calculado do calendário completo
+                let regularSeasonGames = sampleData.totalRegularSeasonGames || 0;
+
+                // Se não temos do calendário, tentar calcular dos jogos já jogados (fallback)
+                if (regularSeasonGames === 0 && sampleData.rawEloData && sampleData.rawEloData.length > 0) {
                     const regularRounds = sampleData.rawEloData
                         .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
                         .map(match => parseInt(match.Jornada));
@@ -1848,10 +1853,17 @@
                     return index === 0 ? 'Início' : 'Data desconhecida';
                 });
 
-                // Adicionar labels vazias = (jogos previstos - jornadas já feitas)
+                // Adicionar labels vazias até meio da temporada
                 // labels.length - 1 porque o primeiro é "Início", não uma jornada
                 const jornadasFeitas = labels.length - 1;
-                const labelsVazias = regularSeasonGames - jornadasFeitas;
+                const meioTemporada = Math.ceil(regularSeasonGames / 2);
+
+                // Se ainda não passou do meio da temporada, adicionar espaços até ao total previsto
+                // Se já passou do meio, não adicionar mais espaços vazios
+                let labelsVazias = 0;
+                if (jornadasFeitas < meioTemporada) {
+                    labelsVazias = regularSeasonGames - jornadasFeitas;
+                }
 
                 if (labelsVazias > 0) {
                     for (let i = 0; i < labelsVazias; i++) {
@@ -1898,10 +1910,17 @@
                 // NÃO calcular automaticamente - usar apenas o número real de jornadas dos dados
                 // (modalidades têm estruturas diferentes: divisões, grupos, etc)
 
-                // Adicionar labels vazias = (jogos previstos - jornadas já feitas)
+                // Adicionar labels vazias até meio da temporada
                 // labels.length - 1 porque o primeiro é "Início", não uma jornada
                 const jornadasFeitas = labels.length - 1;
-                const labelsVazias = regularSeasonGames - jornadasFeitas;
+                const meioTemporada = Math.ceil(regularSeasonGames / 2);
+
+                // Se ainda não passou do meio da temporada, adicionar espaços até ao total previsto
+                // Se já passou do meio, não adicionar mais espaços vazios
+                let labelsVazias = 0;
+                if (jornadasFeitas < meioTemporada) {
+                    labelsVazias = regularSeasonGames - jornadasFeitas;
+                }
 
                 if (labelsVazias > 0) {
                     for (let i = 0; i < labelsVazias; i++) {
@@ -1948,7 +1967,7 @@
                         backgroundColor: team.color + '20',
                         fill: false,
                         borderWidth: 3,
-                        tension: 0.4
+                        tension: 0.3
                     });
                 }
             });
@@ -2911,7 +2930,10 @@
             qualified.legend.forEach(item => {
                 let placeholder = '';
                 DebugUtils.debugTeamResolution('legend_item', item);
-                if (item.division === '1ª') {
+                // Se não tem divisão (single-league), criar mapeamento dos placeholders hardcoded no CSV
+                if (!item.division) {
+                    placeholder = `${item.position}º Class. 1ª Div.`;
+                } else if (item.division === '1ª') {
                     placeholder = `${item.position}º Class. 1ª Div.`;
                 } else if (item.division === '2ª') {
                     if (item.group) {
@@ -2968,6 +2990,7 @@
                     const regularRounds = results.data
                         .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
                         .map(match => parseInt(match.Jornada));
+
                     sampleData.totalRegularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;
 
                     // Filtrar jogos de eliminação dos dados originais (E*)
@@ -3061,6 +3084,11 @@
                             return 0;
                         })
                         .map(item => {
+                            // Se não tem divisão definida (single-league), usar nome direto
+                            if (!item.division || item.division === 'geral') {
+                                return item.team;
+                            }
+                            // Se tem divisão, criar placeholder
                             if (item.division === '1ª') {
                                 return `${item.position}º Class. 1ª Div.`;
                             } else if (item.group) {
@@ -3094,7 +3122,10 @@
             // Criar mapa de placeholders para equipas reais
             qualified.legend.forEach(item => {
                 let placeholder = '';
-                if (item.division === '1ª') {
+                // Se não tem divisão (single-league), criar mapeamento dos placeholders hardcoded no CSV
+                if (!item.division) {
+                    placeholder = `${item.position}º Class. 1ª Div.`;
+                } else if (item.division === '1ª') {
                     placeholder = `${item.position}º Class. 1ª Div.`;
                 } else if (item.division === '2ª') {
                     if (item.group) {
@@ -5031,7 +5062,7 @@
                 }
             });
 
-            // Carregar ficheiro elo_*.csv com ELOs iniciais
+            // Carregar ficheiro elo_*.csv com ELOs iniciais PRIMEIRO
             Papa.parse(eloPath, {
                 download: true,
                 header: false, // Sem cabeçalho - primeira linha é nomes, segunda é valores
@@ -5043,29 +5074,32 @@
                         // Criar mapa equipa -> ELO inicial
                         teams.forEach((team, index) => {
                             if (team && elos[index]) {
-                                initialElosFromFile[team] = parseFloat(elos[index]);
+                                const normalizedTeam = normalizeTeamName(team);
+                                initialElosFromFile[normalizedTeam] = parseFloat(elos[index]);
                             }
                         });
 
                         DebugUtils.debugFileLoading('initial_elos_loaded', initialElosFromFile);
                     }
+
                     checkAllLoaded();
+
+                    // AGORA SIM carregar detalhe (só depois de ter os ELOs iniciais)
+                    Papa.parse(detalhePath, {
+                        download: true,
+                        header: true,
+                        complete: results => {
+                            processEloHistory(results.data, initialElosFromFile);
+                            checkAllLoaded();
+                        },
+                        error: error => {
+                            console.error('Erro ao carregar detalhes ELO:', error);
+                            checkAllLoaded();
+                        }
+                    });
                 },
                 error: error => {
                     console.error('Erro ao carregar ELOs iniciais:', error);
-                    checkAllLoaded();
-                }
-            });
-
-            Papa.parse(detalhePath, {
-                download: true,
-                header: true,
-                complete: results => {
-                    processEloHistory(results.data, initialElosFromFile);
-                    checkAllLoaded();
-                },
-                error: error => {
-                    console.error('Erro ao carregar detalhes ELO:', error);
                     checkAllLoaded();
                 }
             });
@@ -5123,11 +5157,12 @@
                     emblemPath: courseInfo.emblemPath
                 };
 
-                if (!sampleData.teams.find(t => t.name === team.name)) {
+                const existingTeam = sampleData.teams.find(t => t.name === team.name);
+                if (!existingTeam) {
                     sampleData.teams.push(team);
                     sampleData.eloHistory[team.name] = [];
                 } else {
-                    console.warn('Equipa duplicada detectada:', team.name, 'já existe em sampleData.teams');
+                    console.warn('⚠️ Equipa DUPLICADA detectada:', team.name, 'já existe em sampleData.teams');
                 }
 
                 if (!sampleData.rankings[mainKey]) sampleData.rankings[mainKey] = [];
@@ -5321,10 +5356,10 @@
                 const round = row.Jornada; // Manter como string para processar E1, E2, etc.
                 const team1 = normalizeTeamName(row["Equipa 1"]);
                 const team2 = normalizeTeamName(row["Equipa 2"]);
-                const finalElo1 = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || 1500;
-                const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]) || 1500;
-                const initialElo1 = parseInt(row["Elo Antes 1"]) || 1500;
-                const initialElo2 = parseInt(row["Elo Antes 2"]) || 1500;
+                const finalElo1 = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || null;
+                const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]) || null;
+                const initialElo1 = parseInt(row["Elo Antes 1"]) || null;
+                const initialElo2 = parseInt(row["Elo Antes 2"]) || null;
                 const gameDate = row.Dia ? new Date(row.Dia) : null;
 
                 // Debug específico para Informática
@@ -5339,10 +5374,12 @@
 
                 // Guardar ELO inicial se ainda não foi definido
                 if (!teamInitialElo[team1]) {
-                    teamInitialElo[team1] = initialElo1;
+                    // Priorizar: dados do ficheiro > dados do jogo > fallback 1500
+                    teamInitialElo[team1] = initialElosFromFile[team1] || initialElo1 || 1500;
                 }
                 if (!teamInitialElo[team2]) {
-                    teamInitialElo[team2] = initialElo2;
+                    // Priorizar: dados do ficheiro > dados do jogo > fallback 1500
+                    teamInitialElo[team2] = initialElosFromFile[team2] || initialElo2 || 1500;
                 }
 
                 // Guardar ajustes intergrupos se existirem (normalmente só das linhas Inter-Group)
@@ -5451,11 +5488,13 @@
             const allGameRounds = Object.keys(gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
 
             Object.keys(teamEloByRound).forEach(teamName => {
-                const eloValues = [teamInitialElo[teamName] || 1500]; // Começar com ELO inicial correto
-                let currentElo = teamInitialElo[teamName] || 1500;
+                // Priorizar ELO inicial do ficheiro, depois do jogo, depois fallback
+                const initialElo = initialElosFromFile[teamName] || teamInitialElo[teamName] || 1500;
+                const eloValues = [initialElo]; // Começar com ELO inicial correto
+                let currentElo = initialElo;
 
                 // Debug para processamento de equipa
-                DebugUtils.debugTeamEloProcessing(teamName, teamInitialElo[teamName] || 1500, currentElo, teamEloByRound[teamName], allGameRounds);
+                DebugUtils.debugTeamEloProcessing(teamName, initialElo, currentElo, teamEloByRound[teamName], allGameRounds);
 
                 // Para cada jornada da fase de grupos, adicionar o ELO (se mudou) ou manter o anterior
                 allGameRounds.forEach(round => {
@@ -5535,7 +5574,8 @@
             // Para equipas que não jogaram (não têm dados em teamEloByRound mas existem em teams)
             sampleData.teams.forEach(team => {
                 if (!teamEloByRound[team.name]) {
-                    const initialElo = teamInitialElo[team.name] || 1500;
+                    // Priorizar ELO inicial do ficheiro, depois do jogo, depois fallback
+                    const initialElo = initialElosFromFile[team.name] || teamInitialElo[team.name] || 1500;
                     const totalPoints = 1 + allGameRounds.length + Object.keys(playoffDates).length + (hasInterGroupAdjustments ? 1 : 0);
 
                     // Criar array com ELO inicial para todas as datas exceto ajustes
