@@ -5312,6 +5312,7 @@
             rawEloData: []
         };
         let currentEpoca = null; // Será definido automaticamente para a época mais recente
+        let currentModalidade = null; // Modalidade atualmente selecionada
         let availableEpocas = []; // Épocas disponíveis (será preenchido dinamicamente)
         let playoffSystemInfo = {}; // Informações sobre o sistema de playoff/liguilha por modalidade
 
@@ -5387,23 +5388,39 @@
 
             const modalidades = getModalidadesForEpoca(currentEpoca);
 
+            // Tentar preservar modalidade atual se existir na nova época
+            let modalidadeToLoad = null;
+
+            // Extrair o nome da modalidade atual sem a época (ex: "FUTSAL MASCULINO_25_26" -> "FUTSAL MASCULINO")
+            let currentModalidadeName = null;
+            if (currentModalidade) {
+                currentModalidadeName = currentModalidade.replace(/_\d{2}_\d{2}$/, '');
+            }
+
             modalidades.forEach((mod, index) => {
                 const option = document.createElement('option');
                 option.value = mod.value;
                 option.textContent = mod.label;
 
-                // Definir Futsal Masculino como padrão
-                if (mod.value.includes('FUTSAL MASCULINO')) {
+                // Verificar se esta modalidade corresponde à atual
+                const modName = mod.value.replace(/_\d{2}_\d{2}$/, '');
+
+                if (currentModalidadeName && modName === currentModalidadeName) {
+                    // Preservar modalidade atual se existir na nova época
                     option.selected = true;
+                    modalidadeToLoad = mod.value;
+                } else if (!modalidadeToLoad && mod.value.includes('FUTSAL MASCULINO')) {
+                    // Usar Futsal Masculino como fallback
+                    option.selected = true;
+                    modalidadeToLoad = mod.value;
                 }
 
                 modalidadeSelect.appendChild(option);
             });
 
-            // Carregar a modalidade padrão (Futsal Masculino) se existir
-            const defaultModalidade = modalidades.find(mod => mod.value.includes('FUTSAL MASCULINO'));
-            if (defaultModalidade) {
-                changeModalidade(defaultModalidade.value);
+            // Carregar a modalidade selecionada
+            if (modalidadeToLoad) {
+                changeModalidade(modalidadeToLoad);
             }
         }
 
@@ -5417,6 +5434,9 @@
 
         function changeModalidade(mod) {
             if (!mod) return;
+
+            // Atualizar modalidade atual
+            currentModalidade = mod;
 
             // Caminhos relativos
             const classificacaoPath = `elo_ratings/classificacao_${mod}.csv`;
@@ -5555,16 +5575,15 @@
             const prevBtn = document.getElementById('prevJornadaBtn');
             const nextBtn = document.getElementById('nextJornadaBtn');
             const divisionSelectorDiv = document.getElementById('calendarDivisionSelector');
-            const groupSelectorDiv = document.getElementById('calendarGroupSelector');
-
-            // Guardar jornada atual antes de limpar
+            const groupSelectorDiv = document.getElementById('calendarGroupSelector');            // Guardar jornada atual antes de limpar
             const previousJornada = currentCalendarJornada;
 
             // Limpar seletores
             divisionSelectorDiv.innerHTML = '';
             groupSelectorDiv.innerHTML = '';
 
-            if (!sampleData.rawEloData || sampleData.rawEloData.length === 0) {
+            // Verificar se há jogos disponíveis (usar matches, não rawEloData)
+            if (!sampleData.matches || sampleData.matches.length === 0) {
                 jornadaTitle.textContent = 'Sem jogos disponíveis';
                 prevBtn.disabled = true;
                 nextBtn.disabled = true;
@@ -6257,9 +6276,7 @@
                     grupo: row.Grupo
                 });
             });
-        }
-
-        /**
+        }        /**
          * Analisa os dados dos jogos para detectar o sistema de playoff/liguilha usado
          * Identifica se usa: playoffs (E*), playoff de manutenção (PM*), ou liguilha de manutenção (LM*)
          */
