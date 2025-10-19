@@ -1471,12 +1471,12 @@
 
         <div class="modalidade-selector">
             <label for="epoca">Época:</label>
-            <select id="epoca" name="epoca" onchange="changeEpoca(this.value)">
+            <select id="epoca" name="epoca">
                 <!-- Épocas serão carregadas dinamicamente -->
             </select>
 
             <label for="modalidade">Modalidade:</label>
-            <select id="modalidade" name="modalidade" onchange="changeModalidade(this.value)">
+            <select id="modalidade" name="modalidade">
                 <!-- Modalidades serão carregadas dinamicamente baseadas na época -->
             </select>
         </div>
@@ -1491,10 +1491,10 @@
                 <div class="chart-header">
                     <div class="card-title">Evolução de ELO das Equipas</div>
                     <div class="zoom-controls">
-                        <button class="zoom-btn" onclick="zoomChart(1.2)" title="Zoom In">🔍+</button>
-                        <button class="zoom-btn" onclick="zoomChart(0.8)" title="Zoom Out">🔍-</button>
-                        <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
-                        <button class="zoom-btn" onclick="togglePanMode()" id="panModeBtn" title="Pan Mode">✋</button>
+                        <button class="zoom-btn" data-zoom="in" title="Zoom In">🔍+</button>
+                        <button class="zoom-btn" data-zoom="out" title="Zoom Out">🔍-</button>
+                        <button class="zoom-btn" data-zoom="reset" title="Reset Zoom">⟲</button>
+                        <button class="zoom-btn" data-action="toggle-pan" id="panModeBtn" title="Pan Mode">✋</button>
                     </div>
                 </div>
                 <div class="chart-wrapper">
@@ -1554,7 +1554,7 @@
                 <!-- Navegação de Jornadas -->
                 <div class="jornada-navigation">
                     <div class="jornada-arrow-container">
-                        <button class="jornada-arrow" id="prevJornadaBtn" onclick="changeJornada(-1)"
+                        <button class="jornada-arrow" id="prevJornadaBtn" data-jornada-nav="prev"
                             title="Jornada anterior">
                             &lt;
                         </button>
@@ -1564,7 +1564,7 @@
                         Selecione uma modalidade
                     </div>
                     <div class="jornada-arrow-container">
-                        <button class="jornada-arrow" id="nextJornadaBtn" onclick="changeJornada(1)"
+                        <button class="jornada-arrow" id="nextJornadaBtn" data-jornada-nav="next"
                             title="Jornada seguinte">
                             &gt;
                         </button>
@@ -1611,14 +1611,10 @@
     <div id="debug-panel"
         style="display: none; position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 10px; border-radius: 5px; z-index: 10000; font-family: monospace; font-size: 12px;">
         <div style="margin-bottom: 10px; font-weight: bold;">🐛 Debug Panel</div>
-        <button onclick="DebugUtils.setDebugEnabled(true, false)"
-            style="margin: 2px; padding: 5px; font-size: 11px;">Ativar Debug</button>
-        <button onclick="DebugUtils.setDebugEnabled(true, true)"
-            style="margin: 2px; padding: 5px; font-size: 11px;">Debug Verbose</button>
-        <button onclick="DebugUtils.setDebugEnabled(false)"
-            style="margin: 2px; padding: 5px; font-size: 11px;">Desativar</button>
-        <button onclick="document.getElementById('debug-panel').style.display='none'"
-            style="margin: 2px; padding: 5px; font-size: 11px;">Fechar</button>
+        <button data-debug="enable" style="margin: 2px; padding: 5px; font-size: 11px;">Ativar Debug</button>
+        <button data-debug="enable-all" style="margin: 2px; padding: 5px; font-size: 11px;">Debug Verbose</button>
+        <button data-debug="disable" style="margin: 2px; padding: 5px; font-size: 11px;">Desativar</button>
+        <button data-debug="close" style="margin: 2px; padding: 5px; font-size: 11px;">Fechar</button>
     </div>
 
     <script>
@@ -1630,11 +1626,6 @@
                 panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
             }
         });
-
-        let eloChart = null;
-        let currentDivision = 'A';
-        let currentGroup = null; // Para controlar grupo dentro da divisão
-        let currentModalityHasAdjustments = false; // Para controlar se modalidade atual tem ajustes
 
         // Inicializar aplicação
         async function initApp() {
@@ -1675,13 +1666,36 @@
                     `<img src="${team.emblemPath}" alt="${team.name}" class="team-emblem" style="margin-right: 4px;" onerror="this.style.display='none'">` :
                     '';
 
-                label.innerHTML = `
-                    <input type="checkbox" id="team-${team.name.replace(/[^a-zA-Z0-9]/g, '_')}" name="team-${team.name.replace(/[^a-zA-Z0-9]/g, '_')}" checked onchange="toggleTeam('${team.name}')">
-                    ${emblemHtml}
-                    <div class="team-dot" style="background-color: ${team.color}"></div>
-                    <span class="team-name" title="${team.fullName}">${team.name}</span>
-                `;
-                label.title = team.fullName; // Tooltip com nome completo
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `team-${team.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                checkbox.name = checkbox.id;
+                checkbox.checked = true;
+                checkbox.dataset.teamName = team.name;
+
+                const teamDot = document.createElement('div');
+                teamDot.className = 'team-dot';
+                teamDot.style.backgroundColor = team.color;
+
+                const teamNameSpan = document.createElement('span');
+                teamNameSpan.className = 'team-name';
+                teamNameSpan.title = team.fullName;
+                teamNameSpan.textContent = team.name;
+
+                label.appendChild(checkbox);
+                if (team.emblemPath) {
+                    const emblem = document.createElement('img');
+                    emblem.src = team.emblemPath;
+                    emblem.alt = team.name;
+                    emblem.className = 'team-emblem';
+                    emblem.style.marginRight = '4px';
+                    emblem.onerror = () => emblem.style.display = 'none';
+                    label.appendChild(emblem);
+                }
+                label.appendChild(teamDot);
+                label.appendChild(teamNameSpan);
+
+                label.title = team.fullName;
                 selector.appendChild(label);
             });
 
@@ -1835,118 +1849,39 @@
         }
 
         // Criar seletor de divisões
+        // Criar seletor de divisões (usa DivisionSelector class)
         function createDivisionSelector() {
-            const selector = document.getElementById('divisionSelector');
-
-            if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
-                selector.innerHTML = '<p style="color: #666;">Nenhuma categoria disponível</p>';
-                return;
-            }
-
-            const structure = analyzeModalityStructure();
-            const divisions = Object.keys(sampleData.rankings);
-
-            // Preservar divisão atual se ainda existir, senão usar primeira
-            if (!currentDivision || !divisions.includes(currentDivision)) {
-                currentDivision = divisions[0];
-            }
-
-            // Se for liga única, ocultar o seletor de divisão
-            if (structure.type === 'single-league') {
-                selector.style.display = 'none';
-                return;
-            }
-
-            selector.style.display = 'flex';
-            selector.innerHTML = '';
-            divisions.forEach(division => {
-                const btn = document.createElement('button');
-                btn.className = `division-btn ${division === currentDivision ? 'active' : ''}`;
-
-                // O label já vem formatado do CSV (ex: "1ª Divisão", "2ª Divisão - Grupo A")
-                btn.textContent = division;
-                btn.onclick = () => switchDivision(division);
-                selector.appendChild(btn);
-            });
-
-            // Inicializar seletor de grupos para a divisão padrão
-            updateGroupSelector();
+            divisionSelector.render();
         }
 
         // Atualizar botões visuais da classificação
         function updateRankingsDivisionButtons() {
-            document.querySelectorAll('#divisionSelector .division-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent === currentDivision);
-            });
+            divisionSelector.setActive(appState.view.division);
         }
 
         // Trocar divisão
         function switchDivision(division) {
-            currentDivision = division;
-            currentGroup = null; // Reset group selection when changing division
-            updateRankingsDivisionButtons();
-            updateGroupSelector();
+            divisionSelector.setActive(division);
+            groupSelector.render();
             updateRankingsTable();
-            syncCalendarWithRankings(); // Sincronizar calendário
+            syncCalendarWithRankings();
         }
 
-        // Atualizar seletor de grupos
+        // Atualizar seletor de grupos (usa GroupSelector class)
         function updateGroupSelector() {
-            const groupSelector = document.getElementById('groupSelector');
-
-            if (!sampleData.rankings || !sampleData.rankings[currentDivision]) {
-                groupSelector.style.display = 'none';
-                return;
-            }
-
-            // Obter grupos únicos para a divisão atual
-            const teams = sampleData.rankings[currentDivision];
-            const groups = [...new Set(teams.map(team => team.group))].filter(group => group && group !== 'nan');
-
-            if (groups.length <= 1) {
-                groupSelector.style.display = 'none';
-                currentGroup = null;
-                return;
-            }
-
-            // Mostrar seletor de grupos se há múltiplos grupos
-            groupSelector.style.display = 'flex';
-            groupSelector.innerHTML = '';
-
-            // Preservar grupo atual se ainda existir, senão usar Grupo A ou primeiro disponível
-            if (currentGroup === null || !groups.includes(currentGroup)) {
-                if (groups.includes('A')) {
-                    currentGroup = 'A';
-                } else {
-                    currentGroup = groups[0];
-                }
-            }
-
-            // Botões de grupos específicos (sem botão "Todos")
-            groups.forEach(group => {
-                const btn = document.createElement('button');
-                btn.className = `group-btn ${group === currentGroup ? 'active' : ''}`;
-                btn.textContent = `Grupo ${group}`;
-                btn.onclick = () => switchGroup(group);
-                groupSelector.appendChild(btn);
-            });
+            groupSelector.render();
         }
 
         // Atualizar botões visuais de grupo da classificação
         function updateRankingsGroupButtons() {
-            document.querySelectorAll('#groupSelector .group-btn').forEach(btn => {
-                // Extrair letra do grupo do texto "Grupo A" -> "A"
-                const groupLetter = btn.textContent.replace('Grupo ', '');
-                btn.classList.toggle('active', groupLetter === currentGroup);
-            });
+            groupSelector.setActive(appState.view.group ? `Grupo ${appState.view.group}` : '');
         }
 
         // Trocar grupo
         function switchGroup(group) {
-            currentGroup = group;
-            updateRankingsGroupButtons();
+            groupSelector.setActive(group ? `Grupo ${group}` : '');
             updateRankingsTable();
-            syncCalendarWithRankings(); // Sincronizar calendário
+            syncCalendarWithRankings();
         }
 
         // Inicializar gráfico ELO
@@ -2044,25 +1979,21 @@
         // Configurar pan manual com eventos de mouse
         function setupManualPan() {
             const canvas = eloChart.canvas;
-            let isPanning = false;
-            let panStartX = 0;
-            let panStartY = 0;
-            let panMode = false;
 
             canvas.addEventListener('mousedown', function (event) {
-                if (!panMode || !eloChart) return;
+                if (!appState.chart.pan.enabled || !eloChart) return;
 
-                isPanning = true;
-                panStartX = event.clientX;
-                panStartY = event.clientY;
+                appState.chart.pan.isPanning = true;
+                appState.chart.pan.startX = event.clientX;
+                appState.chart.pan.startY = event.clientY;
                 canvas.style.cursor = 'grabbing';
             });
 
             canvas.addEventListener('mousemove', function (event) {
-                if (!isPanning || !panMode || !eloChart) return;
+                if (!appState.chart.pan.isPanning || !appState.chart.pan.enabled || !eloChart) return;
 
-                const deltaX = event.clientX - panStartX;
-                const deltaY = event.clientY - panStartY;
+                const deltaX = event.clientX - appState.chart.pan.startX;
+                const deltaY = event.clientY - appState.chart.pan.startY;
 
                 const xScale = eloChart.scales.x;
                 const yScale = eloChart.scales.y;
@@ -2083,32 +2014,32 @@
                 eloChart.update('none');
                 updateDynamicTeamLabels();
 
-                panStartX = event.clientX;
-                panStartY = event.clientY;
+                appState.chart.pan.startX = event.clientX;
+                appState.chart.pan.startY = event.clientY;
             });
 
             canvas.addEventListener('mouseup', function () {
-                if (isPanning) {
-                    isPanning = false;
-                    canvas.style.cursor = panMode ? 'grab' : 'default';
+                if (appState.chart.pan.isPanning) {
+                    appState.chart.pan.isPanning = false;
+                    canvas.style.cursor = appState.chart.pan.enabled ? 'grab' : 'default';
                 }
             });
 
             canvas.addEventListener('mouseleave', function () {
-                if (isPanning) {
-                    isPanning = false;
+                if (appState.chart.pan.isPanning) {
+                    appState.chart.pan.isPanning = false;
                     canvas.style.cursor = 'default';
                 }
             });
 
             // Função global para ativar/desativar pan
             window.toggleManualPan = function () {
-                panMode = !panMode;
-                canvas.style.cursor = panMode ? 'grab' : 'default';
+                appState.chart.pan.enabled = !appState.chart.pan.enabled;
+                canvas.style.cursor = appState.chart.pan.enabled ? 'grab' : 'default';
 
                 const panButton = document.getElementById('panButton');
-                panButton.textContent = panMode ? '🤚 Pan: ON' : '✋ Pan: OFF';
-                panButton.classList.toggle('active', panMode);
+                panButton.textContent = appState.chart.pan.enabled ? '🤚 Pan: ON' : '✋ Pan: OFF';
+                panButton.classList.toggle('active', appState.chart.pan.enabled);
             };
         }
 
@@ -2932,30 +2863,6 @@
             if (qualifiedTeamsCache && !forceRefresh) {
                 return qualifiedTeamsCache;
             }
-
-            // Função auxiliar para verificar se é equipa B
-            function isTeamB(teamName) {
-                // Verifica se o nome termina com " B" (com espaço antes)
-                return /\sB$/i.test(teamName.trim());
-            }
-
-            // Função auxiliar para obter a equipa A correspondente
-            function getTeamA(teamBName) {
-                // Remove o " B" do final para obter o nome da equipa A
-                return teamBName.replace(/\sB$/i, '').trim();
-            }
-
-            // Função para verificar se equipa A está em posição de descida
-            function isTeamAInRelegation(teamBName, div1Teams) {
-                const teamAName = getTeamA(teamBName);
-                // Encontrar posição da equipa A na 1ª divisão
-                const teamAIndex = div1Teams.findIndex(t => t.team === teamAName);
-                if (teamAIndex === -1) return false; // Equipa A não está na 1ª divisão
-
-                // Considerar em risco de descida se está nos últimos 3 lugares (10º, 11º, 12º)
-                return teamAIndex >= div1Teams.length - 3;
-            }
-
             const structure = analyzeModalityStructure();
             const qualified = {
                 playoffs: [],           // Top 8 para playoffs principais
@@ -3062,10 +2969,21 @@
                 // Contar APENAS grupos da 2ª divisão
                 const numGroups2ndDiv = Object.keys(sampleData.rankings).filter(key =>
                     key.match(/^2[ªa]?\s*(div|divisão|divisao)?\s*-?\s*grupo/i)
-                ).length || 2;
-                const playoffSlots1stDiv = Math.max(0, 8 - numGroups2ndDiv);
+                ).length;
 
-                DebugUtils.debugQualification('playoff_slots', { first: playoffSlots1stDiv, second: numGroups2ndDiv, total: 8 });
+                // Se há 2ª divisão mas sem grupos, assume 1 equipa da 2ª divisão (7 da 1ª + 1 da 2ª = 8)
+                // Se há grupos, cada grupo manda 1 equipa (ex: 2 grupos = 6 da 1ª + 2 da 2ª = 8)
+                // Se não há 2ª divisão, todas as 8 vagas são da 1ª
+                const playoffSlots1stDiv = div2Teams.length > 0
+                    ? (numGroups2ndDiv > 0 ? Math.max(0, 8 - numGroups2ndDiv) : 7)
+                    : 8;
+
+                DebugUtils.debugQualification('playoff_slots', {
+                    first: playoffSlots1stDiv,
+                    second: div2Teams.length > 0 ? (numGroups2ndDiv || 1) : 0,
+                    total: 8,
+                    hasGroups: numGroups2ndDiv > 0
+                });
 
                 // Top da 1ª divisão vão para playoffs (excluindo equipas B)
                 if (playoffSlots1stDiv > 0 && div1Teams.length > 0) {
@@ -3078,7 +2996,7 @@
                     while (qualifiedCount < playoffSlots1stDiv && currentPos < div1Teams.length) {
                         const team = div1Teams[currentPos];
 
-                        if (isTeamB(team.team)) {
+                        if (TeamUtils.isTeamB(team.team)) {
                             DebugUtils.debugQualification('team_b_skip', { position: currentPos + 1, team: team.team });
                             skippedBTeams++;
                             currentPos++;
@@ -3104,51 +3022,82 @@
                     }
                 }
 
-                // 1º de cada grupo da 2ª divisão vão para playoffs (excluindo equipas B)
-                const groups2ndDiv = {};
-                Object.entries(sampleData.rankings).forEach(([key, ranking]) => {
-                    // Busca flexível por 2ª divisão COM GRUPO
-                    if (key.match(/^2[ªa]?\s*(div|divisão|divisao)?\s*-?\s*grupo\s+([A-Z])/i)) {
-                        const groupMatch = key.match(/grupo\s+([A-Z])/i);
-                        if (groupMatch && ranking.length > 0) {
-                            const group = groupMatch[1].toUpperCase();
+                // 1º da 2ª divisão vai para playoffs
+                // Caso 1: Se há grupos na 2ª divisão, pegar 1º de cada grupo
+                // Caso 2: Se não há grupos mas há 2ª divisão, pegar 1º da 2ª divisão
 
-                            // Encontrar primeiro não-B
-                            let teamIndex = 0;
-                            while (teamIndex < ranking.length && isTeamB(ranking[teamIndex].team)) {
-                                DebugUtils.debugQualification('group_team_b_skip', { group, position: teamIndex + 1, team: ranking[teamIndex].team });
-                                teamIndex++;
-                            }
+                if (numGroups2ndDiv > 0) {
+                    // CASO 1: 2ª divisão com grupos - 1º de cada grupo
+                    const groups2ndDiv = {};
+                    Object.entries(sampleData.rankings).forEach(([key, ranking]) => {
+                        // Busca flexível por 2ª divisão COM GRUPO
+                        if (key.match(/^2[ªa]?\s*(div|divisão|divisao)?\s*-?\s*grupo\s+([A-Z])/i)) {
+                            const groupMatch = key.match(/grupo\s+([A-Z])/i);
+                            if (groupMatch && ranking.length > 0) {
+                                const group = groupMatch[1].toUpperCase();
 
-                            if (teamIndex < ranking.length) {
-                                groups2ndDiv[group] = {
-                                    team: ranking[teamIndex],
-                                    actualPosition: teamIndex + 1,  // Posição real da equipa substituta
-                                    placeholderPosition: 1          // SEMPRE usa 1º para o placeholder!
-                                };
-                                DebugUtils.debugQualification('group_winner', { group, team: ranking[teamIndex].team, position: teamIndex + 1 });
-                                if (teamIndex > 0) {
-                                    DebugUtils.debugQualification('group_winner', { group, team: ranking[teamIndex].team, position: teamIndex + 1, replaces: ranking[0].team });
+                                // Encontrar primeiro não-B
+                                let teamIndex = 0;
+                                while (teamIndex < ranking.length && TeamUtils.isTeamB(ranking[teamIndex].team)) {
+                                    DebugUtils.debugQualification('group_team_b_skip', { group, position: teamIndex + 1, team: ranking[teamIndex].team });
+                                    teamIndex++;
                                 }
-                            } else {
-                                console.warn(`  ⚠️ Grupo ${group}: Todas as equipas são B!`);
+
+                                if (teamIndex < ranking.length) {
+                                    groups2ndDiv[group] = {
+                                        team: ranking[teamIndex],
+                                        actualPosition: teamIndex + 1,  // Posição real da equipa substituta
+                                        placeholderPosition: 1          // SEMPRE usa 1º para o placeholder!
+                                    };
+                                    DebugUtils.debugQualification('group_winner', { group, team: ranking[teamIndex].team, position: teamIndex + 1 });
+                                    if (teamIndex > 0) {
+                                        DebugUtils.debugQualification('group_winner', { group, team: ranking[teamIndex].team, position: teamIndex + 1, replaces: ranking[0].team });
+                                    }
+                                } else {
+                                    console.warn(`  ⚠️ Grupo ${group}: Todas as equipas são B!`);
+                                }
                             }
                         }
-                    }
-                });
-
-                Object.entries(groups2ndDiv).forEach(([group, data]) => {
-                    qualified.playoffs.push(data.team.team);
-                    qualified.legend.push({
-                        position: data.placeholderPosition,  // USA 1 para o placeholder
-                        actualPosition: data.actualPosition,  // Guarda posição real para exibição
-                        team: data.team.team,
-                        type: 'playoff',
-                        division: '2ª',
-                        group: isNaN(group) ? group : undefined,
-                        isSubstitute: data.actualPosition > 1  // Flag indicando que é substituto
                     });
-                });
+
+                    Object.entries(groups2ndDiv).forEach(([group, data]) => {
+                        qualified.playoffs.push(data.team.team);
+                        qualified.legend.push({
+                            position: data.placeholderPosition,  // USA 1 para o placeholder
+                            actualPosition: data.actualPosition,  // Guarda posição real para exibição
+                            team: data.team.team,
+                            type: 'playoff',
+                            division: '2ª',
+                            group: isNaN(group) ? group : undefined,
+                            isSubstitute: data.actualPosition > 1  // Flag indicando que é substituto
+                        });
+                    });
+                } else if (div2Teams.length > 0) {
+                    // CASO 2: 2ª divisão SEM grupos - pegar 1º classificado geral (excluindo equipa B)
+                    DebugUtils.debugQualification('selecting_2nd_division_no_groups');
+
+                    let teamIndex = 0;
+                    while (teamIndex < div2Teams.length && TeamUtils.isTeamB(div2Teams[teamIndex].team)) {
+                        DebugUtils.debugQualification('team_b_skip_2nd_div', { position: teamIndex + 1, team: div2Teams[teamIndex].team });
+                        teamIndex++;
+                    }
+
+                    if (teamIndex < div2Teams.length) {
+                        const selectedTeam = div2Teams[teamIndex];
+                        qualified.playoffs.push(selectedTeam.team);
+                        qualified.legend.push({
+                            position: teamIndex + 1,
+                            actualPosition: teamIndex + 1,
+                            team: selectedTeam.team,
+                            type: 'playoff',
+                            division: '2ª',
+                            isSubstitute: teamIndex > 0  // Flag se não é o 1º real
+                        });
+                        DebugUtils.debugQualification('2nd_div_winner', { team: selectedTeam.team, position: teamIndex + 1 });
+                    } else {
+                        console.warn(`  ⚠️ 2ª Divisão: Todas as equipas são B!`);
+                    }
+                }
 
                 // Equipas para playoff/liguilha de manutenção ou promoção
                 if (playoffSystemInfo.hasMaintenancePlayoffs || playoffSystemInfo.hasMaintenanceLeague) {
@@ -3188,9 +3137,9 @@
                                         continue;
                                     }
 
-                                    if (isTeamB(team.team)) {
+                                    if (TeamUtils.isTeamB(team.team)) {
                                         // Verificar se equipa A está em descida
-                                        if (isTeamAInRelegation(team.team, div1Teams)) {
+                                        if (TeamUtils.isTeamAInRelegation(team.team, div1Teams)) {
                                             DebugUtils.debugQualification('team_b_with_relegation', { group, position: teamIndex + 1, team: team.team });
                                             selectedTeam = team;
                                             selectedPosition = teamIndex + 1;
@@ -4588,7 +4537,13 @@
             const filtersContainer = document.getElementById('quickFilters');
 
             // Limpar filtros existentes
-            filtersContainer.innerHTML = '<button class="filter-btn" onclick="filterTop3()">Top 3</button>';
+            filtersContainer.innerHTML = '';
+
+            const top3Btn = document.createElement('button');
+            top3Btn.className = 'filter-btn';
+            top3Btn.textContent = 'Top 3';
+            top3Btn.dataset.filter = 'top3';
+            filtersContainer.appendChild(top3Btn);
 
             // Usar a mesma lógica da tabela de classificação
             const divisions = Object.keys(sampleData.rankings);
@@ -4598,9 +4553,9 @@
                 divisions.forEach(division => {
                     const btn = document.createElement('button');
                     btn.className = 'filter-btn';
-                    // Usar o label original sem adicionar prefixos
                     btn.textContent = division;
-                    btn.onclick = () => filterDivision(division);
+                    btn.dataset.filter = 'division';
+                    btn.dataset.division = division;
                     filtersContainer.appendChild(btn);
                 });
             }
@@ -4618,13 +4573,407 @@
             resetBtn.onclick = resetFilter;
             filtersContainer.appendChild(resetBtn);
         }
-        // Determinar progressão no torneio baseada na estrutura
-        function getTeamProgression(position, totalTeams, structure, teamName = null, teamGroup = null) {
-            const progression = {
-                type: 'safe',
-                description: 'Zona segura'
-            };
 
+        // ==================== UTILITIES ====================
+
+        /**
+         * Utilitários para trabalhar com equipas, especialmente equipas B
+         */
+        const TeamUtils = {
+            /**
+             * Verifica se uma equipa é equipa B
+             * @param {string} name - Nome da equipa
+             * @returns {boolean}
+             */
+            isTeamB(name) {
+                return /\sB$/i.test(name?.trim());
+            },
+
+            /**
+             * Obtém o nome da equipa A correspondente a uma equipa B
+             * @param {string} teamBName - Nome da equipa B
+             * @returns {string} Nome da equipa A
+             */
+            getTeamA(teamBName) {
+                return teamBName?.trim().replace(/\sB$/i, '');
+            },
+
+            /**
+             * Verifica se a equipa A correspondente está em posição de descida
+             * @param {string} teamBName - Nome da equipa B
+             * @param {Array} div1Teams - Lista de equipas da 1ª divisão (ordenadas por classificação)
+             * @returns {boolean}
+             */
+            isTeamAInRelegation(teamBName, div1Teams) {
+                if (!this.isTeamB(teamBName)) {
+                    return false;
+                }
+
+                const teamAName = this.getTeamA(teamBName);
+                const teamAIndex = div1Teams.findIndex(t => t.team === teamAName);
+
+                if (teamAIndex === -1) {
+                    return false; // Equipa A não está na 1ª divisão
+                }
+
+                // Considerar em risco de descida se está nos últimos 3 lugares (10º, 11º, 12º)
+                return teamAIndex >= div1Teams.length - 3;
+            },
+
+            /**
+             * Normaliza nome de equipa para comparações
+             * @param {string} name - Nome da equipa
+             * @returns {string}
+             */
+            normalizeName(name) {
+                return name?.trim().replace(/\s+/g, ' ');
+            },
+
+            /**
+             * Encontra primeira equipa não-B numa lista
+             * @param {Array} teams - Lista de equipas
+             * @param {number} startIndex - Índice inicial para começar a procura
+             * @returns {Object} { team, index } ou null se não encontrar
+             */
+            findFirstNonBTeam(teams, startIndex = 0) {
+                for (let i = startIndex; i < teams.length; i++) {
+                    if (!this.isTeamB(teams[i].team)) {
+                        return { team: teams[i], index: i };
+                    }
+                }
+                return null;
+            }
+        };
+
+        // ==================== STRATEGY PATTERN PARA PROGRESSÃO ====================
+
+        // Estratégias de progressão por tipo de estrutura de torneio
+        const progressionStrategies = {
+            'single-league': (context) => {
+                // Liga única sem divisões nem grupos
+                // REGRA: Passam sempre 8 aos playoffs
+                if (context.position <= 8) {
+                    return {
+                        type: 'playoffs',
+                        description: 'Qualificação para play-offs'
+                    };
+                }
+                return null;
+            },
+
+            'groups-only': (context) => {
+                // Formato: Sem divisões, sempre 2 grupos
+                // Passam os primeiros 4 de cada grupo aos play-offs
+                if (context.position <= 4) {
+                    return {
+                        type: 'playoffs',
+                        description: 'Qualificação para play-offs'
+                    };
+                }
+                return null;
+            },
+
+            'divisions-only': (context) => {
+                // Formato: Múltiplas divisões sem grupos
+                const { position, totalTeams, divisionNum, structure,
+                    hasMaintenancePlayoffs, hasMaintenanceLeague } = context;
+
+                if (divisionNum === 1) {
+                    return progressionStrategies._firstDivisionOnly(context);
+                } else if (divisionNum === 2) {
+                    return progressionStrategies._secondDivisionOnly(context);
+                } else {
+                    return progressionStrategies._lowerDivisions(context);
+                }
+            },
+
+            'divisions-and-groups': (context) => {
+                // Formato: Divisões com grupos
+                const { divisionNum } = context;
+
+                if (divisionNum === 1) {
+                    return progressionStrategies._firstDivisionWithGroups(context);
+                } else if (divisionNum === 2) {
+                    return progressionStrategies._secondDivisionWithGroups(context);
+                } else {
+                    return progressionStrategies._lowerDivisions(context);
+                }
+            },
+
+            // Estratégias auxiliares para divisões específicas
+            _firstDivisionOnly: (context) => {
+                const { position, totalTeams, structure,
+                    hasMaintenancePlayoffs, hasMaintenanceLeague } = context;
+
+                const has2ndDivision = structure.divisions.includes('2');
+                const relegationRules = getRelegationRules();
+                const playoffSpots = calculatePlayoffSpots(has2ndDivision);
+
+                if (position <= playoffSpots && totalTeams >= 8) {
+                    return {
+                        type: 'playoffs',
+                        description: 'Qualificação para play-offs'
+                    };
+                }
+
+                return calculateRelegationProgression(
+                    position,
+                    totalTeams,
+                    relegationRules,
+                    hasMaintenancePlayoffs,
+                    hasMaintenanceLeague
+                );
+            },
+
+            _secondDivisionOnly: (context) => {
+                const { position, hasMaintenancePlayoffs, hasMaintenanceLeague } = context;
+
+                if (position === 1) {
+                    return {
+                        type: 'playoffs',
+                        description: 'Play-offs + Promoção'
+                    };
+                }
+
+                if (position === 2) {
+                    return calculatePromotionProgression(hasMaintenancePlayoffs, hasMaintenanceLeague);
+                }
+
+                return null;
+            },
+
+            _firstDivisionWithGroups: (context) => {
+                const { position, totalTeams, structure,
+                    hasMaintenancePlayoffs, hasMaintenanceLeague } = context;
+
+                const secondDivisionGroups = structure.groups.filter(g =>
+                    sampleData.teams.some(team => team.division === '2' && team.group === g)
+                ).length;
+
+                const playoffSpotsFrom1st = calculatePlayoffSpotsWithGroups(secondDivisionGroups, structure);
+
+                if (position <= playoffSpotsFrom1st) {
+                    return {
+                        type: 'playoffs',
+                        description: 'Qualificação para play-offs'
+                    };
+                }
+
+                const relegationRules = getRelegationRules();
+                return calculateRelegationProgression(
+                    position,
+                    totalTeams,
+                    relegationRules,
+                    hasMaintenancePlayoffs,
+                    hasMaintenanceLeague
+                );
+            },
+
+            _secondDivisionWithGroups: (context) => {
+                const { position, hasMaintenancePlayoffs, hasMaintenanceLeague } = context;
+
+                if (position === 1) {
+                    return {
+                        type: 'playoffs',
+                        description: 'Play-offs + Promoção'
+                    };
+                }
+
+                if (position === 2) {
+                    return calculatePromotionProgression(hasMaintenancePlayoffs, hasMaintenanceLeague);
+                }
+
+                return null;
+            },
+
+            _lowerDivisions: (context) => {
+                // 3ª divisão ou inferior - primeiros 2 sobem
+                if (context.position <= 2) {
+                    return {
+                        type: 'promotion',
+                        description: 'Subida de divisão'
+                    };
+                }
+                return null;
+            }
+        };
+
+        // Funções auxiliares para cálculos específicos
+        function getRelegationRules() {
+            const epochSelector = document.getElementById('epoca');
+            const modalidadeSelector = document.getElementById('modalidade');
+
+            if (!epochSelector || !modalidadeSelector) {
+                console.warn('⚠️ getRelegationRules: seletores não encontrados');
+                return { directRelegation: 3, maintenancePosition: 1 };
+            }
+
+            const currentEpoch = epochSelector.value;
+            const currentModality = modalidadeSelector.value;
+
+            if (currentEpoch === '24_25') {
+                if (currentModality && currentModality.includes('ANDEBOL')) {
+                    return { directRelegation: 2, maintenancePosition: 0 };
+                }
+                return { directRelegation: 4, maintenancePosition: 0 };
+            }
+
+            if (currentModality && currentModality.includes('ANDEBOL')) {
+                return { directRelegation: 2, maintenancePosition: 1 };
+            }
+
+            return { directRelegation: 3, maintenancePosition: 1 };
+        }
+
+        function calculatePlayoffSpots(has2ndDivision) {
+            const epochSelector = document.getElementById('epoca');
+            const modalidadeSelector = document.getElementById('modalidade');
+
+            if (!epochSelector || !modalidadeSelector) {
+                return 7;
+            }
+
+            const currentEpoch = epochSelector.value;
+            const currentModality = modalidadeSelector.value;
+
+            if (currentEpoch === '24_25') {
+                return currentModality && currentModality.includes('ANDEBOL') ? 7 : 6;
+            }
+
+            if (currentModality && currentModality.includes('ANDEBOL')) {
+                return 7;
+            }
+
+            return has2ndDivision ? 7 : 8;
+        }
+
+        function calculatePlayoffSpotsWithGroups(secondDivisionGroups, structure) {
+            const epochSelector = document.getElementById('epoca');
+            const currentEpoch = epochSelector ? epochSelector.value : null;
+
+            if (currentEpoch === '24_25') {
+                return calculatePlayoffSpots(false);
+            }
+
+            if (secondDivisionGroups === 0 && structure.divisions.includes('2')) {
+                return 7;
+            }
+
+            return Math.max(4, 8 - secondDivisionGroups);
+        }
+
+        function calculateRelegationProgression(position, totalTeams, relegationRules, hasMaintenancePlayoffs, hasMaintenanceLeague) {
+            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
+            const maintenanceStart = totalTeams - (relegationRules.directRelegation + relegationRules.maintenancePosition) + 1;
+
+            if (position >= directRelegationStart) {
+                return {
+                    type: 'relegation',
+                    description: 'Descida de divisão'
+                };
+            }
+
+            if (relegationRules.maintenancePosition > 0 && position >= maintenanceStart) {
+                if (hasMaintenancePlayoffs || hasMaintenanceLeague) {
+                    return {
+                        type: hasMaintenancePlayoffs ? 'maintenance-playoffs' : 'maintenance-league',
+                        description: hasMaintenancePlayoffs ? 'Play-off de manutenção' : 'Liguilha de manutenção'
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        function calculatePromotionProgression(hasMaintenancePlayoffs, hasMaintenanceLeague) {
+            if (hasMaintenancePlayoffs) {
+                return {
+                    type: 'promotion-playoffs',
+                    description: 'Play-off de Promoção'
+                };
+            }
+
+            if (hasMaintenanceLeague) {
+                return {
+                    type: 'promotion-league',
+                    description: 'Liguilha de Promoção'
+                };
+            }
+
+            return {
+                type: 'promotion',
+                description: 'Subida de divisão'
+            };
+        }
+
+        function checkTeamBQualification(teamName, position) {
+            if (!teamName || !TeamUtils.isTeamB(teamName)) {
+                return null;
+            }
+
+            const qualified = getQualifiedTeams();
+            const isInPlayoffs = qualified.playoffs.some(t => t === teamName);
+            const isInMaintenancePlayoff = qualified.maintenancePlayoff.some(t => t === teamName);
+            const isInPromotionPlayoff = qualified.promotionPlayoff.some(t => t === teamName);
+
+            if (!isInPlayoffs && !isInMaintenancePlayoff && !isInPromotionPlayoff) {
+                DebugUtils.debugTeamBStatus('team_b_not_qualified', { team: teamName, position });
+                return {
+                    type: 'safe',
+                    description: `Zona segura (${position}º lugar - equipa B não qualifica)`
+                };
+            }
+
+            DebugUtils.debugTeamBStatus('team_b_qualified', { team: teamName, position });
+            return null;
+        }
+
+        function checkSubstituteQualification(teamName, position, isSecondDivision, hasMaintenancePlayoffs, hasMaintenanceLeague) {
+            if (!teamName || TeamUtils.isTeamB(teamName) || !isSecondDivision || (position !== 2 && position < 3)) {
+                return null;
+            }
+
+            const qualified = getQualifiedTeams();
+            const isInPlayoffs = qualified.playoffs.some(t => t === teamName);
+
+            if (isInPlayoffs && position > 1) {
+                DebugUtils.debugTeamBStatus('in_playoffs_replaced', { team: teamName, position });
+                return {
+                    type: 'playoffs',
+                    description: `Play-offs + Promoção (substitui ${position}º do grupo)`
+                };
+            }
+
+            const isInPromotionPlayoff = qualified.promotionPlayoff.some(t => t === teamName);
+
+            if (isInPromotionPlayoff && position > 2) {
+                DebugUtils.debugTeamBStatus('in_promotion_replaced', { team: teamName, position });
+
+                if (hasMaintenancePlayoffs) {
+                    return {
+                        type: 'promotion-playoffs',
+                        description: `Play-off de Promoção (substitui ${position}º do grupo)`
+                    };
+                }
+
+                if (hasMaintenanceLeague) {
+                    return {
+                        type: 'promotion-league',
+                        description: `Liguilha de Promoção (substitui ${position}º do grupo)`
+                    };
+                }
+
+                return {
+                    type: 'promotion',
+                    description: `Subida de divisão (substitui ${position}º do grupo)`
+                };
+            }
+
+            return null;
+        }
+
+        // Função principal de progressão usando Strategy Pattern
+        function getTeamProgression(position, totalTeams, structure, teamName = null, teamGroup = null) {
             DebugUtils.debugModalityAnalysis('calculating_progression', {
                 position,
                 totalTeams,
@@ -4644,359 +4993,46 @@
             const hasMaintenancePlayoffs = playoffSystemInfo.hasMaintenancePlayoffs || false;
             const hasMaintenanceLeague = playoffSystemInfo.hasMaintenanceLeague || false;
 
-            // ⚠️ VERIFICAÇÃO DE EQUIPA B - Se for B team, verificar se realmente qualifica
-            const isTeamB = (name) => /\sB$/i.test(name);
+            // Verificar qualificação de equipa B
+            const teamBResult = checkTeamBQualification(teamName, position);
+            if (teamBResult) return teamBResult;
 
-            if (teamName && isTeamB(teamName)) {
-                // Esta é uma equipa B - precisamos verificar se ela realmente qualifica
-                const qualified = getQualifiedTeams();
+            // Verificar equipa substituta
+            const substituteResult = checkSubstituteQualification(
+                teamName,
+                position,
+                isSecondDivision,
+                hasMaintenancePlayoffs,
+                hasMaintenanceLeague
+            );
+            if (substituteResult) return substituteResult;
 
-                // Verificar se esta equipa B específica está na lista de qualificados
-                const isInPlayoffs = qualified.playoffs.some(t => t === teamName);
-                const isInMaintenancePlayoff = qualified.maintenancePlayoff.some(t => t === teamName);
-                const isInPromotionPlayoff = qualified.promotionPlayoff.some(t => t === teamName);
+            // Criar contexto para a estratégia
+            const context = {
+                position,
+                totalTeams,
+                structure,
+                divisionNum,
+                isSecondDivision,
+                hasWinnerPlayoffs,
+                hasMaintenancePlayoffs,
+                hasMaintenanceLeague,
+                teamName,
+                teamGroup
+            };
 
-                // Se equipa B NÃO está qualificada, marcar como safe
-                if (!isInPlayoffs && !isInMaintenancePlayoff && !isInPromotionPlayoff) {
-                    DebugUtils.debugTeamBStatus('team_b_not_qualified', { team: teamName, position });
-                    progression.type = 'safe';
-                    progression.description = `Zona segura (${position}º lugar - equipa B não qualifica)`;
-                    return progression;
-                }
-                // Se qualifica, continuar lógica normal
-                DebugUtils.debugTeamBStatus('team_b_qualified', { team: teamName, position });
+            // Selecionar e executar estratégia apropriada
+            const strategy = progressionStrategies[structure.type];
+            if (!strategy) {
+                console.warn(`⚠️ Estratégia não encontrada para tipo: ${structure.type}`);
+                return { type: 'safe', description: 'Zona segura' };
             }
 
-            // 🔍 VERIFICAÇÃO DE EQUIPA SUBSTITUTA - Se não for B, mas estiver em posição de B substituída
-            if (teamName && !isTeamB(teamName) && isSecondDivision && (position === 2 || position >= 3)) {
-                const qualified = getQualifiedTeams();
-
-                // Verificar se esta equipa está nos playoffs (substituindo o 1º)
-                const isInPlayoffs = qualified.playoffs.some(t => t === teamName);
-
-                // Se está nos playoffs mas não é 1º, é substituta!
-                if (isInPlayoffs && position > 1) {
-                    DebugUtils.debugTeamBStatus('in_playoffs_replaced', { team: teamName, position });
-                    progression.type = 'playoffs';
-                    progression.description = `Play-offs + Promoção (substitui ${position}º do grupo)`;
-                    return progression;
-                }
-
-                // Verificar se está no promotion playoff (2º lugar normal ou substituindo)
-                const isInPromotionPlayoff = qualified.promotionPlayoff.some(t => t === teamName);
-
-                if (isInPromotionPlayoff && position > 2) {
-                    DebugUtils.debugTeamBStatus('in_promotion_replaced', { team: teamName, position });
-                    if (hasMaintenancePlayoffs) {
-                        progression.type = 'promotion-playoffs';
-                        progression.description = `Play-off de Promoção (substitui ${position}º do grupo)`;
-                    } else if (hasMaintenanceLeague) {
-                        progression.type = 'promotion-league';
-                        progression.description = `Liguilha de Promoção (substitui ${position}º do grupo)`;
-                    } else {
-                        progression.type = 'promotion';
-                        progression.description = `Subida de divisão (substitui ${position}º do grupo)`;
-                    }
-                    return progression;
-                }
-            }
-
-            // 🔧 Obter regras de descida baseadas na época e modalidade
-            function getRelegationRules() {
-                const epochSelector = document.getElementById('epoca');
-                const modalidadeSelector = document.getElementById('modalidade');
-
-                if (!epochSelector || !modalidadeSelector) {
-                    // Padrão se seletores não existirem
-                    console.warn('⚠️ getRelegationRules: seletores não encontrados');
-                    return { directRelegation: 3, maintenancePosition: 1 };
-                }
-
-                const currentEpoch = epochSelector.value;
-                const currentModality = modalidadeSelector.value;
-
-                // Regras específicas para época 24_25
-                if (currentEpoch === '24_25') {
-                    // Andebol: 2 descem direto
-                    if (currentModality && currentModality.includes('ANDEBOL')) {
-                        return {
-                            directRelegation: 2,  // Últimos 2 descem direto
-                            maintenancePosition: 0 // Sem PM/LM
-                        };
-                    }
-                    // Outras modalidades: 4 descem direto
-                    return {
-                        directRelegation: 4,  // Últimos 4 descem direto
-                        maintenancePosition: 0 // Sem PM/LM
-                    };
-                }
-
-                // Regras específicas para ANDEBOL em qualquer época (exceto 24_25)
-                if (currentModality && currentModality.includes('ANDEBOL')) {
-                    return {
-                        directRelegation: 2,  // Últimos 2 descem direto
-                        maintenancePosition: 1 // 1 ao PM/LM
-                    };
-                }
-
-                // Regra padrão para outras épocas: 3 descem, 1 ao PM/LM
-                return {
-                    directRelegation: 3,
-                    maintenancePosition: 1
-                };
-            }
-
-            // 🔧 Obter número de vagas para playoffs baseado na época e modalidade
-            function getPlayoffSpots() {
-                const epochSelector = document.getElementById('epoca');
-                const modalidadeSelector = document.getElementById('modalidade');
-
-                if (!epochSelector || !modalidadeSelector) {
-                    return 7; // Padrão
-                }
-
-                const currentEpoch = epochSelector.value;
-                const currentModality = modalidadeSelector.value;
-
-                // Regras específicas para época 24_25 - 1ª divisão
-                if (currentEpoch === '24_25') {
-                    // Andebol: 7 aos playoffs
-                    if (currentModality && currentModality.includes('ANDEBOL')) {
-                        return 7;
-                    }
-                    // Outras modalidades: 6 aos playoffs
-                    return 6;
-                }
-
-                // Padrão para outras épocas: 7 aos playoffs (se houver 2ª divisão)
-                return 7;
-            }
-
-            // Regras baseadas na estrutura do torneio
-            switch (structure.type) {
-                case 'single-league':
-                    // Liga única sem divisões nem grupos (ex: Basquetebol Feminino 25_26, Futsal Feminino 25_26)
-                    // REGRA: Passam sempre 8 aos playoffs
-                    if (position <= 8) {
-                        progression.type = 'playoffs';
-                        progression.description = 'Qualificação para play-offs';
-                    }
-                    break;
-
-                case 'groups-only':
-                    // Formato: Sem divisões, sempre 2 grupos
-                    // Passam os primeiros 4 de cada grupo aos play-offs
-                    if (position <= 4) {
-                        progression.type = 'playoffs';
-                        progression.description = 'Qualificação para play-offs';
-                    }
-                    break;
-
-                case 'divisions-only':
-                    // Formato: Múltiplas divisões sem grupos (ex: Andebol)
-                    if (divisionNum === 1) {
-                        // 1ª divisão
-                        // REGRA: Vagas de playoffs variam por época/modalidade
-                        // Regras de descida também variam por época/modalidade
-
-                        const has2ndDivision = structure.divisions.includes('2');
-                        const relegationRules = getRelegationRules();
-
-                        // Determinar vagas de playoffs
-                        let playoffSpots;
-                        const epochSelector = document.getElementById('epoca');
-                        const currentEpoch = epochSelector ? epochSelector.value : null;
-                        const modalidadeSelector = document.getElementById('modalidade');
-                        const currentModality = modalidadeSelector ? modalidadeSelector.value : '';
-
-                        if (currentEpoch === '24_25') {
-                            // Época 24_25: usar função específica
-                            playoffSpots = getPlayoffSpots();
-                        } else if (currentModality.includes('ANDEBOL')) {
-                            // Andebol: SEMPRE 7 da 1ª divisão (+ 1 da 2ª = 8 total)
-                            playoffSpots = 7;
-                        } else {
-                            // Outras épocas: regra padrão (7 da 1ª + 1 da 2ª = 8 total)
-                            playoffSpots = has2ndDivision ? 7 : 8;
-                        }
-
-                        if (position <= playoffSpots && totalTeams >= 8) {
-                            progression.type = 'playoffs';
-                            progression.description = 'Qualificação para play-offs';
-                        } else if (hasMaintenancePlayoffs || hasMaintenanceLeague) {
-                            // Aplicar regras de descida configuradas
-                            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
-                            const maintenanceStart = totalTeams - (relegationRules.directRelegation + relegationRules.maintenancePosition) + 1;
-
-                            if (position >= directRelegationStart) {
-                                // Descida direta
-                                progression.type = 'relegation';
-                                progression.description = 'Descida de divisão';
-                            } else if (relegationRules.maintenancePosition > 0 && position >= maintenanceStart) {
-                                // PM/LM de manutenção (se configurado)
-                                if (hasMaintenancePlayoffs) {
-                                    progression.type = 'maintenance-playoffs';
-                                    progression.description = 'Play-off de manutenção';
-                                } else {
-                                    progression.type = 'maintenance-league';
-                                    progression.description = 'Liguilha de manutenção';
-                                }
-                            }
-                        } else {
-                            // Sem PM/LM: aplicar regras de descida configuradas
-                            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
-
-                            if (position >= directRelegationStart) {
-                                progression.type = 'relegation';
-                                progression.description = 'Descida de divisão';
-                            }
-                        }
-                    } else if (isSecondDivision) {
-                        // 2ª divisão - promoção
-                        // REGRA: 1º vai aos playoffs + promoção (com 7 da 1ª = 8 total), 2º vai ao PM/LM ou sobe direto
-                        if (position === 1) {
-                            progression.type = 'playoffs';
-                            progression.description = 'Play-offs + Promoção';
-                        } else if (position === 2) {
-                            if (hasMaintenancePlayoffs) {
-                                progression.type = 'promotion-playoffs';
-                                progression.description = 'Play-off de Promoção';
-                            } else if (hasMaintenanceLeague) {
-                                progression.type = 'promotion-league';
-                                progression.description = 'Liguilha de Promoção';
-                            } else {
-                                progression.type = 'promotion';
-                                progression.description = 'Subida de divisão';
-                            }
-                        }
-                    } else if (divisionNum >= 3) {
-                        // 3ª divisão ou inferior - primeiros 2 sobem
-                        if (position <= 2) {
-                            progression.type = 'promotion';
-                            progression.description = 'Subida de divisão';
-                        }
-                    }
-                    break;
-
-                case 'divisions-and-groups':
-                    // Formato: Divisões com grupos (ex: Futsal Masculino)
-                    // REGRA: Vagas de playoffs variam por época/modalidade
-                    // Regras de descida também variam por época/modalidade
-
-                    const secondDivisionGroups = structure.groups.filter(g =>
-                        sampleData.teams.some(team => team.division === '2' && team.group === g)
-                    ).length;
-
-                    if (divisionNum === 1) {
-                        // 1ª divisão
-                        const relegationRules = getRelegationRules();
-
-                        // Determinar vagas de playoffs
-                        let playoffSpotsFrom1st;
-                        const epochSelector = document.getElementById('epoca');
-                        const currentEpoch = epochSelector ? epochSelector.value : null;
-
-                        if (currentEpoch === '24_25') {
-                            // Época 24_25: TODAS as vagas são da 1ª divisão (não há promoção da 2ª)
-                            playoffSpotsFrom1st = getPlayoffSpots();
-                        } else {
-                            // Outras épocas: 8 total - nº de grupos da 2ª (cada grupo manda 1º classificado)
-                            // Se não há grupos (secondDivisionGroups = 0), mas há 2ª divisão, então são 7 da 1ª + 1 da 2ª
-                            if (secondDivisionGroups === 0 && structure.divisions.includes('2')) {
-                                playoffSpotsFrom1st = 7; // 7 da 1ª + 1 da 2ª (sem grupos) = 8 total
-                            } else {
-                                playoffSpotsFrom1st = Math.max(4, 8 - secondDivisionGroups);
-                            }
-                        }
-
-                        if (position <= playoffSpotsFrom1st) {
-                            progression.type = 'playoffs';
-                            progression.description = 'Qualificação para play-offs';
-                        } else if (hasMaintenancePlayoffs || hasMaintenanceLeague) {
-                            // Aplicar regras de descida configuradas
-                            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
-                            const maintenanceStart = totalTeams - (relegationRules.directRelegation + relegationRules.maintenancePosition) + 1;
-
-                            if (position >= directRelegationStart) {
-                                // Descida direta
-                                progression.type = 'relegation';
-                                progression.description = 'Descida de divisão';
-                            } else if (relegationRules.maintenancePosition > 0 && position >= maintenanceStart) {
-                                // PM/LM de manutenção (se configurado)
-                                if (hasMaintenancePlayoffs) {
-                                    progression.type = 'maintenance-playoffs';
-                                    progression.description = 'Play-off de manutenção';
-                                } else {
-                                    progression.type = 'maintenance-league';
-                                    progression.description = 'Liguilha de manutenção';
-                                }
-                            }
-                        } else {
-                            // Sem PM/LM: aplicar regras de descida configuradas
-                            const directRelegationStart = totalTeams - relegationRules.directRelegation + 1;
-
-                            if (position >= directRelegationStart) {
-                                progression.type = 'relegation';
-                                progression.description = 'Descida de divisão';
-                            }
-                        }
-                    } else if (isSecondDivision) {
-                        // 2ª divisão com grupos
-                        // REGRA: 1º de cada grupo vai aos playoffs + promoção (8 total)
-                        // 2º de cada grupo vai ao PM/LM de promoção (se existir) ou sobe direto (se não existir)
-
-                        if (position === 1) {
-                            progression.type = 'playoffs';
-                            progression.description = 'Play-offs + Promoção (1º do grupo)';
-                        } else if (position === 2) {
-                            if (hasMaintenancePlayoffs) {
-                                progression.type = 'promotion-playoffs';
-                                progression.description = 'Play-off de Promoção (2º do grupo)';
-                            } else if (hasMaintenanceLeague) {
-                                progression.type = 'promotion-league';
-                                progression.description = 'Liguilha de Promoção (2º do grupo)';
-                            } else {
-                                progression.type = 'promotion';
-                                progression.description = 'Subida de divisão (2º do grupo)';
-                            }
-                        }
-                    } else {
-                        // 3ª divisão ou inferior - primeiro de cada grupo sobe
-                        if (position === 1) {
-                            progression.type = 'promotion';
-                            progression.description = 'Subida de divisão (1º do grupo)';
-                        }
-                    }
-                    break;
-
-                default:
-                    // Estrutura desconhecida - usar regras genéricas baseadas no tamanho
-                    if (totalTeams >= 8) {
-                        const playoffSpots = Math.ceil(totalTeams * 0.3);
-                        const relegationSpots = Math.max(2, Math.ceil(totalTeams * 0.2));
-
-                        if (position <= playoffSpots) {
-                            progression.type = 'playoffs';
-                            progression.description = 'Zona de play-offs';
-                        } else if (position >= totalTeams - relegationSpots + 1) {
-                            progression.type = 'relegation';
-                            progression.description = 'Zona de risco';
-                        }
-                    } else if (totalTeams >= 4) {
-                        if (position <= 2) {
-                            progression.type = 'playoffs';
-                            progression.description = 'Zona de play-offs';
-                        } else if (totalTeams > 4 && position >= totalTeams) {
-                            progression.type = 'relegation';
-                            progression.description = 'Zona de risco';
-                        }
-                    }
-                    break;
-            }
-
-            DebugUtils.debugModalityAnalysis('progression_determined', progression);
-            return progression;
+            const result = strategy(context);
+            return result || { type: 'safe', description: 'Zona segura' };
         }
+
+        // ==================== FIM DO STRATEGY PATTERN ====================
 
         function analyzeModalityStructure() {
             const structure = {
@@ -5300,21 +5336,127 @@
             return coursesConfig;
         }
 
-        let sampleData = {
-            teams: [],
-            rankings: {},
-            eloHistory: {},
-            matches: [],
-            bracket: {},
-            secondaryBracket: {},  // ← ADICIONADO para playoffs/liguilhas secundários
-            secondaryBracketType: null,  // ← ADICIONADO para tipo do bracket secundário
-            gamesDates: [],
-            rawEloData: []
+        // ==================== ESTADO CENTRALIZADO DA APLICAÇÃO ====================
+        const appState = {
+            // Estado do gráfico ELO
+            chart: {
+                instance: null,
+                pan: {
+                    enabled: false,
+                    isPanning: false,
+                    startX: 0,
+                    startY: 0
+                }
+            },
+
+            // Estado da visualização atual
+            view: {
+                division: 'A',
+                group: null,
+                hasAdjustments: false
+            },
+
+            // Estado do calendário
+            calendar: {
+                jornada: null,
+                division: null,
+                group: null
+            },
+
+            // Dados carregados
+            data: {
+                teams: [],
+                rankings: {},
+                eloHistory: {},
+                matches: [],
+                bracket: {},
+                secondaryBracket: {},
+                secondaryBracketType: null,
+                gamesDates: [],
+                rawEloData: []
+            },
+
+            // Seleção atual
+            selection: {
+                epoca: null,
+                modalidade: null,
+                availableEpocas: [],
+                playoffSystemInfo: {}
+            }
         };
-        let currentEpoca = null; // Será definido automaticamente para a época mais recente
-        let currentModalidade = null; // Modalidade atualmente selecionada
-        let availableEpocas = []; // Épocas disponíveis (será preenchido dinamicamente)
-        let playoffSystemInfo = {}; // Informações sobre o sistema de playoff/liguilha por modalidade
+
+        // ==================== COMPATIBILIDADE COM CÓDIGO LEGADO ====================
+        // Proxies para sincronizar variáveis antigas com appState
+
+        // Proxy para sampleData
+        let sampleData = new Proxy(appState.data, {
+            get(target, prop) {
+                return target[prop];
+            },
+            set(target, prop, value) {
+                target[prop] = value;
+                return true;
+            }
+        });
+
+        // Getters/Setters para variáveis de seleção
+        Object.defineProperty(window, 'currentEpoca', {
+            get: () => appState.selection.epoca,
+            set: (value) => { appState.selection.epoca = value; }
+        });
+
+        Object.defineProperty(window, 'currentModalidade', {
+            get: () => appState.selection.modalidade,
+            set: (value) => { appState.selection.modalidade = value; }
+        });
+
+        Object.defineProperty(window, 'availableEpocas', {
+            get: () => appState.selection.availableEpocas,
+            set: (value) => { appState.selection.availableEpocas = value; }
+        });
+
+        Object.defineProperty(window, 'playoffSystemInfo', {
+            get: () => appState.selection.playoffSystemInfo,
+            set: (value) => { appState.selection.playoffSystemInfo = value; }
+        });
+
+        // Getters/Setters para variáveis do calendário
+        Object.defineProperty(window, 'currentCalendarJornada', {
+            get: () => appState.calendar.jornada,
+            set: (value) => { appState.calendar.jornada = value; }
+        });
+
+        Object.defineProperty(window, 'currentCalendarDivision', {
+            get: () => appState.calendar.division,
+            set: (value) => { appState.calendar.division = value; }
+        });
+
+        Object.defineProperty(window, 'currentCalendarGroup', {
+            get: () => appState.calendar.group,
+            set: (value) => { appState.calendar.group = value; }
+        });
+
+        // Getters/Setters para variáveis de visualização
+        Object.defineProperty(window, 'currentDivision', {
+            get: () => appState.view.division,
+            set: (value) => { appState.view.division = value; }
+        });
+
+        Object.defineProperty(window, 'currentGroup', {
+            get: () => appState.view.group,
+            set: (value) => { appState.view.group = value; }
+        });
+
+        Object.defineProperty(window, 'currentModalityHasAdjustments', {
+            get: () => appState.view.hasAdjustments,
+            set: (value) => { appState.view.hasAdjustments = value; }
+        });
+
+        // Getters/Setters para variáveis do gráfico
+        Object.defineProperty(window, 'eloChart', {
+            get: () => appState.chart.instance,
+            set: (value) => { appState.chart.instance = value; }
+        });
 
         // Função para detectar épocas disponíveis baseadas nos arquivos existentes
         async function detectAvailableEpocas() {
@@ -5564,9 +5706,6 @@
         // ========== FUNÇÕES DO CALENDÁRIO DE JOGOS ==========
 
         // Variáveis globais para controle do calendário
-        let currentCalendarJornada = null;
-        let currentCalendarDivision = null;
-        let currentCalendarGroup = null;
         let availableJornadas = [];
 
         // Inicializar seletores do calendário
@@ -6361,385 +6500,721 @@
             return result;
         }
 
-        function processEloHistory(data, initialElosFromFile = {}) {
-            DebugUtils.debugProcessedData('histórico ELO', data.length, `${data.length} jogos`);
+        // ==================== PROCESSADOR DE HISTÓRICO ELO ====================
 
-            // Guardar dados brutos para processamento do bracket
-            sampleData.rawEloData = data;
-
-            // Verificar se o ficheiro detalhe_*.csv está vazio (só tem cabeçalho)
-            const hasNoGames = !data || data.length === 0 ||
-                (data.length === 1 && Object.values(data[0]).every(v => !v || v === ''));
-
-            if (hasNoGames && Object.keys(initialElosFromFile).length > 0) {
-                // Sem jogos ainda - usar ELOs iniciais do ficheiro elo_*.csv
-                DebugUtils.debugProcessedData('sem jogos', Object.keys(initialElosFromFile).length, 'usar ELOs iniciais do ficheiro');
-
-                // Criar histórico simples com apenas o ELO inicial
-                Object.keys(initialElosFromFile).forEach(teamName => {
-                    const initialElo = initialElosFromFile[teamName];
-                    // Uma única entrada no histórico com o ELO inicial
-                    sampleData.eloHistory[teamName] = [initialElo];
-                });
-
-                return; // Terminar aqui, não há dados de jogos para processar
+        class EloHistoryProcessor {
+            constructor() {
+                this.teamEloByRound = {};
+                this.teamInitialElo = {};
+                this.gamesDates = {};
+                this.teamInterGroupAdjustments = {};
+                this.playoffGames = {};
+                this.playoffDates = {};
+                this.allDates = [];
+                this.hasInterGroupAdjustments = false;
             }
 
-            // Primeiro, organizar dados por equipa, jornada e data
-            const teamEloByRound = {};
-            const teamInitialElo = {}; // Para guardar ELO inicial de cada equipa
-            const gamesDates = {}; // Para mapear jornada -> data
-            const teamInterGroupAdjustments = {}; // Para ajustes intergrupos
+            /**
+             * Processa dados de histórico ELO
+             */
+            process(data, initialElosFromFile = {}) {
+                DebugUtils.debugProcessedData('histórico ELO', data.length, `${data.length} jogos`);
 
-            // Estruturas para organizar jornadas normais e playoffs separadamente
-            const playoffGames = {}; // Para organizar jogos de playoffs (E1, E2, E3)
+                // Guardar dados brutos para processamento do bracket
+                sampleData.rawEloData = data;
 
-            data.forEach(row => {
-                // Processar ajustes intergrupos especiais (linhas "Inter-Group")
-                if (row.Jornada === "Inter-Group" && row["Equipa 1"]) {
-                    const teamName = normalizeTeamName(row["Equipa 1"]);
-                    const adjustment = parseInt(row["Elo Delta 1"]) || 0;
-                    const finalElo = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || 0;
+                // Verificar se não há jogos
+                if (this._hasNoGames(data, initialElosFromFile)) {
+                    return;
+                }
 
-                    if (adjustment !== 0) {
-                        if (!teamInterGroupAdjustments[teamName]) teamInterGroupAdjustments[teamName] = [];
-                        teamInterGroupAdjustments[teamName].push({
-                            round: "Inter-Group",
-                            adjustment: adjustment,
-                            finalElo: finalElo,
-                            date: null // Será calculada depois
-                        });
-                        DebugUtils.debugInterGroupAdjustment(teamName, adjustment);
+                // Processar todos os jogos e extrair informações
+                this._extractGameData(data, initialElosFromFile);
+
+                // Organizar datas e ajustes
+                this._organizeDatesAndAdjustments();
+
+                // Construir histórico de ELO para cada equipa
+                this._buildEloHistories(initialElosFromFile);
+
+                // Garantir consistência nos pontos do gráfico
+                this._ensureConsistentPoints();
+
+                DebugUtils.debugEloHistoryFinal(sampleData.eloHistory);
+            }
+
+            /**
+             * Verifica se não há jogos para processar
+             */
+            _hasNoGames(data, initialElosFromFile) {
+                const hasNoGames = !data || data.length === 0 ||
+                    (data.length === 1 && Object.values(data[0]).every(v => !v || v === ''));
+
+                if (hasNoGames && Object.keys(initialElosFromFile).length > 0) {
+                    DebugUtils.debugProcessedData('sem jogos', Object.keys(initialElosFromFile).length, 'usar ELOs iniciais do ficheiro');
+
+                    Object.keys(initialElosFromFile).forEach(teamName => {
+                        const initialElo = initialElosFromFile[teamName];
+                        sampleData.eloHistory[teamName] = [initialElo];
+                    });
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            /**
+             * Extrai dados de jogos e ajustes intergrupos
+             */
+            _extractGameData(data, initialElosFromFile) {
+                data.forEach(row => {
+                    // Processar ajustes intergrupos
+                    if (row.Jornada === "Inter-Group" && row["Equipa 1"]) {
+                        this._extractInterGroupAdjustment(row);
+                        return;
                     }
-                    return; // Não processar mais esta linha
+
+                    if (!row["Equipa 1"] || !row["Equipa 2"]) return;
+
+                    const round = row.Jornada;
+                    const team1 = normalizeTeamName(row["Equipa 1"]);
+                    const team2 = normalizeTeamName(row["Equipa 2"]);
+                    const finalElo1 = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || null;
+                    const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]) || null;
+                    const initialElo1 = parseInt(row["Elo Antes 1"]) || null;
+                    const initialElo2 = parseInt(row["Elo Antes 2"]) || null;
+                    const gameDate = row.Dia ? new Date(row.Dia) : null;
+
+                    // Guardar ELO inicial
+                    this._setInitialElo(team1, initialElosFromFile[team1], initialElo1);
+                    this._setInitialElo(team2, initialElosFromFile[team2], initialElo2);
+
+                    // Processar ajustes intergrupos dos jogos normais
+                    this._processGameInterGroupAdjustments(row, team1, team2, round, gameDate);
+
+                    // Separar jornadas numéricas dos playoffs
+                    const roundNum = parseInt(round);
+                    if (!isNaN(roundNum)) {
+                        this._processRegularRound(roundNum, team1, team2, finalElo1, finalElo2, gameDate);
+                    } else if (round.startsWith('E')) {
+                        this._processPlayoffRound(round, team1, team2, finalElo1, finalElo2, gameDate);
+                    }
+                });
+            }
+
+            /**
+             * Extrai ajustes intergrupos especiais
+             */
+            _extractInterGroupAdjustment(row) {
+                const teamName = normalizeTeamName(row["Equipa 1"]);
+                const adjustment = parseInt(row["Elo Delta 1"]) || 0;
+                const finalElo = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || 0;
+
+                if (adjustment !== 0) {
+                    if (!this.teamInterGroupAdjustments[teamName]) {
+                        this.teamInterGroupAdjustments[teamName] = [];
+                    }
+                    this.teamInterGroupAdjustments[teamName].push({
+                        round: "Inter-Group",
+                        adjustment: adjustment,
+                        finalElo: finalElo,
+                        date: null
+                    });
+                    DebugUtils.debugInterGroupAdjustment(teamName, adjustment);
                 }
+            }
 
-                if (!row["Equipa 1"] || !row["Equipa 2"]) return;
-
-                const round = row.Jornada; // Manter como string para processar E1, E2, etc.
-                const team1 = normalizeTeamName(row["Equipa 1"]);
-                const team2 = normalizeTeamName(row["Equipa 2"]);
-                const finalElo1 = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]) || null;
-                const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]) || null;
-                const initialElo1 = parseInt(row["Elo Antes 1"]) || null;
-                const initialElo2 = parseInt(row["Elo Antes 2"]) || null;
-                const gameDate = row.Dia ? new Date(row.Dia) : null;
-
-                // Debug específico para Informática
-                if (team1.toLowerCase().includes('informática') || team1.toLowerCase().includes('informatica') ||
-                    team2.toLowerCase().includes('informática') || team2.toLowerCase().includes('informatica')) {
-
+            /**
+             * Define ELO inicial de uma equipa
+             */
+            _setInitialElo(teamName, fileElo, gameElo) {
+                if (!this.teamInitialElo[teamName]) {
+                    this.teamInitialElo[teamName] = fileElo || gameElo || 1500;
                 }
+            }
 
-                // Processar ajustes intergrupos dos jogos normais (geralmente são 0)
+            /**
+             * Processa ajustes intergrupos de jogos normais
+             */
+            _processGameInterGroupAdjustments(row, team1, team2, round, gameDate) {
                 const interGroupAdj1 = parseInt(row["Inter Group Adjustment 1"]) || 0;
                 const interGroupAdj2 = parseInt(row["Inter Group Adjustment 2"]) || 0;
 
-                // Guardar ELO inicial se ainda não foi definido
-                if (!teamInitialElo[team1]) {
-                    // Priorizar: dados do ficheiro > dados do jogo > fallback 1500
-                    teamInitialElo[team1] = initialElosFromFile[team1] || initialElo1 || 1500;
-                }
-                if (!teamInitialElo[team2]) {
-                    // Priorizar: dados do ficheiro > dados do jogo > fallback 1500
-                    teamInitialElo[team2] = initialElosFromFile[team2] || initialElo2 || 1500;
-                }
-
-                // Guardar ajustes intergrupos se existirem (normalmente só das linhas Inter-Group)
                 if (interGroupAdj1 !== 0) {
-                    if (!teamInterGroupAdjustments[team1]) teamInterGroupAdjustments[team1] = [];
-                    teamInterGroupAdjustments[team1].push({
+                    if (!this.teamInterGroupAdjustments[team1]) {
+                        this.teamInterGroupAdjustments[team1] = [];
+                    }
+                    this.teamInterGroupAdjustments[team1].push({
                         round: round,
                         adjustment: interGroupAdj1,
                         date: gameDate
                     });
                 }
+
                 if (interGroupAdj2 !== 0) {
-                    if (!teamInterGroupAdjustments[team2]) teamInterGroupAdjustments[team2] = [];
-                    teamInterGroupAdjustments[team2].push({
+                    if (!this.teamInterGroupAdjustments[team2]) {
+                        this.teamInterGroupAdjustments[team2] = [];
+                    }
+                    this.teamInterGroupAdjustments[team2].push({
                         round: round,
                         adjustment: interGroupAdj2,
                         date: gameDate
                     });
                 }
-
-                // Processar jornadas numéricas (fase de grupos)
-                const roundNum = parseInt(round);
-                if (!isNaN(roundNum)) {
-                    // Guardar data da jornada
-                    if (gameDate && !gamesDates[roundNum]) {
-                        gamesDates[roundNum] = gameDate;
-                    }
-
-                    if (!teamEloByRound[team1]) teamEloByRound[team1] = {};
-                    if (!teamEloByRound[team2]) teamEloByRound[team2] = {};
-
-                    // Guardar o ELO final mais recente por jornada
-                    teamEloByRound[team1][roundNum] = finalElo1;
-                    teamEloByRound[team2][roundNum] = finalElo2;
-                } else if (round.startsWith('E')) {
-                    // Processar jogos de playoffs (E1, E2, E3)
-                    if (!playoffGames[round]) {
-                        playoffGames[round] = [];
-                    }
-                    playoffGames[round].push({
-                        team1: team1,
-                        team2: team2,
-                        finalElo1: finalElo1,
-                        finalElo2: finalElo2,
-                        date: gameDate
-                    });
-                }
-            });
-
-            // Adicionar data inicial para o ELO de partida baseada na época
-            const initialDate = currentEpoca === '25_26' ? new Date('2025-09-01') : new Date('2024-09-01');
-            const allDates = [initialDate];
-
-            // Guardar datas ordenadas para uso no gráfico (fase de grupos)
-            const sortedRounds = Object.keys(gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
-            sortedRounds.forEach(round => allDates.push(gamesDates[round]));
-
-            // Adicionar datas dos playoffs na ordem correta (E1 -> E2 -> E3L -> E3)
-            const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
-            const playoffDates = {};
-
-            playoffOrder.forEach(phase => {
-                if (playoffGames[phase] && playoffGames[phase].length > 0) {
-                    // Usar a data do primeiro jogo da fase (assumindo que todos os jogos da mesma fase são no mesmo dia)
-                    const phaseDate = playoffGames[phase][0].date;
-                    if (phaseDate) {
-                        playoffDates[phase] = phaseDate;
-                        allDates.push(phaseDate);
-                    }
-                }
-            });
-
-            DebugUtils.debugProcessedData('jogos de playoffs', Object.keys(playoffGames).length, Object.keys(playoffGames));
-            DebugUtils.debugProcessedData('datas dos playoffs', Object.keys(playoffDates).length, playoffDates);
-
-            // Verificar se existem ajustes intergrupos reais (não-zero) usando a função auxiliar
-            const hasInterGroupAdjustments = hasRealInterGroupAdjustments(teamInterGroupAdjustments);
-
-            // Adicionar data para ajustes intergrupos só se existirem ajustes reais
-            if (hasInterGroupAdjustments && allDates.length > 1) {
-                const lastGameDate = allDates[allDates.length - 1];
-                const adjustmentDate = new Date(lastGameDate);
-                adjustmentDate.setDate(adjustmentDate.getDate() + 1); // Um dia depois
-                allDates.push(adjustmentDate);
-                DebugUtils.debugProcessedData('ajustes intergrupos programados', 1, adjustmentDate.toLocaleDateString('pt-PT'));
-            } else if (hasInterGroupAdjustments) {
-                // Fallback se não há datas de jogos
-                const fallbackDate = new Date('2025-06-01');
-                allDates.push(fallbackDate);
             }
 
-            DebugUtils.debugProcessedData('ajustes intergrupos encontrados', hasInterGroupAdjustments ? 1 : 0, hasInterGroupAdjustments);
+            /**
+             * Processa jornada regular (fase de grupos)
+             */
+            _processRegularRound(roundNum, team1, team2, finalElo1, finalElo2, gameDate) {
+                if (gameDate && !this.gamesDates[roundNum]) {
+                    this.gamesDates[roundNum] = gameDate;
+                }
 
-            // Atualizar variável global
-            currentModalityHasAdjustments = hasInterGroupAdjustments;
+                if (!this.teamEloByRound[team1]) this.teamEloByRound[team1] = {};
+                if (!this.teamEloByRound[team2]) this.teamEloByRound[team2] = {};
 
-            sampleData.gamesDates = allDates;
+                this.teamEloByRound[team1][roundNum] = finalElo1;
+                this.teamEloByRound[team2][roundNum] = finalElo2;
+            }
 
-            DebugUtils.debugProcessedData('equipas com histórico ELO', Object.keys(teamEloByRound).length, Object.keys(teamEloByRound));
-            DebugUtils.debugProcessedData('ELO inicial das equipas', Object.keys(teamInitialElo).length, teamInitialElo);
-            DebugUtils.debugProcessedData('ajustes intergrupos', Object.keys(teamInterGroupAdjustments).length, teamInterGroupAdjustments);
-            DebugUtils.debugProcessedData('datas dos jogos', sampleData.gamesDates ? sampleData.gamesDates.length : 0, sampleData.gamesDates);
+            /**
+             * Processa jornada de playoffs
+             */
+            _processPlayoffRound(round, team1, team2, finalElo1, finalElo2, gameDate) {
+                if (!this.playoffGames[round]) {
+                    this.playoffGames[round] = [];
+                }
+                this.playoffGames[round].push({
+                    team1: team1,
+                    team2: team2,
+                    finalElo1: finalElo1,
+                    finalElo2: finalElo2,
+                    date: gameDate
+                });
+            }
 
-            // Converter para formato adequado para o gráfico
-            // Primeiro, obter todas as jornadas onde houve jogos (fase de grupos)
-            const allGameRounds = Object.keys(gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
+            /**
+             * Organiza datas e verifica ajustes intergrupos
+             */
+            _organizeDatesAndAdjustments() {
+                // Data inicial baseada na época
+                const initialDate = currentEpoca === '25_26' ? new Date('2025-09-01') : new Date('2024-09-01');
+                this.allDates = [initialDate];
 
-            Object.keys(teamEloByRound).forEach(teamName => {
-                // Priorizar ELO inicial do ficheiro, depois do jogo, depois fallback
-                const initialElo = initialElosFromFile[teamName] || teamInitialElo[teamName] || 1500;
-                const eloValues = [initialElo]; // Começar com ELO inicial correto
-                let currentElo = initialElo;
+                // Datas da fase de grupos
+                const sortedRounds = Object.keys(this.gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
+                sortedRounds.forEach(round => this.allDates.push(this.gamesDates[round]));
 
-                // Debug para processamento de equipa
-                DebugUtils.debugTeamEloProcessing(teamName, initialElo, currentElo, teamEloByRound[teamName], allGameRounds);
-
-                // Para cada jornada da fase de grupos, adicionar o ELO (se mudou) ou manter o anterior
-                allGameRounds.forEach(round => {
-                    if (teamEloByRound[teamName][round] !== undefined) {
-                        // ELO mudou nesta jornada
-                        currentElo = teamEloByRound[teamName][round];
+                // Datas dos playoffs
+                const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
+                playoffOrder.forEach(phase => {
+                    if (this.playoffGames[phase] && this.playoffGames[phase].length > 0) {
+                        const phaseDate = this.playoffGames[phase][0].date;
+                        if (phaseDate) {
+                            this.playoffDates[phase] = phaseDate;
+                            this.allDates.push(phaseDate);
+                        }
                     }
-                    // Adicionar o ELO atual (mudou ou manteve-se)
-                    eloValues.push(currentElo);
                 });
 
-                // Adicionar mudanças de ELO dos playoffs
+                DebugUtils.debugProcessedData('jogos de playoffs', Object.keys(this.playoffGames).length, Object.keys(this.playoffGames));
+                DebugUtils.debugProcessedData('datas dos playoffs', Object.keys(this.playoffDates).length, this.playoffDates);
+
+                // Verificar ajustes intergrupos
+                this.hasInterGroupAdjustments = hasRealInterGroupAdjustments(this.teamInterGroupAdjustments);
+
+                if (this.hasInterGroupAdjustments && this.allDates.length > 1) {
+                    const lastGameDate = this.allDates[this.allDates.length - 1];
+                    const adjustmentDate = new Date(lastGameDate);
+                    adjustmentDate.setDate(adjustmentDate.getDate() + 1);
+                    this.allDates.push(adjustmentDate);
+                    DebugUtils.debugProcessedData('ajustes intergrupos programados', 1, adjustmentDate.toLocaleDateString('pt-PT'));
+                } else if (this.hasInterGroupAdjustments) {
+                    const fallbackDate = new Date('2025-06-01');
+                    this.allDates.push(fallbackDate);
+                }
+
+                DebugUtils.debugProcessedData('ajustes intergrupos encontrados', this.hasInterGroupAdjustments ? 1 : 0, this.hasInterGroupAdjustments);
+
+                currentModalityHasAdjustments = this.hasInterGroupAdjustments;
+                sampleData.gamesDates = this.allDates;
+
+                DebugUtils.debugProcessedData('equipas com histórico ELO', Object.keys(this.teamEloByRound).length, Object.keys(this.teamEloByRound));
+                DebugUtils.debugProcessedData('ELO inicial das equipas', Object.keys(this.teamInitialElo).length, this.teamInitialElo);
+                DebugUtils.debugProcessedData('ajustes intergrupos', Object.keys(this.teamInterGroupAdjustments).length, this.teamInterGroupAdjustments);
+                DebugUtils.debugProcessedData('datas dos jogos', sampleData.gamesDates ? sampleData.gamesDates.length : 0, sampleData.gamesDates);
+            }
+
+            /**
+             * Constrói histórico de ELO para cada equipa
+             */
+            _buildEloHistories(initialElosFromFile) {
+                const allGameRounds = Object.keys(this.gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
+                const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
+
+                // Equipas que jogaram
+                Object.keys(this.teamEloByRound).forEach(teamName => {
+                    const initialElo = initialElosFromFile[teamName] || this.teamInitialElo[teamName] || 1500;
+                    const eloValues = [initialElo];
+                    let currentElo = initialElo;
+
+                    DebugUtils.debugTeamEloProcessing(teamName, initialElo, currentElo, this.teamEloByRound[teamName], allGameRounds);
+
+                    // Fase de grupos
+                    allGameRounds.forEach(round => {
+                        if (this.teamEloByRound[teamName][round] !== undefined) {
+                            currentElo = this.teamEloByRound[teamName][round];
+                        }
+                        eloValues.push(currentElo);
+                    });
+
+                    // Playoffs
+                    currentElo = this._processTeamPlayoffs(teamName, playoffOrder, eloValues, currentElo);
+
+                    // Ajustes intergrupos
+                    this._applyInterGroupAdjustments(teamName, eloValues);
+
+                    sampleData.eloHistory[teamName] = eloValues;
+                    DebugUtils.debugEloAdjustments(teamName, 'final_elo', {
+                        initial: eloValues[0],
+                        points: eloValues.length
+                    });
+                });
+
+                // Equipas que não jogaram
+                this._processNonPlayingTeams(initialElosFromFile, allGameRounds);
+            }
+
+            /**
+             * Processa playoffs de uma equipa
+             */
+            _processTeamPlayoffs(teamName, playoffOrder, eloValues, currentElo) {
                 playoffOrder.forEach(phase => {
-                    if (playoffGames[phase] && playoffDates[phase]) {
-                        // Verificar se esta equipa jogou nesta fase dos playoffs
-                        const teamGame = playoffGames[phase].find(game =>
+                    if (this.playoffGames[phase] && this.playoffDates[phase]) {
+                        const teamGame = this.playoffGames[phase].find(game =>
                             game.team1 === teamName || game.team2 === teamName
                         );
 
                         if (teamGame) {
-                            // Equipa jogou nesta fase - atualizar ELO
                             currentElo = teamGame.team1 === teamName ? teamGame.finalElo1 : teamGame.finalElo2;
                             DebugUtils.debugProcessedData(`${teamName} ELO`, 1, `após ${phase} = ${currentElo}`);
                         }
-                        // Adicionar ponto ao gráfico (mudou ou manteve-se)
                         eloValues.push(currentElo);
                     }
                 });
 
-                // Adicionar ajustes intergrupos se existirem
-                if (hasInterGroupAdjustments) {
-                    const lastElo = eloValues[eloValues.length - 1];
-                    if (teamInterGroupAdjustments[teamName] && teamInterGroupAdjustments[teamName].length > 0) {
-                        // Procurar ajuste Inter-Group que tem finalElo
-                        const interGroupAdj = teamInterGroupAdjustments[teamName].find(adj => adj.finalElo && adj.finalElo > 0);
+                return currentElo;
+            }
 
-                        if (interGroupAdj) {
-                            // Usar o ELO final das linhas Inter-Group
-                            const newElo = interGroupAdj.finalElo;
-                            const actualAdjustment = newElo - lastElo;
-                            eloValues.push(newElo);
-                            DebugUtils.debugEloAdjustments(teamName, 'before_adjustments', {
+            /**
+             * Aplica ajustes intergrupos a uma equipa
+             */
+            _applyInterGroupAdjustments(teamName, eloValues) {
+                if (!this.hasInterGroupAdjustments) return;
+
+                const lastElo = eloValues[eloValues.length - 1];
+
+                if (this.teamInterGroupAdjustments[teamName] && this.teamInterGroupAdjustments[teamName].length > 0) {
+                    const interGroupAdj = this.teamInterGroupAdjustments[teamName].find(adj => adj.finalElo && adj.finalElo > 0);
+
+                    if (interGroupAdj) {
+                        const newElo = interGroupAdj.finalElo;
+                        const actualAdjustment = newElo - lastElo;
+                        eloValues.push(newElo);
+                        DebugUtils.debugEloAdjustments(teamName, 'before_adjustments', {
+                            before: lastElo,
+                            after: newElo,
+                            adjustment: actualAdjustment
+                        });
+                    } else {
+                        const totalAdjustment = this.teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
+                        const newElo = lastElo + totalAdjustment;
+                        eloValues.push(newElo);
+                        if (totalAdjustment !== 0) {
+                            DebugUtils.debugEloAdjustments(teamName, 'with_adjustment', {
                                 before: lastElo,
-                                after: newElo,
-                                adjustment: actualAdjustment
+                                adjustment: totalAdjustment,
+                                after: newElo
                             });
                         } else {
-                            // Fallback para cálculo manual se não há finalElo
-                            const totalAdjustment = teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
-                            const newElo = lastElo + totalAdjustment;
-                            eloValues.push(newElo);
-                            if (totalAdjustment !== 0) {
-                                DebugUtils.debugEloAdjustments(teamName, 'with_adjustment', {
-                                    before: lastElo,
-                                    adjustment: totalAdjustment,
-                                    after: newElo
-                                });
-                            } else {
-                                DebugUtils.debugEloAdjustments(teamName, 'no_adjustment', { elo: lastElo });
-                            }
+                            DebugUtils.debugEloAdjustments(teamName, 'no_adjustment', { elo: lastElo });
                         }
-                    } else {
-                        // Equipa sem ajustes - manter ELO anterior
-                        eloValues.push(lastElo);
-                        DebugUtils.debugEloAdjustments(teamName, 'no_intergroup', { elo: lastElo });
                     }
+                } else {
+                    eloValues.push(lastElo);
+                    DebugUtils.debugEloAdjustments(teamName, 'no_intergroup', { elo: lastElo });
                 }
+            }
 
-                // Guardar histórico processado
-                sampleData.eloHistory[teamName] = eloValues;
-                DebugUtils.debugEloAdjustments(teamName, 'final_elo', {
-                    initial: eloValues[0],
-                    points: eloValues.length
+            /**
+             * Processa equipas que não jogaram
+             */
+            _processNonPlayingTeams(initialElosFromFile, allGameRounds) {
+                sampleData.teams.forEach(team => {
+                    if (!this.teamEloByRound[team.name]) {
+                        const initialElo = initialElosFromFile[team.name] || this.teamInitialElo[team.name] || 1500;
+                        const totalPoints = 1 + allGameRounds.length + Object.keys(this.playoffDates).length +
+                            (this.hasInterGroupAdjustments ? 1 : 0);
+
+                        let eloValues = new Array(totalPoints - (this.hasInterGroupAdjustments ? 1 : 0)).fill(initialElo);
+
+                        if (this.hasInterGroupAdjustments) {
+                            this._applyAdjustmentToNonPlayingTeam(team.name, initialElo, eloValues);
+                        }
+
+                        sampleData.eloHistory[team.name] = eloValues;
+                    }
                 });
-            });
+            }
 
-            // Para equipas que não jogaram (não têm dados em teamEloByRound mas existem em teams)
-            sampleData.teams.forEach(team => {
-                if (!teamEloByRound[team.name]) {
-                    // Priorizar ELO inicial do ficheiro, depois do jogo, depois fallback
-                    const initialElo = initialElosFromFile[team.name] || teamInitialElo[team.name] || 1500;
-                    const totalPoints = 1 + allGameRounds.length + Object.keys(playoffDates).length + (hasInterGroupAdjustments ? 1 : 0);
+            /**
+             * Aplica ajuste a equipa que não jogou
+             */
+            _applyAdjustmentToNonPlayingTeam(teamName, initialElo, eloValues) {
+                if (this.teamInterGroupAdjustments[teamName] && this.teamInterGroupAdjustments[teamName].length > 0) {
+                    const interGroupAdj = this.teamInterGroupAdjustments[teamName].find(adj => adj.finalElo && adj.finalElo > 0);
 
-                    // Criar array com ELO inicial para todas as datas exceto ajustes
-                    let eloValues = new Array(totalPoints - (hasInterGroupAdjustments ? 1 : 0)).fill(initialElo);
-
-                    // Adicionar ajustes intergrupos se existirem para esta equipa
-                    if (hasInterGroupAdjustments) {
-                        if (teamInterGroupAdjustments[team.name] && teamInterGroupAdjustments[team.name].length > 0) {
-                            // Procurar ajuste Inter-Group que tem finalElo
-                            const interGroupAdj = teamInterGroupAdjustments[team.name].find(adj => adj.finalElo && adj.finalElo > 0);
-
-                            if (interGroupAdj) {
-                                // Usar o ELO final das linhas Inter-Group
-                                const newElo = interGroupAdj.finalElo;
-                                const actualAdjustment = newElo - initialElo;
-                                eloValues.push(newElo);
-                                DebugUtils.debugEloAdjustments(team.name, 'no_games_adjustment', {
-                                    initial: initialElo,
-                                    final: newElo,
-                                    adjustment: actualAdjustment
-                                });
-                            } else {
-                                // Fallback para cálculo manual se não há finalElo
-                                const totalAdjustment = teamInterGroupAdjustments[team.name].reduce((sum, adj) => sum + adj.adjustment, 0);
-                                const newElo = initialElo + totalAdjustment;
-                                eloValues.push(newElo);
-                                if (totalAdjustment !== 0) {
-                                    DebugUtils.debugEloAdjustments(team.name, 'no_games_with_adjustment', {
-                                        initial: initialElo,
-                                        adjustment: totalAdjustment,
-                                        final: newElo
-                                    });
-                                } else {
-                                    DebugUtils.debugEloAdjustments(team.name, 'no_games_no_adjustment', { initial: initialElo });
-                                }
-                            }
+                    if (interGroupAdj) {
+                        const newElo = interGroupAdj.finalElo;
+                        const actualAdjustment = newElo - initialElo;
+                        eloValues.push(newElo);
+                        DebugUtils.debugEloAdjustments(teamName, 'no_games_adjustment', {
+                            initial: initialElo,
+                            final: newElo,
+                            adjustment: actualAdjustment
+                        });
+                    } else {
+                        const totalAdjustment = this.teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
+                        const newElo = initialElo + totalAdjustment;
+                        eloValues.push(newElo);
+                        if (totalAdjustment !== 0) {
+                            DebugUtils.debugEloAdjustments(teamName, 'no_games_with_adjustment', {
+                                initial: initialElo,
+                                adjustment: totalAdjustment,
+                                final: newElo
+                            });
                         } else {
-                            // Equipa sem ajustes - manter ELO inicial
-                            eloValues.push(initialElo);
-                            DebugUtils.debugEloAdjustments(team.name, 'no_games_no_intergroup', { initial: initialElo });
+                            DebugUtils.debugEloAdjustments(teamName, 'no_games_no_adjustment', { initial: initialElo });
                         }
                     }
-
-                    sampleData.eloHistory[team.name] = eloValues;
+                } else {
+                    eloValues.push(initialElo);
+                    DebugUtils.debugEloAdjustments(teamName, 'no_games_no_intergroup', { initial: initialElo });
                 }
-            });
+            }
 
-            // Garantir que todas as equipas têm o mesmo número de pontos no gráfico
-            const expectedPoints = 1 + allGameRounds.length + Object.keys(playoffDates).length + (hasInterGroupAdjustments ? 1 : 0);
+            /**
+             * Garante que todas as equipas têm o mesmo número de pontos
+             */
+            _ensureConsistentPoints() {
+                const allGameRounds = Object.keys(this.gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
+                const expectedPoints = 1 + allGameRounds.length + Object.keys(this.playoffDates).length +
+                    (this.hasInterGroupAdjustments ? 1 : 0);
 
-            sampleData.teams.forEach(team => {
-                if (sampleData.eloHistory[team.name] && sampleData.eloHistory[team.name].length < expectedPoints) {
-                    // Completar com o último ELO conhecido, mas verificar se precisa de ajustes
-                    const currentValues = sampleData.eloHistory[team.name];
-                    const lastElo = currentValues[currentValues.length - 1];
+                sampleData.teams.forEach(team => {
+                    if (sampleData.eloHistory[team.name] && sampleData.eloHistory[team.name].length < expectedPoints) {
+                        const currentValues = sampleData.eloHistory[team.name];
+                        const lastElo = currentValues[currentValues.length - 1];
 
-                    while (currentValues.length < expectedPoints) {
-                        if (hasInterGroupAdjustments && currentValues.length === expectedPoints - 1) {
-                            // Este é o ponto de ajustes intergrupos
-                            if (teamInterGroupAdjustments[team.name] && teamInterGroupAdjustments[team.name].length > 0) {
-                                // Procurar ajuste Inter-Group que tem finalElo
-                                const interGroupAdj = teamInterGroupAdjustments[team.name].find(adj => adj.finalElo && adj.finalElo > 0);
-
-                                if (interGroupAdj) {
-                                    // Usar o ELO final das linhas Inter-Group
-                                    const newElo = interGroupAdj.finalElo;
-                                    const actualAdjustment = newElo - lastElo;
-                                    currentValues.push(newElo);
-                                    DebugUtils.debugEloAdjustments(team.name, 'completed_with_adjustment', {
-                                        final: newElo,
-                                        adjustment: actualAdjustment
-                                    });
-                                } else {
-                                    // Fallback para cálculo manual se não há finalElo
-                                    const totalAdjustment = teamInterGroupAdjustments[team.name].reduce((sum, adj) => sum + adj.adjustment, 0);
-                                    const newElo = lastElo + totalAdjustment;
-                                    currentValues.push(newElo);
-                                    if (totalAdjustment !== 0) {
-                                        DebugUtils.debugEloAdjustments(team.name, 'completed_with_total_adjustment', {
-                                            adjustment: totalAdjustment,
-                                            final: newElo
-                                        });
-                                    } else {
-                                        DebugUtils.debugEloAdjustments(team.name, 'completed_no_adjustment', { elo: lastElo });
-                                    }
-                                }
+                        while (currentValues.length < expectedPoints) {
+                            if (this.hasInterGroupAdjustments && currentValues.length === expectedPoints - 1) {
+                                this._completeWithAdjustment(team.name, currentValues, lastElo);
                             } else {
-                                // Sem ajustes - manter ELO anterior
                                 currentValues.push(lastElo);
-                                DebugUtils.debugEloAdjustments(team.name, 'completed_no_intergroup', { elo: lastElo });
                             }
+                        }
+                        DebugUtils.debugEloAdjustments(team.name, 'completed_points', { points: expectedPoints });
+                    }
+                });
+            }
+
+            /**
+             * Completa pontos em falta com ajuste intergrupos
+             */
+            _completeWithAdjustment(teamName, currentValues, lastElo) {
+                if (this.teamInterGroupAdjustments[teamName] && this.teamInterGroupAdjustments[teamName].length > 0) {
+                    const interGroupAdj = this.teamInterGroupAdjustments[teamName].find(adj => adj.finalElo && adj.finalElo > 0);
+
+                    if (interGroupAdj) {
+                        const newElo = interGroupAdj.finalElo;
+                        const actualAdjustment = newElo - lastElo;
+                        currentValues.push(newElo);
+                        DebugUtils.debugEloAdjustments(teamName, 'completed_with_adjustment', {
+                            final: newElo,
+                            adjustment: actualAdjustment
+                        });
+                    } else {
+                        const totalAdjustment = this.teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
+                        const newElo = lastElo + totalAdjustment;
+                        currentValues.push(newElo);
+                        if (totalAdjustment !== 0) {
+                            DebugUtils.debugEloAdjustments(teamName, 'completed_with_total_adjustment', {
+                                adjustment: totalAdjustment,
+                                final: newElo
+                            });
                         } else {
-                            currentValues.push(lastElo);
+                            DebugUtils.debugEloAdjustments(teamName, 'completed_no_adjustment', { elo: lastElo });
                         }
                     }
-                    DebugUtils.debugEloAdjustments(team.name, 'completed_points', { points: expectedPoints });
+                } else {
+                    currentValues.push(lastElo);
+                    DebugUtils.debugEloAdjustments(teamName, 'completed_no_intergroup', { elo: lastElo });
                 }
-            });
-
-            DebugUtils.debugEloHistoryFinal(sampleData.eloHistory);
+            }
         }
+
+        // Função wrapper para compatibilidade com código existente
+        function processEloHistory(data, initialElosFromFile = {}) {
+            const processor = new EloHistoryProcessor();
+            processor.process(data, initialElosFromFile);
+        }
+
+        // ==================== SISTEMA DE EVENT DELEGATION ====================
+
+        class EventManager {
+            constructor() {
+                this.handlers = new Map();
+                this.init();
+            }
+
+            /**
+             * Inicializa event listeners delegados
+             */
+            init() {
+                // Event delegation para toda a página
+                document.addEventListener('click', (e) => this.handleClick(e));
+                document.addEventListener('change', (e) => this.handleChange(e));
+            }
+
+            /**
+             * Registra um handler para um seletor CSS
+             */
+            on(selector, eventType, handler) {
+                const key = `${eventType}:${selector}`;
+                if (!this.handlers.has(key)) {
+                    this.handlers.set(key, []);
+                }
+                this.handlers.get(key).push(handler);
+            }
+
+            /**
+             * Handler central para eventos de click
+             */
+            handleClick(event) {
+                this.dispatchEvent('click', event);
+            }
+
+            /**
+             * Handler central para eventos de change
+             */
+            handleChange(event) {
+                this.dispatchEvent('change', event);
+            }
+
+            /**
+             * Dispatch de eventos para handlers registrados
+             */
+            dispatchEvent(eventType, event) {
+                for (const [key, handlers] of this.handlers) {
+                    const [type, selector] = key.split(':');
+
+                    if (type === eventType && event.target.matches(selector)) {
+                        handlers.forEach(handler => handler(event));
+                    }
+                }
+            }
+        }
+
+        // Instância global do gerenciador de eventos
+        const eventManager = new EventManager();
+
+        // ==================== COMPONENTES UI ====================
+
+        /**
+         * Componente base para seletores
+         */
+        class SelectorComponent {
+            constructor(elementId) {
+                this.element = document.getElementById(elementId);
+                this.initialized = false;
+            }
+
+            render() {
+                throw new Error('render() deve ser implementado pela subclasse');
+            }
+
+            clear() {
+                if (this.element) {
+                    this.element.innerHTML = '';
+                }
+            }
+        }
+
+        /**
+         * Seletor de Divisões
+         */
+        class DivisionSelector extends SelectorComponent {
+            constructor() {
+                super('divisionSelector');
+            }
+
+            render() {
+                this.clear();
+
+                const structure = analyzeModalityStructure();
+                const divisions = Object.keys(sampleData.rankings);
+
+                if (divisions.length <= 1) {
+                    this.element.style.display = 'none';
+                    return;
+                }
+
+                this.element.style.display = 'flex';
+
+                // Validar divisão atual
+                if (!appState.view.division || !divisions.includes(appState.view.division)) {
+                    appState.view.division = divisions[0];
+                }
+
+                divisions.forEach(division => {
+                    const btn = document.createElement('button');
+                    btn.className = `division-btn ${division === appState.view.division ? 'active' : ''}`;
+                    btn.textContent = division;
+                    btn.dataset.division = division;
+                    this.element.appendChild(btn);
+                });
+
+                this.initialized = true;
+            }
+
+            setActive(division) {
+                appState.view.division = division;
+                appState.view.group = null;
+
+                const buttons = this.element.querySelectorAll('.division-btn');
+                buttons.forEach(btn => {
+                    btn.classList.toggle('active', btn.textContent === division);
+                });
+            }
+        }
+
+        /**
+         * Seletor de Grupos
+         */
+        class GroupSelector extends SelectorComponent {
+            constructor() {
+                super('groupSelector');
+            }
+
+            render() {
+                this.clear();
+
+                if (!sampleData.rankings || !sampleData.rankings[appState.view.division]) {
+                    this.element.style.display = 'none';
+                    return;
+                }
+
+                const teams = sampleData.rankings[appState.view.division];
+                const groups = [...new Set(teams.map(team => team.group))].filter(group => group && group !== 'nan');
+
+                if (groups.length === 0) {
+                    this.element.style.display = 'none';
+                    appState.view.group = null;
+                    return;
+                }
+
+                this.element.style.display = 'flex';
+
+                // Botão "Todos"
+                const allBtn = document.createElement('button');
+                allBtn.className = `group-btn ${!appState.view.group ? 'active' : ''}`;
+                allBtn.textContent = 'Todos';
+                allBtn.dataset.group = '';
+                this.element.appendChild(allBtn);
+
+                // Botões de grupos
+                groups.forEach(group => {
+                    const btn = document.createElement('button');
+                    btn.className = `group-btn ${group === appState.view.group ? 'active' : ''}`;
+                    btn.textContent = `Grupo ${group}`;
+                    btn.dataset.group = group;
+                    this.element.appendChild(btn);
+                });
+
+                this.initialized = true;
+            }
+
+            setActive(group) {
+                const groupLetter = group ? group.replace('Grupo ', '') : null;
+                appState.view.group = groupLetter;
+
+                const buttons = this.element.querySelectorAll('.group-btn');
+                buttons.forEach(btn => {
+                    const btnGroup = btn.dataset.group;
+                    btn.classList.toggle('active', btnGroup === (groupLetter || ''));
+                });
+            }
+        }
+
+        // Instâncias globais dos seletores
+        const divisionSelector = new DivisionSelector();
+        const groupSelector = new GroupSelector();
+
+        // ==================== REGISTRAR EVENT HANDLERS ====================
+
+        // Seletores de época e modalidade
+        eventManager.on('#epoca', 'change', (e) => changeEpoca(e.target.value));
+        eventManager.on('#modalidade', 'change', (e) => changeModalidade(e.target.value));
+
+        // Botões de zoom
+        eventManager.on('[data-zoom="in"]', 'click', () => zoomChart(1.2));
+        eventManager.on('[data-zoom="out"]', 'click', () => zoomChart(0.8));
+        eventManager.on('[data-zoom="reset"]', 'click', () => resetZoom());
+        eventManager.on('[data-action="toggle-pan"]', 'click', () => togglePanMode());
+
+        // Seletores de divisão e grupo
+        eventManager.on('.division-btn', 'click', (e) => {
+            const division = e.target.dataset.division;
+            if (division) {
+                divisionSelector.setActive(division);
+                groupSelector.render();
+                updateRankingsTable();
+                updateBracket();
+            }
+        });
+
+        eventManager.on('.group-btn', 'click', (e) => {
+            const group = e.target.dataset.group;
+            groupSelector.setActive(group);
+            updateRankingsTable();
+        });
+
+        // Navegação de jornadas
+        eventManager.on('[data-jornada-nav="prev"]', 'click', () => changeJornada(-1));
+        eventManager.on('[data-jornada-nav="next"]', 'click', () => changeJornada(1));
+
+        // Botões de debug
+        eventManager.on('[data-debug="enable"]', 'click', () => DebugUtils.setDebugEnabled(true, false));
+        eventManager.on('[data-debug="enable-all"]', 'click', () => DebugUtils.setDebugEnabled(true, true));
+        eventManager.on('[data-debug="disable"]', 'click', () => DebugUtils.setDebugEnabled(false));
+        eventManager.on('[data-debug="close"]', 'click', () => {
+            document.getElementById('debug-panel').style.display = 'none';
+        });
+
+        // Checkboxes de equipas (delegação para o container)
+        eventManager.on('#teamSelector input[type="checkbox"]', 'change', (e) => {
+            const teamName = e.target.dataset.teamName || e.target.id.replace('team-', '').replace(/_/g, ' ');
+            toggleTeam(teamName);
+        });
+
+        // Filtros rápidos
+        eventManager.on('[data-filter="top3"]', 'click', () => filterTop3());
+        eventManager.on('[data-filter="division"]', 'click', (e) => {
+            const division = e.target.dataset.division;
+            if (division) filterDivision(division);
+        });
 
         // Inicializar quando a página carregar
         document.addEventListener('DOMContentLoaded', initApp);
