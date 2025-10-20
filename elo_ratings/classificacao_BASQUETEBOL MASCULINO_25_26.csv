@@ -1,31 +1,31 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
-1,,1,EET,0,0,0,0,0,0,0,0,0
-1,,2,Tecnologias de Informação,0,0,0,0,0,0,0,0,0
+1,,1,Tecnologias de Informação,0,0,0,0,0,0,0,0,0
+1,,2,ECT,0,0,0,0,0,0,0,0,0
 1,,3,Eng. Materiais,0,0,0,0,0,0,0,0,0
-1,,4,Eng. Aeroespacial,0,0,0,0,0,0,0,0,0
-1,,5,Eng. Informática ,0,0,0,0,0,0,0,0,0
-1,,6,EGI,0,0,0,0,0,0,0,0,0
+1,,4,Eng. Mecânica,0,0,0,0,0,0,0,0,0
+1,,5,Biotecnologia,0,0,0,0,0,0,0,0,0
+1,,6,Biologia,0,0,0,0,0,0,0,0,0
 1,,7,Matemática,0,0,0,0,0,0,0,0,0
-1,,8,Eng. Mecânica,0,0,0,0,0,0,0,0,0
-1,,9,MTC,0,0,0,0,0,0,0,0,0
-1,,10,Biologia,0,0,0,0,0,0,0,0,0
-1,,11,Biotecnologia,0,0,0,0,0,0,0,0,0
-1,,12,ECT,0,0,0,0,0,0,0,0,0
-2,A,1,Eng. Cívil,0,0,0,0,0,0,0,0,0
-2,A,2,Física,0,0,0,0,0,0,0,0,0
-2,A,3,GPT,0,0,0,0,0,0,0,0,0
-2,A,4,Contabilidade,0,0,0,0,0,0,0,0,0
-2,A,5,Biologia e Geologia,0,0,0,0,0,0,0,0,0
-2,A,6,LRE,0,0,0,0,0,0,0,0,0
-2,A,7,Design,0,0,0,0,0,0,0,0,0
-2,A,8,Economia,0,0,0,0,0,0,0,0,0
-2,A,9,Música,0,0,0,0,0,0,0,0,0
-2,B,1,Eng. Biomédica,0,0,0,0,0,0,0,0,0
-2,B,2,LLC,0,0,0,0,0,0,0,0,0
-2,B,3,Eng. Computacional,0,0,0,0,0,0,0,0,0
-2,B,4,Gestão,0,0,0,0,0,0,0,0,0
-2,B,5,Psicologia,0,0,0,0,0,0,0,0,0
-2,B,6,Ciências do Mar,0,0,0,0,0,0,0,0,0
+1,,8,Eng. Aeroespacial,0,0,0,0,0,0,0,0,0
+1,,9,EGI,0,0,0,0,0,0,0,0,0
+1,,10,EET,0,0,0,0,0,0,0,0,0
+1,,11,Eng. Informática ,0,0,0,0,0,0,0,0,0
+1,,12,MTC,0,0,0,0,0,0,0,0,0
+2,A,1,Biologia e Geologia,0,0,0,0,0,0,0,0,0
+2,A,2,Eng. Cívil,0,0,0,0,0,0,0,0,0
+2,A,3,Contabilidade,0,0,0,0,0,0,0,0,0
+2,A,4,Design,0,0,0,0,0,0,0,0,0
+2,A,5,LRE,0,0,0,0,0,0,0,0,0
+2,A,6,Física,0,0,0,0,0,0,0,0,0
+2,A,7,GPT,0,0,0,0,0,0,0,0,0
+2,A,8,Música,0,0,0,0,0,0,0,0,0
+2,A,9,Economia,0,0,0,0,0,0,0,0,0
+2,B,1,Gestão,0,0,0,0,0,0,0,0,0
+2,B,2,Ciências do Mar,0,0,0,0,0,0,0,0,0
+2,B,3,Eng. Biomédica,0,0,0,0,0,0,0,0,0
+2,B,4,Administração Pública,0,0,0,0,0,0,0,0,0
+2,B,5,Eng. Física,0,0,0,0,0,0,0,0,0
+2,B,6,Eng. Computacional,0,0,0,0,0,0,0,0,0
 2,B,7,Eng. Mecânica B,0,0,0,0,0,0,0,0,0
-2,B,8,Eng. Física,0,0,0,0,0,0,0,0,0
-2,B,9,Administração Pública,0,0,0,0,0,0,0,0,0
+2,B,8,LLC,0,0,0,0,0,0,0,0,0
+2,B,9,Psicologia,0,0,0,0,0,0,0,0,0
