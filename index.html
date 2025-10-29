@@ -18,11 +18,17 @@
             box-sizing: border-box;
         }
 
+        html {
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
+            max-width: 100vw;
         }
 
         .container {
@@ -63,6 +69,8 @@
             grid-template-rows: auto auto;
             gap: 30px;
             margin-bottom: 30px;
+            max-width: 100%;
+            overflow-x: hidden;
         }
 
         .quick-filters {
@@ -453,6 +461,11 @@
             border: 1px solid #dee2e6;
             border-radius: 10px;
             overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .rankings-table th,
@@ -1101,13 +1114,28 @@
             }
 
             .chart-wrapper {
-                height: 400px;
+                height: auto;
+                min-height: 400px;
+                overflow: visible;
+                max-width: 100%;
+            }
+
+            .chart-container {
+                height: 350px;
+                margin-bottom: 15px;
+                padding-left: 5px;
+                padding-right: 5px;
+                max-width: 100%;
+                overflow: hidden;
             }
 
             .team-selector {
                 position: relative;
                 width: 100%;
                 height: auto;
+                max-height: 200px;
+                overflow-y: auto;
+                overflow-x: hidden;
                 display: flex;
                 flex-direction: row;
                 flex-wrap: wrap;
@@ -1116,20 +1144,50 @@
                 background: #f8f9fa;
                 border-radius: 10px;
                 margin-top: 15px;
+                margin-bottom: 20px;
                 right: auto;
                 top: auto;
                 bottom: auto;
                 min-width: auto;
-                max-width: none;
+                max-width: 100%;
                 justify-content: center;
+                box-sizing: border-box;
+                -webkit-overflow-scrolling: touch;
+                border: 2px solid #e0e0e0;
+                box-shadow: inset 0 -10px 10px -10px rgba(0, 0, 0, 0.1);
+            }
+
+            .team-selector::after {
+                content: '⬍ Scroll para ver mais ⬍';
+                position: sticky;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(to top, #f8f9fa 50%, transparent);
+                text-align: center;
+                font-size: 0.7em;
+                color: #666;
+                padding: 8px 0 4px;
+                pointer-events: none;
             }
 
             .team-checkbox {
                 transform: none !important;
-                font-size: 0.8em;
-                padding: 4px 8px;
-                min-height: 28px;
+                font-size: 0.75em;
+                padding: 3px 6px;
+                min-height: 24px;
                 margin: 1px;
+                flex-shrink: 0;
+            }
+
+            .team-checkbox .team-emblem {
+                width: 16px;
+                height: 16px;
+            }
+
+            .team-dot {
+                width: 10px;
+                height: 10px;
             }
 
             .team-end-labels {
@@ -1437,27 +1495,490 @@
             .game-item {
                 flex-direction: column;
                 gap: 12px;
+                padding: 12px;
+            }
+
+            .game-date {
+                font-size: 0.85em;
+                min-width: auto;
+                width: 100%;
+                text-align: center;
             }
 
             .game-teams {
                 flex-direction: column;
                 width: 100%;
                 gap: 10px;
+                margin-right: 0;
             }
 
             .game-team {
                 width: 100%;
                 min-width: auto;
+                max-width: 100%;
+                gap: 8px;
             }
 
             .game-team.home,
             .game-team.away {
                 justify-content: space-between;
                 flex-direction: row;
+                text-align: left;
             }
 
-            .game-score {
+            .game-team.home .game-team-name {
+                text-align: left;
+            }
+
+            .game-team-name {
+                font-size: 0.85em;
+                width: auto;
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .game-team-emblem {
+                width: 35px;
+                height: 35px;
+                flex-shrink: 0;
+            }
+
+            .game-team-emblem[src*="EGI-07.png"] {
+                width: 32px;
+                height: 32px;
+                padding: 8px;
+            }
+
+            .game-elo-change {
+                font-size: 0.75em;
+                padding: 2px 5px;
+                flex-shrink: 0;
+            }
+
+            .game-score,
+            .game-vs {
                 min-width: auto;
+                font-size: 1.1em;
+                flex-shrink: 0;
+            }
+        }
+
+        /* Media queries adicionais para mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                overflow-x: hidden;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 10px;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .modalidade-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .modalidade-selector select {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .card {
+                padding: 15px;
+                margin-bottom: 20px;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .chart-card {
+                margin-bottom: 30px;
+                overflow-x: hidden;
+            }
+
+            .ranking-card {
+                margin-top: 30px;
+                overflow-x: hidden;
+            }
+
+            .card-title {
+                font-size: 1.1em;
+            }
+
+            /* Tabela de classificação */
+            .table-wrapper {
+                overflow-x: auto;
+                margin: 0 -15px;
+                padding: 0 15px;
+                max-width: calc(100vw - 60px);
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .rankings-table {
+                font-size: 0.75em;
+                white-space: nowrap;
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .rankings-table th,
+            .rankings-table td {
+                padding: 6px 4px;
+                line-height: 1.3;
+                height: auto;
+                min-height: 36px;
+            }
+
+            .rankings-table .team-emblem {
+                width: 22px;
+                height: 22px;
+            }
+
+            .rank-badge {
+                width: 22px;
+                height: 22px;
+                font-size: 0.65em;
+            }
+
+            /* Seletores de divisão e grupo */
+            .division-selector,
+            .group-selector {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .division-btn,
+            .group-btn {
+                font-size: 0.8em;
+                padding: 6px 10px;
+                white-space: nowrap;
+            }
+
+            /* Navegação de jornadas */
+            .jornada-navigation {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .jornada-title {
+                font-size: 1.2em;
+                order: -1;
+            }
+
+            .jornada-arrow-container {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .jornada-arrow {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5em;
+            }
+
+            /* Calendário de jogos */
+            .calendar-card {
+                margin-top: 20px;
+            }
+
+            .games-list {
+                gap: 12px;
+            }
+
+            .game-date {
+                font-size: 0.8em;
+            }
+
+            .game-team-name {
+                font-size: 0.85em;
+            }
+
+            .game-team-emblem {
+                width: 30px;
+                height: 30px;
+            }
+
+            .game-elo-change {
+                font-size: 0.75em;
+                padding: 2px 5px;
+            }
+
+            /* Bracket */
+            .bracket-container {
+                overflow-x: auto;
+            }
+
+            .bracket {
+                min-width: 600px;
+            }
+
+            .bracket-round {
+                min-width: 140px;
+            }
+
+            .match {
+                min-height: 60px;
+                margin: 8px 0;
+            }
+
+            .match-team {
+                font-size: 0.75em;
+                padding: 6px;
+            }
+
+            /* Controles de zoom */
+            .zoom-controls {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .zoom-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 11px;
+            }
+
+            /* Filtros rápidos */
+            .quick-filters {
+                max-height: 80px;
+            }
+
+            .filter-btn {
+                font-size: 0.75em;
+                padding: 5px 10px;
+            }
+
+            /* Legenda de progressão */
+            .progression-legend {
+                flex-wrap: wrap;
+                gap: 8px;
+                font-size: 0.75em;
+            }
+
+            .legend-item {
+                font-size: 0.7em;
+            }
+
+            /* Gráfico ELO */
+            .chart-container {
+                height: 350px;
+                padding-left: 10px;
+            }
+
+            .chart-container canvas {
+                max-width: 100%;
+                height: auto !important;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .chart-header .card-title {
+                width: 100%;
+            }
+
+            .zoom-controls {
+                align-self: flex-end;
+            }
+        }
+
+        /* Media queries para tablets (landscape) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+
+            .dashboard-grid {
+                gap: 20px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .rankings-table {
+                font-size: 0.85em;
+            }
+
+            .chart-container {
+                height: 450px;
+            }
+        }
+
+        /* Media queries para telas muito pequenas */
+        @media (max-width: 480px) {
+            body {
+                overflow-x: hidden;
+            }
+
+            .container {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .card {
+                padding: 12px;
+                margin-bottom: 15px;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .chart-card {
+                margin-bottom: 25px;
+            }
+
+            .ranking-card {
+                margin-top: 25px;
+            }
+
+            .chart-container {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+
+            .chart-container canvas {
+                max-width: 100%;
+            }
+
+            .table-wrapper {
+                margin: 0 -12px;
+                padding: 0 12px;
+                max-width: calc(100vw - 44px);
+            }
+
+            .rankings-table {
+                font-size: 0.7em;
+            }
+
+            .rankings-table th,
+            .rankings-table td {
+                padding: 4px 2px;
+                min-height: 32px;
+            }
+
+            .rankings-table .team-emblem {
+                width: 20px;
+                height: 20px;
+            }
+
+            .rank-badge {
+                width: 20px;
+                height: 20px;
+                font-size: 0.6em;
+            }
+
+            .division-btn,
+            .group-btn {
+                font-size: 0.75em;
+                padding: 5px 8px;
+            }
+
+            .team-selector {
+                max-height: 180px;
+                padding: 10px;
+                gap: 4px;
+            }
+
+            .team-checkbox {
+                font-size: 0.7em;
+                padding: 2px 5px;
+                min-height: 22px;
+            }
+
+            .team-checkbox .team-emblem {
+                width: 14px;
+                height: 14px;
+            }
+
+            .team-dot {
+                width: 8px;
+                height: 8px;
+            }
+
+            .game-item {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .game-date {
+                font-size: 0.75em;
+            }
+
+            .game-team-emblem {
+                width: 28px;
+                height: 28px;
+            }
+
+            .game-team-emblem[src*="EGI-07.png"] {
+                width: 26px;
+                height: 26px;
+                padding: 6px;
+            }
+
+            .game-score,
+            .game-vs {
+                font-size: 1em;
+            }
+
+            .game-team-name {
+                font-size: 0.75em;
+            }
+
+            .game-elo-change {
+                font-size: 0.7em;
+                padding: 1px 4px;
+            }
+
+            .jornada-arrow {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+
+            .jornada-title {
+                font-size: 1.1em;
+            }
+
+            .bracket {
+                min-width: 500px;
+            }
+
+            .bracket-round {
+                min-width: 120px;
+            }
+
+            .match-team {
+                font-size: 0.7em;
+                padding: 4px;
+            }
+
+            .modalidade-selector label {
+                font-size: 1em;
+            }
+
+            .modalidade-selector select {
+                font-size: 0.9em;
             }
         }
     </style>
@@ -1525,26 +2046,28 @@
                     <!-- Será preenchido dinamicamente via JavaScript -->
                 </div>
 
-                <table class="rankings-table" id="rankingsTable">
-                    <thead>
-                        <tr>
-                            <th>Pos.</th>
-                            <th>Equipa</th>
-                            <th>Pts</th>
-                            <th>J</th>
-                            <th>V</th>
-                            <th>E</th>
-                            <th>D</th>
-                            <th style="color: red;">FC</th>
-                            <th>GM</th>
-                            <th>GS</th>
-                            <th>±</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rankingsBody">
-                        <!-- Dados serão preenchidos dinamicamente -->
-                    </tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table class="rankings-table" id="rankingsTable">
+                        <thead>
+                            <tr>
+                                <th>Pos.</th>
+                                <th>Equipa</th>
+                                <th>Pts</th>
+                                <th>J</th>
+                                <th>V</th>
+                                <th>E</th>
+                                <th>D</th>
+                                <th style="color: red;">FC</th>
+                                <th>GM</th>
+                                <th>GS</th>
+                                <th>±</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingsBody">
+                            <!-- Dados serão preenchidos dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Calendário de Jogos -->
@@ -1861,10 +2384,36 @@
 
         // Trocar divisão
         function switchDivision(division) {
+            // Atualizar appState e variáveis globais
+            appState.view.division = division;
+            appState.view.group = null; // Reset group quando muda divisão
+            currentDivision = division;
+            currentGroup = null;
+
+            // Atualizar UI da classificação
             divisionSelector.setActive(division);
             groupSelector.render();
             updateRankingsTable();
-            syncCalendarWithRankings();
+
+            // Sincronizar com o calendário
+            currentCalendarDivision = division;
+            currentCalendarGroup = null;
+
+            // Atualizar botões do calendário
+            document.querySelectorAll('#calendarDivisionSelector .division-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === division);
+            });
+
+            // Atualizar seletor de grupo do calendário
+            createCalendarGroupSelector();
+
+            // Atualizar jornadas disponíveis
+            updateAvailableJornadas();
+
+            // Atualizar calendário se houver jornada selecionada
+            if (currentCalendarJornada) {
+                updateCalendar();
+            }
         }
 
         // Atualizar seletor de grupos (usa GroupSelector class)
@@ -1879,9 +2428,31 @@
 
         // Trocar grupo
         function switchGroup(group) {
+            // Atualizar appState e variáveis globais
+            appState.view.group = group;
+            currentGroup = group;
+
+            // Atualizar UI da classificação
             groupSelector.setActive(group ? `Grupo ${group}` : '');
             updateRankingsTable();
-            syncCalendarWithRankings();
+
+            // Sincronizar com o calendário
+            currentCalendarGroup = group;
+
+            // Atualizar botões do calendário
+            document.querySelectorAll('#calendarGroupSelector .group-btn').forEach(btn => {
+                const btnGroup = btn.dataset.group || '';
+                const isActive = (group === null && btnGroup === '') || (btnGroup === group);
+                btn.classList.toggle('active', isActive);
+            });
+
+            // Atualizar jornadas disponíveis
+            updateAvailableJornadas();
+
+            // Atualizar calendário se houver jornada selecionada
+            if (currentCalendarJornada) {
+                updateCalendar();
+            }
         }
 
         // Inicializar gráfico ELO
@@ -5910,11 +6481,16 @@
             // Sincronizar com a classificação
             currentDivision = division;
             currentGroup = null; // Reset group quando muda divisão
+            appState.view.division = division;
+            appState.view.group = null;
 
             // Atualizar botões da classificação
-            updateRankingsDivisionButtons();
-            updateGroupSelector(); // Recria os botões de grupo se necessário
+            divisionSelector.setActive(division);
+            groupSelector.render();
             updateRankingsTable();
+
+            // Atualizar seletor de grupo do calendário
+            createCalendarGroupSelector();
 
             // Atualizar jornadas disponíveis para nova divisão/grupo
             updateAvailableJornadas();
@@ -5946,9 +6522,10 @@
 
             // Sincronizar com a classificação
             currentGroup = group;
+            appState.view.group = group;
 
             // Atualizar botões da classificação
-            updateRankingsGroupButtons();
+            groupSelector.setActive(group ? `Grupo ${group}` : '');
             updateRankingsTable();
 
             // Atualizar jornadas disponíveis para novo grupo
@@ -6283,18 +6860,51 @@
 
         // Sincronizar calendário quando divisão/grupo da classificação mudar
         function syncCalendarWithRankings() {
-            // Sincronizar divisão do calendário com a classificação
-            if (currentDivision && currentDivision !== currentCalendarDivision) {
-                currentCalendarDivision = currentDivision;
+            let divisionChanged = false;
+            let groupChanged = false;
 
-                // Atualizar botões de divisão
-                document.querySelectorAll('#calendarDivisionSelector .division-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.textContent === currentDivision);
-                });
+            // Sincronizar divisão do calendário com a classificação
+            if (appState.view.division) {
+                divisionChanged = appState.view.division !== currentCalendarDivision;
+
+                currentCalendarDivision = appState.view.division;
+                currentDivision = appState.view.division;
+
+                if (divisionChanged) {
+                    // Atualizar botões de divisão do calendário
+                    document.querySelectorAll('#calendarDivisionSelector .division-btn').forEach(btn => {
+                        btn.classList.toggle('active', btn.textContent === appState.view.division);
+                    });
+
+                    // Atualizar seletor de grupo do calendário
+                    createCalendarGroupSelector();
+
+                    // Atualizar jornadas disponíveis
+                    updateAvailableJornadas();
+                }
             }
 
-            // Atualizar calendário se já houver jornada selecionada
-            if (currentCalendarJornada) {
+            // Sincronizar grupo do calendário com a classificação (se aplicável)
+            groupChanged = appState.view.group !== currentCalendarGroup;
+
+            currentCalendarGroup = appState.view.group;
+            currentGroup = appState.view.group;
+
+            if (groupChanged) {
+                // Atualizar botões de grupo do calendário
+                document.querySelectorAll('#calendarGroupSelector .group-btn').forEach(btn => {
+                    const btnGroup = btn.dataset.group || '';
+                    const isActive = (appState.view.group === null && btnGroup === '') ||
+                        (btnGroup === appState.view.group);
+                    btn.classList.toggle('active', isActive);
+                });
+
+                // Atualizar jornadas disponíveis
+                updateAvailableJornadas();
+            }
+
+            // Atualizar calendário sempre que houver mudança ou se já houver jornada selecionada
+            if (divisionChanged || groupChanged || currentCalendarJornada) {
                 updateCalendar();
             }
         }
@@ -7116,6 +7726,16 @@
                     return;
                 }
 
+                // Verificar se a divisão atual já tem grupo no nome (ex: "2ª Divisão - Grupo A")
+                const divisionHasGroup = appState.view.division && appState.view.division.includes('Grupo');
+
+                if (divisionHasGroup) {
+                    // Se a divisão já inclui o grupo no nome, não mostrar seletor de grupo
+                    this.element.style.display = 'none';
+                    appState.view.group = null;
+                    return;
+                }
+
                 const teams = sampleData.rankings[appState.view.division];
                 const groups = [...new Set(teams.map(team => team.group))].filter(group => group && group !== 'nan');
 
@@ -7178,17 +7798,14 @@
         eventManager.on('.division-btn', 'click', (e) => {
             const division = e.target.dataset.division;
             if (division) {
-                divisionSelector.setActive(division);
-                groupSelector.render();
-                updateRankingsTable();
-                updateBracket();
+                switchDivision(division);
+                createBracket();
             }
         });
 
         eventManager.on('.group-btn', 'click', (e) => {
             const group = e.target.dataset.group;
-            groupSelector.setActive(group);
-            updateRankingsTable();
+            switchGroup(group);
         });
 
         // Navegação de jornadas
