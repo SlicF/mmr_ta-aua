@@ -1,15 +1,15 @@
 Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
-1,EGI,0,0,0,0,0,0,0,0,0
-2,Fisioterapia,0,0,0,0,0,0,0,0,0
-3,EET,0,0,0,0,0,0,0,0,0
-4,Eng. Mecânica,0,0,0,0,0,0,0,0,0
-5,ECT,0,0,0,0,0,0,0,0,0
-6,Educação Básica,0,0,0,0,0,0,0,0,0
-7,Psicologia,0,0,0,0,0,0,0,0,0
-8,MTC,0,0,0,0,0,0,0,0,0
-9,Biologia,0,0,0,0,0,0,0,0,0
-10,Design,0,0,0,0,0,0,0,0,0
-11,Eng. Física,0,0,0,0,0,0,0,0,0
-12,Tradução,0,0,0,0,0,0,0,0,0
-13,Economia,0,0,0,0,0,0,0,0,0
-14,Eng. Cívil,0,0,0,0,0,0,0,0,0
+1,Fisioterapia,4,2,2,0,0,42,15,27,0
+2,EGI,4,2,2,0,0,26,7,19,0
+3,EET,4,2,2,0,0,26,8,18,0
+4,Eng. Mecânica,4,2,2,0,0,27,13,14,0
+5,MTC,4,2,2,0,0,14,3,11,0
+6,Educação Básica,2,2,1,0,1,21,9,12,0
+7,Psicologia,2,2,1,0,1,14,10,4,0
+8,Design,2,2,1,0,1,11,9,2,0
+9,Eng. Cívil,2,2,1,0,1,10,21,-11,0
+10,Biologia,0,2,0,0,2,14,24,-10,0
+11,ECT,0,2,0,0,2,4,22,-18,0
+12,Economia,0,2,0,0,2,14,35,-21,0
+13,Eng. Física,0,2,0,0,2,6,29,-23,0
+14,Tradução,0,2,0,0,2,9,33,-24,0
