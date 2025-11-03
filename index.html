@@ -3224,10 +3224,106 @@
             return { elo: latestElo, position: position > 0 ? position : null };
         }
 
+        // Obter labels dos cabeçalhos baseados na modalidade
+        function getGoalHeaders() {
+            // Extrair o nome da modalidade sem a época
+            let modalityName = '';
+            if (currentModalidade) {
+                modalityName = currentModalidade.replace(/_\d{2}_\d{2}$/, '').toUpperCase();
+            }
+
+            // Basquetebol usa "Cestos Feitos" e "Cestos Sofridos"
+            if (modalityName.includes('BASQUETEBOL')) {
+                return { scored: 'CF', conceded: 'CS' };
+            }
+
+            // Voleibol usa "Sets Ganhos" e "Sets Perdidos"
+            if (modalityName.includes('VOLEIBOL')) {
+                return { scored: 'SG', conceded: 'SP' };
+            }
+
+            // Futebol, Futsal e Andebol mantêm "Golos Marcados" e "Golos Sofridos"
+            return { scored: 'GM', conceded: 'GS' };
+        }
+
+        // Atualizar cabeçalhos da tabela de classificação
+        function updateRankingsTableHeaders() {
+            const headers = getGoalHeaders();
+            const rankingsTable = document.getElementById('rankingsTable');
+
+            if (!rankingsTable) return;
+
+            const thead = rankingsTable.querySelector('thead tr');
+            if (!thead) return;
+
+            const thElements = Array.from(thead.querySelectorAll('th'));
+
+            // Normalizar texto de cabeçalho: remover espaços, minúsculas, remover diacríticos
+            function normalizeHeaderText(text) {
+                return text
+                    .trim()
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '') // Remove diacríticos
+                    .replace(/\s+/g, ''); // Remove espaços
+            }
+
+            // Encontrar a coluna de diferença como âncora (várias variações)
+            const diffSymbolsList = [
+                '±', '+/-', '+-',
+                'dif', 'dif.', 'diferenca', 'diferença',
+                'dg', 'delta', 'δ', 'Δ',
+                'saldo', 'diff',
+                'gd', 'goal difference', 'goaldifference',
+                'goal diff', 'goaldiff'
+            ];
+
+            // Normalizar símbolos e criar Set para O(1) lookups com deduplicação
+            const normalizedDiffSymbols = new Set(
+                diffSymbolsList.map(s => normalizeHeaderText(s))
+            );
+            let diffIndex = -1;
+
+            for (let i = 0; i < thElements.length; i++) {
+                const normalizedText = normalizeHeaderText(thElements[i].textContent);
+                if (normalizedDiffSymbols.has(normalizedText)) {
+                    diffIndex = i;
+                    break;
+                }
+            }
+
+            if (diffIndex === -1) {
+                console.warn('Coluna de diferença (±) não encontrada na tabela de classificação');
+                return;
+            }
+
+            // As colunas de golos/cestos/sets são sempre as duas anteriores ao "±"
+            // Layout: ... | Scored | Conceded | ± | ...
+            const scoredIndex = diffIndex - 2;
+            const concededIndex = diffIndex - 1;
+
+            // Validar bounds: garantir que diffIndex >= 2 e ambos os índices estão no range válido
+            if (diffIndex < 2 || scoredIndex >= thElements.length || concededIndex >= thElements.length) {
+                console.warn(
+                    `Índices de cabeçalho inválidos: diffIndex=${diffIndex}, ` +
+                    `scoredIndex=${scoredIndex}, concededIndex=${concededIndex}, ` +
+                    `total columns=${thElements.length}`
+                );
+                return;
+            }
+
+            // Atualizar os cabeçalhos
+            thElements[scoredIndex].textContent = headers.scored;
+            thElements[concededIndex].textContent = headers.conceded;
+        }
+
         // Atualizar tabela de classificações
         function updateRankingsTable() {
             const tbody = document.getElementById('rankingsBody');
             const progressionLegend = document.getElementById('progressionLegend');
+
+            // Atualizar cabeçalhos conforme a modalidade
+            updateRankingsTableHeaders();
 
             if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
                 tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #666;">Nenhum dado disponível</td></tr>';
@@ -4868,6 +4964,9 @@
                 const tableDiv = document.createElement('div');
                 tableDiv.className = 'bracket-league-table';
 
+                // Obter labels corretos para golos/cestos
+                const headers = getGoalHeaders();
+
                 const table = document.createElement('table');
                 table.innerHTML = `
                     <thead>
@@ -4878,8 +4977,8 @@
                             <th>V</th>
                             <th>E</th>
                             <th>D</th>
-                            <th>GM</th>
-                            <th>GS</th>
+                            <th>${headers.scored}</th>
+                            <th>${headers.conceded}</th>
                             <th>±</th>
                             <th>Pts</th>
                         </tr>
@@ -6198,6 +6297,9 @@
                             updateEloChart();
                         }
                         // Brackets serão carregados depois de processar rankings
+
+                        // Disparar evento indicando que os dados foram carregados
+                        document.dispatchEvent(new CustomEvent('data:loaded'));
                     }, 500);
                 }
             }
@@ -6321,15 +6423,9 @@
             // Atualizar jornadas disponíveis para a divisão/grupo atual
             updateAvailableJornadas();
 
-            // Tentar manter a mesma jornada, ou usar a primeira se não existir
+            // Selecionar a jornada mais recente com jogos realizados
             if (availableJornadas.length > 0) {
-                // Se havia uma jornada anterior e ela existe na nova época, manter
-                if (previousJornada && availableJornadas.includes(previousJornada)) {
-                    currentCalendarJornada = previousJornada;
-                } else {
-                    // Caso contrário, usar a primeira jornada
-                    currentCalendarJornada = availableJornadas[0];
-                }
+                currentCalendarJornada = getCurrentJornada();
                 updateJornadaDisplay();
             } else {
                 jornadaTitle.textContent = 'Sem jornadas disponíveis';
@@ -6386,6 +6482,72 @@
             availableJornadas = [...new Set(
                 filteredMatches.map(match => parseInt(match.jornada))
             )].sort((a, b) => a - b);
+        }        // Encontrar a jornada mais recente com pelo menos um jogo realizado
+        function getCurrentJornada() {
+            if (availableJornadas.length === 0) return null;
+
+            // Extrair divisão e grupo atuais
+            let targetDivision = null;
+            let targetGroup = null;
+
+            if (currentCalendarDivision) {
+                const divMatch = currentCalendarDivision.match(/^(\d+)ª Divisão(?:\s*-\s*Grupo\s*([A-Z]))?$/);
+                if (divMatch) {
+                    targetDivision = divMatch[1];
+                    targetGroup = divMatch[2] || null;
+                }
+            }
+
+            // Pré-filtrar jogos uma única vez por divisão/grupo (O(n))
+            const filteredMatches = sampleData.matches.filter(match => {
+                // Filtrar por divisão/grupo se necessário
+                if (targetDivision) {
+                    const matchDiv = match.division ? match.division.toString() : null;
+                    const matchGroup = match.grupo || null;
+
+                    const divMatch = matchDiv && (matchDiv == targetDivision ||
+                        parseFloat(matchDiv) == parseFloat(targetDivision));
+                    if (!divMatch) return false;
+
+                    if (targetGroup && matchGroup !== targetGroup) return false;
+                }
+
+                return true;
+            });
+
+            // Construir lookup: jornada -> tem jogos realizados (O(n))
+            const jornadaHasPlayedGames = new Map();
+
+            for (const match of filteredMatches) {
+                const jornada = parseInt(match.jornada);
+                if (isNaN(jornada)) continue;
+
+                // Verificar se já encontramos um jogo realizado nesta jornada
+                if (!jornadaHasPlayedGames.has(jornada)) {
+                    jornadaHasPlayedGames.set(jornada, false);
+                }
+
+                // Verificar se este jogo tem resultado
+                if (!jornadaHasPlayedGames.get(jornada)) {
+                    const hasScore = match.score1 != null && match.score1 !== '' &&
+                        match.score2 != null && match.score2 !== '';
+                    if (hasScore) {
+                        jornadaHasPlayedGames.set(jornada, true);
+                    }
+                }
+            }
+
+            // Iterar jornadas da mais recente para a mais antiga (O(m))
+            for (let i = availableJornadas.length - 1; i >= 0; i--) {
+                const jornada = availableJornadas[i];
+
+                if (jornadaHasPlayedGames.get(jornada) === true) {
+                    return jornada;
+                }
+            }
+
+            // Se nenhuma jornada tem jogos realizados, retornar a primeira
+            return availableJornadas[0];
         }
 
         // Criar seletor de divisão (IGUAL à classificação - usa sampleData.rankings)
@@ -6495,11 +6657,11 @@
             // Atualizar jornadas disponíveis para nova divisão/grupo
             updateAvailableJornadas();
 
-            // Ajustar jornada atual se exceder o máximo da nova divisão/grupo
+            // Selecionar a jornada mais recente com jogos realizados
             if (availableJornadas.length > 0) {
                 if (!availableJornadas.includes(currentCalendarJornada)) {
-                    // Se a jornada atual não existe nesta divisão, ir para a última disponível
-                    currentCalendarJornada = availableJornadas[availableJornadas.length - 1];
+                    // Se a jornada atual não existe nesta divisão, ir para a jornada atual desta divisão
+                    currentCalendarJornada = getCurrentJornada();
                 }
                 updateJornadaDisplay();
             } else {
@@ -6531,10 +6693,11 @@
             // Atualizar jornadas disponíveis para novo grupo
             updateAvailableJornadas();
 
-            // Ajustar jornada atual se exceder o máximo do novo grupo
+            // Selecionar a jornada mais recente com jogos realizados
             if (availableJornadas.length > 0) {
                 if (!availableJornadas.includes(currentCalendarJornada)) {
-                    currentCalendarJornada = availableJornadas[availableJornadas.length - 1];
+                    // Se a jornada atual não existe neste grupo, ir para a jornada atual deste grupo
+                    currentCalendarJornada = getCurrentJornada();
                 }
                 updateJornadaDisplay();
             } else {
@@ -6585,18 +6748,18 @@
                 // Chamar changeEpoca para atualizar todos os dados
                 changeEpoca(previousEpoch);
 
-                // Após mudança, ir para última jornada disponível
-                setTimeout(() => {
+                // Aguardar carregamento dos dados via evento
+                document.addEventListener('data:loaded', function updateJornadaAfterLoad() {
                     if (availableJornadas.length > 0) {
-                        currentCalendarJornada = availableJornadas[availableJornadas.length - 1];
+                        currentCalendarJornada = getCurrentJornada();
                         updateJornadaDisplay();
                         updateCalendar();
                     }
-                }, 100);
+                }, { once: true });
             }
         }
 
-        // Mudar para próxima época (primeira jornada)
+        // Mudar para próxima época (jornada atual)
         function switchToNextEpoca() {
             const currentEpochElement = document.getElementById('epoca');
             if (!currentEpochElement) return;
@@ -6615,14 +6778,14 @@
                 // Chamar changeEpoca para atualizar todos os dados
                 changeEpoca(nextEpoch);
 
-                // Após mudança, ir para primeira jornada disponível
-                setTimeout(() => {
+                // Aguardar carregamento dos dados via evento
+                document.addEventListener('data:loaded', function updateJornadaAfterLoad() {
                     if (availableJornadas.length > 0) {
-                        currentCalendarJornada = availableJornadas[0];
+                        currentCalendarJornada = getCurrentJornada();
                         updateJornadaDisplay();
                         updateCalendar();
                     }
-                }, 100);
+                }, { once: true });
             }
         }
 
