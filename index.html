@@ -2286,9 +2286,7 @@
             controlsDiv.appendChild(toggleBtn);
 
             selector.prepend(controlsDiv);
-        }
-
-        // Funções de controle rápido
+        }        // Funções de controle rápido
         function selectAllTeams(select) {
             const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
             checkboxes.forEach(checkbox => {
@@ -2312,6 +2310,25 @@
                 if (checkbox.checked) {
                     label.classList.add('active');
                 } else {
+                    label.classList.remove('active');
+                }
+            });
+            updateEloChart();
+            updateTeamCountIndicator();
+        }
+
+        function selectDivision(division) {
+            const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                const teamName = checkbox.dataset.teamName;
+                const team = sampleData.teams.find(t => t.name === teamName);
+                const label = checkbox.parentElement;
+
+                if (team && team.division && team.division.toString() === division) {
+                    checkbox.checked = true;
+                    label.classList.add('active');
+                } else {
+                    checkbox.checked = false;
                     label.classList.remove('active');
                 }
             });
@@ -2528,7 +2545,7 @@
                     },
                     elements: {
                         line: {
-                            tension: 0.3
+                            tension: 0.15
                         },
                         point: {
                             radius: 4,
@@ -2609,8 +2626,10 @@
                 canvas.style.cursor = appState.chart.pan.enabled ? 'grab' : 'default';
 
                 const panButton = document.getElementById('panButton');
-                panButton.textContent = appState.chart.pan.enabled ? '🤚 Pan: ON' : '✋ Pan: OFF';
-                panButton.classList.toggle('active', appState.chart.pan.enabled);
+                if (panButton) {
+                    panButton.textContent = appState.chart.pan.enabled ? '🤚 Pan: ON' : '✋ Pan: OFF';
+                    panButton.classList.toggle('active', appState.chart.pan.enabled);
+                }
             };
         }
 
@@ -2774,14 +2793,30 @@
 
                     DebugUtils.debugEloChart('team_added', { name: team.name, history: teamHistory });
 
-                    // Duplicar o primeiro valor para criar o ponto "Época Anterior" (só se houver época anterior)
+                    // Duplicar o primeiro valor para criar o ponto "Época Anterior" 
+                    // (só se houver época anterior E a equipa estava nessa época)
                     let dataToUse = teamHistory;
                     const currentEpochElement = document.getElementById('epoca');
                     if (currentEpochElement) {
                         const currentEpoch = currentEpochElement.value;
                         const currentIndex = availableEpocas.indexOf(currentEpoch);
-                        if (currentIndex < availableEpocas.length - 1) {
+
+                        // Verificar se há época anterior disponível
+                        const hasPreviousEpoch = currentIndex < availableEpocas.length - 1;
+
+                        // Verificar se a equipa estava na época anterior
+                        const wasInPreviousSeason = sampleData.teamsFromPreviousSeason &&
+                            sampleData.teamsFromPreviousSeason.has(team.name);
+
+                        // Só adicionar ponto da época anterior se AMBAS as condições forem verdadeiras
+                        if (hasPreviousEpoch && wasInPreviousSeason) {
                             dataToUse = [teamHistory[0], ...teamHistory];
+                        } else if (hasPreviousEpoch && !wasInPreviousSeason) {
+                            // Equipa nova: adicionar null no início para alinhar com os labels
+                            dataToUse = [null, ...teamHistory];
+                        } else {
+                            // Sem época anterior disponível
+                            dataToUse = teamHistory;
                         }
                     }
 
@@ -2792,7 +2827,7 @@
                         backgroundColor: team.color + '20',
                         fill: false,
                         borderWidth: 3,
-                        tension: 0.3
+                        tension: 0.15
                     });
                 }
             });
@@ -2800,9 +2835,7 @@
             DebugUtils.debugEloChart('datasets_total', datasets.length);
 
             eloChart.data.labels = labels;
-            eloChart.data.datasets = datasets;
-
-            // Calcular min e max dos dados e adicionar padding de 5%
+            eloChart.data.datasets = datasets;            // Calcular min e max dos dados e adicionar padding de 5%
             if (datasets.length > 0) {
                 let allValues = [];
                 datasets.forEach(dataset => {
@@ -2815,10 +2848,14 @@
                     const minValue = Math.min(...allValues);
                     const maxValue = Math.max(...allValues);
                     const range = maxValue - minValue;
-                    const padding = range * 0.05;
+                    const padding = range > 0 ? range * 0.05 : 50; // Pelo menos 50 pontos de padding se range=0
 
                     eloChart.options.scales.y.min = minValue - padding;
                     eloChart.options.scales.y.max = maxValue + padding;
+                } else {
+                    // Se não há valores válidos, definir escala padrão
+                    eloChart.options.scales.y.min = 0;
+                    eloChart.options.scales.y.max = 2000;
                 }
             }
 
@@ -5213,6 +5250,7 @@
             top3Btn.className = 'filter-btn';
             top3Btn.textContent = 'Top 3';
             top3Btn.dataset.filter = 'top3';
+            top3Btn.onclick = filterTop3;
             filtersContainer.appendChild(top3Btn);
 
             // Usar a mesma lógica da tabela de classificação
@@ -5220,6 +5258,9 @@
 
             // Se for liga única, não adicionar filtros de divisão/grupo
             if (structure.type !== 'single-league') {
+                // Verificar se há múltiplos grupos da 2ª divisão
+                const div2Groups = divisions.filter(d => d.startsWith('2ª Divisão - Grupo'));
+
                 divisions.forEach(division => {
                     const btn = document.createElement('button');
                     btn.className = 'filter-btn';
@@ -5228,14 +5269,72 @@
                     btn.dataset.division = division;
                     filtersContainer.appendChild(btn);
                 });
+
+                // Adicionar botão "2ª Divisão" especial logo após a 1ª divisão
+                if (div2Groups.length > 1) {
+                    // Encontrar a posição após a 1ª divisão
+                    const buttons = filtersContainer.querySelectorAll('.filter-btn');
+                    let insertAfter = null;
+                    buttons.forEach(btn => {
+                        if (btn.textContent === '1ª Divisão') {
+                            insertAfter = btn;
+                        }
+                    });
+
+                    const allDiv2Btn = document.createElement('button');
+                    allDiv2Btn.className = 'filter-btn';
+                    allDiv2Btn.textContent = '2ª Divisão';
+                    allDiv2Btn.dataset.filter = 'all-div2';
+                    allDiv2Btn.onclick = () => selectDivision('2');
+
+                    if (insertAfter) {
+                        insertAfter.after(allDiv2Btn);
+                    } else {
+                        filtersContainer.appendChild(allDiv2Btn);
+                    }
+                }
             }
+
+            // Verificar se há playoffs REAIS ou se a fase de grupos ainda não terminou
+            let hasActualPlayoffs = false;
+            let groupStageComplete = false;
+
+            if (sampleData.rawEloData && sampleData.rawEloData.length > 0) {
+                // Verificar se há jogos de playoffs (jornadas começando com 'E')
+                hasActualPlayoffs = sampleData.rawEloData.some(match =>
+                    match.Jornada && match.Jornada.startsWith('E')
+                );
+
+                // Verificar se todos os jogos da fase de grupos estão completos
+                const groupStageGames = sampleData.rawEloData.filter(match =>
+                    match.Jornada && !match.Jornada.startsWith('E')
+                );
+
+                if (groupStageGames.length > 0) {
+                    const allGroupGamesPlayed = groupStageGames.every(match => {
+                        const score1 = match["Golos Casa"] || match.score1;
+                        const score2 = match["Golos Fora"] || match.score2;
+                        return score1 != null && score1 !== '' && score2 != null && score2 !== '';
+                    });
+                    groupStageComplete = allGroupGamesPlayed;
+                }
+            }
+
+            // Mostrar "Playoffs" se há playoffs reais OU se fase de grupos está completa
+            const playoffsLabel = (hasActualPlayoffs || groupStageComplete) ? 'Playoffs' : 'Playoffs (Classificação Atual)';
 
             // Adicionar filtros finais
             const playoffsBtn = document.createElement('button');
             playoffsBtn.className = 'filter-btn';
-            playoffsBtn.textContent = 'Playoffs';
+            playoffsBtn.textContent = playoffsLabel;
             playoffsBtn.onclick = filterPlayoffs;
             filtersContainer.appendChild(playoffsBtn);
+
+            const sensationBtn = document.createElement('button');
+            sensationBtn.className = 'filter-btn';
+            sensationBtn.textContent = 'Equipas Sensação';
+            sensationBtn.onclick = filterSensationTeams;
+            filtersContainer.appendChild(sensationBtn);
 
             const resetBtn = document.createElement('button');
             resetBtn.className = 'filter-btn';
@@ -5789,40 +5888,65 @@
             updateTeamCountIndicator();
         }
 
-        // Filtro Top 3 - equipas que chegaram à final e vencedor do 3º lugar
+        // Filtro Top 3 - mostra equipas da final e 3º lugar se existir, senão Top 3 por ELO
         function filterTop3() {
             const top3Teams = new Set();
 
-            // Procurar nos dados do bracket se existir
-            if (sampleData.bracket && Object.keys(sampleData.bracket).length > 0) {
-                // Adicionar finalistas
-                if (sampleData.bracket["Final"]) {
-                    sampleData.bracket["Final"].forEach(match => {
-                        top3Teams.add(match.team1);
-                        top3Teams.add(match.team2);
-                    });
-                }
+            // Verificar se há jogos de playoffs definidos
+            if (sampleData.rawEloData && sampleData.rawEloData.length > 0) {
+                // Procurar jogos da Final (E3) e 3º Lugar (E3L)
+                sampleData.rawEloData.forEach(match => {
+                    if (match.Jornada === 'E3') {
+                        // Final - adicionar ambas as equipas (1º e 2º lugar)
+                        if (match["Equipa 1"]) top3Teams.add(match["Equipa 1"]);
+                        if (match["Equipa 2"]) top3Teams.add(match["Equipa 2"]);
+                    } else if (match.Jornada === 'E3L') {
+                        // 3º Lugar - adicionar APENAS o vencedor
+                        const score1 = parseInt(match["Golos Casa"]) || parseInt(match.score1) || 0;
+                        const score2 = parseInt(match["Golos Fora"]) || parseInt(match.score2) || 0;
 
-                // Adicionar vencedor do 3º lugar
-                if (sampleData.bracket["3º Lugar"]) {
-                    sampleData.bracket["3º Lugar"].forEach(match => {
-                        top3Teams.add(match.winner);
-                    });
-                }
+                        if (score1 > score2 && match["Equipa 1"]) {
+                            top3Teams.add(match["Equipa 1"]);
+                        } else if (score2 > score1 && match["Equipa 2"]) {
+                            top3Teams.add(match["Equipa 2"]);
+                        } else if (score1 === score2 && score1 > 0) {
+                            // Em caso de empate, adicionar ambos (improvável mas possível)
+                            if (match["Equipa 1"]) top3Teams.add(match["Equipa 1"]);
+                            if (match["Equipa 2"]) top3Teams.add(match["Equipa 2"]);
+                        }
+                    }
+                });
             }
 
-            // Se não há dados do bracket ou não encontrou 3 equipas, usar ranking
-            if (top3Teams.size < 3) {
-                DebugUtils.debugBracket('using_ranking_fallback');
-                const rankingTop3 = sampleData.rankings[currentDivision].slice(0, 3).map(t => t.team);
-                setActiveTeams(rankingTop3);
-            } else {
-                DebugUtils.debugPlayoffs('top3_teams', [...top3Teams]);
+            // Se encontrou exatamente 3 equipas dos playoffs, usar essas
+            if (top3Teams.size === 3) {
+                DebugUtils.debugBracket('top3_from_playoffs', [...top3Teams]);
                 setActiveTeams([...top3Teams]);
+                return;
             }
-        }
 
-        // Filtro por divisão
+            // Caso contrário, usar Top 3 por ELO
+            const allTeamsWithElo = sampleData.teams.map(team => {
+                const history = sampleData.eloHistory[team.name];
+                const currentElo = history && history.length > 0
+                    ? history[history.length - 1]
+                    : (team.initialElo || 1500);
+
+                return {
+                    name: team.name,
+                    elo: currentElo
+                };
+            });
+
+            // Ordenar por ELO decrescente
+            allTeamsWithElo.sort((a, b) => b.elo - a.elo);
+
+            // Pegar top 3
+            const top3Names = allTeamsWithElo.slice(0, 3).map(t => t.name);
+
+            DebugUtils.debugBracket('top3_by_elo', { teams: top3Names, elos: allTeamsWithElo.slice(0, 3) });
+            setActiveTeams(top3Names);
+        }        // Filtro por divisão
         function filterDivision(division) {
             if (!sampleData.rankings[division]) return;
             const divisionTeams = sampleData.rankings[division].map(t => t.team);
@@ -5846,27 +5970,72 @@
         // Filtro equipas que passaram aos playoffs (estão no bracket)
         function filterPlayoffs() {
             const playoffTeams = new Set();
+            let hasActualPlayoffs = false;
 
-            // Usar dados brutos para encontrar equipas nos playoffs
+            // Primeiro verificar se há jogos de playoffs (jornadas que começam com 'E')
             if (sampleData.rawEloData && sampleData.rawEloData.length > 0) {
                 sampleData.rawEloData.forEach(match => {
                     if (match.Jornada && match.Jornada.startsWith('E')) {
+                        hasActualPlayoffs = true;
                         if (match["Equipa 1"]) playoffTeams.add(match["Equipa 1"]);
                         if (match["Equipa 2"]) playoffTeams.add(match["Equipa 2"]);
                     }
                 });
-            } else {
-                // Fallback para usar dados do bracket se disponível
+            }
+
+            // Se não há jogos de playoffs reais, usar dados do bracket (classificação atual)
+            if (!hasActualPlayoffs && sampleData.bracket && Object.keys(sampleData.bracket).length > 0) {
+                DebugUtils.debugPlayoffs('using_bracket_classification');
                 Object.values(sampleData.bracket).forEach(round =>
                     round.forEach(match => {
-                        playoffTeams.add(match.team1);
-                        playoffTeams.add(match.team2);
+                        if (match.team1) playoffTeams.add(match.team1);
+                        if (match.team2) playoffTeams.add(match.team2);
                     })
                 );
             }
 
             DebugUtils.debugPlayoffs('playoff_teams', [...playoffTeams]);
             setActiveTeams([...playoffTeams]);
+        }
+
+        // Filtro Equipas Sensação - 3 equipas com maior ganho de ELO desde o início
+        function filterSensationTeams() {
+            const teamsWithGain = sampleData.teams.map(team => {
+                const history = sampleData.eloHistory[team.name];
+
+                if (!history || history.length < 2) {
+                    return {
+                        name: team.name,
+                        gain: 0,
+                        initial: team.initialElo || 1500,
+                        current: team.initialElo || 1500
+                    };
+                }
+
+                const initialElo = history[0]; // Primeiro valor (início da época)
+                const currentElo = history[history.length - 1]; // Último valor (ELO atual)
+                const gain = currentElo - initialElo;
+
+                return {
+                    name: team.name,
+                    gain: gain,
+                    initial: initialElo,
+                    current: currentElo
+                };
+            });
+
+            // Ordenar por ganho de ELO decrescente
+            teamsWithGain.sort((a, b) => b.gain - a.gain);
+
+            // Pegar top 3 com maior ganho
+            const top3Sensation = teamsWithGain.slice(0, 3).map(t => t.name);
+
+            DebugUtils.debugBracket('sensation_teams', {
+                teams: top3Sensation,
+                details: teamsWithGain.slice(0, 3)
+            });
+
+            setActiveTeams(top3Sensation);
         }
 
         // Resetar filtro -> ativa todas as equipas
@@ -5918,10 +6087,26 @@
 
             let normalized = teamName.trim();
 
-            // Casos específicos conhecidos
+            // Casos específicos conhecidos de typos
             if (normalized === 'Traduçao' || normalized === 'TRADUÇÃO' || normalized === 'TRADUÇAO' ||
                 normalized.toLowerCase() === 'tradução' || normalized.toLowerCase() === 'traduçao') {
                 normalized = 'Tradução';
+            }
+
+            // Corrigir typo conhecido
+            if (normalized === 'Edcucação Básica') {
+                normalized = 'Educação Básica';
+            }
+
+            // Typos da época 24_25 (ficheiros antigos)
+            if (normalized === 'Eng. Civil') {
+                normalized = 'Eng. Cívil';
+            }
+            if (normalized === 'Eng. Materias') {
+                normalized = 'Eng. Materiais';
+            }
+            if (normalized === 'Educaçao Básica') {
+                normalized = 'Educação Básica';
             }
 
             // Normalização adicional removendo acentos
@@ -5931,9 +6116,7 @@
             }
 
             return normalized;
-        }
-
-        /**
+        }        /**
          * Obtém as informações de um curso pelo nome
          * @param {string} courseName Nome do curso
          * @returns {object} Informações do curso (nome completo, núcleo, emblema, cores)
@@ -6267,12 +6450,14 @@
                 secondaryBracketType: null,  // ← ADICIONADO para tipo do bracket secundário
                 gamesDates: [],
                 rawEloData: [],
-                totalRegularSeasonGames: 0  // ← ADICIONADO para número de jornadas do calendário
+                totalRegularSeasonGames: 0,  // ← ADICIONADO para número de jornadas do calendário
+                teamsFromPreviousSeason: new Set()  // ← ADICIONADO para rastreamento de equipas da época anterior
             };
             currentModalityHasAdjustments = false;
 
-            // Variável para guardar ELOs iniciais (usada quando detalhe_*.csv está vazio)
+            // Variáveis para guardar ELOs iniciais e equipas da época anterior
             let initialElosFromFile = {};
+            let previousSeasonTeams = new Set();
 
             // Mostrar loading
             document.getElementById('teamSelector').innerHTML = '<div class="loading"><div class="spinner"></div>A carregar dados...</div>';
@@ -6351,23 +6536,62 @@
                         DebugUtils.debugFileLoading('initial_elos_loaded', initialElosFromFile);
                     }
 
-                    checkAllLoaded();
+                    // Agora carregar época ANTERIOR para saber quais equipas existiam
+                    const currentEpochElement = document.getElementById('epoca');
+                    const currentEpoch = currentEpochElement ? currentEpochElement.value : null;
 
-                    // AGORA SIM carregar detalhe (só depois de ter os ELOs iniciais)
-                    Papa.parse(detalhePath, {
-                        download: true,
-                        header: true,
-                        skipEmptyLines: true,
-                        newline: '\n',
-                        complete: results => {
-                            processEloHistory(results.data, initialElosFromFile);
-                            checkAllLoaded();
-                        },
-                        error: error => {
-                            console.error('Erro ao carregar detalhes ELO:', error);
-                            checkAllLoaded();
+                    if (currentEpoch && availableEpocas && availableEpocas.length > 0) {
+                        const previousEpochIndex = availableEpocas.indexOf(currentEpoch) + 1;
+                        if (previousEpochIndex < availableEpocas.length) {
+                            const previousEpoch = availableEpocas[previousEpochIndex];
+                            const previousEloPath = `elo_ratings/elo_${mod.replace(currentEpoch, previousEpoch)}.csv`;
+
+                            Papa.parse(previousEloPath, {
+                                download: true,
+                                header: false,
+                                complete: prevResults => {
+                                    if (prevResults.data && prevResults.data.length >= 1) {
+                                        const prevTeams = prevResults.data[0];
+                                        prevTeams.forEach(team => {
+                                            if (team) {
+                                                previousSeasonTeams.add(normalizeTeamName(team));
+                                            }
+                                        });
+                                    }
+                                    loadDetailFile();
+                                },
+                                error: () => {
+                                    // Se não conseguir carregar época anterior, continuar sem ela
+                                    loadDetailFile();
+                                }
+                            });
+                        } else {
+                            loadDetailFile();
                         }
-                    });
+                    } else {
+                        loadDetailFile();
+                    }
+
+                    function loadDetailFile() {
+                        checkAllLoaded();
+
+                        // AGORA SIM carregar detalhe (só depois de ter os ELOs iniciais)
+                        // Adicionar timestamp para evitar cache
+                        const cacheBuster = '?t=' + Date.now();
+                        Papa.parse(detalhePath + cacheBuster, {
+                            download: true,
+                            header: true,
+                            skipEmptyLines: true,
+                            complete: results => {
+                                processEloHistory(results.data, initialElosFromFile, previousSeasonTeams);
+                                checkAllLoaded();
+                            },
+                            error: error => {
+                                console.error('Erro ao carregar detalhes ELO:', error);
+                                checkAllLoaded();
+                            }
+                        });
+                    }
                 },
                 error: error => {
                     console.error('Erro ao carregar ELOs iniciais:', error);
@@ -7285,19 +7509,20 @@
                 this.playoffDates = {};
                 this.allDates = [];
                 this.hasInterGroupAdjustments = false;
+                this.teamsFromPreviousSeason = new Set(); // Novo: rastrear equipas da época anterior
             }
 
             /**
              * Processa dados de histórico ELO
              */
-            process(data, initialElosFromFile = {}) {
+            process(data, initialElosFromFile = {}, previousSeasonTeams = new Set()) {
                 DebugUtils.debugProcessedData('histórico ELO', data.length, `${data.length} jogos`);
 
                 // Guardar dados brutos para processamento do bracket
                 sampleData.rawEloData = data;
 
                 // Verificar se não há jogos
-                if (this._hasNoGames(data, initialElosFromFile)) {
+                if (this._hasNoGames(data, initialElosFromFile, previousSeasonTeams)) {
                     return;
                 }
 
@@ -7313,13 +7538,14 @@
                 // Garantir consistência nos pontos do gráfico
                 this._ensureConsistentPoints();
 
-                DebugUtils.debugEloHistoryFinal(sampleData.eloHistory);
-            }
+                // Salvar equipas da época anterior em sampleData
+                sampleData.teamsFromPreviousSeason = this.teamsFromPreviousSeason;
 
-            /**
+                DebugUtils.debugEloHistoryFinal(sampleData.eloHistory);
+            }            /**
              * Verifica se não há jogos para processar
              */
-            _hasNoGames(data, initialElosFromFile) {
+            _hasNoGames(data, initialElosFromFile, previousSeasonTeams) {
                 const hasNoGames = !data || data.length === 0 ||
                     (data.length === 1 && Object.values(data[0]).every(v => !v || v === ''));
 
@@ -7329,15 +7555,21 @@
                     Object.keys(initialElosFromFile).forEach(teamName => {
                         const initialElo = initialElosFromFile[teamName];
                         sampleData.eloHistory[teamName] = [initialElo];
+
+                        // Só adicionar ao Set se a equipa existia na época anterior
+                        if (previousSeasonTeams.has(teamName)) {
+                            this.teamsFromPreviousSeason.add(teamName);
+                        }
                     });
+
+                    // Salvar também no sampleData quando não há jogos
+                    sampleData.teamsFromPreviousSeason = this.teamsFromPreviousSeason;
 
                     return true;
                 }
 
                 return false;
-            }
-
-            /**
+            }            /**
              * Extrai dados de jogos e ajustes intergrupos
              */
             _extractGameData(data, initialElosFromFile) {
@@ -7359,7 +7591,16 @@
                     const initialElo2 = parseInt(row["Elo Antes 2"]) || null;
                     const gameDate = row.Dia ? new Date(row.Dia) : null;
 
-                    // Guardar ELO inicial
+                    // Verificar se equipas estavam na época anterior
+                    const wasInPreviousSeason1 = row["Was In Previous Season 1"];
+                    const wasInPreviousSeason2 = row["Was In Previous Season 2"];
+
+                    if (wasInPreviousSeason1 === true || wasInPreviousSeason1 === 'True' || wasInPreviousSeason1 === 'true') {
+                        this.teamsFromPreviousSeason.add(team1);
+                    }
+                    if (wasInPreviousSeason2 === true || wasInPreviousSeason2 === 'True' || wasInPreviousSeason2 === 'true') {
+                        this.teamsFromPreviousSeason.add(team2);
+                    }                    // Guardar ELO inicial
                     this._setInitialElo(team1, initialElosFromFile[team1], initialElo1);
                     this._setInitialElo(team2, initialElosFromFile[team2], initialElo2);
 
@@ -7739,9 +7980,9 @@
         }
 
         // Função wrapper para compatibilidade com código existente
-        function processEloHistory(data, initialElosFromFile = {}) {
+        function processEloHistory(data, initialElosFromFile = {}, previousSeasonTeams = new Set()) {
             const processor = new EloHistoryProcessor();
-            processor.process(data, initialElosFromFile);
+            processor.process(data, initialElosFromFile, previousSeasonTeams);
         }
 
         // ==================== SISTEMA DE EVENT DELEGATION ====================

@@ -1456,12 +1456,17 @@ class EloRatingSystem:
         # Inicializar ratings das equipas
         teams = self._initialize_team_ratings(df)
 
+        # Criar set de equipas que existiam na época anterior
+        teams_from_previous_season = set(self.previous_ratings.keys())
+
         # Calcular classificação real
         standings_calculator = StandingsCalculator(df, sport, teams)
         real_standings = standings_calculator.calculate_standings()
 
         # Processar jogos e calcular ELO
-        elo_history, detailed_rows = self._process_games(df, teams, sport)
+        elo_history, detailed_rows = self._process_games(
+            df, teams, sport, teams_from_previous_season
+        )
 
         # Aplicar ajustes inter-grupos
         self._apply_inter_group_adjustments(
@@ -1542,8 +1547,11 @@ class EloRatingSystem:
         else:
             return 750
 
-    def _process_games(self, df, teams, sport):
+    def _process_games(self, df, teams, sport, teams_from_previous_season=None):
         """Processa os jogos e calcula as mudanças de ELO"""
+        if teams_from_previous_season is None:
+            teams_from_previous_season = set()
+
         # Inicializar histórico de ELO
         elo_history = {team: [elo] for team, elo in teams.items()}
 
@@ -1638,6 +1646,7 @@ class EloRatingSystem:
                 elo_changes,
                 elo_deltas,
                 has_absence,
+                teams_from_previous_season,
             )
             detailed_rows.append(detailed_row)
 
@@ -1817,8 +1826,12 @@ class EloRatingSystem:
         elo_changes,
         elo_deltas,
         has_absence,
+        teams_from_previous_season=None,
     ):
         """Cria uma linha detalhada com informações do cálculo de ELO"""
+        if teams_from_previous_season is None:
+            teams_from_previous_season = set()
+
         phase_multiplier1, phase_multiplier2 = phase_multipliers
         k_factor1, k_factor2 = k_factors
         elo_change1, elo_change2 = elo_changes
@@ -1845,6 +1858,8 @@ class EloRatingSystem:
             "Elo Depois 1": elo_before1 + elo_delta1,
             "Elo Depois 2": elo_before2 + elo_delta2,
             "Has Absence": has_absence,
+            "Was In Previous Season 1": team1 in teams_from_previous_season,
+            "Was In Previous Season 2": team2 in teams_from_previous_season,
             "Inter Group Adjustment 1": 0,  # Inicializar como 0
             "Inter Group Adjustment 2": 0,  # Inicializar como 0
             "Final Elo 1": elo_before1
