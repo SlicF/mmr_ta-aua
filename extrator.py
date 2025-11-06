@@ -197,6 +197,81 @@ def current_season_token(today: Optional[datetime] = None) -> str:
     return f"{y1:02d}_{y2:02d}"
 
 
+def validate_and_fix_date_for_season(date_val, season: str) -> datetime:
+    """Valida e corrige datas que estão fora do intervalo esperado para a época.
+
+    Época desportiva: setembro do primeiro ano até junho do segundo ano.
+    Se a data estiver fora deste intervalo, tenta corrigir trocando mês 01 por 10.
+
+    Args:
+        date_val: Data a validar (datetime ou Timestamp)
+        season: Época no formato 'YY_YY' (ex: '25_26')
+
+    Returns:
+        Data corrigida se necessário, ou a data original se estiver válida
+    """
+    if not isinstance(date_val, (datetime, pd.Timestamp)):
+        return date_val
+
+    if not season or "_" not in season:
+        return date_val
+
+    try:
+        # Extrair anos da época
+        parts = season.split("_")
+        year1 = 2000 + int(parts[0])  # Ex: 25 -> 2025
+        year2 = 2000 + int(parts[1])  # Ex: 26 -> 2026
+
+        # Definir intervalo válido: setembro do year1 até junho do year2
+        start_date = datetime(year1, 9, 1)  # 1 de setembro
+        end_date = datetime(year2, 6, 30)  # 30 de junho
+
+        # Verificar se a data está no intervalo válido
+        if start_date <= date_val <= end_date:
+            return date_val  # Data válida, não precisa correção
+
+        # Data fora do intervalo - tentar corrigir
+        # Caso 1: mês 01 (janeiro) do year1 em vez de 10 (outubro) do year1
+        # Ex: 2025-01-27 deveria ser 2025-10-27 para época 25_26
+        if date_val.month == 1 and date_val.year == year1:
+            corrected = date_val.replace(month=10)
+            print(
+                f"  ⚠️  Data corrigida: {date_val.strftime('%Y-%m-%d')} → {corrected.strftime('%Y-%m-%d')} (janeiro → outubro)"
+            )
+            return corrected
+
+        # Caso 2: mês 01 (janeiro) do year2 em vez de 10 (outubro) do year1
+        # (menos provável, mas possível se o ano também estiver errado)
+        if date_val.month == 1 and date_val.year == year2:
+            # Trocar janeiro do year2 por outubro do year1
+            corrected = date_val.replace(year=year1, month=10)
+            print(
+                f"  ⚠️  Data corrigida: {date_val.strftime('%Y-%m-%d')} → {corrected.strftime('%Y-%m-%d')} (janeiro year2 → outubro year1)"
+            )
+            return corrected
+
+        # Caso 3: mês 10 (outubro) em vez de 01 (janeiro) - verificar se faz sentido
+        if date_val.month == 10 and date_val.year == year1:
+            # Verificar se deveria ser janeiro do year2
+            candidate = date_val.replace(year=year2, month=1)
+            if candidate <= end_date:
+                # Só corrige se a data resultante ainda estiver no intervalo
+                print(
+                    f"  ⚠️  Data corrigida: {date_val.strftime('%Y-%m-%d')} → {candidate.strftime('%Y-%m-%d')} (outubro year1 → janeiro year2)"
+                )
+                return candidate
+
+        # Outros casos: apenas avisar mas não corrigir automaticamente
+        print(
+            f"  ⚠️  Data fora do intervalo esperado ({start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}): {date_val.strftime('%Y-%m-%d')}"
+        )
+        return date_val
+
+    except Exception as e:
+        print(f"  ⚠️  Erro ao validar data: {e}")
+        return date_val
+
+
 class ExcelProcessor:
     """Classe para processar ficheiros Excel de resultados desportivos."""
 
@@ -1346,6 +1421,17 @@ class ExcelProcessor:
             self.xls, sheet_name=sheet_name, usecols=[0, 1, 2, 3, 4, 5, 7, 8]
         )
         df["Falta de Comparência"] = ""
+
+        # Validar e corrigir datas fora do intervalo da época
+        dia_col = df.columns[1]  # Coluna "Dia"
+        if self.season:
+            df[dia_col] = df[dia_col].apply(
+                lambda x: (
+                    validate_and_fix_date_for_season(x, self.season)
+                    if pd.notna(x)
+                    else x
+                )
+            )
 
         # Preenche faltas de comparência
         for row_idx, value in linhas_faltas.items():

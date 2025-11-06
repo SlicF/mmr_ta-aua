@@ -418,6 +418,44 @@
             pointer-events: auto;
         }
 
+        #chartjs-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 12px;
+            pointer-events: none;
+            transition: all 0.1s ease;
+            z-index: 9999;
+            font-size: 0.9em;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        #chartjs-tooltip .tooltip-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #chartjs-tooltip .tooltip-body {
+            margin: 6px 0;
+        }
+
+        #chartjs-tooltip .tooltip-body div {
+            margin: 4px 0;
+        }
+
+        #chartjs-tooltip .tooltip-footer {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
         .next-season-btn {
             position: absolute;
             background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
@@ -472,7 +510,6 @@
         .rankings-table td {
             padding: 1px 4px;
             text-align: center;
-            vertical-align: top;
             line-height: 44px;
             height: 46px;
             box-sizing: border-box;
@@ -483,8 +520,6 @@
         .rankings-table th:nth-child(2),
         .rankings-table td:nth-child(2) {
             text-align: left;
-            padding: 1px 4px 1px 8px;
-            vertical-align: top;
             white-space: nowrap;
             line-height: 44px;
             height: 46px;
@@ -1133,14 +1168,14 @@
                 position: relative;
                 width: 100%;
                 height: auto;
-                max-height: 200px;
-                overflow-y: auto;
+                max-height: 200px !important;
+                overflow-y: auto !important;
                 overflow-x: hidden;
                 display: flex;
                 flex-direction: row;
                 flex-wrap: wrap;
                 gap: 6px;
-                padding: 15px;
+                padding: 10px;
                 background: #f8f9fa;
                 border-radius: 10px;
                 margin-top: 15px;
@@ -1169,6 +1204,7 @@
                 color: #666;
                 padding: 8px 0 4px;
                 pointer-events: none;
+                display: var(--show-scroll-indicator, block);
             }
 
             .team-checkbox {
@@ -1211,6 +1247,71 @@
 
             .division-selector {
                 flex-wrap: wrap;
+            }
+
+            /* Ajustes para emblemas do calendário de jogos */
+            .game-team-emblem {
+                width: 42px !important;
+                height: 42px !important;
+            }
+
+            .game-team-emblem[src*="EGI-07.png"] {
+                width: 40px !important;
+                height: 40px !important;
+                padding: 8px !important;
+            }
+
+            /* Ajustar navegação de jornadas para alinhar verticalmente */
+            /* Ajustes para a navegação de jornadas */
+            .jornada-navigation {
+                gap: 8px !important;
+                flex-wrap: nowrap !important;
+            }
+
+            /* Ajustes para o bracket dos playoffs */
+            .bracket-team {
+                padding: 8px 10px;
+                flex-wrap: nowrap;
+                gap: 8px;
+            }
+
+            .bracket-team-content {
+                gap: 8px;
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+            }
+
+            .bracket-team-emblem {
+                width: 32px !important;
+                height: 32px !important;
+            }
+
+            .bracket-team-emblem[src*="EGI-07.png"] {
+                padding: 6px !important;
+            }
+
+            .bracket-team-name {
+                font-size: 0.85em;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .score {
+                font-size: 0.85em;
+                flex-shrink: 0;
+                margin-left: auto;
+            }
+
+            .bracket-elo-change {
+                font-size: 0.65em;
+                padding: 2px 4px;
+                margin-left: 4px;
+                white-space: nowrap;
+                flex-shrink: 0;
             }
         }
 
@@ -1637,7 +1738,7 @@
 
             .rankings-table th,
             .rankings-table td {
-                padding: 6px 4px;
+                padding: 6px 2px;
                 line-height: 1.3;
                 height: auto;
                 min-height: 36px;
@@ -1646,12 +1747,42 @@
             .rankings-table .team-emblem {
                 width: 22px;
                 height: 22px;
+                margin-right: 4px;
             }
 
             .rank-badge {
                 width: 22px;
                 height: 22px;
                 font-size: 0.65em;
+            }
+
+            /* Ajustes para emblemas da tabela principal */
+            .team-emblem-table {
+                width: 40px !important;
+                height: 40px !important;
+                margin-right: 0 !important;
+                padding: 0px !important;
+            }
+
+            /* Ajuste específico para EGI na tabela mobile - mantém proporção do desktop */
+            .team-emblem-table[src*="EGI-07.png"] {
+                padding: 9px !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            .rankings-table td:first-child {
+                padding-right: 0px !important;
+            }
+
+            /* Remove margem do indicador de cor para economizar espaço */
+            .team-color-indicator {
+                margin-right: 0px !important;
+            }
+
+            /* Reduz gap na célula da equipa */
+            .team-cell {
+                gap: 4px !important;
             }
 
             /* Seletores de divisão e grupo */
@@ -1670,17 +1801,19 @@
 
             /* Navegação de jornadas */
             .jornada-navigation {
-                flex-direction: column;
-                gap: 10px;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 8px;
             }
 
             .jornada-title {
-                font-size: 1.2em;
-                order: -1;
+                order: 0;
+                flex: 1;
+                text-align: center;
             }
 
             .jornada-arrow-container {
-                width: 100%;
+                flex-shrink: 0;
                 justify-content: center;
             }
 
@@ -1766,7 +1899,7 @@
             .progression-legend {
                 flex-wrap: wrap;
                 gap: 8px;
-                font-size: 0.75em;
+                font-size: 1em;
             }
 
             .legend-item {
@@ -1862,8 +1995,7 @@
             }
 
             .table-wrapper {
-                margin: 0 -12px;
-                padding: 0 12px;
+                padding: 0 4px;
                 max-width: calc(100vw - 44px);
             }
 
@@ -1873,7 +2005,7 @@
 
             .rankings-table th,
             .rankings-table td {
-                padding: 4px 2px;
+                padding: 4px 1px;
                 min-height: 32px;
             }
 
@@ -1926,14 +2058,14 @@
             }
 
             .game-team-emblem {
-                width: 28px;
-                height: 28px;
+                width: 38px;
+                height: 38px;
             }
 
             .game-team-emblem[src*="EGI-07.png"] {
-                width: 26px;
-                height: 26px;
-                padding: 6px;
+                width: 36px;
+                height: 36px;
+                padding: 7px;
             }
 
             .game-score,
@@ -2229,6 +2361,22 @@
 
             // Inicializar indicador de equipas
             setTimeout(updateTeamCountIndicator, 100);
+
+            // Verificar se precisa do indicador de scroll em mobile
+            setTimeout(() => checkScrollIndicator(selector), 200);
+        }
+
+        // Função para verificar se precisa mostrar "scroll para ver mais"
+        function checkScrollIndicator(selector) {
+            if (window.innerWidth <= 768) {
+                // Em mobile, verificar se o conteúdo ultrapassa o container
+                const needsScroll = selector.scrollHeight > selector.clientHeight;
+                if (!needsScroll) {
+                    selector.style.setProperty('--show-scroll-indicator', 'none');
+                } else {
+                    selector.style.setProperty('--show-scroll-indicator', 'block');
+                }
+            }
         }
 
         // Função para aplicar layout inteligente baseado no número de equipas
@@ -2249,6 +2397,9 @@
                 selector.classList.add('many-teams');
                 selector.style.gap = '6px';
             }
+
+            // Verificar scroll indicator após aplicar layout
+            setTimeout(() => checkScrollIndicator(selector), 100);
         }
 
         // Função para adicionar controles de seleção rápida
@@ -2494,7 +2645,291 @@
                             display: false
                         },
                         tooltip: {
-                            enabled: false
+                            enabled: false,  // Desabilitar tooltip padrão
+                            mode: 'nearest',  // Modo nearest para pegar o ponto mais próximo
+                            intersect: false,  // Não precisa estar exatamente sobre o ponto
+                            axis: 'xy',  // Considera ambos os eixos
+                            external: function (context) {
+                                // Criar ou obter o elemento do tooltip
+                                let tooltipEl = document.getElementById('chartjs-tooltip');
+
+                                if (!tooltipEl) {
+                                    tooltipEl = document.createElement('div');
+                                    tooltipEl.id = 'chartjs-tooltip';
+                                    document.body.appendChild(tooltipEl);
+                                }
+
+                                // Esconder se não há tooltip
+                                const tooltipModel = context.tooltip;
+                                if (tooltipModel.opacity === 0) {
+                                    tooltipEl.style.opacity = 0;
+                                    return;
+                                }
+
+                                // Construir conteúdo do tooltip usando DOM seguro
+                                if (tooltipModel.body && tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
+                                    // Pegar apenas o primeiro ponto (o mais próximo)
+                                    const dataPoint = tooltipModel.dataPoints[0];
+                                    const labels = context.chart.data.labels;
+                                    const dataIndex = dataPoint.dataIndex;
+                                    const teamName = dataPoint.dataset.label;
+                                    const eloValue = Math.round(dataPoint.parsed.y);
+
+                                    // Limpar tooltip e reconstruir usando DOM
+                                    tooltipEl.innerHTML = '';
+
+                                    // Título
+                                    const titleDiv = document.createElement('div');
+                                    titleDiv.className = 'tooltip-title';
+                                    titleDiv.textContent = teamName;
+                                    tooltipEl.appendChild(titleDiv);
+
+                                    // Body
+                                    const bodyDiv = document.createElement('div');
+                                    bodyDiv.className = 'tooltip-body';
+
+                                    // Encontrar o jogo desta equipa nesta data
+                                    let currentGameInfo = null;
+                                    let currentRound = null;
+
+                                    // Função auxiliar para comparar datas ignorando hora/timezone
+                                    const isSameDay = (date1, date2) => {
+                                        if (!date1 || !date2) return false;
+                                        // Usar getUTCDate/Month/FullYear para evitar problemas de timezone
+                                        // Ou comparar as strings de data formatadas
+                                        const d1 = date1.getFullYear() * 10000 + date1.getMonth() * 100 + date1.getDate();
+                                        const d2 = date2.getFullYear() * 10000 + date2.getMonth() * 100 + date2.getDate();
+                                        return d1 === d2;
+                                    };
+
+                                    // Sempre tentar buscar jogo, exceto para pontos especiais sem data
+                                    const gameDetails = sampleData.gameDetails && sampleData.gameDetails[teamName];
+
+                                    if (gameDetails && sampleData.gamesDates && sampleData.gamesDates[dataIndex]) {
+                                        const currentDate = sampleData.gamesDates[dataIndex];
+
+                                        // Procurar o jogo desta equipa nesta data
+                                        for (const [round, gameInfo] of Object.entries(gameDetails)) {
+                                            if (gameInfo.date && isSameDay(gameInfo.date, currentDate)) {
+                                                currentGameInfo = gameInfo;
+                                                currentRound = round;
+                                                break;
+                                            }
+                                        }
+
+                                        // Se não encontrou jogo nesta data, buscar o último jogo anterior
+                                        if (!currentGameInfo) {
+                                            let closestRound = null;
+                                            let closestDate = null;
+
+                                            for (const [round, gameInfo] of Object.entries(gameDetails)) {
+                                                if (gameInfo.date && gameInfo.date < currentDate) {
+                                                    if (!closestDate || gameInfo.date > closestDate) {
+                                                        closestDate = gameInfo.date;
+                                                        closestRound = round;
+                                                    }
+                                                }
+                                            }
+
+                                            if (closestRound) {
+                                                currentRound = closestRound;
+                                                currentGameInfo = gameDetails[closestRound];
+                                            }
+                                        }
+                                    }
+
+                                    // ELO com variação
+                                    const eloDiv = document.createElement('div');
+                                    eloDiv.textContent = 'ELO: ' + eloValue;
+
+                                    if (currentGameInfo && currentGameInfo.eloDelta !== undefined && currentGameInfo.eloDelta !== 0) {
+                                        const isPositive = currentGameInfo.eloDelta > 0;
+                                        const color = isPositive ? '#28a745' : '#dc3545';
+                                        const arrow = isPositive ? '↑' : '↓';
+                                        const deltaAbs = Math.abs(currentGameInfo.eloDelta);
+
+                                        const deltaSpan = document.createElement('span');
+                                        deltaSpan.style.color = color;
+                                        deltaSpan.style.fontWeight = '600';
+                                        deltaSpan.style.marginLeft = '8px';
+                                        deltaSpan.textContent = arrow + ' ' + deltaAbs;
+                                        eloDiv.appendChild(document.createTextNode(' '));
+                                        eloDiv.appendChild(deltaSpan);
+                                    }
+
+                                    bodyDiv.appendChild(eloDiv);
+
+                                    // Resultado do jogo
+                                    if (currentGameInfo && !currentGameInfo.isAdjustment) {
+                                        const resultDiv = document.createElement('div');
+
+                                        if (currentGameInfo.unknownResult) {
+                                            // Resultado desconhecido
+                                            resultDiv.style.color = '#ffc107';
+                                            const resultParts = currentGameInfo.result ? currentGameInfo.result.split('-') : ['?', '?'];
+                                            const resultInt = currentGameInfo.result ?
+                                                Math.floor(parseFloat(resultParts[0])) + '-' + Math.floor(parseFloat(resultParts[1])) :
+                                                '? - ?';
+                                            resultDiv.textContent = '⚠️ ' + resultInt + ' vs ' + currentGameInfo.opponent;
+                                        } else if (currentGameInfo.result !== null && currentGameInfo.opponent) {
+                                            // Resultado normal
+                                            const resultParts = currentGameInfo.result.split('-');
+                                            const resultInt = Math.floor(parseFloat(resultParts[0])) + '-' + Math.floor(parseFloat(resultParts[1]));
+                                            resultDiv.textContent = resultInt + ' vs ' + currentGameInfo.opponent;
+                                        }
+
+                                        if (resultDiv.textContent) {
+                                            bodyDiv.appendChild(resultDiv);
+                                        }
+                                    }
+
+                                    tooltipEl.appendChild(bodyDiv);
+
+                                    // Forma (últimos 5 jogos) - buscar até a data atual
+                                    const gameDetails2 = sampleData.gameDetails && sampleData.gameDetails[teamName];
+
+                                    if (gameDetails2 && sampleData.gamesDates && sampleData.gamesDates[dataIndex]) {
+                                        const currentDate = sampleData.gamesDates[dataIndex];
+
+                                        // Coletar todos os jogos até esta data
+                                        const gamesUpToDate = [];
+                                        for (const [round, gameInfo] of Object.entries(gameDetails2)) {
+                                            if (gameInfo.date && gameInfo.date <= currentDate && gameInfo.outcome) {
+                                                gamesUpToDate.push({
+                                                    date: gameInfo.date,
+                                                    outcome: gameInfo.outcome
+                                                });
+                                            }
+                                        }
+
+                                        // Ordenar por data e pegar os últimos 5
+                                        gamesUpToDate.sort((a, b) => a.date - b.date);
+                                        const last5 = gamesUpToDate.slice(-5);
+
+                                        if (last5.length > 0) {
+                                            const formDiv = document.createElement('div');
+                                            formDiv.className = 'tooltip-body';
+                                            formDiv.style.borderTop = '1px solid rgba(255,255,255,0.2)';
+                                            formDiv.style.paddingTop = '4px';
+                                            formDiv.style.marginTop = '4px';
+                                            formDiv.appendChild(document.createTextNode('Forma: '));
+
+                                            last5.forEach((game, idx) => {
+                                                let color = '#6c757d';
+                                                if (game.outcome === 'V') color = '#28a745';
+                                                else if (game.outcome === 'D') color = '#dc3545';
+
+                                                const outcomeSpan = document.createElement('span');
+                                                outcomeSpan.style.color = color;
+                                                outcomeSpan.style.fontWeight = '600';
+                                                if (idx > 0) outcomeSpan.style.marginLeft = '6px';
+                                                outcomeSpan.textContent = game.outcome;
+                                                formDiv.appendChild(outcomeSpan);
+                                            });
+
+                                            tooltipEl.appendChild(formDiv);
+                                        }
+                                    }
+
+                                    // Footer
+                                    const footerDiv = document.createElement('div');
+                                    footerDiv.className = 'tooltip-footer';
+
+                                    if (labels[dataIndex] === 'Início' || labels[dataIndex] === 'Época Anterior') {
+                                        footerDiv.textContent = labels[dataIndex];
+                                    } else {
+                                        const labelText = labels[dataIndex];
+
+                                        if (labelText.includes('(') && labelText.includes(')')) {
+                                            footerDiv.textContent = labelText;
+                                        } else if (labelText.includes('Ajustes')) {
+                                            footerDiv.textContent = labelText;
+                                        } else {
+                                            // Buscar a jornada específica do jogo desta equipa nesta data
+                                            const gameDetails = sampleData.gameDetails && sampleData.gameDetails[teamName];
+
+                                            let jornadaStr = '?';
+                                            let specificDateStr = labelText;
+
+                                            if (gameDetails && sampleData.gamesDates[dataIndex]) {
+                                                const currentDate = sampleData.gamesDates[dataIndex];
+
+                                                // Função auxiliar para comparar datas (mesma do body)
+                                                const isSameDay = (date1, date2) => {
+                                                    if (!date1 || !date2) return false;
+                                                    return date1.getFullYear() === date2.getFullYear() &&
+                                                        date1.getMonth() === date2.getMonth() &&
+                                                        date1.getDate() === date2.getDate();
+                                                };
+
+                                                // Procurar qual jornada esta equipa jogou nesta data
+                                                for (const [round, gameInfo] of Object.entries(gameDetails)) {
+                                                    if (gameInfo.date && isSameDay(gameInfo.date, currentDate)) {
+                                                        jornadaStr = round;
+                                                        break;
+                                                    }
+                                                }
+
+                                                // Se não encontrou jogo nesta data, buscar o último jogo anterior
+                                                if (jornadaStr === '?') {
+                                                    let closestRound = null;
+                                                    let closestDate = null;
+
+                                                    for (const [round, gameInfo] of Object.entries(gameDetails)) {
+                                                        if (gameInfo.date && gameInfo.date < currentDate) {
+                                                            if (!closestDate || gameInfo.date > closestDate) {
+                                                                closestDate = gameInfo.date;
+                                                                closestRound = round;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    if (closestRound) {
+                                                        jornadaStr = closestRound + ' (última)';
+                                                    }
+                                                }
+                                            }
+
+                                            footerDiv.textContent = 'Jornada: ' + jornadaStr + ' | Data: ' + specificDateStr;
+                                        }
+                                    }
+
+                                    tooltipEl.appendChild(footerDiv);
+                                }
+
+                                // Posicionar o tooltip seguindo o mouse
+                                const position = context.chart.canvas.getBoundingClientRect();
+                                const canvasTop = position.top + window.pageYOffset;
+                                const canvasLeft = position.left + window.pageXOffset;
+
+                                tooltipEl.style.opacity = 1;
+                                tooltipEl.style.position = 'absolute';
+
+                                // Posicionar à direita do cursor com offset
+                                let tooltipLeft = canvasLeft + tooltipModel.caretX + 15;
+                                let tooltipTop = canvasTop + tooltipModel.caretY - 10;
+
+                                // Ajustar se sair da tela à direita
+                                const tooltipWidth = tooltipEl.offsetWidth;
+                                if (tooltipLeft + tooltipWidth > window.innerWidth) {
+                                    tooltipLeft = canvasLeft + tooltipModel.caretX - tooltipWidth - 15;
+                                }
+
+                                // Ajustar se sair da tela embaixo
+                                const tooltipHeight = tooltipEl.offsetHeight;
+                                if (tooltipTop + tooltipHeight > window.innerHeight + window.pageYOffset) {
+                                    tooltipTop = window.innerHeight + window.pageYOffset - tooltipHeight - 10;
+                                }
+
+                                // Ajustar se sair da tela em cima
+                                if (tooltipTop < window.pageYOffset) {
+                                    tooltipTop = window.pageYOffset + 10;
+                                }
+
+                                tooltipEl.style.left = tooltipLeft + 'px';
+                                tooltipEl.style.top = tooltipTop + 'px';
+                                tooltipEl.style.pointerEvents = 'none';
+                            }
                         },
                         zoom: {
                             pan: {
@@ -2651,69 +3086,26 @@
             // Criar labels com datas formatadas e identificação das fases
             let labels = [];
             if (sampleData.gamesDates && sampleData.gamesDates.length > 0) {
-                // Contadores para identificar fases dos playoffs
-                let playoffPhaseIndex = 0;
-                const playoffPhases = ['Quartos', 'Meias', '3º Lugar', 'Final']; // E1, E2, E3L, E3
-                let regularSeasoneEnded = false;
-
-                // Calcular quantas jornadas de fase de grupos existem
-                // Usar o valor pré-calculado do calendário completo
-                let regularSeasonGames = sampleData.totalRegularSeasonGames || 0;
-
-                // Se não temos do calendário, tentar calcular dos jogos já jogados (fallback)
-                if (regularSeasonGames === 0 && sampleData.rawEloData && sampleData.rawEloData.length > 0) {
-                    const regularRounds = sampleData.rawEloData
-                        .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
-                        .map(match => parseInt(match.Jornada));
-                    regularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;
-                }
-
-                // NÃO calcular automaticamente - usar apenas o número real de jornadas dos dados
-                // (modalidades têm estruturas diferentes: divisões, grupos, etc)
+                // Criar mapeamento de índices para datas
+                sampleData.roundMapping = [];
 
                 labels = sampleData.gamesDates.map((date, index) => {
                     if (date instanceof Date) {
                         if (index === 0) {
+                            sampleData.roundMapping.push(null); // Início não tem jornada
                             return 'Início'; // Primeira data é o início da época
-                        } else if (index === sampleData.gamesDates.length - 1 && hasAdjustments) {
-                            // Verificar se é a última data e há ajustes intergrupos reais
-                            return `Ajustes (${date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })})`;
                         }
 
-                        // Verificar se já passou da fase de grupos
-                        if (index > regularSeasonGames && !regularSeasoneEnded) {
-                            regularSeasoneEnded = true;
-                            playoffPhaseIndex = 0;
-                        }
-
-                        if (regularSeasoneEnded && playoffPhaseIndex < playoffPhases.length) {
-                            const label = `${playoffPhases[playoffPhaseIndex]} (${date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })})`;
-                            playoffPhaseIndex++;
-                            return label;
-                        }
-
-                        return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+                        // Para datas regulares, apenas mostrar a data
+                        // Usar getDate/getMonth diretamente para evitar problemas de timezone
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        sampleData.roundMapping.push(null);
+                        return `${day}/${month}`;
                     }
+                    sampleData.roundMapping.push(null);
                     return index === 0 ? 'Início' : 'Data desconhecida';
                 });
-
-                // Adicionar labels vazias até meio da temporada
-                // labels.length - 1 porque o primeiro é "Início", não uma jornada
-                const jornadasFeitas = labels.length - 1;
-                const meioTemporada = Math.ceil(regularSeasonGames / 2);
-
-                // Se ainda não passou do meio da temporada, adicionar espaços até ao total previsto
-                // Se já passou do meio, não adicionar mais espaços vazios
-                let labelsVazias = 0;
-                if (jornadasFeitas < meioTemporada) {
-                    labelsVazias = regularSeasonGames - jornadasFeitas;
-                }
-
-                if (labelsVazias > 0) {
-                    for (let i = 0; i < labelsVazias; i++) {
-                        labels.push('');
-                    }
-                }
 
                 // Adicionar ponto extra no início para "Época Anterior" (só se houver época anterior)
                 const currentEpochElement = document.getElementById('epoca');
@@ -2722,6 +3114,9 @@
                     const currentIndex = availableEpocas.indexOf(currentEpoch);
                     if (currentIndex < availableEpocas.length - 1) {
                         labels.unshift('Época Anterior');
+                        sampleData.roundMapping.unshift(null); // Época anterior não tem jornada
+                        // IMPORTANTE: adicionar data placeholder em gamesDates para manter sincronia
+                        sampleData.gamesDates.unshift(null);
                     }
                 }
             } else {
@@ -3962,14 +4357,18 @@
                 download: true,
                 header: true,
                 complete: results => {
+                    // Salvar dados do calendário para verificação de resultados desconhecidos
+                    sampleData.calendarData = results.data;
+
+                    // Marcar resultados desconhecidos (caso o detalhe já tenha sido carregado)
+                    markUnknownResultsFromCalendar();
+
                     // Calcular número máximo de jornadas do calendário (antes dos jogos acontecerem)
                     const regularRounds = results.data
                         .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
                         .map(match => parseInt(match.Jornada));
 
-                    sampleData.totalRegularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;
-
-                    // Filtrar jogos de eliminação dos dados originais (E*)
+                    sampleData.totalRegularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;                    // Filtrar jogos de eliminação dos dados originais (E*)
                     const eliminationMatches = results.data.filter(match =>
                         match.Jornada && (
                             match.Jornada.startsWith('E1') ||  // Quartos
@@ -6082,6 +6481,23 @@
         /**
          * Normaliza nomes de equipas para resolver duplicações
          */
+        // Parsear data sem problemas de timezone
+        // Formato esperado: "2025-10-27 00:00:00" ou "2025-10-27"
+        function parseDate(dateStr) {
+            if (!dateStr) return null;
+
+            // Parsear manualmente para evitar problemas de timezone
+            const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                const [, year, month, day] = match;
+                // Criar data local diretamente sem conversões de timezone
+                return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            }
+
+            // Fallback para Date normal se não conseguir parsear
+            return new Date(dateStr);
+        }
+
         function normalizeTeamName(teamName) {
             if (!teamName) return teamName;
 
@@ -6444,6 +6860,8 @@
                 teams: [],
                 rankings: {},
                 eloHistory: {},
+                gameDetails: {},  // ← ADICIONADO para guardar detalhes de cada jogo (adversário, resultado, variação)
+                roundMapping: [],  // ← ADICIONADO para mapear índice do gráfico -> jornada real
                 matches: [],
                 bracket: {},
                 secondaryBracket: {},  // ← ADICIONADO para playoffs/liguilhas secundários
@@ -7234,7 +7652,15 @@
         function formatGameDate(dateStr) {
             if (!dateStr) return '';
 
-            // Tentar diferentes formatos de data
+            // Parsear manualmente para evitar problemas de timezone
+            // Formato esperado: "2025-10-27 00:00:00" ou "2025-10-27"
+            const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (dateMatch) {
+                const [, year, month, day] = dateMatch;
+                return `${day}/${month}/${year}`;
+            }
+
+            // Fallback: tentar usar Date se não conseguir parsear manualmente
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) return dateStr; // Se não conseguir parsear, retorna string original
 
@@ -7504,6 +7930,7 @@
                 this.teamEloByRound = {};
                 this.teamInitialElo = {};
                 this.gamesDates = {};
+                this.gamesDatesList = {}; // Nova estrutura: array de datas por jornada
                 this.teamInterGroupAdjustments = {};
                 this.playoffGames = {};
                 this.playoffDates = {};
@@ -7589,7 +8016,64 @@
                     const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]) || null;
                     const initialElo1 = parseInt(row["Elo Antes 1"]) || null;
                     const initialElo2 = parseInt(row["Elo Antes 2"]) || null;
-                    const gameDate = row.Dia ? new Date(row.Dia) : null;
+                    const gameDate = parseDate(row.Dia);
+
+                    // Guardar detalhes do jogo para o tooltip
+                    const eloDelta1 = parseInt(row["Elo Delta 1"]) || 0;
+                    const eloDelta2 = parseInt(row["Elo Delta 2"]) || 0;
+
+                    const golos1 = row["Golos 1"] !== undefined && row["Golos 1"] !== '' && row["Golos 1"] !== null && row["Golos 1"] !== '?' ? parseFloat(row["Golos 1"]) : null;
+                    const golos2 = row["Golos 2"] !== undefined && row["Golos 2"] !== '' && row["Golos 2"] !== null && row["Golos 2"] !== '?' ? parseFloat(row["Golos 2"]) : null;
+
+                    // Determinar resultado (V=Vitória, E=Empate, D=Derrota)
+                    let resultado1, resultado2;
+                    if (golos1 !== null && golos2 !== null) {
+                        if (golos1 > golos2) {
+                            resultado1 = 'V';
+                            resultado2 = 'D';
+                        } else if (golos1 < golos2) {
+                            resultado1 = 'D';
+                            resultado2 = 'V';
+                        } else {
+                            resultado1 = 'E';
+                            resultado2 = 'E';
+                        }
+                    } else {
+                        // Resultado desconhecido
+                        resultado1 = null;
+                        resultado2 = null;
+                    }
+
+                    // Inicializar estrutura de detalhes do jogo se não existir
+                    if (!sampleData.gameDetails[team1]) {
+                        sampleData.gameDetails[team1] = {};
+                    }
+                    if (!sampleData.gameDetails[team2]) {
+                        sampleData.gameDetails[team2] = {};
+                    }
+
+                    // Guardar detalhes para cada equipa
+                    sampleData.gameDetails[team1][round] = {
+                        opponent: team2,
+                        result: golos1 !== null && golos2 !== null ? `${golos1}-${golos2}` : null,
+                        eloDelta: eloDelta1,
+                        goalsFor: golos1,
+                        goalsAgainst: golos2,
+                        outcome: resultado1,  // V, E, D ou null se desconhecido
+                        date: gameDate,
+                        unknownResult: false  // Será marcado depois pela função markUnknownResultsFromCalendar
+                    };
+
+                    sampleData.gameDetails[team2][round] = {
+                        opponent: team1,
+                        result: golos1 !== null && golos2 !== null ? `${golos2}-${golos1}` : null,
+                        eloDelta: eloDelta2,
+                        goalsFor: golos2,
+                        goalsAgainst: golos1,
+                        outcome: resultado2,  // V, E, D ou null se desconhecido
+                        date: gameDate,
+                        unknownResult: false  // Será marcado depois pela função markUnknownResultsFromCalendar
+                    };
 
                     // Verificar se equipas estavam na época anterior
                     const wasInPreviousSeason1 = row["Was In Previous Season 1"];
@@ -7635,6 +8119,18 @@
                         finalElo: finalElo,
                         date: null
                     });
+
+                    // Guardar no gameDetails também para aparecer no tooltip
+                    if (!sampleData.gameDetails[teamName]) {
+                        sampleData.gameDetails[teamName] = {};
+                    }
+                    sampleData.gameDetails[teamName]["Inter-Group"] = {
+                        opponent: null,
+                        result: null,
+                        eloDelta: adjustment,
+                        isAdjustment: true
+                    };
+
                     DebugUtils.debugInterGroupAdjustment(teamName, adjustment);
                 }
             }
@@ -7682,8 +8178,16 @@
              * Processa jornada regular (fase de grupos)
              */
             _processRegularRound(roundNum, team1, team2, finalElo1, finalElo2, gameDate) {
-                if (gameDate && !this.gamesDates[roundNum]) {
-                    this.gamesDates[roundNum] = gameDate;
+                // Guardar todas as datas desta jornada
+                if (gameDate) {
+                    if (!this.gamesDatesList[roundNum]) {
+                        this.gamesDatesList[roundNum] = [];
+                    }
+                    // Adicionar data se ainda não estiver na lista
+                    const dateStr = gameDate.toISOString();
+                    if (!this.gamesDatesList[roundNum].some(d => d.toISOString() === dateStr)) {
+                        this.gamesDatesList[roundNum].push(gameDate);
+                    }
                 }
 
                 if (!this.teamEloByRound[team1]) this.teamEloByRound[team1] = {};
@@ -7713,13 +8217,59 @@
              * Organiza datas e verifica ajustes intergrupos
              */
             _organizeDatesAndAdjustments() {
+                // Consolidar datas: escolher a data mais antiga de cada jornada
+                Object.keys(this.gamesDatesList).forEach(roundNum => {
+                    const dates = this.gamesDatesList[roundNum];
+                    if (dates && dates.length > 0) {
+                        // Ordenar datas e escolher a mais antiga
+                        dates.sort((a, b) => a - b);
+                        this.gamesDates[roundNum] = dates[0];
+                    }
+                });
+
+                // Criar lista de TODAS as datas únicas em ordem cronológica
+                const allDatesMap = new Map(); // Usar Map para preservar objetos Date originais
+                Object.keys(this.gamesDatesList).forEach(roundNum => {
+                    this.gamesDatesList[roundNum].forEach(date => {
+                        // Criar chave única baseada em ano-mês-dia (sem hora/timezone)
+                        const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                        if (!allDatesMap.has(dateKey)) {
+                            allDatesMap.set(dateKey, date);
+                        }
+                    });
+                });
+
+                const chronologicalDates = Array.from(allDatesMap.values())
+                    .sort((a, b) => a - b);
+
                 // Data inicial baseada na época
                 const initialDate = currentEpoca === '25_26' ? new Date('2025-09-01') : new Date('2024-09-01');
-                this.allDates = [initialDate];
+                this.allDates = [initialDate, ...chronologicalDates];
 
-                // Datas da fase de grupos
-                const sortedRounds = Object.keys(this.gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
-                sortedRounds.forEach(round => this.allDates.push(this.gamesDates[round]));
+                // Criar mapeamento de datas para jornadas (para o tooltip)
+                this.dateToRoundMapping = {};
+                Object.keys(this.gamesDatesList).forEach(roundNum => {
+                    this.gamesDatesList[roundNum].forEach(date => {
+                        const dateKey = date.toISOString();
+                        if (!this.dateToRoundMapping[dateKey]) {
+                            this.dateToRoundMapping[dateKey] = [];
+                        }
+                        this.dateToRoundMapping[dateKey].push(roundNum);
+                    });
+                });
+
+                // Criar lista ordenada de jornadas por ordem cronológica (para referência)
+                this.roundsByDateOrder = [];
+                chronologicalDates.forEach(date => {
+                    const dateKey = date.toISOString();
+                    if (this.dateToRoundMapping[dateKey]) {
+                        this.dateToRoundMapping[dateKey].forEach(round => {
+                            if (!this.roundsByDateOrder.includes(round)) {
+                                this.roundsByDateOrder.push(round);
+                            }
+                        });
+                    }
+                });
 
                 // Datas dos playoffs
                 const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
@@ -7729,6 +8279,8 @@
                         if (phaseDate) {
                             this.playoffDates[phase] = phaseDate;
                             this.allDates.push(phaseDate);
+                            // Adicionar fase de playoff ao roundsByDateOrder também para o tooltip de forma
+                            this.roundsByDateOrder.push(phase);
                         }
                     }
                 });
@@ -7744,16 +8296,21 @@
                     const adjustmentDate = new Date(lastGameDate);
                     adjustmentDate.setDate(adjustmentDate.getDate() + 1);
                     this.allDates.push(adjustmentDate);
+                    // Adicionar Inter-Group ao roundsByDateOrder para o tooltip de forma
+                    this.roundsByDateOrder.push('Inter-Group');
                     DebugUtils.debugProcessedData('ajustes intergrupos programados', 1, adjustmentDate.toLocaleDateString('pt-PT'));
                 } else if (this.hasInterGroupAdjustments) {
                     const fallbackDate = new Date('2025-06-01');
                     this.allDates.push(fallbackDate);
+                    // Adicionar Inter-Group ao roundsByDateOrder para o tooltip de forma
+                    this.roundsByDateOrder.push('Inter-Group');
                 }
 
                 DebugUtils.debugProcessedData('ajustes intergrupos encontrados', this.hasInterGroupAdjustments ? 1 : 0, this.hasInterGroupAdjustments);
 
                 currentModalityHasAdjustments = this.hasInterGroupAdjustments;
                 sampleData.gamesDates = this.allDates;
+                sampleData.roundsByDateOrder = this.roundsByDateOrder; // Guardar ordem cronológica das jornadas
 
                 DebugUtils.debugProcessedData('equipas com histórico ELO', Object.keys(this.teamEloByRound).length, Object.keys(this.teamEloByRound));
                 DebugUtils.debugProcessedData('ELO inicial das equipas', Object.keys(this.teamInitialElo).length, this.teamInitialElo);
@@ -7765,26 +8322,53 @@
              * Constrói histórico de ELO para cada equipa
              */
             _buildEloHistories(initialElosFromFile) {
-                const allGameRounds = Object.keys(this.gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
-                const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
+                // Criar lista de TODAS as datas únicas em ordem cronológica
+                const allDatesSet = new Set();
 
-                // Equipas que jogaram
+                // Adicionar todas as datas dos jogos
+                Object.keys(this.gamesDatesList).forEach(roundNum => {
+                    this.gamesDatesList[roundNum].forEach(date => {
+                        allDatesSet.add(date.getTime()); // Usar timestamp para comparação
+                    });
+                });
+
+                // Converter para array e ordenar cronologicamente
+                const allDates = Array.from(allDatesSet)
+                    .map(timestamp => new Date(timestamp))
+                    .sort((a, b) => a - b);
+
+                DebugUtils.debugProcessedData('datas únicas encontradas', allDates.length, allDates.map(d => d.toLocaleDateString('pt-PT')));
+
+                // Para cada equipa, construir histórico baseado nas datas em que jogou
                 Object.keys(this.teamEloByRound).forEach(teamName => {
                     const initialElo = initialElosFromFile[teamName] || this.teamInitialElo[teamName] || 1500;
                     const eloValues = [initialElo];
                     let currentElo = initialElo;
 
-                    DebugUtils.debugTeamEloProcessing(teamName, initialElo, currentElo, this.teamEloByRound[teamName], allGameRounds);
+                    // Para cada data, verificar se a equipa jogou
+                    allDates.forEach(date => {
+                        const dateStr = date.toISOString();
+                        let eloChanged = false;
 
-                    // Fase de grupos
-                    allGameRounds.forEach(round => {
-                        if (this.teamEloByRound[teamName][round] !== undefined) {
-                            currentElo = this.teamEloByRound[teamName][round];
-                        }
+                        // Verificar em todas as jornadas se há jogo nesta data
+                        Object.keys(this.teamEloByRound[teamName]).forEach(round => {
+                            // Obter detalhes do jogo para verificar a data
+                            if (sampleData.gameDetails[teamName] && sampleData.gameDetails[teamName][round]) {
+                                const gameInfo = sampleData.gameDetails[teamName][round];
+                                if (gameInfo.date && gameInfo.date.toISOString() === dateStr) {
+                                    // Equipa jogou nesta data
+                                    currentElo = this.teamEloByRound[teamName][round];
+                                    eloChanged = true;
+                                }
+                            }
+                        });
+
+                        // Adicionar o ELO atual (mudou ou manteve)
                         eloValues.push(currentElo);
                     });
 
-                    // Playoffs
+                    // Playoffs (mantém lógica existente)
+                    const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
                     currentElo = this._processTeamPlayoffs(teamName, playoffOrder, eloValues, currentElo);
 
                     // Ajustes intergrupos
@@ -7797,8 +8381,12 @@
                     });
                 });
 
-                // Equipas que não jogaram
-                this._processNonPlayingTeams(initialElosFromFile, allGameRounds);
+                // Atualizar allDates para usar as datas reais
+                const initialDate = currentEpoca === '25_26' ? new Date('2025-09-01') : new Date('2024-09-01');
+                this.allDates = [initialDate, ...allDates];
+
+                // Processar equipas que não jogaram
+                this._processNonPlayingTeamsChronological(initialElosFromFile, allDates);
             }
 
             /**
@@ -7884,6 +8472,27 @@
             }
 
             /**
+             * Processa equipas que não jogaram (versão cronológica)
+             */
+            _processNonPlayingTeamsChronological(initialElosFromFile, allDates) {
+                sampleData.teams.forEach(team => {
+                    if (!this.teamEloByRound[team.name]) {
+                        const initialElo = initialElosFromFile[team.name] || this.teamInitialElo[team.name] || 1500;
+                        const totalPoints = 1 + allDates.length + Object.keys(this.playoffDates).length +
+                            (this.hasInterGroupAdjustments ? 1 : 0);
+
+                        let eloValues = new Array(totalPoints - (this.hasInterGroupAdjustments ? 1 : 0)).fill(initialElo);
+
+                        if (this.hasInterGroupAdjustments) {
+                            this._applyAdjustmentToNonPlayingTeam(team.name, initialElo, eloValues);
+                        }
+
+                        sampleData.eloHistory[team.name] = eloValues;
+                    }
+                });
+            }
+
+            /**
              * Aplica ajuste a equipa que não jogou
              */
             _applyAdjustmentToNonPlayingTeam(teamName, initialElo, eloValues) {
@@ -7923,7 +8532,12 @@
              * Garante que todas as equipas têm o mesmo número de pontos
              */
             _ensureConsistentPoints() {
-                const allGameRounds = Object.keys(this.gamesDates).sort((a, b) => parseInt(a) - parseInt(b));
+                // Ordenar jornadas por DATA, não por número de jornada
+                const allGameRounds = Object.keys(this.gamesDates).sort((a, b) => {
+                    const dateA = this.gamesDates[a];
+                    const dateB = this.gamesDates[b];
+                    return dateA - dateB; // Comparar datas cronologicamente
+                });
                 const expectedPoints = 1 + allGameRounds.length + Object.keys(this.playoffDates).length +
                     (this.hasInterGroupAdjustments ? 1 : 0);
 
@@ -7983,6 +8597,40 @@
         function processEloHistory(data, initialElosFromFile = {}, previousSeasonTeams = new Set()) {
             const processor = new EloHistoryProcessor();
             processor.process(data, initialElosFromFile, previousSeasonTeams);
+
+            // Marcar resultados desconhecidos do calendário (se já foi carregado)
+            markUnknownResultsFromCalendar();
+        }
+
+        /**
+         * Marca jogos com resultados desconhecidos baseado no calendário
+         */
+        function markUnknownResultsFromCalendar() {
+            if (!sampleData.calendarData || !sampleData.gameDetails) return;
+
+            sampleData.calendarData.forEach(calendarMatch => {
+                const round = calendarMatch.Jornada;
+                const team1 = normalizeTeamName(calendarMatch['Equipa 1']);
+                const team2 = normalizeTeamName(calendarMatch['Equipa 2']);
+
+                // Verificar se há "?" em algum campo
+                const hasUnknownMarker = Object.values(calendarMatch).some(value =>
+                    value && value.toString().trim() === '?'
+                );
+
+                if (hasUnknownMarker) {
+                    // Atualizar gameDetails para ambas as equipas - apenas marcar como desconhecido
+                    if (sampleData.gameDetails[team1] && sampleData.gameDetails[team1][round]) {
+                        sampleData.gameDetails[team1][round].unknownResult = true;
+                        // NÃO alterar result e outcome - preservar os valores que vieram do CSV de detalhe
+                    }
+
+                    if (sampleData.gameDetails[team2] && sampleData.gameDetails[team2][round]) {
+                        sampleData.gameDetails[team2][round].unknownResult = true;
+                        // NÃO alterar result e outcome - preservar os valores que vieram do CSV de detalhe
+                    }
+                }
+            });
         }
 
         // ==================== SISTEMA DE EVENT DELEGATION ====================
