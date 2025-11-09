@@ -2695,30 +2695,79 @@
                                     // Função auxiliar para comparar datas ignorando hora/timezone
                                     const isSameDay = (date1, date2) => {
                                         if (!date1 || !date2) return false;
-                                        // Usar getUTCDate/Month/FullYear para evitar problemas de timezone
-                                        // Ou comparar as strings de data formatadas
+                                        // IMPORTANTE: Usar get* (local) porque as datas são criadas como locais, não UTC
                                         const d1 = date1.getFullYear() * 10000 + date1.getMonth() * 100 + date1.getDate();
                                         const d2 = date2.getFullYear() * 10000 + date2.getMonth() * 100 + date2.getDate();
                                         return d1 === d2;
                                     };
 
-                                    // Sempre tentar buscar jogo, exceto para pontos especiais sem data
+                                    // Sempre tentar buscar jogo, exceto para pontos especiais sem data ou pontos de padding
                                     const gameDetails = sampleData.gameDetails && sampleData.gameDetails[teamName];
+                                    const isPaddingPoint = !labels[dataIndex] || labels[dataIndex].trim() === '';
 
-                                    if (gameDetails && sampleData.gamesDates && sampleData.gamesDates[dataIndex]) {
-                                        const currentDate = sampleData.gamesDates[dataIndex];
+                                    // Usar displayGamesDates que tem o mesmo tamanho que labels (inclui "Época Anterior")
+                                    const gameDatesList = sampleData.displayGamesDates || sampleData.gamesDates;
 
-                                        // Procurar o jogo desta equipa nesta data
-                                        for (const [round, gameInfo] of Object.entries(gameDetails)) {
-                                            if (gameInfo.date && isSameDay(gameInfo.date, currentDate)) {
-                                                currentGameInfo = gameInfo;
-                                                currentRound = round;
-                                                break;
-                                            }
+                                    // Não buscar informações de jogo para pontos de padding
+                                    if (!isPaddingPoint && gameDetails && gameDatesList) {
+                                        // Verificar se o ELO mudou neste ponto (comparar com ponto anterior)
+                                        const previousElo = dataIndex > 0 ? dataPoint.dataset.data[dataIndex - 1] : null;
+                                        const eloChanged = previousElo !== null && Math.abs(eloValue - previousElo) > 0.01;
+
+                                        // Tentar obter a data para este índice
+                                        // Se não existir (último ponto extra), pegar a última data disponível
+                                        const currentDate = gameDatesList[dataIndex] || gameDatesList[gameDatesList.length - 1];
+
+                                        if (!currentDate) {
+                                            // Se realmente não há data nenhuma, pular
+                                            return;
                                         }
 
-                                        // Se não encontrou jogo nesta data, buscar o último jogo anterior
-                                        if (!currentGameInfo) {
+                                        // Usar roundsByDateOrder para saber qual jornada/fase está neste ponto exato
+                                        const roundsOrder = sampleData.roundsByDateOrder || [];
+
+                                        // IMPORTANTE: roundsOrder não inclui o ponto "Início" (índice 0)
+                                        // Calcular índice na array de rounds
+                                        // Se dataIndex > tamanho de gameDatesList, é um ponto extra (usar último round)
+                                        let roundsIndex;
+                                        if (dataIndex >= gameDatesList.length) {
+                                            // Ponto extra no final - usar o último round
+                                            roundsIndex = roundsOrder.length - 1;
+                                        } else {
+                                            // Ponto normal - ajustar índice (dataIndex 0 = Início, dataIndex 1 = roundsOrder[0])
+                                            roundsIndex = dataIndex - 1;
+                                        }
+
+                                        const expectedRound = roundsIndex >= 0 && roundsIndex < roundsOrder.length ? roundsOrder[roundsIndex] : null;                                        // Se o ELO mudou, este ponto representa um jogo que ACABOU de acontecer
+                                        if (eloChanged && expectedRound) {
+                                            // Tentar encontrar o jogo com a chave exata ou convertida
+                                            const roundKey = expectedRound;
+                                            const roundKeyStr = String(expectedRound);
+                                            const roundKeyNum = parseInt(expectedRound);
+
+                                            if (gameDetails[roundKey]) {
+                                                currentGameInfo = gameDetails[roundKey];
+                                                currentRound = roundKey;
+                                            } else if (gameDetails[roundKeyStr]) {
+                                                currentGameInfo = gameDetails[roundKeyStr];
+                                                currentRound = roundKeyStr;
+                                            } else if (!isNaN(roundKeyNum) && gameDetails[roundKeyNum]) {
+                                                currentGameInfo = gameDetails[roundKeyNum];
+                                                currentRound = roundKeyNum;
+                                            }
+                                        }
+                                        // Se ELO não mudou mas há jogo nesta data, mostrar esse jogo
+                                        if (!currentGameInfo && !eloChanged && dataIndex > 0) {
+                                            for (const [round, gameInfo] of Object.entries(gameDetails)) {
+                                                if (gameInfo.date && isSameDay(gameInfo.date, currentDate)) {
+                                                    currentGameInfo = gameInfo;
+                                                    currentRound = round;
+                                                    break;
+                                                }
+                                            }
+                                        }                                        // Se ainda não encontrou jogo, buscar o último jogo anterior
+                                        // (apenas se ELO não mudou, para não sobrescrever o jogo correto)
+                                        if (!currentGameInfo && !eloChanged) {
                                             let closestRound = null;
                                             let closestDate = null;
 
@@ -2742,11 +2791,16 @@
                                     const eloDiv = document.createElement('div');
                                     eloDiv.textContent = 'ELO: ' + eloValue;
 
-                                    if (currentGameInfo && currentGameInfo.eloDelta !== undefined && currentGameInfo.eloDelta !== 0) {
-                                        const isPositive = currentGameInfo.eloDelta > 0;
+                                    // Calcular o delta real comparando com o ponto anterior
+                                    const prevElo = dataIndex > 0 ? dataPoint.dataset.data[dataIndex - 1] : null;
+                                    const actualDelta = prevElo !== null ? eloValue - prevElo : 0;
+
+                                    // Só mostrar delta se o ELO mudou neste ponto (e o delta é significativo)
+                                    if (Math.abs(actualDelta) > 0.01) {
+                                        const isPositive = actualDelta > 0;
                                         const color = isPositive ? '#28a745' : '#dc3545';
                                         const arrow = isPositive ? '↑' : '↓';
-                                        const deltaAbs = Math.abs(currentGameInfo.eloDelta);
+                                        const deltaAbs = Math.abs(actualDelta).toFixed(0);
 
                                         const deltaSpan = document.createElement('span');
                                         deltaSpan.style.color = color;
@@ -2759,8 +2813,8 @@
 
                                     bodyDiv.appendChild(eloDiv);
 
-                                    // Resultado do jogo
-                                    if (currentGameInfo && !currentGameInfo.isAdjustment) {
+                                    // Resultado do jogo - só mostrar se o ELO mudou (jogo aconteceu neste ponto)
+                                    if (currentGameInfo && !currentGameInfo.isAdjustment && Math.abs(actualDelta) > 0.01) {
                                         const resultDiv = document.createElement('div');
 
                                         if (currentGameInfo.unknownResult) {
@@ -2788,8 +2842,10 @@
                                     // Forma (últimos 5 jogos) - buscar até a data atual
                                     const gameDetails2 = sampleData.gameDetails && sampleData.gameDetails[teamName];
 
-                                    if (gameDetails2 && sampleData.gamesDates && sampleData.gamesDates[dataIndex]) {
-                                        const currentDate = sampleData.gamesDates[dataIndex];
+                                    // Não buscar forma para pontos de padding
+                                    // Só mostrar forma se o ELO mudou (jogo aconteceu)
+                                    if (!isPaddingPoint && gameDetails2 && gameDatesList && Math.abs(actualDelta) > 0.01) {
+                                        const currentDate = gameDatesList[dataIndex] || gameDatesList[gameDatesList.length - 1];
 
                                         // Coletar todos os jogos até esta data
                                         const gamesUpToDate = [];
@@ -2840,61 +2896,46 @@
                                     } else {
                                         const labelText = labels[dataIndex];
 
-                                        if (labelText.includes('(') && labelText.includes(')')) {
-                                            footerDiv.textContent = labelText;
+                                        // Se é um ponto de padding (label vazio), não mostrar informações de jornada
+                                        if (!labelText || labelText.trim() === '') {
+                                            // Não adicionar footer para pontos de padding
                                         } else if (labelText.includes('Ajustes')) {
+                                            // Para ajustes inter-grupos, mostrar apenas o texto (sem data)
+                                            footerDiv.textContent = 'Ajustes Inter-Grupos';
+                                        } else if (labelText.includes('(') && labelText.includes(')')) {
                                             footerDiv.textContent = labelText;
                                         } else {
                                             // Buscar a jornada específica do jogo desta equipa nesta data
-                                            const gameDetails = sampleData.gameDetails && sampleData.gameDetails[teamName];
+                                            // Usar o currentRound que já foi encontrado no body do tooltip
+                                            // Isso garante consistência quando há múltiplos jogos no mesmo dia
 
-                                            let jornadaStr = '?';
-                                            let specificDateStr = labelText;
+                                            // Se não há jornada (entre Início e primeiro jogo), mostrar apenas a data
+                                            if (!currentRound) {
+                                                footerDiv.textContent = 'Data: ' + labelText;
+                                            } else {
+                                                let jornadaStr = currentRound;
 
-                                            if (gameDetails && sampleData.gamesDates[dataIndex]) {
-                                                const currentDate = sampleData.gamesDates[dataIndex];
-
-                                                // Função auxiliar para comparar datas (mesma do body)
-                                                const isSameDay = (date1, date2) => {
-                                                    if (!date1 || !date2) return false;
-                                                    return date1.getFullYear() === date2.getFullYear() &&
-                                                        date1.getMonth() === date2.getMonth() &&
-                                                        date1.getDate() === date2.getDate();
+                                                // Traduzir fases de playoff se necessário
+                                                const formatRoundLabel = (round) => {
+                                                    if (round === 'E1') return 'Quartos de Final';
+                                                    if (round === 'E2') return 'Meias-Finais';
+                                                    if (round === 'E3') return 'Final';
+                                                    if (round === 'E3L') return '3º/4º Lugar';
+                                                    return round;
                                                 };
 
-                                                // Procurar qual jornada esta equipa jogou nesta data
-                                                for (const [round, gameInfo] of Object.entries(gameDetails)) {
-                                                    if (gameInfo.date && isSameDay(gameInfo.date, currentDate)) {
-                                                        jornadaStr = round;
-                                                        break;
-                                                    }
-                                                }
+                                                jornadaStr = formatRoundLabel(jornadaStr);
+                                                let specificDateStr = labelText;
 
-                                                // Se não encontrou jogo nesta data, buscar o último jogo anterior
-                                                if (jornadaStr === '?') {
-                                                    let closestRound = null;
-                                                    let closestDate = null;
-
-                                                    for (const [round, gameInfo] of Object.entries(gameDetails)) {
-                                                        if (gameInfo.date && gameInfo.date < currentDate) {
-                                                            if (!closestDate || gameInfo.date > closestDate) {
-                                                                closestDate = gameInfo.date;
-                                                                closestRound = round;
-                                                            }
-                                                        }
-                                                    }
-
-                                                    if (closestRound) {
-                                                        jornadaStr = closestRound + ' (última)';
-                                                    }
-                                                }
+                                                footerDiv.textContent = 'Jornada: ' + jornadaStr + ' | Data: ' + specificDateStr;
                                             }
-
-                                            footerDiv.textContent = 'Jornada: ' + jornadaStr + ' | Data: ' + specificDateStr;
                                         }
                                     }
 
-                                    tooltipEl.appendChild(footerDiv);
+                                    // Só adicionar footer se tiver conteúdo
+                                    if (footerDiv.textContent) {
+                                        tooltipEl.appendChild(footerDiv);
+                                    }
                                 }
 
                                 // Posicionar o tooltip seguindo o mouse
@@ -3083,42 +3124,60 @@
             // Verificar se existem ajustes intergrupos reais nos dados atuais
             const hasAdjustments = currentModalityHasAdjustments;
 
+            // Função helper para formatar labels
+            const formatRoundLabel = (round) => {
+                if (round === 'E1') return 'Quartos de Final';
+                if (round === 'E2') return 'Meias-Finais';
+                if (round === 'E3') return 'Final';
+                if (round === 'E3L') return '3º/4º Lugar';
+                if (round === 'Inter-Group') return 'Ajustes Inter-Grupos';
+                return round;
+            };
+
             // Criar labels com datas formatadas e identificação das fases
             let labels = [];
             if (sampleData.gamesDates && sampleData.gamesDates.length > 0) {
-                // Criar mapeamento de índices para datas
-                sampleData.roundMapping = [];
+                const roundsOrder = sampleData.roundsByDateOrder || [];
 
+                // Criar labels a partir das datas e fases
                 labels = sampleData.gamesDates.map((date, index) => {
-                    if (date instanceof Date) {
-                        if (index === 0) {
-                            sampleData.roundMapping.push(null); // Início não tem jornada
-                            return 'Início'; // Primeira data é o início da época
-                        }
+                    if (index === 0) {
+                        return 'Início'; // Primeira posição é sempre "Início"
+                    }
 
-                        // Para datas regulares, apenas mostrar a data
-                        // Usar getDate/getMonth diretamente para evitar problemas de timezone
+                    // Obter a fase/jornada deste ponto (ajustar índice -1 porque roundsOrder não inclui "Início")
+                    const roundIdx = index - 1;
+                    const round = roundIdx >= 0 && roundIdx < roundsOrder.length ? roundsOrder[roundIdx] : null;
+
+                    // Se for ajuste inter-grupos, mostrar apenas isso
+                    if (round === 'Inter-Group') {
+                        return 'Ajustes Inter-Grupos';
+                    }
+
+                    // Se for playoff, adicionar "(Playoffs)" à data
+                    const isPlayoff = round && typeof round === 'string' && round.startsWith('E');
+
+                    if (date instanceof Date) {
+                        // IMPORTANTE: Usar getDate() e getMonth() SEM UTC porque as datas são locais
                         const day = String(date.getDate()).padStart(2, '0');
                         const month = String(date.getMonth() + 1).padStart(2, '0');
-                        sampleData.roundMapping.push(null);
-                        return `${day}/${month}`;
+                        const dateStr = `${day}/${month}`;
+                        return isPlayoff ? `${dateStr} (Playoffs)` : dateStr;
                     }
-                    sampleData.roundMapping.push(null);
-                    return index === 0 ? 'Início' : 'Data desconhecida';
+                    return '';
                 });
 
-                // Adicionar ponto extra no início para "Época Anterior" (só se houver época anterior)
+                // Adicionar "Época Anterior" no início se houver época anterior disponível
                 const currentEpochElement = document.getElementById('epoca');
                 if (currentEpochElement) {
                     const currentEpoch = currentEpochElement.value;
                     const currentIndex = availableEpocas.indexOf(currentEpoch);
                     if (currentIndex < availableEpocas.length - 1) {
                         labels.unshift('Época Anterior');
-                        sampleData.roundMapping.unshift(null); // Época anterior não tem jornada
-                        // IMPORTANTE: adicionar data placeholder em gamesDates para manter sincronia
-                        sampleData.gamesDates.unshift(null);
                     }
                 }
+
+                sampleData.displayGamesDates = sampleData.gamesDates;
             } else {
                 // Fallback para jornadas se não houver datas
                 let maxRounds = 0;
@@ -3178,6 +3237,28 @@
                 }
             }
 
+            // Garantir número mínimo/máximo de pontos no eixo X (pad labels LOCALMENTE, não modificar sampleData)
+            // IMPORTANTE: NÃO modificar sampleData.gamesDates pois ele é reutilizado em cada atualização
+
+            // Contar jogos reais (ignorar data inicial 01/09 e "Época Anterior")
+            let realGamesCount = 0;
+            if (sampleData.gamesDates) {
+                realGamesCount = sampleData.gamesDates.filter((date, idx) => {
+                    if (!date || date === null) return false;
+                    if (!(date instanceof Date)) return false;
+                    // Ignorar data inicial 01/09
+                    if (date.getDate() === 1 && date.getMonth() === 8) return false;
+                    return true;
+                }).length;
+            }
+
+            const desiredTotal = (realGamesCount >= 10) ? 20 : 10;
+
+            // Adicionar padding apenas aos labels (NÃO modificar sampleData.gamesDates)
+            while (labels.length < desiredTotal) {
+                labels.push('');
+            }
+
             DebugUtils.debugEloChart('labels', labels);
             DebugUtils.debugEloChart('adjustments', hasAdjustments);
 
@@ -3228,6 +3309,12 @@
             });
 
             DebugUtils.debugEloChart('datasets_total', datasets.length);
+
+            // Garantir que todos os datasets têm o mesmo comprimento que labels
+            datasets.forEach(ds => {
+                if (!ds.data) ds.data = [];
+                while (ds.data.length < labels.length) ds.data.push(null);
+            });
 
             eloChart.data.labels = labels;
             eloChart.data.datasets = datasets;            // Calcular min e max dos dados e adicionar padding de 5%
@@ -6498,6 +6585,29 @@
             return new Date(dateStr);
         }
 
+        function parseDateWithTime(dateStr, timeStr) {
+            if (!dateStr) return null;
+
+            // Parsear data
+            const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (!dateMatch) return parseDate(dateStr);
+
+            const [, year, month, day] = dateMatch;
+
+            // Parsear hora (formato: "10h15" ou "23h15")
+            let hours = 0, minutes = 0;
+            if (timeStr) {
+                const timeMatch = timeStr.match(/(\d+)h(\d+)/);
+                if (timeMatch) {
+                    hours = parseInt(timeMatch[1]);
+                    minutes = parseInt(timeMatch[2]);
+                }
+            }
+
+            // Criar data com hora incluída
+            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), hours, minutes);
+        }
+
         function normalizeTeamName(teamName) {
             if (!teamName) return teamName;
 
@@ -7962,9 +8072,6 @@
                 // Construir histórico de ELO para cada equipa
                 this._buildEloHistories(initialElosFromFile);
 
-                // Garantir consistência nos pontos do gráfico
-                this._ensureConsistentPoints();
-
                 // Salvar equipas da época anterior em sampleData
                 sampleData.teamsFromPreviousSeason = this.teamsFromPreviousSeason;
 
@@ -8016,7 +8123,7 @@
                     const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]) || null;
                     const initialElo1 = parseInt(row["Elo Antes 1"]) || null;
                     const initialElo2 = parseInt(row["Elo Antes 2"]) || null;
-                    const gameDate = parseDate(row.Dia);
+                    const gameDate = parseDateWithTime(row.Dia, row.Hora);
 
                     // Guardar detalhes do jogo para o tooltip
                     const eloDelta1 = parseInt(row["Elo Delta 1"]) || 0;
@@ -8271,7 +8378,7 @@
                     }
                 });
 
-                // Datas dos playoffs
+                // Adicionar datas dos playoffs ANTES dos ajustes intergrupos
                 const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
                 playoffOrder.forEach(phase => {
                     if (this.playoffGames[phase] && this.playoffGames[phase].length > 0) {
@@ -8291,22 +8398,24 @@
                 // Verificar ajustes intergrupos
                 this.hasInterGroupAdjustments = hasRealInterGroupAdjustments(this.teamInterGroupAdjustments);
 
-                if (this.hasInterGroupAdjustments && this.allDates.length > 1) {
-                    const lastGameDate = this.allDates[this.allDates.length - 1];
-                    const adjustmentDate = new Date(lastGameDate);
-                    adjustmentDate.setDate(adjustmentDate.getDate() + 1);
+                // Adicionar ajustes intergrupos DEPOIS de todos os jogos (fase regular + playoffs)
+                if (this.hasInterGroupAdjustments) {
+                    let adjustmentDate;
+
+                    if (this.allDates.length > 1) {
+                        // Ajustes vêm 1 dia depois do último jogo (seja fase regular ou playoff)
+                        const lastGameDate = this.allDates[this.allDates.length - 1];
+                        adjustmentDate = new Date(lastGameDate);
+                        adjustmentDate.setDate(adjustmentDate.getDate() + 1);
+                    } else {
+                        // Fallback
+                        adjustmentDate = new Date('2025-06-01');
+                    }
+
                     this.allDates.push(adjustmentDate);
-                    // Adicionar Inter-Group ao roundsByDateOrder para o tooltip de forma
                     this.roundsByDateOrder.push('Inter-Group');
                     DebugUtils.debugProcessedData('ajustes intergrupos programados', 1, adjustmentDate.toLocaleDateString('pt-PT'));
-                } else if (this.hasInterGroupAdjustments) {
-                    const fallbackDate = new Date('2025-06-01');
-                    this.allDates.push(fallbackDate);
-                    // Adicionar Inter-Group ao roundsByDateOrder para o tooltip de forma
-                    this.roundsByDateOrder.push('Inter-Group');
-                }
-
-                DebugUtils.debugProcessedData('ajustes intergrupos encontrados', this.hasInterGroupAdjustments ? 1 : 0, this.hasInterGroupAdjustments);
+                } DebugUtils.debugProcessedData('ajustes intergrupos encontrados', this.hasInterGroupAdjustments ? 1 : 0, this.hasInterGroupAdjustments);
 
                 currentModalityHasAdjustments = this.hasInterGroupAdjustments;
                 sampleData.gamesDates = this.allDates;
@@ -8320,276 +8429,187 @@
 
             /**
              * Constrói histórico de ELO para cada equipa
+             * REGRA: Processar jogos sequencialmente mas agrupar por DIA no eixo X
+             * A ordem deve ser: Data Inicial -> Fase Regular -> Playoffs -> Inter-Group
              */
             _buildEloHistories(initialElosFromFile) {
-                // Criar lista de TODAS as datas únicas em ordem cronológica
-                const allDatesSet = new Set();
+                // 1. Coletar todas as equipas
+                const allTeamsWithGames = new Set([
+                    ...Object.keys(this.teamEloByRound),
+                    ...Object.keys(this.teamInterGroupAdjustments)
+                ]);
 
-                // Adicionar todas as datas dos jogos
-                Object.keys(this.gamesDatesList).forEach(roundNum => {
-                    this.gamesDatesList[roundNum].forEach(date => {
-                        allDatesSet.add(date.getTime()); // Usar timestamp para comparação
+                // Adicionar equipas de playoffs
+                Object.keys(this.playoffGames).forEach(phase => {
+                    this.playoffGames[phase].forEach(game => {
+                        allTeamsWithGames.add(game.team1);
+                        allTeamsWithGames.add(game.team2);
                     });
                 });
 
-                // Converter para array e ordenar cronologicamente
-                const allDates = Array.from(allDatesSet)
-                    .map(timestamp => new Date(timestamp))
-                    .sort((a, b) => a - b);
+                // 2. Coletar TODOS os jogos em ordem cronológica
+                const allGames = [];
 
-                DebugUtils.debugProcessedData('datas únicas encontradas', allDates.length, allDates.map(d => d.toLocaleDateString('pt-PT')));
+                // Processar fase regular
+                sampleData.rawEloData.forEach(row => {
+                    if (!row["Equipa 1"] || !row["Equipa 2"]) return;
+                    if (row.Jornada === "Inter-Group") return;
 
-                // Para cada equipa, construir histórico baseado nas datas em que jogou
-                Object.keys(this.teamEloByRound).forEach(teamName => {
+                    const round = row.Jornada;
+                    if (!round || round.startsWith('E')) return; // Pular playoffs por agora
+
+                    const roundNum = parseInt(round);
+                    if (isNaN(roundNum)) return;
+
+                    const team1 = normalizeTeamName(row["Equipa 1"]);
+                    const team2 = normalizeTeamName(row["Equipa 2"]);
+                    const gameDate = parseDate(row.Dia);
+                    const finalElo1 = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]);
+                    const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]);
+
+                    allGames.push({
+                        date: gameDate,
+                        team1, team2, finalElo1, finalElo2,
+                        round: roundNum,
+                        type: 'regular'
+                    });
+                });
+
+                // Adicionar playoffs
+                const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
+                playoffOrder.forEach(phase => {
+                    if (this.playoffGames[phase]) {
+                        this.playoffGames[phase].forEach(game => {
+                            allGames.push({
+                                date: game.date,
+                                team1: game.team1,
+                                team2: game.team2,
+                                finalElo1: game.finalElo1,
+                                finalElo2: game.finalElo2,
+                                round: phase,
+                                type: 'playoff'
+                            });
+                        });
+                    }
+                });
+
+                // Ordenar todos os jogos por data
+                allGames.sort((a, b) => (a.date || 0) - (b.date || 0));                // 3. Agrupar jogos por data (dia) e contar jogos por equipa
+                const gamesByDate = new Map(); // dateKey -> array de jogos
+                const gamesCountByTeamByDate = new Map(); // dateKey -> {teamName -> count}
+
+                allGames.forEach(game => {
+                    const dateKey = game.date ? game.date.toDateString() : 'unknown';
+
+                    if (!gamesByDate.has(dateKey)) {
+                        gamesByDate.set(dateKey, []);
+                        gamesCountByTeamByDate.set(dateKey, {});
+                    }
+
+                    gamesByDate.get(dateKey).push(game);
+
+                    // Contar quantos jogos cada equipa tem nesta data
+                    const counts = gamesCountByTeamByDate.get(dateKey);
+                    counts[game.team1] = (counts[game.team1] || 0) + 1;
+                    counts[game.team2] = (counts[game.team2] || 0) + 1;
+                });
+
+                // 4. Agrupar jogos em "rodadas" - jogos que acontecem na MESMA HORA
+                // Cada rodada representa jogos verdadeiramente simultâneos
+                const gameRoundsByDate = new Map(); // dateKey -> [[jogos rodada 1], [jogos rodada 2], ...]
+
+                gamesByDate.forEach((games, dateKey) => {
+                    // Agrupar por timestamp exato (dia + hora)
+                    const gamesByTime = new Map();
+
+                    games.forEach(game => {
+                        const timeKey = game.date ? game.date.getTime() : 0;
+                        if (!gamesByTime.has(timeKey)) {
+                            gamesByTime.set(timeKey, []);
+                        }
+                        gamesByTime.get(timeKey).push(game);
+                    });
+
+                    // Ordenar por timestamp e criar rodadas
+                    const sortedTimes = Array.from(gamesByTime.keys()).sort((a, b) => a - b);
+                    const rounds = sortedTimes.map(time => gamesByTime.get(time));
+
+                    gameRoundsByDate.set(dateKey, rounds);
+                });                // 5. Inicializar histórico de cada equipa
+                const teamCurrentElo = {}; // ELO atual de cada equipa
+                allTeamsWithGames.forEach(teamName => {
                     const initialElo = initialElosFromFile[teamName] || this.teamInitialElo[teamName] || 1500;
-                    const eloValues = [initialElo];
-                    let currentElo = initialElo;
+                    teamCurrentElo[teamName] = initialElo;
+                    sampleData.eloHistory[teamName] = [initialElo];
+                });
 
-                    // Para cada data, verificar se a equipa jogou
-                    allDates.forEach(date => {
-                        const dateStr = date.toISOString();
-                        let eloChanged = false;
+                const allDates = [];
+                const roundsOrder = [];
 
-                        // Verificar em todas as jornadas se há jogo nesta data
-                        Object.keys(this.teamEloByRound[teamName]).forEach(round => {
-                            // Obter detalhes do jogo para verificar a data
-                            if (sampleData.gameDetails[teamName] && sampleData.gameDetails[teamName][round]) {
-                                const gameInfo = sampleData.gameDetails[teamName][round];
-                                if (gameInfo.date && gameInfo.date.toISOString() === dateStr) {
-                                    // Equipa jogou nesta data
-                                    currentElo = this.teamEloByRound[teamName][round];
-                                    eloChanged = true;
-                                }
-                            }
+                // 6. Processar cada data, rodada por rodada
+                Array.from(gameRoundsByDate.keys()).forEach(dateKey => {
+                    const rounds = gameRoundsByDate.get(dateKey);
+
+                    // Processar cada rodada de jogos
+                    rounds.forEach((roundGames) => {
+                        // Todos os jogos desta rodada usam a mesma data
+                        allDates.push(roundGames[0].date);
+
+                        // Usar a fase do primeiro jogo como label da rodada
+                        roundsOrder.push(roundGames[0].round);
+
+                        // Atualizar ELO das equipas que jogaram
+                        roundGames.forEach(game => {
+                            if (game.finalElo1) teamCurrentElo[game.team1] = game.finalElo1;
+                            if (game.finalElo2) teamCurrentElo[game.team2] = game.finalElo2;
                         });
 
-                        // Adicionar o ELO atual (mudou ou manteve)
-                        eloValues.push(currentElo);
-                    });
-
-                    // Playoffs (mantém lógica existente)
-                    const playoffOrder = ['E1', 'E2', 'E3L', 'E3'];
-                    currentElo = this._processTeamPlayoffs(teamName, playoffOrder, eloValues, currentElo);
-
-                    // Ajustes intergrupos
-                    this._applyInterGroupAdjustments(teamName, eloValues);
-
-                    sampleData.eloHistory[teamName] = eloValues;
-                    DebugUtils.debugEloAdjustments(teamName, 'final_elo', {
-                        initial: eloValues[0],
-                        points: eloValues.length
+                        // Adicionar ponto ao histórico de todas as equipas
+                        allTeamsWithGames.forEach(teamName => {
+                            sampleData.eloHistory[teamName].push(teamCurrentElo[teamName]);
+                        });
                     });
                 });
 
-                // Atualizar allDates para usar as datas reais
+                // 4. Aplicar ajustes inter-grupos DEPOIS de todos os jogos
+                if (this.hasInterGroupAdjustments) {
+                    const lastGameDate = allDates.length > 0 ? allDates[allDates.length - 1] : new Date();
+                    const adjustmentDate = new Date(lastGameDate);
+                    adjustmentDate.setDate(adjustmentDate.getDate() + 1);
+
+                    allDates.push(adjustmentDate);
+                    roundsOrder.push('Inter-Group');
+
+                    allTeamsWithGames.forEach(teamName => {
+                        const currentElo = sampleData.eloHistory[teamName][sampleData.eloHistory[teamName].length - 1];
+
+                        if (this.teamInterGroupAdjustments[teamName]) {
+                            const adjustments = this.teamInterGroupAdjustments[teamName];
+                            const adjustment = adjustments.find(adj => adj.round === "Inter-Group");
+                            if (adjustment && adjustment.finalElo) {
+                                sampleData.eloHistory[teamName].push(adjustment.finalElo);
+                            } else {
+                                sampleData.eloHistory[teamName].push(currentElo);
+                            }
+                        } else {
+                            sampleData.eloHistory[teamName].push(currentElo);
+                        }
+                    });
+                }
+
+                // 5. Guardar array de datas (inicial + todas as datas de eventos)
                 const initialDate = currentEpoca === '25_26' ? new Date('2025-09-01') : new Date('2024-09-01');
                 this.allDates = [initialDate, ...allDates];
+                sampleData.gamesDates = this.allDates;
+                sampleData.roundsByDateOrder = roundsOrder;
 
-                // Processar equipas que não jogaram
-                this._processNonPlayingTeamsChronological(initialElosFromFile, allDates);
-            }
-
-            /**
-             * Processa playoffs de uma equipa
-             */
-            _processTeamPlayoffs(teamName, playoffOrder, eloValues, currentElo) {
-                playoffOrder.forEach(phase => {
-                    if (this.playoffGames[phase] && this.playoffDates[phase]) {
-                        const teamGame = this.playoffGames[phase].find(game =>
-                            game.team1 === teamName || game.team2 === teamName
-                        );
-
-                        if (teamGame) {
-                            currentElo = teamGame.team1 === teamName ? teamGame.finalElo1 : teamGame.finalElo2;
-                            DebugUtils.debugProcessedData(`${teamName} ELO`, 1, `após ${phase} = ${currentElo}`);
-                        }
-                        eloValues.push(currentElo);
-                    }
-                });
-
-                return currentElo;
-            }
-
-            /**
-             * Aplica ajustes intergrupos a uma equipa
-             */
-            _applyInterGroupAdjustments(teamName, eloValues) {
-                if (!this.hasInterGroupAdjustments) return;
-
-                const lastElo = eloValues[eloValues.length - 1];
-
-                if (this.teamInterGroupAdjustments[teamName] && this.teamInterGroupAdjustments[teamName].length > 0) {
-                    const interGroupAdj = this.teamInterGroupAdjustments[teamName].find(adj => adj.finalElo && adj.finalElo > 0);
-
-                    if (interGroupAdj) {
-                        const newElo = interGroupAdj.finalElo;
-                        const actualAdjustment = newElo - lastElo;
-                        eloValues.push(newElo);
-                        DebugUtils.debugEloAdjustments(teamName, 'before_adjustments', {
-                            before: lastElo,
-                            after: newElo,
-                            adjustment: actualAdjustment
-                        });
-                    } else {
-                        const totalAdjustment = this.teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
-                        const newElo = lastElo + totalAdjustment;
-                        eloValues.push(newElo);
-                        if (totalAdjustment !== 0) {
-                            DebugUtils.debugEloAdjustments(teamName, 'with_adjustment', {
-                                before: lastElo,
-                                adjustment: totalAdjustment,
-                                after: newElo
-                            });
-                        } else {
-                            DebugUtils.debugEloAdjustments(teamName, 'no_adjustment', { elo: lastElo });
-                        }
-                    }
-                } else {
-                    eloValues.push(lastElo);
-                    DebugUtils.debugEloAdjustments(teamName, 'no_intergroup', { elo: lastElo });
-                }
-            }
-
-            /**
-             * Processa equipas que não jogaram
-             */
-            _processNonPlayingTeams(initialElosFromFile, allGameRounds) {
+                // 6. Processar equipas que não jogaram (nem fase regular nem playoffs nem ajustes)
                 sampleData.teams.forEach(team => {
-                    if (!this.teamEloByRound[team.name]) {
+                    if (!sampleData.eloHistory[team.name]) {
                         const initialElo = initialElosFromFile[team.name] || this.teamInitialElo[team.name] || 1500;
-                        const totalPoints = 1 + allGameRounds.length + Object.keys(this.playoffDates).length +
-                            (this.hasInterGroupAdjustments ? 1 : 0);
-
-                        let eloValues = new Array(totalPoints - (this.hasInterGroupAdjustments ? 1 : 0)).fill(initialElo);
-
-                        if (this.hasInterGroupAdjustments) {
-                            this._applyAdjustmentToNonPlayingTeam(team.name, initialElo, eloValues);
-                        }
-
-                        sampleData.eloHistory[team.name] = eloValues;
+                        sampleData.eloHistory[team.name] = [initialElo, ...Array(allDates.length).fill(initialElo)];
                     }
                 });
-            }
-
-            /**
-             * Processa equipas que não jogaram (versão cronológica)
-             */
-            _processNonPlayingTeamsChronological(initialElosFromFile, allDates) {
-                sampleData.teams.forEach(team => {
-                    if (!this.teamEloByRound[team.name]) {
-                        const initialElo = initialElosFromFile[team.name] || this.teamInitialElo[team.name] || 1500;
-                        const totalPoints = 1 + allDates.length + Object.keys(this.playoffDates).length +
-                            (this.hasInterGroupAdjustments ? 1 : 0);
-
-                        let eloValues = new Array(totalPoints - (this.hasInterGroupAdjustments ? 1 : 0)).fill(initialElo);
-
-                        if (this.hasInterGroupAdjustments) {
-                            this._applyAdjustmentToNonPlayingTeam(team.name, initialElo, eloValues);
-                        }
-
-                        sampleData.eloHistory[team.name] = eloValues;
-                    }
-                });
-            }
-
-            /**
-             * Aplica ajuste a equipa que não jogou
-             */
-            _applyAdjustmentToNonPlayingTeam(teamName, initialElo, eloValues) {
-                if (this.teamInterGroupAdjustments[teamName] && this.teamInterGroupAdjustments[teamName].length > 0) {
-                    const interGroupAdj = this.teamInterGroupAdjustments[teamName].find(adj => adj.finalElo && adj.finalElo > 0);
-
-                    if (interGroupAdj) {
-                        const newElo = interGroupAdj.finalElo;
-                        const actualAdjustment = newElo - initialElo;
-                        eloValues.push(newElo);
-                        DebugUtils.debugEloAdjustments(teamName, 'no_games_adjustment', {
-                            initial: initialElo,
-                            final: newElo,
-                            adjustment: actualAdjustment
-                        });
-                    } else {
-                        const totalAdjustment = this.teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
-                        const newElo = initialElo + totalAdjustment;
-                        eloValues.push(newElo);
-                        if (totalAdjustment !== 0) {
-                            DebugUtils.debugEloAdjustments(teamName, 'no_games_with_adjustment', {
-                                initial: initialElo,
-                                adjustment: totalAdjustment,
-                                final: newElo
-                            });
-                        } else {
-                            DebugUtils.debugEloAdjustments(teamName, 'no_games_no_adjustment', { initial: initialElo });
-                        }
-                    }
-                } else {
-                    eloValues.push(initialElo);
-                    DebugUtils.debugEloAdjustments(teamName, 'no_games_no_intergroup', { initial: initialElo });
-                }
-            }
-
-            /**
-             * Garante que todas as equipas têm o mesmo número de pontos
-             */
-            _ensureConsistentPoints() {
-                // Ordenar jornadas por DATA, não por número de jornada
-                const allGameRounds = Object.keys(this.gamesDates).sort((a, b) => {
-                    const dateA = this.gamesDates[a];
-                    const dateB = this.gamesDates[b];
-                    return dateA - dateB; // Comparar datas cronologicamente
-                });
-                const expectedPoints = 1 + allGameRounds.length + Object.keys(this.playoffDates).length +
-                    (this.hasInterGroupAdjustments ? 1 : 0);
-
-                sampleData.teams.forEach(team => {
-                    if (sampleData.eloHistory[team.name] && sampleData.eloHistory[team.name].length < expectedPoints) {
-                        const currentValues = sampleData.eloHistory[team.name];
-                        const lastElo = currentValues[currentValues.length - 1];
-
-                        while (currentValues.length < expectedPoints) {
-                            if (this.hasInterGroupAdjustments && currentValues.length === expectedPoints - 1) {
-                                this._completeWithAdjustment(team.name, currentValues, lastElo);
-                            } else {
-                                currentValues.push(lastElo);
-                            }
-                        }
-                        DebugUtils.debugEloAdjustments(team.name, 'completed_points', { points: expectedPoints });
-                    }
-                });
-            }
-
-            /**
-             * Completa pontos em falta com ajuste intergrupos
-             */
-            _completeWithAdjustment(teamName, currentValues, lastElo) {
-                if (this.teamInterGroupAdjustments[teamName] && this.teamInterGroupAdjustments[teamName].length > 0) {
-                    const interGroupAdj = this.teamInterGroupAdjustments[teamName].find(adj => adj.finalElo && adj.finalElo > 0);
-
-                    if (interGroupAdj) {
-                        const newElo = interGroupAdj.finalElo;
-                        const actualAdjustment = newElo - lastElo;
-                        currentValues.push(newElo);
-                        DebugUtils.debugEloAdjustments(teamName, 'completed_with_adjustment', {
-                            final: newElo,
-                            adjustment: actualAdjustment
-                        });
-                    } else {
-                        const totalAdjustment = this.teamInterGroupAdjustments[teamName].reduce((sum, adj) => sum + adj.adjustment, 0);
-                        const newElo = lastElo + totalAdjustment;
-                        currentValues.push(newElo);
-                        if (totalAdjustment !== 0) {
-                            DebugUtils.debugEloAdjustments(teamName, 'completed_with_total_adjustment', {
-                                adjustment: totalAdjustment,
-                                final: newElo
-                            });
-                        } else {
-                            DebugUtils.debugEloAdjustments(teamName, 'completed_no_adjustment', { elo: lastElo });
-                        }
-                    }
-                } else {
-                    currentValues.push(lastElo);
-                    DebugUtils.debugEloAdjustments(teamName, 'completed_no_intergroup', { elo: lastElo });
-                }
             }
         }
 
