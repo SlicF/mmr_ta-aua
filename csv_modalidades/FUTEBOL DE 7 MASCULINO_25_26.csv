@@ -1,4 +1,5 @@
 Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Falta de Comparência
+2,2025-10-10 00:00:00,21h00,Sintético,Administração Pública,0.0,1.0,Contabilidade,1,,
 1,2025-10-20 00:00:00,21h00,Sintético,Eng. Informática,1.0,4.0,Tecnologias de Informação,2,A,
 1,2025-10-20 00:00:00,22h00,Sintético,Eng. Civil,4.0,3.0,CBM,2,B,
 1,2025-10-20 00:00:00,23h00,Sintético,Fisioterapia,1.0,1.0,Biotecnologia,1,,
@@ -17,10 +18,9 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Falta de
 2,2025-11-03 00:00:00,23H00,Sintético,Finanças,2.0,2.0,EGI,1,,
 2,2025-11-04 00:00:00,21h00,Sintético,Música,1.0,4.0,Eng. Química,2,B,
 2,2025-11-04 00:00:00,22h00,Sintético,CBM,6.0,2.0,Biologia e Geologia,2,B,
-2,2025-11-10 00:00:00,22h00,Sintético,Matemática,,,Gestão,2,B,
+2,2025-11-10 00:00:00,22h00,Sintético,Matemática,0.0,7.0,Gestão,2,B,
 2,2025-11-11 00:00:00,21h00,Sintético,MTC,,,Eng. Civil,2,B,
 1,,,Sintético,Educação Básica,,,Eng. Computacional,2,A,
-2,,,Sintético,Administração Pública,,,Contabilidade,1,,
 2,,,Sintético,Economia,,,GPT,1,,
 2,,,Sintético,Eng. Mecânica,,,Eng. Biomédica,1,,
 2,,,,Eng. Computacional,,,Eng. Materiais,2,A,
