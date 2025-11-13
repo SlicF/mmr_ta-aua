@@ -1,7 +1,7 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia,sets_ganhos,sets_perdidos,diferenca_sets
-1,,1,Eng. Informática ,9,3,3,0,0,6,0,6,0,0,0,0
-1,,2,EET,9,3,3,0,0,6,0,6,0,0,0,0
-1,,3,EGI,9,3,3,0,0,6,0,6,0,0,0,0
+1,,1,EET,9,3,3,0,0,6,0,6,0,0,0,0
+1,,2,EGI,9,3,3,0,0,6,0,6,0,0,0,0
+1,,3,Eng. Informática ,9,3,3,0,0,6,0,6,0,0,0,0
 1,,4,Design,7,3,3,0,0,6,2,4,0,0,0,0
 1,,5,LRE,6,3,2,0,1,4,2,2,0,0,0,0
 1,,6,Eng. Mecânica,6,3,2,0,1,4,2,2,0,0,0,0
@@ -9,8 +9,8 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 1,,8,Ciências do Mar,3,3,1,0,2,2,4,-2,0,0,0,0
 1,,9,GPT,1,3,0,0,3,1,6,-5,0,0,0,0
 1,,10,Tecnologias de Informação,1,3,0,0,3,1,6,-5,0,0,0,0
-1,,11,Música,0,3,0,0,3,0,6,-6,0,0,0,0
-1,,12,ECT,0,3,0,0,3,0,6,-6,0,0,0,0
+1,,11,ECT,0,3,0,0,3,0,6,-6,0,0,0,0
+1,,12,Música,0,3,0,0,3,0,6,-6,0,0,0,0
 2,A,1,Fisioterapia,7,3,3,0,0,6,2,4,0,0,0,0
 2,A,2,Eng. Ambiente,6,2,2,0,0,4,0,4,0,0,0,0
 2,A,3,Biologia,6,3,2,0,1,5,3,2,0,0,0,0
@@ -23,8 +23,8 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,A,10,Biotecnologia,0,3,0,0,3,0,6,-6,0,0,0,0
 2,A,11,Economia,0,3,0,0,3,0,6,-6,0,0,0,0
 2,B,1,Contabilidade,8,3,3,0,0,6,1,5,0,0,0,0
-2,B,2,MTC,7,3,2,0,1,5,2,3,0,0,0,0
-2,B,3,Física,7,3,2,0,1,5,2,3,0,0,0,0
+2,B,2,Física,7,3,2,0,1,5,2,3,0,0,0,0
+2,B,3,MTC,7,3,2,0,1,5,2,3,0,0,0,0
 2,B,4,Eng. Física,5,2,2,0,0,4,1,3,0,0,0,0
 2,B,5,Eng. Cívil,4,3,2,0,1,4,4,0,0,0,0,0
 2,B,6,Matemática,4,3,1,0,2,3,4,-1,0,0,0,0
