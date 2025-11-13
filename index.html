@@ -75,15 +75,39 @@
 
         .quick-filters {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 8px;
             margin-bottom: 10px;
-            max-height: 60px;
-            overflow-y: auto;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 5px;
+            /* Firefox scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #f1f1f1;
+        }
+
+        /* WebKit scrollbar styling (Chrome, Safari, Edge) */
+        .quick-filters::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .quick-filters::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .quick-filters::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+
+        .quick-filters::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
         }
 
         .filter-btn {
             padding: 6px 12px;
+            flex-shrink: 0;
             border: 2px solid #667eea;
             background: white;
             color: #667eea;
@@ -100,6 +124,11 @@
             color: white;
         }
 
+        .filter-btn:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
 
         .card {
             background: white;
@@ -198,26 +227,10 @@
             color: white;
         }
 
-        .quick-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 10px;
-            max-height: 60px;
-            overflow-y: auto;
-        }
-
-        .filter-btn {
-            padding: 6px 12px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            font-size: 0.8em;
-            height: fit-content;
+        .zoom-btn:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
         }
 
         .team-selector {
@@ -347,6 +360,12 @@
             background: #667eea;
             color: white;
             transform: translateY(-2px);
+        }
+
+        .quick-control-btn:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
         }
 
         /* Barra de scroll personalizada para muitas equipas */
@@ -489,6 +508,13 @@
         .next-season-btn:hover {
             box-shadow: 0 6px 16px rgba(16, 185, 129, 0.6);
             background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+
+        .previous-season-btn:focus-visible,
+        .next-season-btn:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 3px;
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.25);
         }
 
         .rankings-table {
@@ -838,6 +864,13 @@
             background: linear-gradient(135deg, #764ba2, #667eea);
             color: white;
             transform: translateY(-2px);
+        }
+
+        .division-btn:focus-visible,
+        .group-btn:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
         }
 
         .bracket-container {
@@ -1431,6 +1464,12 @@
             opacity: 0.3;
         }
 
+        .jornada-arrow:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+
         .epoca-switch-label {
             font-size: 0.75em;
             color: #667eea;
@@ -1886,10 +1925,6 @@
             }
 
             /* Filtros rápidos */
-            .quick-filters {
-                max-height: 80px;
-            }
-
             .filter-btn {
                 font-size: 0.75em;
                 padding: 5px 10px;
@@ -2144,10 +2179,13 @@
                 <div class="chart-header">
                     <div class="card-title">Evolução de ELO das Equipas</div>
                     <div class="zoom-controls">
-                        <button class="zoom-btn" data-zoom="in" title="Zoom In">🔍+</button>
-                        <button class="zoom-btn" data-zoom="out" title="Zoom Out">🔍-</button>
-                        <button class="zoom-btn" data-zoom="reset" title="Reset Zoom">⟲</button>
-                        <button class="zoom-btn" data-action="toggle-pan" id="panModeBtn" title="Pan Mode">✋</button>
+                        <button class="zoom-btn" data-zoom="in" title="Zoom In" aria-label="Aumentar zoom">🔍+</button>
+                        <button class="zoom-btn" data-zoom="out" title="Zoom Out"
+                            aria-label="Diminuir zoom">🔍-</button>
+                        <button class="zoom-btn" data-zoom="reset" title="Reset Zoom"
+                            aria-label="Resetar zoom">⟲</button>
+                        <button class="zoom-btn" data-action="toggle-pan" id="panModeBtn" title="Pan Mode"
+                            aria-label="Ativar/desativar modo de panorâmica">✋</button>
                     </div>
                 </div>
                 <div class="chart-wrapper">
@@ -2187,7 +2225,7 @@
                                 <th>Pts</th>
                                 <th>J</th>
                                 <th>V</th>
-                                <th>E</th>
+                                <th class="draws-column">E</th>
                                 <th>D</th>
                                 <th style="color: red;">FC</th>
                                 <th>GM</th>
@@ -2210,7 +2248,7 @@
                 <div class="jornada-navigation">
                     <div class="jornada-arrow-container">
                         <button class="jornada-arrow" id="prevJornadaBtn" data-jornada-nav="prev"
-                            title="Jornada anterior">
+                            title="Jornada anterior" aria-label="Navegar para jornada anterior">
                             &lt;
                         </button>
                         <div class="epoca-switch-label" id="prevEpocaLabel" style="display: none;"></div>
@@ -2220,7 +2258,7 @@
                     </div>
                     <div class="jornada-arrow-container">
                         <button class="jornada-arrow" id="nextJornadaBtn" data-jornada-nav="next"
-                            title="Jornada seguinte">
+                            title="Jornada seguinte" aria-label="Navegar para próxima jornada">
                             &gt;
                         </button>
                         <div class="epoca-switch-label" id="nextEpocaLabel" style="display: none;"></div>
@@ -2273,6 +2311,9 @@
     </div>
 
     <script>
+        // ==================== CONSTANTES GLOBAIS ====================
+        const DEFAULT_ELO = 750;
+
         // Mostrar painel de debug com Ctrl+Shift+D
         document.addEventListener('keydown', function (e) {
             if (e.ctrlKey && e.shiftKey && e.key === 'D') {
@@ -2420,16 +2461,19 @@
             const selectAllBtn = document.createElement('button');
             selectAllBtn.textContent = 'Seleccionar Todas';
             selectAllBtn.className = 'quick-control-btn';
+            selectAllBtn.setAttribute('aria-label', 'Selecionar todas as equipas');
             selectAllBtn.onclick = () => selectAllTeams(true);
 
             const deselectAllBtn = document.createElement('button');
             deselectAllBtn.textContent = 'Desseleccionar Todas';
             deselectAllBtn.className = 'quick-control-btn';
+            deselectAllBtn.setAttribute('aria-label', 'Desselecionar todas as equipas');
             deselectAllBtn.onclick = () => selectAllTeams(false);
 
             const toggleBtn = document.createElement('button');
             toggleBtn.textContent = 'Inverter Seleção';
             toggleBtn.className = 'quick-control-btn';
+            toggleBtn.setAttribute('aria-label', 'Inverter seleção de equipas');
             toggleBtn.onclick = toggleAllTeams;
 
             controlsDiv.appendChild(selectAllBtn);
@@ -2756,23 +2800,25 @@
                                                 currentRound = roundKeyNum;
                                             }
                                         }
-                                        // Se ELO não mudou mas há jogo nesta data, mostrar esse jogo
-                                        if (!currentGameInfo && !eloChanged && dataIndex > 0) {
-                                            for (const [round, gameInfo] of Object.entries(gameDetails)) {
-                                                if (gameInfo.date && isSameDay(gameInfo.date, currentDate)) {
-                                                    currentGameInfo = gameInfo;
-                                                    currentRound = round;
-                                                    break;
-                                                }
-                                            }
-                                        }                                        // Se ainda não encontrou jogo, buscar o último jogo anterior
-                                        // (apenas se ELO não mudou, para não sobrescrever o jogo correto)
-                                        if (!currentGameInfo && !eloChanged) {
+
+                                        // REMOVIDO: A lógica que buscava jogos na mesma data quando ELO não mudou
+                                        // Isso causava o problema de mostrar jogos futuros
+
+                                        // Se ainda não encontrou jogo, buscar o último jogo anterior
+                                        // IMPORTANTE: Se ELO mudou, pode incluir jogo na data atual (<=)
+                                        // Se ELO não mudou, buscar apenas jogos anteriores (<)
+                                        if (!currentGameInfo) {
                                             let closestRound = null;
                                             let closestDate = null;
 
                                             for (const [round, gameInfo] of Object.entries(gameDetails)) {
-                                                if (gameInfo.date && gameInfo.date < currentDate) {
+                                                // Se ELO mudou, incluir jogos até a data atual (<=)
+                                                // Se não mudou, buscar apenas jogos anteriores (<)
+                                                const dateCondition = eloChanged ?
+                                                    (gameInfo.date && gameInfo.date <= currentDate) :
+                                                    (gameInfo.date && gameInfo.date < currentDate);
+
+                                                if (dateCondition) {
                                                     if (!closestDate || gameInfo.date > closestDate) {
                                                         closestDate = gameInfo.date;
                                                         closestRound = round;
@@ -2795,12 +2841,20 @@
                                     const prevElo = dataIndex > 0 ? dataPoint.dataset.data[dataIndex - 1] : null;
                                     const actualDelta = prevElo !== null ? eloValue - prevElo : 0;
 
-                                    // Só mostrar delta se o ELO mudou neste ponto (e o delta é significativo)
-                                    if (Math.abs(actualDelta) > 0.01) {
-                                        const isPositive = actualDelta > 0;
+                                    // Mostrar delta do último jogo (se existir)
+                                    let deltaToShow = actualDelta;
+
+                                    // Se não mudou neste ponto mas temos info do último jogo, buscar sua variação
+                                    if (Math.abs(actualDelta) < 0.01 && currentGameInfo && currentGameInfo.eloDelta !== undefined) {
+                                        deltaToShow = currentGameInfo.eloDelta;
+                                    }
+
+                                    // Mostrar delta se for significativo
+                                    if (Math.abs(deltaToShow) > 0.01) {
+                                        const isPositive = deltaToShow > 0;
                                         const color = isPositive ? '#28a745' : '#dc3545';
                                         const arrow = isPositive ? '↑' : '↓';
-                                        const deltaAbs = Math.abs(actualDelta).toFixed(0);
+                                        const deltaAbs = Math.abs(deltaToShow).toFixed(0);
 
                                         const deltaSpan = document.createElement('span');
                                         deltaSpan.style.color = color;
@@ -2813,8 +2867,21 @@
 
                                     bodyDiv.appendChild(eloDiv);
 
-                                    // Resultado do jogo - só mostrar se o ELO mudou (jogo aconteceu neste ponto)
-                                    if (currentGameInfo && !currentGameInfo.isAdjustment && Math.abs(actualDelta) > 0.01) {
+                                    // Resultado do jogo - mostrar sempre o último jogo (se existir)
+                                    if (currentGameInfo && !currentGameInfo.isAdjustment) {
+                                        // Verificar se este ponto é exatamente onde o jogo aconteceu
+                                        const isExactGamePoint = Math.abs(actualDelta) > 0.01;
+
+                                        // Adicionar título "Último jogo:" se não for o ponto exato
+                                        if (!isExactGamePoint) {
+                                            const lastGameLabel = document.createElement('div');
+                                            lastGameLabel.style.fontSize = '0.9em';
+                                            lastGameLabel.style.color = '#999';
+                                            lastGameLabel.style.marginTop = '4px';
+                                            lastGameLabel.textContent = 'Último jogo:';
+                                            bodyDiv.appendChild(lastGameLabel);
+                                        }
+
                                         const resultDiv = document.createElement('div');
 
                                         if (currentGameInfo.unknownResult) {
@@ -2842,15 +2909,20 @@
                                     // Forma (últimos 5 jogos) - buscar até a data atual
                                     const gameDetails2 = sampleData.gameDetails && sampleData.gameDetails[teamName];
 
-                                    // Não buscar forma para pontos de padding
-                                    // Só mostrar forma se o ELO mudou (jogo aconteceu)
-                                    if (!isPaddingPoint && gameDetails2 && gameDatesList && Math.abs(actualDelta) > 0.01) {
+                                    // Mostrar forma sempre que houver jogos até esta data (exceto pontos de padding)
+                                    if (!isPaddingPoint && gameDetails2 && gameDatesList) {
                                         const currentDate = gameDatesList[dataIndex] || gameDatesList[gameDatesList.length - 1];
 
                                         // Coletar todos os jogos até esta data
+                                        // Se ELO mudou (jogo aconteceu aqui), incluir jogos até esta data (<=)
+                                        // Se não mudou, incluir apenas jogos anteriores (<)
                                         const gamesUpToDate = [];
                                         for (const [round, gameInfo] of Object.entries(gameDetails2)) {
-                                            if (gameInfo.date && gameInfo.date <= currentDate && gameInfo.outcome) {
+                                            const dateCondition = Math.abs(actualDelta) > 0.01 ?
+                                                (gameInfo.date && gameInfo.date <= currentDate) :
+                                                (gameInfo.date && gameInfo.date < currentDate);
+
+                                            if (dateCondition && gameInfo.outcome) {
                                                 gamesUpToDate.push({
                                                     date: gameInfo.date,
                                                     outcome: gameInfo.outcome
@@ -3265,7 +3337,7 @@
             checkboxes.forEach((checkbox, index) => {
                 if (checkbox.checked && sampleData.teams[index]) {
                     const team = sampleData.teams[index];
-                    const teamHistory = sampleData.eloHistory[team.name] || [1500];
+                    const teamHistory = sampleData.eloHistory[team.name] || [DEFAULT_ELO];
 
                     DebugUtils.debugEloChart('team_added', { name: team.name, history: teamHistory });
 
@@ -3599,6 +3671,7 @@
                 btnPrev.className = 'season-nav-btn previous-season-btn';
                 btnPrev.textContent = '← Época Anterior';
                 btnPrev.title = `Ver época 20${previousEpoch.replace('_', '/')}`;
+                btnPrev.setAttribute('aria-label', `Navegar para época anterior 20${previousEpoch.replace('_', '/')}`);
 
                 // Posicionar à esquerda
                 btnPrev.style.left = (offsetX + chartArea.left) + 'px';
@@ -3631,6 +3704,7 @@
                 btnNext.className = 'season-nav-btn next-season-btn';
                 btnNext.textContent = 'Época Seguinte →';
                 btnNext.title = `Ver época 20${nextEpoch.replace('_', '/')}`;
+                btnNext.setAttribute('aria-label', `Navegar para época seguinte 20${nextEpoch.replace('_', '/')}`);
 
                 // Posicionar à direita do gráfico
                 btnNext.style.right = '20px'; // 20px da borda direita do container
@@ -3719,7 +3793,7 @@
             // Obter ELO mais recente
             const teamHistory = sampleData.eloHistory[normalizedTeamName];
             if (!teamHistory || teamHistory.length === 0) {
-                return { elo: 1500, position: null };
+                return { elo: DEFAULT_ELO, position: null };
             }
 
             const latestElo = Math.round(teamHistory[teamHistory.length - 1]);
@@ -3836,6 +3910,34 @@
             thElements[concededIndex].textContent = headers.conceded;
         }
 
+        // Verificar se a modalidade é voleibol
+        function isVolleyballModality() {
+            if (!currentModalidade) return false;
+            const modalityName = currentModalidade.replace(/_\d{2}_\d{2}$/, '').toUpperCase();
+            return modalityName.includes('VOLEIBOL');
+        }
+
+        // Atualizar visibilidade da coluna de empates
+        function updateDrawsColumnVisibility() {
+            const isVolleyball = isVolleyballModality();
+            const rankingsTable = document.getElementById('rankingsTable');
+
+            if (!rankingsTable) return;
+
+            // Selecionar coluna de empates no cabeçalho
+            const drawsHeader = rankingsTable.querySelector('thead th.draws-column');
+
+            if (drawsHeader) {
+                drawsHeader.style.display = isVolleyball ? 'none' : '';
+            }
+
+            // Selecionar todas as células de empates no corpo da tabela
+            const drawsCells = rankingsTable.querySelectorAll('tbody td.draws-column');
+            drawsCells.forEach(cell => {
+                cell.style.display = isVolleyball ? 'none' : '';
+            });
+        }
+
         // Atualizar tabela de classificações
         function updateRankingsTable() {
             const tbody = document.getElementById('rankingsBody');
@@ -3916,7 +4018,7 @@
                     <td><strong>${team.points}</strong></td>
                     <td>${totalGames}</td>
                     <td>${team.wins || 0}</td>
-                    <td>${team.draws || 0}</td>
+                    <td class="draws-column">${team.draws || 0}</td>
                     <td>${team.losses || 0}</td>
                     <td style="color: red;">${team.noShows || 0}</td>
                     <td>${team.goals || 0}</td>
@@ -3925,6 +4027,9 @@
                 `;
                 tbody.appendChild(row);
             });
+
+            // Atualizar visibilidade da coluna de empates após renderizar todas as linhas
+            updateDrawsColumnVisibility();
         }
 
         /**
@@ -5736,6 +5841,7 @@
             top3Btn.className = 'filter-btn';
             top3Btn.textContent = 'Top 3';
             top3Btn.dataset.filter = 'top3';
+            top3Btn.setAttribute('aria-label', 'Filtrar top 3 equipas');
             top3Btn.onclick = filterTop3;
             filtersContainer.appendChild(top3Btn);
 
@@ -5753,6 +5859,7 @@
                     btn.textContent = division;
                     btn.dataset.filter = 'division';
                     btn.dataset.division = division;
+                    btn.setAttribute('aria-label', `Filtrar por ${division}`);
                     filtersContainer.appendChild(btn);
                 });
 
@@ -5771,6 +5878,7 @@
                     allDiv2Btn.className = 'filter-btn';
                     allDiv2Btn.textContent = '2ª Divisão';
                     allDiv2Btn.dataset.filter = 'all-div2';
+                    allDiv2Btn.setAttribute('aria-label', 'Filtrar por toda a 2ª Divisão');
                     allDiv2Btn.onclick = () => selectDivision('2');
 
                     if (insertAfter) {
@@ -5813,18 +5921,21 @@
             const playoffsBtn = document.createElement('button');
             playoffsBtn.className = 'filter-btn';
             playoffsBtn.textContent = playoffsLabel;
+            playoffsBtn.setAttribute('aria-label', 'Filtrar equipas dos playoffs');
             playoffsBtn.onclick = filterPlayoffs;
             filtersContainer.appendChild(playoffsBtn);
 
             const sensationBtn = document.createElement('button');
             sensationBtn.className = 'filter-btn';
             sensationBtn.textContent = 'Equipas Sensação';
+            sensationBtn.setAttribute('aria-label', 'Filtrar equipas sensação com maior ganho de ELO');
             sensationBtn.onclick = filterSensationTeams;
             filtersContainer.appendChild(sensationBtn);
 
             const resetBtn = document.createElement('button');
             resetBtn.className = 'filter-btn';
             resetBtn.textContent = 'Resetar Filtro';
+            resetBtn.setAttribute('aria-label', 'Resetar filtros de equipas');
             resetBtn.onclick = resetFilter;
             filtersContainer.appendChild(resetBtn);
         }
@@ -6416,7 +6527,7 @@
                 const history = sampleData.eloHistory[team.name];
                 const currentElo = history && history.length > 0
                     ? history[history.length - 1]
-                    : (team.initialElo || 1500);
+                    : (team.initialElo || DEFAULT_ELO);
 
                 return {
                     name: team.name,
@@ -6493,8 +6604,8 @@
                     return {
                         name: team.name,
                         gain: 0,
-                        initial: team.initialElo || 1500,
-                        current: team.initialElo || 1500
+                        initial: team.initialElo || DEFAULT_ELO,
+                        current: team.initialElo || DEFAULT_ELO
                     };
                 }
 
@@ -8050,6 +8161,18 @@
             }
 
             /**
+             * Cria chave de data timezone-safe usando data local (não UTC)
+             * Formato: "yyyymmdd" (ex: "20251027")
+             */
+            _getLocalDateKey(date) {
+                if (!date) return '';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}${month}${day}`;
+            }
+
+            /**
              * Processa dados de histórico ELO
              */
             process(data, initialElosFromFile = {}, previousSeasonTeams = new Set()) {
@@ -8247,7 +8370,7 @@
              */
             _setInitialElo(teamName, fileElo, gameElo) {
                 if (!this.teamInitialElo[teamName]) {
-                    this.teamInitialElo[teamName] = fileElo || gameElo || 1500;
+                    this.teamInitialElo[teamName] = fileElo || gameElo || DEFAULT_ELO;
                 }
             }
 
@@ -8291,8 +8414,8 @@
                         this.gamesDatesList[roundNum] = [];
                     }
                     // Adicionar data se ainda não estiver na lista
-                    const dateStr = gameDate.toISOString();
-                    if (!this.gamesDatesList[roundNum].some(d => d.toISOString() === dateStr)) {
+                    const dateStr = this._getLocalDateKey(gameDate);
+                    if (!this.gamesDatesList[roundNum].some(d => this._getLocalDateKey(d) === dateStr)) {
                         this.gamesDatesList[roundNum].push(gameDate);
                     }
                 }
@@ -8357,7 +8480,7 @@
                 this.dateToRoundMapping = {};
                 Object.keys(this.gamesDatesList).forEach(roundNum => {
                     this.gamesDatesList[roundNum].forEach(date => {
-                        const dateKey = date.toISOString();
+                        const dateKey = this._getLocalDateKey(date);
                         if (!this.dateToRoundMapping[dateKey]) {
                             this.dateToRoundMapping[dateKey] = [];
                         }
@@ -8368,7 +8491,7 @@
                 // Criar lista ordenada de jornadas por ordem cronológica (para referência)
                 this.roundsByDateOrder = [];
                 chronologicalDates.forEach(date => {
-                    const dateKey = date.toISOString();
+                    const dateKey = this._getLocalDateKey(date);
                     if (this.dateToRoundMapping[dateKey]) {
                         this.dateToRoundMapping[dateKey].forEach(round => {
                             if (!this.roundsByDateOrder.includes(round)) {
@@ -8436,7 +8559,8 @@
                 // 1. Coletar todas as equipas
                 const allTeamsWithGames = new Set([
                     ...Object.keys(this.teamEloByRound),
-                    ...Object.keys(this.teamInterGroupAdjustments)
+                    ...Object.keys(this.teamInterGroupAdjustments),
+                    ...Object.keys(initialElosFromFile)
                 ]);
 
                 // Adicionar equipas de playoffs
@@ -8499,7 +8623,7 @@
                 const gamesCountByTeamByDate = new Map(); // dateKey -> {teamName -> count}
 
                 allGames.forEach(game => {
-                    const dateKey = game.date ? game.date.toDateString() : 'unknown';
+                    const dateKey = game.date ? this._getLocalDateKey(game.date) : 'unknown';
 
                     if (!gamesByDate.has(dateKey)) {
                         gamesByDate.set(dateKey, []);
@@ -8538,7 +8662,7 @@
                 });                // 5. Inicializar histórico de cada equipa
                 const teamCurrentElo = {}; // ELO atual de cada equipa
                 allTeamsWithGames.forEach(teamName => {
-                    const initialElo = initialElosFromFile[teamName] || this.teamInitialElo[teamName] || 1500;
+                    const initialElo = initialElosFromFile[teamName] || this.teamInitialElo[teamName] || DEFAULT_ELO;
                     teamCurrentElo[teamName] = initialElo;
                     sampleData.eloHistory[teamName] = [initialElo];
                 });
@@ -8606,7 +8730,7 @@
                 // 6. Processar equipas que não jogaram (nem fase regular nem playoffs nem ajustes)
                 sampleData.teams.forEach(team => {
                     if (!sampleData.eloHistory[team.name]) {
-                        const initialElo = initialElosFromFile[team.name] || this.teamInitialElo[team.name] || 1500;
+                        const initialElo = initialElosFromFile[team.name] || this.teamInitialElo[team.name] || DEFAULT_ELO;
                         sampleData.eloHistory[team.name] = [initialElo, ...Array(allDates.length).fill(initialElo)];
                     }
                 });
