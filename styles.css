@@ -1,0 +1,2170 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #667eea;
+}
+
+.header h1 {
+  color: #333;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header p {
+  color: #666;
+  font-size: 1.1em;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 30px;
+  margin-bottom: 30px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.quick-filters {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 5px;
+  /* Firefox scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #f1f1f1;
+}
+
+/* WebKit scrollbar styling (Chrome, Safari, Edge) */
+.quick-filters::-webkit-scrollbar {
+  height: 8px;
+}
+
+.quick-filters::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.quick-filters::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+}
+
+.quick-filters::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+.filter-btn {
+  padding: 6px 12px;
+  flex-shrink: 0;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 0.8em;
+  height: fit-content;
+}
+
+.filter-btn:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.filter-btn:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+  font-size: 1.3em;
+  color: #333;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-title::before {
+  content: "";
+  width: 4px;
+  height: 25px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+.chart-card {
+  grid-column: span 2;
+}
+
+.ranking-card {
+  grid-column: span 2;
+}
+
+.chart-wrapper {
+  position: relative;
+  margin-top: 20px;
+}
+
+.chart-container {
+  position: relative;
+  height: 550px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-left: 30px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.zoom-controls {
+  position: static;
+  display: flex;
+  gap: 8px;
+}
+
+.zoom-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  color: #667eea;
+}
+
+.zoom-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1);
+}
+
+.zoom-btn.active {
+  background: #667eea;
+  color: white;
+}
+
+.zoom-btn:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+.team-selector {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.team-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  pointer-events: all;
+  backdrop-filter: blur(5px);
+  font-size: 0.75em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 26px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin: 1px;
+}
+
+.team-checkbox:hover {
+  border-color: #667eea;
+  transform: translateY(-2px) scale(1.05);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.team-checkbox.active {
+  background: rgba(102, 126, 234, 0.95);
+  color: white;
+  border-color: transparent;
+  font-weight: 500;
+}
+
+.team-checkbox.active:hover {
+  background: rgba(102, 126, 234, 1);
+}
+
+.team-checkbox input {
+  display: none;
+}
+
+.team-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.team-emblem {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  object-fit: contain;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.team-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Layouts adaptativos para diferentes números de equipas */
+.team-selector.many-teams .team-checkbox {
+  font-size: 0.8em;
+  padding: 4px 8px;
+  min-height: 26px;
+}
+
+.team-selector.many-teams .team-dot {
+  width: 10px;
+  height: 10px;
+}
+
+/* Controles de seleção rápida */
+.quick-control-btn {
+  padding: 6px 12px;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.quick-control-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.quick-control-btn:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+/* Labels dinâmicos posicionados no final das linhas */
+.team-end-labels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.team-end-label {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 2px 6px;
+  font-size: 0.75em;
+  font-weight: 500;
+  white-space: nowrap;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-50%);
+  transition: all 0.3s ease;
+  display: none;
+  z-index: 10;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-end-label.visible {
+  display: block;
+}
+
+.team-end-label.group-label {
+  background: rgba(255, 255, 255, 0.98);
+  font-weight: 600;
+  border-width: 3px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  max-width: 200px;
+}
+
+.team-end-label:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.05);
+  z-index: 20;
+  max-width: none;
+  overflow: visible;
+}
+
+.previous-season-btn {
+  position: absolute;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+#chartjs-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  padding: 12px;
+  pointer-events: none;
+  transition: all 0.1s ease;
+  z-index: 9999;
+  font-size: 0.9em;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#chartjs-tooltip .tooltip-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#chartjs-tooltip .tooltip-body {
+  margin: 6px 0;
+}
+
+#chartjs-tooltip .tooltip-body div {
+  margin: 4px 0;
+}
+
+#chartjs-tooltip .tooltip-footer {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ccc;
+  font-size: 0.9em;
+}
+
+.next-season-btn {
+  position: absolute;
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.season-nav-btn:hover {
+  transform: scale(1.05);
+}
+
+.season-nav-btn:active {
+  transform: scale(0.98);
+}
+
+.previous-season-btn:hover {
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.next-season-btn:hover {
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.6);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
+
+.previous-season-btn:focus-visible,
+.next-season-btn:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.25);
+}
+
+.rankings-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 0.9em;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rankings-table th,
+.rankings-table td {
+  padding: 1px 4px;
+  text-align: center;
+  line-height: 44px;
+  height: 46px;
+  box-sizing: border-box;
+  margin: 0;
+  position: relative;
+}
+
+.rankings-table th:nth-child(2),
+.rankings-table td:nth-child(2) {
+  text-align: left;
+  white-space: nowrap;
+  line-height: 44px;
+  height: 46px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.rankings-table th:nth-child(2) {
+  text-align: center;
+  padding: 1px 4px;
+}
+
+.rankings-table tbody tr:last-child td {
+  border-bottom: none;
+  padding-bottom: 3px;
+}
+
+.rankings-table th {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9em;
+}
+
+.rankings-table th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.rankings-table th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.rankings-table tr:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+/* Novos badges com indicadores de progressão integrados */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9em;
+  position: relative;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.rank-badge:hover {
+  transform: scale(1.1);
+}
+
+/* Cores base dos rankings removidas - agora usamos apenas as cores de progressão */
+
+/* Indicadores de progressão com cores completas de fundo */
+.rank-badge.progression-playoffs {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border: 2px solid #1e7e34;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+}
+
+.rank-badge.progression-maintenance-playoffs {
+  background: linear-gradient(135deg, #ffc107, #ff9800);
+  border: 2px solid #e68900;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+}
+
+.rank-badge.progression-maintenance-league {
+  background: linear-gradient(135deg, #ff9800, #ff6f00);
+  border: 2px solid #e65100;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
+}
+
+/* Playoff/Liguilha de Promoção (2ª divisão) - Azul claro */
+.rank-badge.progression-promotion-playoffs {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  border: 2px solid #0f6674;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.4);
+}
+
+.rank-badge.progression-promotion-league {
+  background: linear-gradient(135deg, #20c997, #17a085);
+  border: 2px solid #0e7c68;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.4);
+}
+
+.rank-badge.progression-promotion {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border: 2px solid #004085;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4);
+}
+
+.rank-badge.progression-relegation {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  border: 2px solid #a71e2a;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+  animation: pulse-danger 2s infinite;
+}
+
+.rank-badge.progression-safe {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  border: 2px solid #495057;
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Animação para zona de descida */
+@keyframes pulse-danger {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.4),
+      0 2px 12px rgba(220, 53, 69, 0.3);
+  }
+}
+
+/* Célula da posição volta ao normal */
+.rankings-table td:first-child {
+  position: relative;
+  padding-right: 12px;
+}
+
+/* Legenda dos indicadores */
+.progression-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(248, 249, 250, 0.8)
+  );
+  border-radius: 10px;
+  font-size: 0.87em;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.legend-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: white;
+  font-size: 0.7em;
+  font-weight: bold;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.legend-badge.legend-playoffs {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border: 2px solid #1e7e34;
+}
+
+.legend-badge.legend-maintenance-playoffs {
+  background: linear-gradient(135deg, #ffc107, #ff9800);
+  border: 2px solid #e68900;
+}
+
+.legend-badge.legend-maintenance-league {
+  background: linear-gradient(135deg, #ff9800, #ff6f00);
+  border: 2px solid #e65100;
+}
+
+/* Playoff/Liguilha de Promoção (2ª divisão) - Azul claro */
+.legend-badge.legend-promotion-playoffs {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  border: 2px solid #0f6674;
+}
+
+.legend-badge.legend-promotion-league {
+  background: linear-gradient(135deg, #20c997, #17a085);
+  border: 2px solid #0e7c68;
+}
+
+.legend-badge.legend-promotion {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border: 2px solid #004085;
+}
+
+.legend-badge.legend-relegation {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  border: 2px solid #a71e2a;
+}
+
+.legend-badge.legend-safe {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  border: 2px solid #495057;
+}
+
+.team-emblem-table {
+  width: 68px;
+  height: 68px;
+  border-radius: 6px;
+  margin-right: 10px;
+  object-fit: contain;
+  vertical-align: middle;
+  padding: 4px;
+  box-sizing: border-box;
+  display: inline-block;
+}
+
+/* Ajuste específico para o emblema EGI que não tem margens internas */
+.team-emblem[src*="EGI-07.png"],
+.team-emblem-table[src*="EGI-07.png"] {
+  padding: 19px;
+}
+
+/* Ajuste específico do EGI para emblemas pequenos nos seletores */
+.team-checkbox .team-emblem[src*="EGI-07.png"] {
+  padding: 6px;
+}
+
+.team-color-indicator {
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
+  margin-right: 8px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.team-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left !important;
+  padding: 8px 0;
+}
+
+.team-name-table {
+  font-weight: bold;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.3;
+  max-width: 300px;
+}
+
+.team-info-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.team-elo-info {
+  font-size: 0.75em;
+  color: #999;
+  font-weight: normal;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.division-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.group-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 15px;
+}
+
+.division-btn,
+.group-btn {
+  padding: 10px 20px;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.group-btn {
+  padding: 8px 16px;
+  font-size: 0.9em;
+  border-color: #764ba2;
+  color: #764ba2;
+}
+
+.division-btn.active,
+.division-btn:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.group-btn.active,
+.group-btn:hover {
+  background: linear-gradient(135deg, #764ba2, #667eea);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.division-btn:focus-visible,
+.group-btn:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+.bracket-container {
+  grid-column: span 2;
+  overflow-x: auto;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 15px;
+  margin-top: 20px;
+}
+
+.bracket {
+  display: flex;
+  gap: 30px;
+  min-width: 800px;
+  justify-content: center;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 280px;
+}
+
+.bracket-round h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.bracket-match {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  border-left: 4px solid #667eea;
+}
+
+.bracket-match:hover {
+  transform: translateY(-3px);
+}
+
+.bracket-team {
+  padding: 12px 16px;
+  margin: 3px 0;
+  border-radius: 6px;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  border-left: 4px solid #dee2e6;
+  position: relative;
+}
+
+.bracket-team.winner {
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-left-width: 6px;
+}
+
+.bracket-team:not(.winner):hover {
+  background: #e9ecef;
+  transform: translateX(2px);
+}
+
+.bracket-team-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.bracket-team-emblem {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.bracket-team-emblem[src*="EGI-07.png"] {
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.score {
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+/* Indicadores de ELO no bracket */
+.bracket-elo-change {
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.bracket-elo-change.positive {
+  color: #28a745;
+  background: rgba(40, 167, 69, 0.15);
+}
+
+.bracket-elo-change.negative {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.15);
+}
+
+.unknown-result-indicator {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.unknown-result-indicator small {
+  color: #856404 !important;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+/* Labels de qualificação nos brackets */
+.qualification-label {
+  font-size: 0.7em;
+  color: #666;
+  font-style: italic;
+  padding: 2px 8px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 3px;
+  text-align: center;
+  margin: 2px 0;
+}
+
+.qualification-label-top {
+  margin-bottom: 5px;
+  margin-top: -5px;
+}
+
+.qualification-label-bottom {
+  margin-top: 5px;
+  margin-bottom: -5px;
+}
+
+.bracket-legend {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.bracket-legend h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 0.95em;
+  text-align: center;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.bracket-legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.bracket-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.85em;
+  border-left: 4px solid #667eea;
+}
+
+.bracket-legend-item.playoff {
+  border-left-color: #28a745;
+}
+
+.bracket-legend-item.promotion-playoff,
+.bracket-legend-item.promotion-league {
+  border-left-color: #17a2b8;
+}
+
+.bracket-legend-item.maintenance-playoff,
+.bracket-legend-item.maintenance-league {
+  border-left-color: #ffc107;
+}
+
+.bracket-legend-badge {
+  font-weight: bold;
+  background: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.bracket-league-table {
+  background: white;
+  border-radius: 10px;
+  padding: 35px;
+  margin-top: 20px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bracket-league-table h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.bracket-league-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 17px;
+}
+
+.bracket-league-table th {
+  background: #667eea;
+  color: white;
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.bracket-league-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.bracket-league-table td.team-cell {
+  text-align: left;
+}
+
+.bracket-league-table tr:hover {
+  background: #f8f9fa;
+}
+
+.bracket-league-table .position {
+  font-weight: bold;
+  text-align: center;
+  width: 40px;
+}
+
+.bracket-league-table .team-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bracket-league-table .team-emblem {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  margin-right: 10px;
+}
+
+.bracket-league-table .team-qualification-label {
+  display: inline-block;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-right: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bracket-league-table .qual-1div {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+}
+
+.bracket-league-table .qual-2div {
+  background: #fff3e0;
+  color: #f57c00;
+  border: 1px solid #f57c00;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 0px;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .chart-card,
+  .bracket-container {
+    grid-column: span 1;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .chart-wrapper {
+    height: auto;
+    min-height: 400px;
+    overflow: visible;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .chart-container {
+    height: 350px;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    padding-right: 5px;
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .team-selector {
+    position: relative;
+    width: 100%;
+    height: auto;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    min-width: auto;
+    max-width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    border: 2px solid #e0e0e0;
+    box-shadow: inset 0 -10px 10px -10px rgba(0, 0, 0, 0.1);
+  }
+
+  .team-selector::after {
+    content: "⬍ Scroll para ver mais ⬍";
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, #f8f9fa 50%, transparent);
+    text-align: center;
+    font-size: 0.7em;
+    color: #666;
+    padding: 8px 0 4px;
+    pointer-events: none;
+    display: var(--show-scroll-indicator, block);
+  }
+
+  .team-checkbox {
+    transform: none !important;
+    font-size: 0.75em;
+    padding: 3px 6px;
+    min-height: 24px;
+    margin: 1px;
+    flex-shrink: 0;
+  }
+
+  .team-checkbox .team-emblem {
+    width: 16px;
+    height: 16px;
+  }
+
+  .team-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .team-end-labels {
+    display: none;
+    /* Ocultar labels dinâmicos no mobile */
+  }
+
+  .quick-selection-controls {
+    flex-direction: column;
+    gap: 5px !important;
+  }
+
+  .quick-control-btn {
+    font-size: 0.75em !important;
+    padding: 4px 8px !important;
+  }
+
+  .team-selector.many-teams {
+    max-height: none;
+  }
+
+  .division-selector {
+    flex-wrap: wrap;
+  }
+
+  /* Ajustes para emblemas do calendário de jogos */
+  .game-team-emblem {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .game-team-emblem[src*="EGI-07.png"] {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 8px !important;
+  }
+
+  /* Ajustar navegação de jornadas para alinhar verticalmente */
+  /* Ajustes para a navegação de jornadas */
+  .jornada-navigation {
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Ajustes para o bracket dos playoffs */
+  .bracket-team {
+    padding: 8px 10px;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .bracket-team-content {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .bracket-team-emblem {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .bracket-team-emblem[src*="EGI-07.png"] {
+    padding: 6px !important;
+  }
+
+  .bracket-team-name {
+    font-size: 0.85em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .score {
+    font-size: 0.85em;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .bracket-elo-change {
+    font-size: 0.65em;
+    padding: 2px 4px;
+    margin-left: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Estilos de calendário de jogos */
+  .game-item {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+
+  .game-date {
+    font-size: 0.8em;
+    min-width: auto;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+
+  .game-teams {
+    flex-direction: column;
+    width: 100%;
+    gap: 0 !important;
+    margin-right: 0;
+    align-items: stretch;
+  }
+
+  .game-team {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    gap: 6px;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+
+  .game-team.home,
+  .game-team.away {
+    justify-content: flex-start;
+    flex-direction: row;
+    text-align: left;
+  }
+
+  .game-team.home .game-team-name {
+    text-align: left;
+  }
+
+  .game-team-name {
+    font-size: 0.8em;
+    width: auto;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .game-team-emblem {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .game-team-emblem[src*="EGI-07.png"] {
+    width: 30px;
+    height: 30px;
+    padding: 6px;
+  }
+
+  .game-elo-change {
+    font-size: 0.7em;
+    padding: 2px 4px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .game-score,
+  .game-vs {
+    min-width: auto;
+    font-size: 1em;
+    flex-shrink: 0;
+    margin: 8px 0;
+    text-align: center;
+  }
+
+  /* Estilos gerais */
+  body {
+    padding: 10px;
+    overflow-x: hidden;
+  }
+
+  .container {
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .header h1 {
+    font-size: 1.8em;
+  }
+
+  .header p {
+    font-size: 0.95em;
+  }
+
+  .modalidade-selector {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modalidade-selector select {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .card {
+    padding: 15px;
+    margin-bottom: 20px;
+    max-width: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .chart-card {
+    margin-bottom: 30px;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .ranking-card {
+    margin-top: 30px;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .card-title {
+    font-size: 1.1em;
+  }
+
+  /* Tabela de classificação */
+  .table-wrapper {
+    overflow-x: auto;
+    margin: 0 -15px;
+    padding: 0 15px;
+    max-width: calc(100vw - 60px);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rankings-table {
+    font-size: 0.75em;
+    white-space: nowrap;
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .rankings-table th,
+  .rankings-table td {
+    padding: 6px 2px;
+    line-height: 1.3;
+    height: auto;
+    min-height: 36px;
+  }
+
+  .rankings-table .team-emblem {
+    width: 22px;
+    height: 22px;
+    margin-right: 4px;
+  }
+
+  .rank-badge {
+    width: 22px;
+    height: 22px;
+    font-size: 0.65em;
+  }
+
+  .team-emblem-table {
+    width: 40px !important;
+    height: 40px !important;
+    margin-right: 0 !important;
+    padding: 0px !important;
+  }
+
+  .team-emblem-table[src*="EGI-07.png"] {
+    padding: 9px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .rankings-table td:first-child {
+    padding-right: 0px !important;
+  }
+
+  .team-color-indicator {
+    margin-right: 0px !important;
+  }
+
+  .team-cell {
+    gap: 4px !important;
+  }
+
+  .division-selector,
+  .group-selector {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .division-btn,
+  .group-btn {
+    font-size: 0.8em;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+
+  .calendar-controls {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .jornada-navigation {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .jornada-title {
+    order: 0;
+    flex: 1;
+    text-align: center;
+    font-size: 1.2em;
+    min-width: 0;
+  }
+
+  .jornada-arrow-container {
+    flex-shrink: 0;
+    justify-content: center;
+  }
+
+  .jornada-arrow {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3em;
+    padding: 2px;
+  }
+
+  .calendar-card {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+    grid-column: span 1;
+  }
+
+  .games-list {
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .bracket-container {
+    overflow-x: auto;
+  }
+
+  .bracket {
+    min-width: 600px;
+  }
+
+  .bracket-round {
+    min-width: 140px;
+  }
+
+  .match {
+    min-height: 60px;
+    margin: 8px 0;
+  }
+
+  .match-team {
+    font-size: 0.75em;
+    padding: 6px;
+  }
+
+  .zoom-controls {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .zoom-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .filter-btn {
+    font-size: 0.75em;
+    padding: 5px 10px;
+  }
+
+  .progression-legend {
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 1em;
+  }
+
+  .legend-item {
+    font-size: 0.7em;
+  }
+
+  .chart-container {
+    height: 350px;
+    padding-left: 10px;
+  }
+
+  .chart-container canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .chart-header .card-title {
+    width: 100%;
+  }
+
+  .zoom-controls {
+    align-self: flex-end;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.1em;
+  color: #666;
+}
+
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+.modalidade-selector {
+  text-align: center;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.modalidade-selector label {
+  font-weight: 600;
+  margin-right: 8px;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.modalidade-selector select {
+  padding: 10px 16px;
+  border: 2px solid #667eea;
+  border-radius: 12px;
+  font-size: 1em;
+  cursor: pointer;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.modalidade-selector select:hover {
+  border-color: #764ba2;
+  background: #f7f7ff;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Estilos do Calendário de Jogos */
+.calendar-card {
+  margin-top: 30px;
+  grid-column: 1 / -1;
+  /* Ocupa toda a largura do grid */
+}
+
+.calendar-controls {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.jornada-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.jornada-arrow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.jornada-arrow {
+  background: transparent;
+  color: #667eea;
+  border: none;
+  width: auto;
+  height: auto;
+  font-size: 2em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 5px 15px;
+  font-weight: bold;
+}
+
+.jornada-arrow:hover:not(:disabled) {
+  color: #764ba2;
+  transform: scale(1.2);
+}
+
+.jornada-arrow:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.jornada-arrow:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.epoca-switch-label {
+  font-size: 0.75em;
+  color: #667eea;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.epoca-switch-label:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
+}
+
+.jornada-title {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #333;
+  min-width: 180px;
+  text-align: center;
+}
+
+.games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.game-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.game-item:hover {
+  background: #e9ecef;
+  border-color: #667eea;
+  transform: translateX(2px);
+}
+
+.game-item.played {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.game-item.not-played {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.game-date {
+  min-width: 100px;
+  font-size: 0.9em;
+  color: #666;
+  font-weight: 500;
+  flex-shrink: 0;
+  align-content: center;
+}
+
+.game-teams {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-right: 135px;
+}
+
+.game-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 320px;
+}
+
+.game-team.home {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.game-team.away {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.game-team-emblem {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.game-team-emblem[src*="EGI-07.png"] {
+  width: 66px;
+  height: 66px;
+  padding: 15px;
+}
+
+.game-team-name {
+  font-weight: 600;
+  color: #333;
+  width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-team.home .game-team-name {
+  text-align: right;
+}
+
+.game-team.away .game-team-name {
+  text-align: left;
+}
+
+.game-elo-change {
+  font-size: 0.85em;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.game-elo-change.positive {
+  color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.game-elo-change.negative {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.game-score {
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #333;
+  min-width: 80px;
+  text-align: center;
+}
+
+.game-vs {
+  color: #999;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.no-games-message {
+  text-align: center;
+  color: #666;
+  padding: 40px;
+  font-size: 1.1em;
+}
+
+/* Media queries para tablets (landscape) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 20px;
+  }
+
+  .dashboard-grid {
+    gap: 20px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .rankings-table {
+    font-size: 0.85em;
+  }
+
+  .chart-container {
+    height: 450px;
+  }
+}
+
+/* Media queries para telas muito pequenas */
+@media (max-width: 480px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .header h1 {
+    font-size: 1.5em;
+  }
+
+  .card {
+    padding: 12px;
+    margin-bottom: 15px;
+    max-width: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .chart-card {
+    margin-bottom: 25px;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .ranking-card {
+    margin-top: 25px;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .chart-container {
+    padding-left: 5px;
+    padding-right: 5px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .chart-container canvas {
+    max-width: 100%;
+  }
+
+  .table-wrapper {
+    padding: 0 4px;
+    max-width: calc(100vw - 44px);
+  }
+
+  .rankings-table {
+    font-size: 0.7em;
+  }
+
+  .rankings-table th,
+  .rankings-table td {
+    padding: 4px 1px;
+    min-height: 32px;
+  }
+
+  .rankings-table .team-emblem {
+    width: 20px;
+    height: 20px;
+  }
+
+  .rank-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 0.6em;
+  }
+
+  .division-btn,
+  .group-btn {
+    font-size: 0.75em;
+    padding: 5px 8px;
+  }
+
+  .team-selector {
+    max-height: 180px;
+    padding: 10px;
+    gap: 4px;
+  }
+
+  .team-checkbox {
+    font-size: 0.7em;
+    padding: 2px 5px;
+    min-height: 22px;
+  }
+
+  .team-checkbox .team-emblem {
+    width: 14px;
+    height: 14px;
+  }
+
+  .team-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .game-item {
+    padding: 0px 24px;
+    gap: 0px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .game-date {
+    font-size: 0.75em;
+    width: 100%;
+    text-align: center;
+  }
+
+  .game-team-emblem {
+    width: 28px;
+    height: 28px;
+  }
+
+  .game-team-emblem[src*="EGI-07.png"] {
+    width: 26px;
+    height: 26px;
+    padding: 5px;
+  }
+
+  .game-score,
+  .game-vs {
+    font-size: 0.95em;
+    margin: 6px 0;
+  }
+
+  .game-team-name {
+    font-size: 0.75em;
+  }
+
+  .game-elo-change {
+    font-size: 0.65em;
+    padding: 1px 3px;
+  }
+
+  .jornada-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2em;
+  }
+
+  .jornada-title {
+    font-size: 1.1em;
+  }
+
+  .bracket {
+    min-width: 500px;
+  }
+
+  .bracket-round {
+    min-width: 120px;
+  }
+
+  .match-team {
+    font-size: 0.7em;
+    padding: 4px;
+  }
+
+  .modalidade-selector label {
+    font-size: 1em;
+  }
+
+  .modalidade-selector select {
+    font-size: 0.9em;
+  }
+}
