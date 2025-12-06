@@ -1,23 +1,23 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
-1,,1,Fisioterapia,7,3,2,1,0,8,3,5,0
-1,,2,EGI,7,3,2,1,0,6,4,2,0
-1,,3,Contabilidade,6,3,2,0,1,7,3,4,0
-1,,4,Economia,6,2,2,0,0,5,2,3,0
-1,,5,GPT,6,2,2,0,0,3,0,3,0
-1,,6,Finanças,4,3,1,1,1,11,8,3,0
-1,,7,Biotecnologia,4,3,1,1,1,4,3,1,0
-1,,8,Eng. Mecânica,3,2,1,0,1,3,3,0,0
+1,,1,GPT,9,3,3,0,0,11,1,10,0
+1,,2,Fisioterapia,7,3,2,1,0,8,3,5,0
+1,,3,EGI,7,3,2,1,0,6,4,2,0
+1,,4,Eng. Mecânica,6,3,2,0,1,9,4,5,0
+1,,5,Economia,6,3,2,0,1,6,10,-4,0
+1,,6,Contabilidade,6,3,2,0,1,7,3,4,0
+1,,7,Finanças,4,3,1,1,1,11,8,3,0
+1,,8,Biotecnologia,4,3,1,1,1,4,3,1,0
 1,,9,ECT,3,3,1,0,2,3,5,-2,0
 1,,10,Administração Pública,0,3,0,0,3,1,6,-5,0
 1,,11,EET,0,3,0,0,3,1,7,-6,0
-1,,12,Eng. Biomédica,0,2,0,0,2,4,12,-8,0
-2,A,1,Eng. Materiais,9,3,3,0,0,19,3,16,0
-2,A,2,Eng. Mecânica B,4,2,1,1,0,8,1,7,0
-2,A,3,Tecnologias de Informação,4,2,1,1,0,5,2,3,0
-2,A,4,Eng. Computacional,3,2,1,0,1,4,4,0,0
-2,A,5,Eng. Informática ,3,3,1,0,2,6,7,-1,0
-2,A,6,Geologia,3,2,1,0,1,6,13,-7,0
-2,A,7,Biologia,0,1,0,0,1,1,5,-4,0
+1,,12,Eng. Biomédica,0,3,0,0,3,5,18,-13,0
+2,A,1,Eng. Materiais,12,4,4,0,0,23,3,20,0
+2,A,2,Tecnologias de Informação,7,3,2,1,0,10,3,7,0
+2,A,3,Eng. Mecânica B,4,2,1,1,0,8,1,7,0
+2,A,4,Eng. Informática ,4,4,1,1,2,9,10,-1,0
+2,A,5,Geologia,4,3,1,1,1,9,16,-7,0
+2,A,6,Eng. Computacional,3,3,1,0,2,5,9,-4,0
+2,A,7,Biologia,0,2,0,0,2,1,9,-8,0
 2,A,8,Eng. Física,0,3,0,0,3,1,15,-14,0
 2,B,1,Gestão,9,3,3,0,0,21,0,21,0
 2,B,2,Eng. Química,9,3,3,0,0,12,2,10,0
