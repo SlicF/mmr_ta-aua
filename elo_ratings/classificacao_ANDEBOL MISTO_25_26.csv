@@ -10,15 +10,15 @@ Divisao,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,gol
 1,9,Eng. Informática ,4,2,1,0,1,42,46,-4,0
 1,10,Fisioterapia,3,3,0,0,3,41,98,-57,0
 1,11,Eng. Física,2,2,0,0,2,42,55,-13,0
-2,1,Biologia e Geologia,9,3,3,0,0,58,32,26,0
-2,2,Eng. Biomédica,9,3,3,0,0,69,45,24,0
-2,3,Economia,9,3,3,0,0,67,59,8,0
-2,4,DPT,7,3,2,0,1,65,54,11,0
-2,5,Ciências do Mar,7,3,2,0,1,57,51,6,0
-2,6,Gestão,7,3,2,0,1,62,56,6,0
-2,7,Administração Pública,7,3,2,0,1,41,43,-2,0
-2,8,Matemática,5,3,1,0,2,57,58,-1,0
-2,9,MTC,3,3,0,0,3,48,59,-11,0
-2,10,Biologia,3,3,0,0,3,39,58,-19,0
-2,11,Psicologia,3,3,0,0,3,42,63,-21,0
-2,12,Educação Básica,3,3,0,0,3,43,70,-27,0
+2,1,Biologia e Geologia,12,4,4,0,0,89,55,34,0
+2,2,Gestão,10,4,3,0,1,88,79,9,0
+2,3,Eng. Biomédica,9,3,3,0,0,69,45,24,0
+2,4,Economia,9,3,3,0,0,67,59,8,0
+2,5,Administração Pública,9,4,2,1,1,62,64,-2,0
+2,6,DPT,7,3,2,0,1,65,54,11,0
+2,7,Ciências do Mar,7,3,2,0,1,57,51,6,0
+2,8,Matemática,7,4,1,1,2,78,79,-1,0
+2,9,Educação Básica,6,4,1,0,3,60,85,-25,0
+2,10,MTC,4,4,0,0,4,71,90,-19,0
+2,11,Biologia,4,4,0,0,4,54,75,-21,0
+2,12,Psicologia,4,4,0,0,4,65,89,-24,0
