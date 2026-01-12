@@ -1890,6 +1890,104 @@ function getQualifiedTeams(forceRefresh = false) {
         return qualified;
     }
 
+    // Apenas grupos (sem divisões) - rotular por posição no grupo
+    if (structure.type === 'groups-only') {
+        // Agrupar a partir de todas as tabelas disponíveis (não apenas 'geral')
+        const rankingAll = Object.values(sampleData.rankings || {}).flat();
+
+        // Ordenação que respeita posição explícita do CSV antes de tie-break por pontos
+        const sortByPositionThenPoints = (a, b) => {
+            const hasPosA = a.position !== null && a.position !== undefined;
+            const hasPosB = b.position !== null && b.position !== undefined;
+
+            if (hasPosA && hasPosB) return a.position - b.position;
+            if (hasPosA) return -1;
+            if (hasPosB) return 1;
+
+            if (b.points !== a.points) return b.points - a.points;
+            const diffA = (a.goals || 0) - (a.conceded || 0);
+            const diffB = (b.goals || 0) - (b.conceded || 0);
+            return diffB - diffA;
+        };
+
+        // Mapear equipas para posição no grupo
+        const groupsMap = {};
+        rankingAll.forEach(entry => {
+            const grp = entry.group;
+            if (!grp) return;
+            if (!groupsMap[grp]) groupsMap[grp] = [];
+            groupsMap[grp].push(entry);
+        });
+
+        // Ordenar cada grupo e adicionar legendas
+        Object.entries(groupsMap).forEach(([grp, grpRanking]) => {
+            grpRanking.sort(sortByPositionThenPoints);
+
+            grpRanking.forEach((entry, idx) => {
+                const posFromCsv = entry.position && !isNaN(parseInt(entry.position)) ? parseInt(entry.position) : null;
+                const computedPos = idx + 1;
+                const finalPos = posFromCsv || computedPos;
+
+                qualified.legend.push({
+                    position: finalPos,
+                    actualPosition: finalPos,
+                    team: entry.team,
+                    type: 'playoff',
+                    group: grp
+                });
+            });
+        });
+
+        // Gerar seeds de playoffs por cruzamento entre grupos (1A x 4B, 2A x 3B, 1B x 4A, 2B x 3A)
+        const groupKeys = Object.keys(groupsMap).sort(); // ordenação estável (A, B, ...)
+        const hasTwoGroups = groupKeys.length === 2;
+
+        if (hasTwoGroups) {
+            const [gA, gB] = groupKeys;
+            const topA = (groupsMap[gA] || []).slice(0, 4);
+            const topB = (groupsMap[gB] || []).slice(0, 4);
+
+            // Só semear se ambos têm pelo menos 4 equipas
+            if (topA.length === 4 && topB.length === 4) {
+                // Ordem alinhada com createPredictedBracket (1 vs 8, 4 vs 5, 2 vs 7, 3 vs 6):
+                // 1A vs 4B, 1B vs 4A, 2B vs 3A, 2A vs 3B
+                qualified.playoffs = [
+                    topA[0]?.team, // idx0 -> 1A (vs idx7)
+                    topB[0]?.team, // idx1 -> 1B (vs idx6)
+                    topB[1]?.team, // idx2 -> 2B (vs idx5)
+                    topA[1]?.team, // idx3 -> 2A (vs idx4)
+                    topB[2]?.team, // idx4 -> 3B
+                    topA[2]?.team, // idx5 -> 3A
+                    topA[3]?.team, // idx6 -> 4A
+                    topB[3]?.team  // idx7 -> 4B
+                ].filter(Boolean);
+            }
+        }
+
+        // Fallback: se não for 2 grupos ou faltarem equipas, usar top 8 globalmente mas respeitando grupo
+        if (!qualified.playoffs || qualified.playoffs.length < 8) {
+            const sortedAll = [...rankingAll].sort(sortByPositionThenPoints);
+
+            // Manter alternância A/B sempre que possível: 1A,1B,2A,2B,3A,3B,4A,4B
+            const altSeeds = [];
+            const byGroup = {};
+            sortedAll.forEach(entry => {
+                if (!byGroup[entry.group]) byGroup[entry.group] = [];
+                byGroup[entry.group].push(entry);
+            });
+            const groups = Object.keys(byGroup).sort();
+            for (let pos = 0; pos < 4; pos++) {
+                groups.forEach(g => {
+                    if (byGroup[g][pos]) altSeeds.push(byGroup[g][pos].team);
+                });
+            }
+
+            qualified.playoffs = (altSeeds.length >= 8 ? altSeeds.slice(0, 8) : sortedAll.slice(0, 8).map(t => t.team));
+        }
+
+        return qualified;
+    }
+
     // Sistema com divisões
     if (structure.hasDivisions) {
         DebugUtils.debugQualification('has_divisions');
@@ -2184,6 +2282,22 @@ function resolveTeamName(teamName) {
         // Se não tem divisão (single-league), criar mapeamento dos placeholders hardcoded no CSV
         if (!item.division) {
             placeholder = `${item.position}º Class. 1ª Div.`;
+            // Suporte adicional: épocas com grupos sem divisão
+            if (item.group) {
+                const grp = item.group;
+                const keys = [
+                    `${item.position}º Gr. ${grp}`,
+                    `${item.position}º Grupo ${grp}`,
+                    `${item.position}º Class. Gr. ${grp}`,
+                    `${item.position}º Class. Grupo ${grp}`,
+                    // Alguns CSVs antigos incluem "1ª Div." mesmo em liga única
+                    `${item.position}º 1ª Div. Gr. ${grp}`,
+                    `${item.position}º 1ª Div. Grupo ${grp}`,
+                    `${item.position}º Class. 1ª Div. Gr. ${grp}`,
+                    `${item.position}º Class. 1ª Div. Grupo ${grp}`
+                ];
+                keys.forEach(k => { qualifiedMap[k] = item.team; });
+            }
         } else if (item.division === '1ª') {
             placeholder = `${item.position}º Class. 1ª Div.`;
         } else if (item.division === '2ª') {
@@ -2380,6 +2494,21 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
         // Se não tem divisão (single-league), criar mapeamento dos placeholders hardcoded no CSV
         if (!item.division) {
             placeholder = `${item.position}º Class. 1ª Div.`;
+            // Suporte adicional: épocas com grupos sem divisão
+            if (item.group) {
+                const grp = item.group;
+                const keys = [
+                    `${item.position}º Gr. ${grp}`,
+                    `${item.position}º Grupo ${grp}`,
+                    `${item.position}º Class. Gr. ${grp}`,
+                    `${item.position}º Class. Grupo ${grp}`,
+                    `${item.position}º 1ª Div. Gr. ${grp}`,
+                    `${item.position}º 1ª Div. Grupo ${grp}`,
+                    `${item.position}º Class. 1ª Div. Gr. ${grp}`,
+                    `${item.position}º Class. 1ª Div. Grupo ${grp}`
+                ];
+                keys.forEach(k => { qualifiedMap[k] = item.team; });
+            }
         } else if (item.division === '1ª') {
             placeholder = `${item.position}º Class. 1ª Div.`;
         } else if (item.division === '2ª') {
@@ -3020,6 +3149,9 @@ function createBracket() {
 
     container.innerHTML = '';
 
+    // Analisar estrutura para decidir como exibir labels (liga única vs divisões/grupos)
+    const structure = analyzeModalityStructure();
+
     // Obter mapa de equipas qualificadas para mostrar labels - forçar refresh
     const qualified = getQualifiedTeams(true);
     DebugUtils.debugBracket('qualified_teams', qualified);
@@ -3055,16 +3187,54 @@ function createBracket() {
                 thirdPlaceHeader.textContent = '3º Lugar';
                 thirdPlaceHeader.style.cssText = `
                             text-align: center;
-                            color: #666;
-                            margin: 30px 0 10px 0;
+                            color: rgb(102, 102, 102);
+                            margin: 30px 0px -20px !important;
                             padding: 8px;
-                            background: #f5f5f5;
+                            background: rgb(245, 245, 245);
                             border-radius: 8px;
                             font-weight: 600;
                             font-size: 0.9em;
                         `;
                 roundDiv.appendChild(thirdPlaceHeader);
             }
+
+            // Criar wrapper para o identificador + card do jogo
+            const matchWrapper = document.createElement('div');
+            matchWrapper.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                margin-top: 3px;
+            `;
+
+            // Adicionar identificador do jogo ANTES do card (QF1-4, MF1-2)
+            // Estrutura do bracket: QF1 vs QF4 -> MF1, QF2 vs QF3 -> MF2
+            let matchIdentifier = '';
+            if (round === 'Quartos de Final') {
+                // Mapear visualmente: índice 0->QF1, 1->QF4, 2->QF2, 3->QF3
+                const qfMapping = [1, 4, 2, 3];
+                matchIdentifier = `QF${qfMapping[index]}`;
+            } else if (round === 'Meias-Finais') {
+                matchIdentifier = `MF${index + 1}`;
+            } else if (round === 'Final') {
+                // Adicionar espaço vazio para alinhamento
+                matchIdentifier = ' '; // espaço invisível
+            }
+
+            const idLabel = document.createElement('div');
+            idLabel.className = 'match-id-label';
+            idLabel.textContent = matchIdentifier && matchIdentifier.trim()
+                ? matchIdentifier
+                : '\u00A0'; // espaço não quebrável se vazio
+            idLabel.style.cssText = `
+                font-size: 0.75em;
+                color: #2a5298;
+                margin: 0;
+                padding: 0 0 0 2px;
+                line-height: 1;
+                min-height: 1em;
+            `;
+            matchWrapper.appendChild(idLabel);
 
             const matchDiv = document.createElement('div');
             matchDiv.className = 'bracket-match';
@@ -3113,14 +3283,36 @@ function createBracket() {
                         ${elo1Html}
                     `;
 
-            // Adicionar label de qualificação acima da equipa 1 (mesma lógica da liguilha - todas as rondas)
-            const legendItem1 = qualified.legend.find(item =>
+            // Adicionar label de qualificação acima da equipa 1 (com fallback por seed em liga única)
+            let legendItem1 = qualified.legend.find(item =>
                 normalizeTeamName(item.team) === normalizeTeamName(resolvedTeam1)
             );
+            if (!legendItem1) {
+                const idx1 = qualified.playoffs.findIndex(t => normalizeTeamName(t) === normalizeTeamName(resolvedTeam1));
+                if (idx1 !== -1) {
+                    legendItem1 = { position: idx1 + 1, division: '1ª' };
+                }
+            }
 
             if (legendItem1) {
                 let qualLabel = '';
-                if (legendItem1.division === '1ª') {
+                console.log('legendItem1', legendItem1);
+                // Garantir posição caso ausente
+                if (!legendItem1.position) {
+                    const idx1 = qualified.playoffs.findIndex(t => normalizeTeamName(t) === normalizeTeamName(resolvedTeam1));
+                    if (idx1 !== -1) legendItem1.position = idx1 + 1;
+                }
+
+                // Liga única: mostrar apenas posição (sem mencionar divisão)
+                if (structure.type === 'single-league') {
+                    qualLabel = `${legendItem1.position}º da Liga`;
+                }
+                // Grupos sem divisões: priorizar mostrar grupo
+                else if (legendItem1.group) {
+                    qualLabel = `${legendItem1.actualPosition || legendItem1.position}º Gr. ${legendItem1.group}`;
+                }
+                // Divisões convencionais
+                else if (legendItem1.division === '1ª') {
                     qualLabel = `${legendItem1.position}º 1ª Div`;
                 } else if (legendItem1.division === '2ª') {
                     if (legendItem1.group) {
@@ -3128,7 +3320,11 @@ function createBracket() {
                     } else {
                         qualLabel = `${legendItem1.actualPosition || legendItem1.position}º 2ª Div`;
                     }
+                } else {
+                    // Fallback: só posição
+                    qualLabel = `${legendItem1.position}º`;
                 }
+
 
                 if (qualLabel) {
                     const label1 = document.createElement('div');
@@ -3170,14 +3366,36 @@ function createBracket() {
             matchDiv.appendChild(team1Div);
             matchDiv.appendChild(team2Div);
 
-            // Adicionar label de qualificação abaixo da equipa 2 (mesma lógica da liguilha - todas as rondas)
-            const legendItem2 = qualified.legend.find(item =>
+            // Adicionar label de qualificação abaixo da equipa 2 (com fallback por seed em liga única)
+            let legendItem2 = qualified.legend.find(item =>
                 normalizeTeamName(item.team) === normalizeTeamName(resolvedTeam2)
             );
+            if (!legendItem2) {
+                const idx2 = qualified.playoffs.findIndex(t => normalizeTeamName(t) === normalizeTeamName(resolvedTeam2));
+                if (idx2 !== -1) {
+                    legendItem2 = { position: idx2 + 1, division: '1ª' };
+                }
+            }
 
             if (legendItem2) {
                 let qualLabel = '';
-                if (legendItem2.division === '1ª') {
+                console.log('legendItem2:', legendItem2.division);
+                // Garantir posição caso ausente
+                if (!legendItem2.position) {
+                    const idx2 = qualified.playoffs.findIndex(t => normalizeTeamName(t) === normalizeTeamName(resolvedTeam2));
+                    if (idx2 !== -1) legendItem2.position = idx2 + 1;
+                }
+
+                // Liga única: mostrar apenas posição (sem mencionar divisão)
+                if (structure.type === 'single-league') {
+                    qualLabel = `${legendItem2.position}º da Liga`;
+                }
+                // Grupos sem divisões: priorizar mostrar grupo
+                else if (legendItem2.group) {
+                    qualLabel = `${legendItem2.actualPosition || legendItem2.position}º Gr. ${legendItem2.group}`;
+                }
+                // Divisões convencionais
+                else if (legendItem2.division === '1ª') {
                     qualLabel = `${legendItem2.position}º 1ª Div`;
                 } else if (legendItem2.division === '2ª') {
                     if (legendItem2.group) {
@@ -3185,6 +3403,9 @@ function createBracket() {
                     } else {
                         qualLabel = `${legendItem2.actualPosition || legendItem2.position}º 2ª Div`;
                     }
+                } else {
+                    // Fallback: só posição
+                    qualLabel = `${legendItem2.position}º`;
                 }
 
                 if (qualLabel) {
@@ -3211,7 +3432,8 @@ function createBracket() {
                 matchDiv.appendChild(unknownIndicator);
             }
 
-            roundDiv.appendChild(matchDiv);
+            matchWrapper.appendChild(matchDiv);
+            roundDiv.appendChild(matchWrapper);
         });
 
         container.appendChild(roundDiv);
@@ -5644,6 +5866,8 @@ function processRankings(data) {
         let mainKey;
         let divisao = row.Divisao || row['Divisão'];
         let grupo = row.Grupo;
+        const posicaoRaw = row.Posicao || row['Posição'] || row.posicao || row['posição'];
+        const explicitPosition = posicaoRaw !== undefined && posicaoRaw !== '' ? parseInt(posicaoRaw) : null;
 
         // Tratar valores vazios ou nan
         if (!divisao || divisao === 'nan' || divisao === 'NaN' || divisao === '') {
@@ -5703,7 +5927,8 @@ function processRankings(data) {
             noShows: parseInt(row.faltas_comparencia) || 0,
             goals: parseInt(row.golos_marcados) || 0,
             conceded: parseInt(row.golos_sofridos) || 0,
-            group: grupo
+            group: grupo,
+            position: explicitPosition
         });
     });
 

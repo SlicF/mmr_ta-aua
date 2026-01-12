@@ -10,7 +10,7 @@ html {
 
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
   min-height: 100vh;
   padding: 20px;
   overflow-x: hidden;
@@ -21,9 +21,9 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
+  border-radius: 8px;
   padding: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(10px);
 }
 
@@ -31,14 +31,14 @@ body {
   text-align: center;
   margin-bottom: 40px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid #2a5298;
 }
 
 .header h1 {
   color: #333;
   font-size: 2.5em;
   margin-bottom: 10px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -69,7 +69,7 @@ body {
   padding-bottom: 5px;
   /* Firefox scrollbar styling */
   scrollbar-width: thin;
-  scrollbar-color: #667eea #f1f1f1;
+  scrollbar-color: #2a5298 #f1f1f1;
 }
 
 /* WebKit scrollbar styling (Chrome, Safari, Edge) */
@@ -79,25 +79,25 @@ body {
 
 .quick-filters::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 10px;
+  border-radius: 4px;
 }
 
 .quick-filters::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 10px;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  border-radius: 4px;
 }
 
 .quick-filters::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #764ba2, #667eea);
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
 }
 
 .filter-btn {
   padding: 6px 12px;
   flex-shrink: 0;
-  border: 2px solid #667eea;
+  border: 2px solid #2a5298;
   background: white;
-  color: #667eea;
-  border-radius: 15px;
+  color: #2a5298;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
@@ -106,28 +106,28 @@ body {
 }
 
 .filter-btn:hover {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: white;
 }
 
 .filter-btn:focus-visible {
-  outline: 3px solid #667eea;
+  outline: 3px solid #2a5298;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.2);
 }
 
 .card {
   background: white;
-  border-radius: 15px;
+  border-radius: 6px;
   padding: 25px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(42, 82, 152, 0.1);
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .card-title {
@@ -143,7 +143,7 @@ body {
   content: "";
   width: 4px;
   height: 25px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
   border-radius: 2px;
 }
 
@@ -183,8 +183,8 @@ body {
 
 .zoom-btn {
   background: rgba(255, 255, 255, 0.9);
-  border: 2px solid #667eea;
-  border-radius: 8px;
+  border: 2px solid #2a5298;
+  border-radius: 4px;
   width: 32px;
   height: 32px;
   cursor: pointer;
@@ -194,17 +194,17 @@ body {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(5px);
-  color: #667eea;
+  color: #2a5298;
 }
 
 .zoom-btn:hover {
-  background: #667eea;
+  background: #2a5298;
   color: white;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .zoom-btn.active {
-  background: #667eea;
+  background: #2a5298;
   color: white;
 }
 
@@ -236,7 +236,7 @@ body {
   padding: 4px 8px;
   background: rgba(255, 255, 255, 0.95);
   border: 2px solid #e9ecef;
-  border-radius: 12px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   user-select: none;
@@ -251,21 +251,21 @@ body {
 }
 
 .team-checkbox:hover {
-  border-color: #667eea;
+  border-color: #2a5298;
   transform: translateY(-2px) scale(1.05);
   background: rgba(255, 255, 255, 1);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .team-checkbox.active {
-  background: rgba(102, 126, 234, 0.95);
+  background: rgba(42, 82, 152, 0.95);
   color: white;
   border-color: transparent;
   font-weight: 500;
 }
 
 .team-checkbox.active:hover {
-  background: rgba(102, 126, 234, 1);
+  background: rgba(42, 82, 152, 1);
 }
 
 .team-checkbox input {
@@ -312,10 +312,10 @@ body {
 /* Controles de seleção rápida */
 .quick-control-btn {
   padding: 6px 12px;
-  border: 2px solid #667eea;
+  border: 2px solid #2a5298;
   background: white;
-  color: #667eea;
-  border-radius: 15px;
+  color: #2a5298;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.8em;
@@ -323,15 +323,15 @@ body {
 }
 
 .quick-control-btn:hover {
-  background: #667eea;
+  background: #2a5298;
   color: white;
   transform: translateY(-2px);
 }
 
 .quick-control-btn:focus-visible {
-  outline: 3px solid #667eea;
+  outline: 3px solid #2a5298;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.2);
 }
 
 /* Labels dinâmicos posicionados no final das linhas */
@@ -349,7 +349,7 @@ body {
   position: absolute;
   background: rgba(255, 255, 255, 0.95);
   border: 2px solid;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 2px 6px;
   font-size: 0.75em;
   font-weight: 500;
@@ -387,15 +387,15 @@ body {
 
 .previous-season-btn {
   position: absolute;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 8px 16px;
   font-size: 0.85em;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(42, 82, 152, 0.4);
   transition: all 0.3s ease;
   z-index: 1000;
   white-space: nowrap;
@@ -406,8 +406,8 @@ body {
   position: absolute;
   background: rgba(0, 0, 0, 0.9);
   color: white;
-  border: 2px solid #667eea;
-  border-radius: 8px;
+  border: 2px solid #2a5298;
+  border-radius: 4px;
   padding: 12px;
   pointer-events: none;
   transition: all 0.1s ease;
@@ -445,7 +445,7 @@ body {
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 8px 16px;
   font-size: 0.85em;
   font-weight: 600;
@@ -466,8 +466,8 @@ body {
 }
 
 .previous-season-btn:hover {
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 6px 16px rgba(42, 82, 152, 0.6);
+  background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
 }
 
 .next-season-btn:hover {
@@ -477,9 +477,9 @@ body {
 
 .previous-season-btn:focus-visible,
 .next-season-btn:focus-visible {
-  outline: 3px solid #667eea;
+  outline: 3px solid #2a5298;
   outline-offset: 3px;
-  box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 0 0 5px rgba(42, 82, 152, 0.25);
 }
 
 .rankings-table {
@@ -488,7 +488,7 @@ body {
   margin-top: 20px;
   font-size: 0.9em;
   border: 1px solid #dee2e6;
-  border-radius: 10px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -529,7 +529,7 @@ body {
 }
 
 .rankings-table th {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: white;
   font-weight: 600;
   text-transform: uppercase;
@@ -546,7 +546,7 @@ body {
 }
 
 .rankings-table tr:hover {
-  background: rgba(102, 126, 234, 0.05);
+  background: rgba(42, 82, 152, 0.05);
 }
 
 /* Novos badges com indicadores de progressão integrados */
@@ -805,10 +805,10 @@ body {
 .division-btn,
 .group-btn {
   padding: 10px 20px;
-  border: 2px solid #667eea;
+  border: 2px solid #2a5298;
   background: white;
-  color: #667eea;
-  border-radius: 25px;
+  color: #2a5298;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
@@ -817,29 +817,29 @@ body {
 .group-btn {
   padding: 8px 16px;
   font-size: 0.9em;
-  border-color: #764ba2;
-  color: #764ba2;
+  border-color: #1e3c72;
+  color: #1e3c72;
 }
 
 .division-btn.active,
 .division-btn:hover {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: white;
   transform: translateY(-2px);
 }
 
 .group-btn.active,
 .group-btn:hover {
-  background: linear-gradient(135deg, #764ba2, #667eea);
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
   color: white;
   transform: translateY(-2px);
 }
 
 .division-btn:focus-visible,
 .group-btn:focus-visible {
-  outline: 3px solid #667eea;
+  outline: 3px solid #2a5298;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.2);
 }
 
 .bracket-container {
