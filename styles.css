@@ -1509,14 +1509,21 @@ body {
 
 @media (max-width: 768px) {
   .dashboard-grid {
-    gap: 8px;
-    padding: 8px;
-    max-height: 220px;
+    gap: 12px;
     width: 100%;
     box-shadow: none;
     margin-right: 0;
     padding: 0;
     box-sizing: border-box;
+  }
+
+  .card {
+    padding: 15px;
+    margin-bottom: 0;
+  }
+
+  .ranking-card {
+    min-height: auto;
   }
 
   .chart-card,
@@ -1531,7 +1538,7 @@ body {
 
   .chart-wrapper {
     height: auto;
-    min-height: 400px;
+    min-height: 0;
     overflow: visible;
     max-width: 100%;
     width: 100%;
@@ -1539,7 +1546,7 @@ body {
   }
 
   .chart-container {
-    height: 350px;
+    height: clamp(280px, 50vh, 400px);
     margin-bottom: 15px;
     padding-left: 5px;
     padding-right: 5px;
@@ -2439,6 +2446,7 @@ body {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    height: clamp(250px, 45vh, 360px);
   }
 
   .chart-container canvas {
@@ -2446,12 +2454,16 @@ body {
   }
 
   .table-wrapper {
-    padding: 0 4px;
-    max-width: calc(100vw - 44px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .rankings-table {
     font-size: 0.7em;
+    width: 100%;
+    min-width: auto;
   }
 
   .rankings-table th,
