@@ -1,6 +1,9 @@
 
 // ==================== CONSTANTES GLOBAIS ====================
 const DEFAULT_ELO = 750;
+const ENABLE_RANKING_SPARKLINES = true; // Mostrar micro-tendência de ELO na tabela
+const SPARKLINE_POINTS = 10; // número de pontos mais recentes
+let compactModeEnabled = false; // Modo compacto da tabela (sem emblemas e ELO Trend)
 
 // Mostrar painel de debug com Ctrl+Shift+D
 document.addEventListener('keydown', function (e) {
@@ -11,21 +14,66 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
+// ==================== SISTEMA DE COLAPSÁVEIS ====================
+
+/**
+ * Inicializa o comportamento colapsável do gráfico ELO
+ */
+function initializeCollapsibles() {
+    const toggleBtn = document.getElementById('toggleEloChart');
+    const chartContent = document.getElementById('eloChartContent');
+
+    if (!toggleBtn || !chartContent) return;
+
+    // Carregar preferência do localStorage
+    const isCollapsed = localStorage.getItem('eloChartCollapsed') === 'true';
+
+    if (isCollapsed) {
+        chartContent.classList.add('collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+
+        if (expanded) {
+            chartContent.classList.add('collapsed');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            localStorage.setItem('eloChartCollapsed', 'true');
+        } else {
+            chartContent.classList.remove('collapsed');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            localStorage.setItem('eloChartCollapsed', 'false');
+        }
+    });
+}
+
 // Inicializar aplicação
 async function initApp() {
     // Carregar configuração dos cursos
     await loadCoursesConfig();
+
+    // Inicializar colapsáveis
+    initializeCollapsibles();
 
     // Inicializar seletores de época e modalidade
     initializeSelectors();
 
     // Não carregar dados inicialmente - aguardar seleção de modalidade
     document.getElementById('teamSelector').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Selecione uma modalidade para ver os dados</p>';
-    document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="11" style="text-align: center; color: #666;">Selecione uma modalidade</td></tr>';
+    document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="13" style="text-align: center; color: #666;">Selecione uma modalidade</td></tr>';
     document.getElementById('bracketContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Selecione uma modalidade para ver o bracket</p>';
 
     // Inicializar gráfico vazio
     initEloChart();
+
+    // Disparar evento de mudança na modalidade para carregar dados iniciais (User Feedback: Render on Load)
+    setTimeout(() => {
+        const modalitySelector = document.getElementById('modalidade');
+        if (modalitySelector && modalitySelector.value) {
+            modalitySelector.dispatchEvent(new Event('change'));
+        }
+    }, 500);
 }
 
 // Criar seletor de equipas
@@ -41,46 +89,246 @@ function createTeamSelector() {
     // Aplicar layout inteligente baseado no número de equipas
     applyIntelligentTeamLayout(selector, sampleData.teams.length);
 
-    sampleData.teams.forEach(team => {
-        const label = document.createElement('label');
-        label.className = 'team-checkbox active';
+    // Adicionar estilos de transição para animações suaves
+    if (!document.getElementById('team-selector-transitions')) {
+        const style = document.createElement('style');
+        style.id = 'team-selector-transitions';
+        style.textContent = `
+            #teamSelector {
+                position: relative;
+            }
+            #teamSelector label.team-checkbox {
+                transition: transform 0.3s ease, opacity 0.3s ease;
+                will-change: transform;
+            }
+            #teamSelector label.team-checkbox.moving {
+                z-index: 10;
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
-        // Criar elemento para o emblema
-        const emblemHtml = team.emblemPath ?
-            `<img src="${team.emblemPath}" alt="${team.name}" class="team-emblem" style="margin-right: 4px;" onerror="this.style.display='none'">` :
-            '';
+    // Função auxiliar para agrupar equipas
+    function groupTeamsByDivisionAndGroup(teams) {
+        const grouped = {};
 
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = `team-${team.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
-        checkbox.name = checkbox.id;
-        checkbox.checked = true;
-        checkbox.dataset.teamName = team.name;
+        teams.forEach(team => {
+            const division = team.division || 'A';
+            const group = team.group || 'Único';
 
-        const teamDot = document.createElement('div');
-        teamDot.className = 'team-dot';
-        teamDot.style.backgroundColor = team.color;
+            if (!grouped[division]) {
+                grouped[division] = {};
+            }
+            if (!grouped[division][group]) {
+                grouped[division][group] = [];
+            }
+            grouped[division][group].push(team);
+        });
 
-        const teamNameSpan = document.createElement('span');
-        teamNameSpan.className = 'team-name';
-        teamNameSpan.title = team.fullName;
-        teamNameSpan.textContent = team.name;
+        // Ordenar divisões alfabeticamente
+        const sortedGrouped = {};
+        Object.keys(grouped).sort().forEach(division => {
+            sortedGrouped[division] = {};
+            const groupKeys = Object.keys(grouped[division]).sort((a, b) => {
+                if (a === 'Único') return 1;
+                if (b === 'Único') return -1;
+                return a.localeCompare(b);
+            });
+            groupKeys.forEach(group => {
+                sortedGrouped[division][group] = grouped[division][group];
+            });
+        });
 
-        label.appendChild(checkbox);
-        if (team.emblemPath) {
-            const emblem = document.createElement('img');
-            emblem.src = team.emblemPath;
-            emblem.alt = team.name;
-            emblem.className = 'team-emblem';
-            emblem.style.marginRight = '4px';
-            emblem.onerror = () => emblem.style.display = 'none';
-            label.appendChild(emblem);
-        }
-        label.appendChild(teamDot);
-        label.appendChild(teamNameSpan);
+        return sortedGrouped;
+    }
 
-        label.title = team.fullName;
-        selector.appendChild(label);
+    // Reorganizar equipas por divisão e grupo
+    const teamsByDivisionAndGroup = groupTeamsByDivisionAndGroup(sampleData.teams);
+
+    // Criar estrutura colapsável por divisão
+    Object.entries(teamsByDivisionAndGroup).forEach(([division, groups]) => {
+        // Criar contentor de divisão
+        const divisionContainer = document.createElement('div');
+        divisionContainer.className = 'team-division-group';
+
+        // Cabeçalho da divisão com botão colapsável
+        const divisionHeader = document.createElement('div');
+        divisionHeader.className = 'team-division-header';
+        divisionHeader.dataset.division = division;
+
+        // Chevron do colapsável
+        const chevron = document.createElement('span');
+        chevron.className = 'team-division-chevron';
+        chevron.innerHTML = '▼';
+
+        // Título da divisão com contador de equipas
+        const divisionTitle = document.createElement('span');
+        divisionTitle.className = 'team-division-title';
+        const groupCount = Object.keys(groups).length;
+        const teamCount = Object.values(groups).flat().length;
+        divisionTitle.textContent = `${division}ª Divisão (${teamCount} equipa${teamCount !== 1 ? 's' : ''})`;
+
+        divisionHeader.appendChild(chevron);
+        divisionHeader.appendChild(divisionTitle);
+
+        // Contentor de grupos
+        const groupsContainer = document.createElement('div');
+        groupsContainer.className = 'team-groups-container';
+        groupsContainer.style.maxHeight = '0px';
+        groupsContainer.style.paddingTop = '0px';
+        groupsContainer.style.paddingBottom = '0px';
+
+        // Criar grupos dentro da divisão
+        Object.entries(groups).forEach(([groupName, teams]) => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'team-group';
+
+            // Se há apenas um grupo, não mostrar cabeçalho
+            if (groupCount > 1) {
+                const groupHeader = document.createElement('div');
+                groupHeader.className = 'team-group-header';
+                groupHeader.textContent = `Grupo ${groupName}`;
+                groupDiv.appendChild(groupHeader);
+            }
+
+            // Adicionar equipas do grupo
+            const teamsInGroupDiv = document.createElement('div');
+            teamsInGroupDiv.className = 'team-group-teams';
+
+            teams.forEach(team => {
+                const label = document.createElement('label');
+                label.className = 'team-checkbox active';
+                label.dataset.teamName = team.name;
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `team-${team.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                checkbox.name = checkbox.id;
+                checkbox.checked = true;
+                checkbox.dataset.teamName = team.name;
+
+                // Garantir que há cor: fallback se necessário
+                let teamColor = team.color;
+                if (!teamColor) {
+                    const courseInfo = getCourseInfo(team.name);
+                    teamColor = courseInfo.primaryColor;
+                    team.color = teamColor; // Guardar de volta para garantir consistência
+                }
+
+                const teamDot = document.createElement('div');
+                teamDot.className = 'team-dot';
+                teamDot.style.backgroundColor = teamColor;
+
+                const teamNameSpan = document.createElement('span');
+                teamNameSpan.className = 'team-name';
+                teamNameSpan.title = team.fullName;
+                teamNameSpan.textContent = team.name;
+
+                label.appendChild(checkbox);
+                if (team.emblemPath) {
+                    const emblem = document.createElement('img');
+                    emblem.src = team.emblemPath;
+                    emblem.alt = team.name;
+                    emblem.className = 'team-emblem';
+                    emblem.style.marginRight = '4px';
+                    emblem.onerror = () => emblem.style.display = 'none';
+                    label.appendChild(emblem);
+                }
+                label.appendChild(teamDot);
+                label.appendChild(teamNameSpan);
+
+                label.title = team.fullName;
+                teamsInGroupDiv.appendChild(label);
+            });
+
+            groupDiv.appendChild(teamsInGroupDiv);
+            groupsContainer.appendChild(groupDiv);
+        });
+
+        divisionContainer.appendChild(divisionHeader);
+        divisionContainer.appendChild(groupsContainer);
+        selector.appendChild(divisionContainer);
+
+        // Event listener para colapsar/expandir divisão
+        divisionHeader.addEventListener('click', () => {
+            const isCollapsed = groupsContainer.dataset.state === 'collapsed';
+            if (isCollapsed) {
+                // expandir
+                groupsContainer.style.display = 'block';
+                groupsContainer.style.maxHeight = 'none';
+                const contentHeight = groupsContainer.scrollHeight;
+                groupsContainer.style.maxHeight = '0px';
+                requestAnimationFrame(() => {
+                    groupsContainer.style.maxHeight = `${contentHeight}px`;
+                    groupsContainer.style.paddingTop = '8px';
+                    groupsContainer.style.paddingBottom = '8px';
+                });
+                groupsContainer.dataset.state = 'expanded';
+                chevron.style.transform = 'rotate(0deg)';
+            } else {
+                // colapsar
+                const contentHeight = groupsContainer.scrollHeight;
+                groupsContainer.style.maxHeight = `${contentHeight}px`;
+                requestAnimationFrame(() => {
+                    groupsContainer.style.maxHeight = '0px';
+                    groupsContainer.style.paddingTop = '0px';
+                    groupsContainer.style.paddingBottom = '0px';
+                });
+                groupsContainer.dataset.state = 'collapsed';
+                chevron.style.transform = 'rotate(-90deg)';
+                setTimeout(() => {
+                    if (groupsContainer.dataset.state === 'collapsed') {
+                        groupsContainer.style.display = 'none';
+                    }
+                }, 350);
+            }
+
+            // Guardar preferência
+            const collapsedDivisions = JSON.parse(localStorage.getItem('teamDivisionsCollapsed') || '{}');
+            if (isCollapsed) {
+                delete collapsedDivisions[division];
+            } else {
+                collapsedDivisions[division] = true;
+            }
+            localStorage.setItem('teamDivisionsCollapsed', JSON.stringify(collapsedDivisions));
+        });
+
+        // Restaurar estado colapsado
+        const collapsedDivisions = JSON.parse(localStorage.getItem('teamDivisionsCollapsed') || '{}');
+        const shouldCollapse = collapsedDivisions[division];
+        const setExpandedState = () => {
+            groupsContainer.style.display = 'block';
+            groupsContainer.style.maxHeight = 'none';
+            const contentHeight = groupsContainer.scrollHeight;
+            groupsContainer.style.maxHeight = `${contentHeight}px`;
+            groupsContainer.style.paddingTop = '8px';
+            groupsContainer.style.paddingBottom = '8px';
+            groupsContainer.dataset.state = 'expanded';
+            chevron.style.transform = 'rotate(0deg)';
+        };
+
+        const setCollapsedState = () => {
+            groupsContainer.style.display = 'none';
+            groupsContainer.style.maxHeight = '0px';
+            groupsContainer.style.paddingTop = '0px';
+            groupsContainer.style.paddingBottom = '0px';
+            groupsContainer.dataset.state = 'collapsed';
+            chevron.style.transform = 'rotate(-90deg)';
+        };
+
+        // Esperar um frame para garantir scrollHeight correto antes de definir estado
+        requestAnimationFrame(() => {
+            if (shouldCollapse) {
+                setCollapsedState();
+            } else {
+                setExpandedState();
+            }
+            // Reavaliar necessidade de scroll após o toggle inicial
+            const selectorEl = document.getElementById('teamSelector');
+            if (selectorEl) {
+                setTimeout(() => checkScrollIndicator(selectorEl), 120);
+            }
+        });
     });
 
     // Se há muitas equipas, adicionar controles de seleção rápida
@@ -183,6 +431,7 @@ function selectAllTeams(select) {
     });
     updateEloChart();
     updateTeamCountIndicator();
+    reorderTeamSelector();
 }
 
 function toggleAllTeams() {
@@ -198,6 +447,7 @@ function toggleAllTeams() {
     });
     updateEloChart();
     updateTeamCountIndicator();
+    reorderTeamSelector();
 }
 
 function selectDivision(division) {
@@ -217,6 +467,7 @@ function selectDivision(division) {
     });
     updateEloChart();
     updateTeamCountIndicator();
+    reorderTeamSelector();
 }
 
 // Alternar visibilidade da equipa no gráfico
@@ -232,8 +483,85 @@ function toggleTeam(teamName) {
 
     updateEloChart();
     updateTeamCountIndicator();
+
+    // Reordenar equipas com animação
+    reorderTeamSelector();
 }
 
+// Função para reordenar equipas no seletor (selecionadas primeiro)
+function reorderTeamSelector() {
+    const selector = document.getElementById('teamSelector');
+    if (!selector) return;
+
+    // Reordenar equipa a equipa dentro de cada grupo para não quebrar as divisões
+    const groupContainers = selector.querySelectorAll('.team-group-teams');
+    groupContainers.forEach(group => {
+        const labels = Array.from(group.querySelectorAll('label.team-checkbox'));
+        if (labels.length === 0) return;
+
+        const positions = new Map();
+        labels.forEach(label => {
+            const rect = label.getBoundingClientRect();
+            positions.set(label, { top: rect.top, left: rect.left });
+        });
+
+        const teamsInfo = labels.map(label => {
+            const checkbox = label.querySelector('input[type="checkbox"]');
+            const teamName = checkbox.dataset.teamName;
+
+            let currentElo = DEFAULT_ELO;
+            const history = sampleData.eloHistory[teamName];
+            if (history && history.length > 0) {
+                for (let i = history.length - 1; i >= 0; i--) {
+                    if (history[i] !== null && history[i] !== undefined && !isNaN(history[i])) {
+                        currentElo = history[i];
+                        break;
+                    }
+                }
+            }
+
+            return {
+                label,
+                isChecked: checkbox.checked,
+                currentElo
+            };
+        });
+
+        teamsInfo.sort((a, b) => {
+            if (a.isChecked !== b.isChecked) {
+                return a.isChecked ? -1 : 1;
+            }
+            return b.currentElo - a.currentElo;
+        });
+
+        const fragment = document.createDocumentFragment();
+        teamsInfo.forEach(info => fragment.appendChild(info.label));
+        group.appendChild(fragment);
+
+        requestAnimationFrame(() => {
+            teamsInfo.forEach(info => {
+                const oldPos = positions.get(info.label);
+                const newRect = info.label.getBoundingClientRect();
+                const deltaX = oldPos.left - newRect.left;
+                const deltaY = oldPos.top - newRect.top;
+
+                if (deltaX !== 0 || deltaY !== 0) {
+                    info.label.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                    info.label.style.transition = 'none';
+                    info.label.offsetHeight; // força reflow
+                    info.label.style.transition = 'transform 0.3s ease';
+                    info.label.style.transform = '';
+                    setTimeout(() => {
+                        info.label.style.transition = '';
+                        info.label.style.transform = '';
+                    }, 300);
+                }
+            });
+        });
+    });
+}
+
+// Função para atualizar indicador de número de equipas selecionadas
 // Função para atualizar indicador de número de equipas selecionadas
 function updateTeamCountIndicator() {
     const activeCount = document.querySelectorAll('#teamSelector input[type="checkbox"]:checked').length;
@@ -246,17 +574,30 @@ function updateTeamCountIndicator() {
         indicator.style.cssText = `
                     position: absolute;
                     top: 10px;
-                    right: 15px;
+                    left: 10px;
+                    z-index: 15;
                     background: rgba(102, 126, 234, 0.9);
                     color: white;
-                    padding: 4px 8px;
-                    border-radius: 10px;
-                    font-size: 0.75em;
+                    padding: 4px 12px;
+                    border-radius: 15px;
+                    font-size: 0.85em;
                     font-weight: 500;
-                    z-index: 15;
+                    display: inline-block;
                     transition: all 0.3s ease;
                 `;
-        document.querySelector('.chart-container').appendChild(indicator);
+
+        // Inserir preferencialmente no container do gráfico (tem position: relative)
+        const chartContainer = document.querySelector('.chart-container');
+        if (chartContainer) {
+            chartContainer.appendChild(indicator);
+        } else {
+            // Fallback para o header se o container não existir ainda
+            const header = document.querySelector('.chart-header');
+            if (header) {
+                header.appendChild(indicator);
+                indicator.style.position = 'static';
+            }
+        }
     }
 
     indicator.textContent = `${activeCount}/${totalCount} equipas`;
@@ -269,6 +610,113 @@ function updateTeamCountIndicator() {
     } else {
         indicator.style.background = 'rgba(40, 167, 69, 0.9)'; // Verde - poucas equipas
     }
+
+    // Atualizar botões de navegação entre épocas
+    updateSeasonNavigationButtons();
+}
+
+// Função para criar e atualizar botões de navegação entre épocas
+function updateSeasonNavigationButtons() {
+    const navContainer = document.getElementById('seasonNavigation');
+    if (!navContainer) return;
+
+    const epochSelector = document.getElementById('epoca');
+    const modalidadeSelector = document.getElementById('modalidade');
+    if (!epochSelector || !modalidadeSelector) return;
+
+    const currentEpoch = epochSelector.value;
+    const currentModality = modalidadeSelector.value;
+
+    // Obter todas as épocas disponíveis (ordenadas da mais recente para a mais antiga)
+    const allEpochs = Array.from(epochSelector.options).map(opt => opt.value);
+    const currentIndex = allEpochs.indexOf(currentEpoch);
+
+    // Como as épocas estão ordenadas da mais recente (index 0) para a mais antiga (index length-1):
+    // Época anterior (mais antiga) = index maior
+    // Época seguinte (mais recente) = index menor
+    const hasPrevious = currentIndex < allEpochs.length - 1; // Pode ir para época mais antiga
+    const hasNext = currentIndex > 0; // Pode ir para época mais recente
+
+    // Criar ou atualizar botão época anterior
+    let prevBtn = document.getElementById('season-prev-btn');
+    if (!prevBtn) {
+        prevBtn = document.createElement('button');
+        prevBtn.id = 'season-prev-btn';
+        prevBtn.innerHTML = '← Época Anterior';
+        prevBtn.style.cssText = `
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        `;
+        prevBtn.addEventListener('mouseover', () => {
+            if (prevBtn.style.display !== 'none') {
+                prevBtn.style.background = 'rgba(102, 126, 234, 1)';
+            }
+        });
+        prevBtn.addEventListener('mouseout', () => {
+            prevBtn.style.background = 'rgba(102, 126, 234, 0.9)';
+        });
+        navContainer.appendChild(prevBtn);
+    }
+    // Remover listeners antigos e adicionar novo com currentIndex atualizado
+    prevBtn.onclick = () => {
+        const epochSel = document.getElementById('epoca');
+        const allEps = Array.from(epochSel.options).map(opt => opt.value);
+        const currIdx = allEps.indexOf(epochSel.value);
+        if (currIdx < allEps.length - 1) {
+            const novaEpoca = allEps[currIdx + 1];
+            epochSel.value = novaEpoca;
+            changeEpoca(novaEpoca);
+        }
+    };
+    prevBtn.style.display = hasPrevious ? 'inline-block' : 'none';
+
+    // Criar ou atualizar botão época seguinte
+    let nextBtn = document.getElementById('season-next-btn');
+    if (!nextBtn) {
+        nextBtn = document.createElement('button');
+        nextBtn.id = 'season-next-btn';
+        nextBtn.innerHTML = 'Época Seguinte →';
+        nextBtn.style.cssText = `
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        `;
+        nextBtn.addEventListener('mouseover', () => {
+            if (nextBtn.style.display !== 'none') {
+                nextBtn.style.background = 'rgba(102, 126, 234, 1)';
+            }
+        });
+        nextBtn.addEventListener('mouseout', () => {
+            nextBtn.style.background = 'rgba(102, 126, 234, 0.9)';
+        });
+        navContainer.appendChild(nextBtn);
+    }
+    // Remover listeners antigos e adicionar novo com currentIndex atualizado
+    nextBtn.onclick = () => {
+        const epochSel = document.getElementById('epoca');
+        const allEps = Array.from(epochSel.options).map(opt => opt.value);
+        const currIdx = allEps.indexOf(epochSel.value);
+        if (currIdx > 0) {
+            const novaEpoca = allEps[currIdx - 1];
+            epochSel.value = novaEpoca;
+            changeEpoca(novaEpoca);
+        }
+    };
+    nextBtn.style.display = hasNext ? 'inline-block' : 'none';
 }
 
 // Criar seletor de divisões
@@ -355,1155 +803,1642 @@ function switchGroup(group) {
     }
 }
 
-// Inicializar gráfico ELO
+// Inicializar gráfico ELO com ApexCharts
 function initEloChart() {
-    const ctx = document.getElementById('eloChart').getContext('2d');
+    // Se já existe gráfico, destruir
+    if (eloChart) {
+        eloChart.destroy();
+    }
 
-    eloChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: []
+    // Calcular altura do gráfico baseado em orientação e viewport
+    const isLandscapeMobile = window.matchMedia('(max-width: 932px) and (orientation: landscape)').matches;
+    const chartHeight = isLandscapeMobile ? Math.min(Math.max(window.innerHeight * 0.5, 300), 500) : 700;
+
+    const options = {
+        series: [], // Preenchido em updateEloChart
+        chart: {
+            id: 'eloChart',
+            type: 'line',
+            height: chartHeight,
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                    reset: false
+                },
+                autoSelected: 'zoom'
+            },
+            animations: {
+                enabled: false // Desativar animações para performance
+            },
+            events: {
+                dataPointSelection: function (event, chartContext, config) {
+                    // Este evento é disparado quando um ponto específico é clicado
+
+                    // Guardar a cor original do ponto ANTES de qualquer mudança
+                    if (event && event.target) {
+                        const marker = event.target.closest('.apexcharts-marker');
+                        if (marker && !marker.hasAttribute('data-original-fill')) {
+                            // Guardar a cor atual como cor original (antes de ser selecionado)
+                            const currentFill = marker.getAttribute('fill');
+                            if (currentFill) {
+                                marker.setAttribute('data-original-fill', currentFill);
+                                // console.log('[DEBUG] Guardou cor original:', currentFill);
+                            }
+                        }
+                    }
+
+                    // Se já está fixo e clicamos no mesmo ponto, desafixar
+                    if (window.tooltipFixed &&
+                        window.tooltipFixedDataPoint &&
+                        window.tooltipFixedDataPoint.seriesIndex === config.seriesIndex &&
+                        window.tooltipFixedDataPoint.dataPointIndex === config.dataPointIndex) {
+                        // Remover seleção anterior
+                        window.tooltipFixed = null;
+                        window.tooltipFixedPosition = null;
+                        window.tooltipFixedDataPoint = null;
+
+                        // Remover atributo selected e resetar visual de todos os marcadores
+                        document.querySelectorAll('.apexcharts-marker[selected="true"]').forEach(marker => {
+                            marker.setAttribute('selected', 'false');
+
+                            // Obter a cor original guardada
+                            let originalColor = marker.getAttribute('data-original-fill');
+                            if (!originalColor) {
+                                // Fallback: tentar obter da série
+                                const seriesIndex = marker.getAttribute('rel');
+                                if (seriesIndex !== null && eloChart && eloChart.opts.colors) {
+                                    originalColor = eloChart.opts.colors[seriesIndex];
+                                }
+                            }
+
+                            if (originalColor) {
+                                marker.setAttribute('fill', originalColor);
+                            }
+                            marker.removeAttribute('filter');
+                        });
+
+                        // Resetar markers discretos para remover o visual de seleção
+                        if (eloChart) {
+                            eloChart.updateOptions({
+                                markers: {
+                                    discrete: []
+                                }
+                            }, false);
+
+                            if (typeof eloChart.clearSelection === 'function') {
+                                eloChart.clearSelection();
+                            }
+                        }
+                    } else {
+                        // Limpar seleção anterior do ApexCharts antes de selecionar nova
+                        if (eloChart && typeof eloChart.clearSelection === 'function') {
+                            eloChart.clearSelection();
+                        }
+
+                        // Resetar flags globais
+                        const wasFixed = window.tooltipFixed;
+                        window.tooltipFixed = null;
+                        window.tooltipFixedPosition = null;
+
+                        // Guardar o ponto que foi clicado para fixar o tooltip
+                        window.tooltipFixedDataPoint = {
+                            seriesIndex: config.seriesIndex,
+                            dataPointIndex: config.dataPointIndex
+                        };
+
+                        // Aguardar um momento para o tooltip renderizar e posicionar-se no novo ponto
+                        setTimeout(() => {
+                            const tooltip = document.querySelector('.apexcharts-tooltip');
+                            if (tooltip && tooltip.style.display !== 'none') {
+                                window.tooltipFixed = true;
+                                // Guardar a nova posição do tooltip
+                                window.tooltipFixedPosition = {
+                                    top: tooltip.style.top,
+                                    left: tooltip.style.left
+                                };
+                                tooltip.style.pointerEvents = 'auto';
+                            }
+                        }, 100);
+                    }
+                }
+            }
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: false,  // Desabilitar tooltip padrão
-                    mode: 'nearest',  // Modo nearest para pegar o ponto mais próximo
-                    intersect: false,  // Não precisa estar exatamente sobre o ponto
-                    axis: 'xy',  // Considera ambos os eixos
-                    external: function (context) {
-                        // Criar ou obter o elemento do tooltip
-                        let tooltipEl = document.getElementById('chartjs-tooltip');
-
-                        if (!tooltipEl) {
-                            tooltipEl = document.createElement('div');
-                            tooltipEl.id = 'chartjs-tooltip';
-                            document.body.appendChild(tooltipEl);
-                        }
-
-                        // Esconder se não há tooltip
-                        const tooltipModel = context.tooltip;
-                        if (tooltipModel.opacity === 0) {
-                            tooltipEl.style.opacity = 0;
-                            return;
-                        }
-
-                        // Construir conteúdo do tooltip usando DOM seguro
-                        if (tooltipModel.body && tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
-                            // Pegar apenas o primeiro ponto (o mais próximo)
-                            const dataPoint = tooltipModel.dataPoints[0];
-                            const labels = context.chart.data.labels;
-                            const dataIndex = dataPoint.dataIndex;
-                            const teamName = dataPoint.dataset.label;
-                            const eloValue = Math.round(dataPoint.parsed.y);
-
-                            // Limpar tooltip e reconstruir usando DOM
-                            tooltipEl.innerHTML = '';
-
-                            // Título
-                            const titleDiv = document.createElement('div');
-                            titleDiv.className = 'tooltip-title';
-                            titleDiv.textContent = teamName;
-                            tooltipEl.appendChild(titleDiv);
-
-                            // Body
-                            const bodyDiv = document.createElement('div');
-                            bodyDiv.className = 'tooltip-body';
-
-                            // Encontrar o jogo desta equipa nesta data
-                            let currentGameInfo = null;
-                            let currentRound = null;
-
-                            // Função auxiliar para comparar datas ignorando hora/timezone
-                            const isSameDay = (date1, date2) => {
-                                if (!date1 || !date2) return false;
-                                // IMPORTANTE: Usar get* (local) porque as datas são criadas como locais, não UTC
-                                const d1 = date1.getFullYear() * 10000 + date1.getMonth() * 100 + date1.getDate();
-                                const d2 = date2.getFullYear() * 10000 + date2.getMonth() * 100 + date2.getDate();
-                                return d1 === d2;
-                            };
-
-                            // Sempre tentar buscar jogo, exceto para pontos especiais sem data ou pontos de padding
-                            const gameDetails = sampleData.gameDetails && sampleData.gameDetails[teamName];
-                            const isPaddingPoint = !labels[dataIndex] || labels[dataIndex].trim() === '';
-
-                            // Usar displayGamesDates que tem o mesmo tamanho que labels (inclui "Época Anterior")
-                            const gameDatesList = sampleData.displayGamesDates || sampleData.gamesDates;
-
-                            // Não buscar informações de jogo para pontos de padding
-                            if (!isPaddingPoint && gameDetails && gameDatesList) {
-                                // Verificar se o ELO mudou neste ponto (comparar com ponto anterior)
-                                const previousElo = dataIndex > 0 ? dataPoint.dataset.data[dataIndex - 1] : null;
-                                const eloChanged = previousElo !== null && Math.abs(eloValue - previousElo) > 0.01;
-
-                                // Tentar obter a data para este índice
-                                // Se não existir (último ponto extra), pegar a última data disponível
-                                const currentDate = gameDatesList[dataIndex] || gameDatesList[gameDatesList.length - 1];
-
-                                if (!currentDate) {
-                                    // Se realmente não há data nenhuma, pular
-                                    return;
-                                }
-
-                                // Usar roundsByDateOrder para saber qual jornada/fase está neste ponto exato
-                                const roundsOrder = sampleData.roundsByDateOrder || [];
-
-                                // IMPORTANTE: roundsOrder não inclui o ponto "Início" (índice 0)
-                                // Calcular índice na array de rounds
-                                // Se dataIndex > tamanho de gameDatesList, é um ponto extra (usar último round)
-                                let roundsIndex;
-                                if (dataIndex >= gameDatesList.length) {
-                                    // Ponto extra no final - usar o último round
-                                    roundsIndex = roundsOrder.length - 1;
-                                } else {
-                                    // Ponto normal - ajustar índice (dataIndex 0 = Início, dataIndex 1 = roundsOrder[0])
-                                    roundsIndex = dataIndex - 1;
-                                }
-
-                                const expectedRound = roundsIndex >= 0 && roundsIndex < roundsOrder.length ? roundsOrder[roundsIndex] : null;                                        // Se o ELO mudou, este ponto representa um jogo que ACABOU de acontecer
-                                if (eloChanged && expectedRound) {
-                                    // Tentar encontrar o jogo com a chave exata ou convertida
-                                    const roundKey = expectedRound;
-                                    const roundKeyStr = String(expectedRound);
-                                    const roundKeyNum = parseInt(expectedRound);
-
-                                    if (gameDetails[roundKey]) {
-                                        currentGameInfo = gameDetails[roundKey];
-                                        currentRound = roundKey;
-                                    } else if (gameDetails[roundKeyStr]) {
-                                        currentGameInfo = gameDetails[roundKeyStr];
-                                        currentRound = roundKeyStr;
-                                    } else if (!isNaN(roundKeyNum) && gameDetails[roundKeyNum]) {
-                                        currentGameInfo = gameDetails[roundKeyNum];
-                                        currentRound = roundKeyNum;
-                                    }
-                                }
-
-                                // REMOVIDO: A lógica que buscava jogos na mesma data quando ELO não mudou
-                                // Isso causava o problema de mostrar jogos futuros
-
-                                // Se ainda não encontrou jogo, buscar o último jogo anterior
-                                // IMPORTANTE: Se ELO mudou, pode incluir jogo na data atual (<=)
-                                // Se ELO não mudou, buscar apenas jogos anteriores (<)
-                                if (!currentGameInfo) {
-                                    let closestRound = null;
-                                    let closestDate = null;
-
-                                    for (const [round, gameInfo] of Object.entries(gameDetails)) {
-                                        // Se ELO mudou, incluir jogos até a data atual (<=)
-                                        // Se não mudou, buscar apenas jogos anteriores (<)
-                                        const dateCondition = eloChanged ?
-                                            (gameInfo.date && gameInfo.date <= currentDate) :
-                                            (gameInfo.date && gameInfo.date < currentDate);
-
-                                        if (dateCondition) {
-                                            if (!closestDate || gameInfo.date > closestDate) {
-                                                closestDate = gameInfo.date;
-                                                closestRound = round;
-                                            }
-                                        }
-                                    }
-
-                                    if (closestRound) {
-                                        currentRound = closestRound;
-                                        currentGameInfo = gameDetails[closestRound];
-                                    }
-                                }
-                            }
-
-                            // ELO com variação
-                            const eloDiv = document.createElement('div');
-                            eloDiv.textContent = 'ELO: ' + eloValue;
-
-                            // Calcular o delta real comparando com o ponto anterior
-                            const prevElo = dataIndex > 0 ? dataPoint.dataset.data[dataIndex - 1] : null;
-                            const actualDelta = prevElo !== null ? eloValue - prevElo : 0;
-
-                            // Mostrar delta do último jogo (se existir)
-                            let deltaToShow = actualDelta;
-
-                            // Se não mudou neste ponto mas temos info do último jogo, buscar sua variação
-                            if (Math.abs(actualDelta) < 0.01 && currentGameInfo && currentGameInfo.eloDelta !== undefined) {
-                                deltaToShow = currentGameInfo.eloDelta;
-                            }
-
-                            // Mostrar delta se for significativo
-                            if (Math.abs(deltaToShow) > 0.01) {
-                                const isPositive = deltaToShow > 0;
-                                const color = isPositive ? '#28a745' : '#dc3545';
-                                const arrow = isPositive ? '↑' : '↓';
-                                const deltaAbs = Math.abs(deltaToShow).toFixed(0);
-
-                                const deltaSpan = document.createElement('span');
-                                deltaSpan.style.color = color;
-                                deltaSpan.style.fontWeight = '600';
-                                deltaSpan.style.marginLeft = '8px';
-                                deltaSpan.textContent = arrow + ' ' + deltaAbs;
-                                eloDiv.appendChild(document.createTextNode(' '));
-                                eloDiv.appendChild(deltaSpan);
-                            }
-
-                            bodyDiv.appendChild(eloDiv);
-
-                            // Resultado do jogo - mostrar sempre o último jogo (se existir)
-                            if (currentGameInfo && !currentGameInfo.isAdjustment) {
-                                // Verificar se este ponto é exatamente onde o jogo aconteceu
-                                const isExactGamePoint = Math.abs(actualDelta) > 0.01;
-
-                                // Adicionar título "Último jogo:" se não for o ponto exato
-                                if (!isExactGamePoint) {
-                                    const lastGameLabel = document.createElement('div');
-                                    lastGameLabel.style.fontSize = '0.9em';
-                                    lastGameLabel.style.color = '#999';
-                                    lastGameLabel.style.marginTop = '4px';
-                                    lastGameLabel.textContent = 'Último jogo:';
-                                    bodyDiv.appendChild(lastGameLabel);
-                                }
-
-                                const resultDiv = document.createElement('div');
-
-                                if (currentGameInfo.unknownResult) {
-                                    // Resultado desconhecido
-                                    resultDiv.style.color = '#ffc107';
-                                    const resultParts = currentGameInfo.result ? currentGameInfo.result.split('-') : ['?', '?'];
-                                    const resultInt = currentGameInfo.result ?
-                                        Math.floor(parseFloat(resultParts[0])) + '-' + Math.floor(parseFloat(resultParts[1])) :
-                                        '? - ?';
-                                    resultDiv.textContent = '⚠️ ' + resultInt + ' vs ' + currentGameInfo.opponent;
-                                } else if (currentGameInfo.result !== null && currentGameInfo.opponent) {
-                                    // Resultado normal
-                                    const resultParts = currentGameInfo.result.split('-');
-                                    const resultInt = Math.floor(parseFloat(resultParts[0])) + '-' + Math.floor(parseFloat(resultParts[1]));
-                                    resultDiv.textContent = resultInt + ' vs ' + currentGameInfo.opponent;
-                                }
-
-                                if (resultDiv.textContent) {
-                                    bodyDiv.appendChild(resultDiv);
-                                }
-                            }
-
-                            tooltipEl.appendChild(bodyDiv);
-
-                            // Forma (últimos 5 jogos) - buscar até a data atual
-                            const gameDetails2 = sampleData.gameDetails && sampleData.gameDetails[teamName];
-
-                            // Mostrar forma sempre que houver jogos até esta data (exceto pontos de padding)
-                            if (!isPaddingPoint && gameDetails2 && gameDatesList) {
-                                const currentDate = gameDatesList[dataIndex] || gameDatesList[gameDatesList.length - 1];
-
-                                // Coletar todos os jogos até esta data
-                                // Se ELO mudou (jogo aconteceu aqui), incluir jogos até esta data (<=)
-                                // Se não mudou, incluir apenas jogos anteriores (<)
-                                const gamesUpToDate = [];
-                                for (const [round, gameInfo] of Object.entries(gameDetails2)) {
-                                    const dateCondition = Math.abs(actualDelta) > 0.01 ?
-                                        (gameInfo.date && gameInfo.date <= currentDate) :
-                                        (gameInfo.date && gameInfo.date < currentDate);
-
-                                    if (dateCondition && gameInfo.outcome) {
-                                        gamesUpToDate.push({
-                                            date: gameInfo.date,
-                                            outcome: gameInfo.outcome
-                                        });
-                                    }
-                                }
-
-                                // Ordenar por data e pegar os últimos 5
-                                gamesUpToDate.sort((a, b) => a.date - b.date);
-                                const last5 = gamesUpToDate.slice(-5);
-
-                                if (last5.length > 0) {
-                                    const formDiv = document.createElement('div');
-                                    formDiv.className = 'tooltip-body';
-                                    formDiv.style.borderTop = '1px solid rgba(255,255,255,0.2)';
-                                    formDiv.style.paddingTop = '4px';
-                                    formDiv.style.marginTop = '4px';
-                                    formDiv.appendChild(document.createTextNode('Forma: '));
-
-                                    last5.forEach((game, idx) => {
-                                        let color = '#6c757d';
-                                        if (game.outcome === 'V') color = '#28a745';
-                                        else if (game.outcome === 'D') color = '#dc3545';
-
-                                        const outcomeSpan = document.createElement('span');
-                                        outcomeSpan.style.color = color;
-                                        outcomeSpan.style.fontWeight = '600';
-                                        if (idx > 0) outcomeSpan.style.marginLeft = '6px';
-                                        outcomeSpan.textContent = game.outcome;
-                                        formDiv.appendChild(outcomeSpan);
-                                    });
-
-                                    tooltipEl.appendChild(formDiv);
-                                }
-                            }
-
-                            // Footer
-                            const footerDiv = document.createElement('div');
-                            footerDiv.className = 'tooltip-footer';
-
-                            if (labels[dataIndex] === 'Início' || labels[dataIndex] === 'Época Anterior') {
-                                footerDiv.textContent = labels[dataIndex];
-                            } else {
-                                const labelText = labels[dataIndex];
-
-                                // Se é um ponto de padding (label vazio), não mostrar informações de jornada
-                                if (!labelText || labelText.trim() === '') {
-                                    // Não adicionar footer para pontos de padding
-                                } else if (labelText.includes('Ajustes')) {
-                                    // Para ajustes inter-grupos, mostrar apenas o texto (sem data)
-                                    footerDiv.textContent = 'Ajustes Inter-Grupos';
-                                } else if (labelText.includes('(') && labelText.includes(')')) {
-                                    footerDiv.textContent = labelText;
-                                } else {
-                                    // Buscar a jornada específica do jogo desta equipa nesta data
-                                    // Usar o currentRound que já foi encontrado no body do tooltip
-                                    // Isso garante consistência quando há múltiplos jogos no mesmo dia
-
-                                    // Se não há jornada (entre Início e primeiro jogo), mostrar apenas a data
-                                    if (!currentRound) {
-                                        footerDiv.textContent = 'Data: ' + labelText;
-                                    } else {
-                                        let jornadaStr = currentRound;
-
-                                        // Traduzir fases de playoff se necessário
-                                        const formatRoundLabel = (round) => {
-                                            if (round === 'E1') return 'Quartos de Final';
-                                            if (round === 'E2') return 'Meias-Finais';
-                                            if (round === 'E3') return 'Final';
-                                            if (round === 'E3L') return '3º/4º Lugar';
-                                            return round;
-                                        };
-
-                                        jornadaStr = formatRoundLabel(jornadaStr);
-                                        let specificDateStr = labelText;
-
-                                        footerDiv.textContent = 'Jornada: ' + jornadaStr + ' | Data: ' + specificDateStr;
-                                    }
-                                }
-                            }
-
-                            // Só adicionar footer se tiver conteúdo
-                            if (footerDiv.textContent) {
-                                tooltipEl.appendChild(footerDiv);
-                            }
-                        }
-
-                        // Posicionar o tooltip seguindo o mouse
-                        const position = context.chart.canvas.getBoundingClientRect();
-                        const canvasTop = position.top + window.pageYOffset;
-                        const canvasLeft = position.left + window.pageXOffset;
-
-                        tooltipEl.style.opacity = 1;
-                        tooltipEl.style.position = 'absolute';
-
-                        // Posicionar à direita do cursor com offset
-                        let tooltipLeft = canvasLeft + tooltipModel.caretX + 15;
-                        let tooltipTop = canvasTop + tooltipModel.caretY - 10;
-
-                        // Ajustar se sair da tela à direita
-                        const tooltipWidth = tooltipEl.offsetWidth;
-                        if (tooltipLeft + tooltipWidth > window.innerWidth) {
-                            tooltipLeft = canvasLeft + tooltipModel.caretX - tooltipWidth - 15;
-                        }
-
-                        // Ajustar se sair da tela embaixo
-                        const tooltipHeight = tooltipEl.offsetHeight;
-                        if (tooltipTop + tooltipHeight > window.innerHeight + window.pageYOffset) {
-                            tooltipTop = window.innerHeight + window.pageYOffset - tooltipHeight - 10;
-                        }
-
-                        // Ajustar se sair da tela em cima
-                        if (tooltipTop < window.pageYOffset) {
-                            tooltipTop = window.pageYOffset + 10;
-                        }
-
-                        tooltipEl.style.left = tooltipLeft + 'px';
-                        tooltipEl.style.top = tooltipTop + 'px';
-                        tooltipEl.style.pointerEvents = 'none';
-                    }
-                },
-                zoom: {
-                    pan: {
-                        enabled: false,
-                        mode: 'xy',
-                        modifierKey: null,
-                        onPanComplete: function () {
-                            setTimeout(updateDynamicTeamLabels, 100);
-                        }
-                    },
-                    zoom: {
-                        wheel: {
-                            enabled: true,
-                            speed: 0.1
-                        },
-                        pinch: {
-                            enabled: true
-                        },
-                        drag: {
-                            enabled: false,
-                            backgroundColor: 'rgba(225,225,225,0.3)'
-                        },
-                        mode: 'xy',
-                        onZoomComplete: function () {
-                            setTimeout(updateDynamicTeamLabels, 100);
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    ticks: {
-                        padding: 10
-                    },
-                    grid: {
-                        color: 'rgba(0,0,0,0.1)'
-                    }
-                },
-                x: {
-                    grid: {
-                        color: 'rgba(0,0,0,0.1)'
-                    },
-                    ticks: {
-                        padding: 5
-                    }
-                }
-            },
-            elements: {
-                line: {
-                    tension: 0.15
-                },
-                point: {
-                    radius: 4,
-                    hoverRadius: 6
-                }
-            },
-            layout: {
-                padding: {
-                    right: 50
+        colors: [], // Preenchido dinamicamente
+        stroke: {
+            width: 3,
+            curve: 'straight' // Linhas retas para conectar pontos
+        },
+        grid: {
+            borderColor: '#f1f1f1',
+            xaxis: {
+                lines: {
+                    show: true
                 }
             }
-        }
-    });
-
-    // Adicionar funcionalidade de pan manual
-    setupManualPan();
-}
-
-// Configurar pan manual com eventos de mouse
-function setupManualPan() {
-    const canvas = eloChart.canvas;
-
-    canvas.addEventListener('mousedown', function (event) {
-        if (!appState.chart.pan.enabled || !eloChart) return;
-
-        appState.chart.pan.isPanning = true;
-        appState.chart.pan.startX = event.clientX;
-        appState.chart.pan.startY = event.clientY;
-        canvas.style.cursor = 'grabbing';
-    });
-
-    canvas.addEventListener('mousemove', function (event) {
-        if (!appState.chart.pan.isPanning || !appState.chart.pan.enabled || !eloChart) return;
-
-        const deltaX = event.clientX - appState.chart.pan.startX;
-        const deltaY = event.clientY - appState.chart.pan.startY;
-
-        const xScale = eloChart.scales.x;
-        const yScale = eloChart.scales.y;
-
-        // Calcular movimento proporcional
-        const xRange = xScale.max - xScale.min;
-        const yRange = yScale.max - yScale.min;
-
-        const xMovement = -(deltaX / canvas.width) * xRange;
-        const yMovement = (deltaY / canvas.height) * yRange;
-
-        // Aplicar pan
-        eloChart.options.scales.x.min = (eloChart.options.scales.x.min || xScale.min) + xMovement;
-        eloChart.options.scales.x.max = (eloChart.options.scales.x.max || xScale.max) + xMovement;
-        eloChart.options.scales.y.min = (eloChart.options.scales.y.min || yScale.min) + yMovement;
-        eloChart.options.scales.y.max = (eloChart.options.scales.y.max || yScale.max) + yMovement;
-
-        eloChart.update('none');
-        updateDynamicTeamLabels();
-
-        appState.chart.pan.startX = event.clientX;
-        appState.chart.pan.startY = event.clientY;
-    });
-
-    canvas.addEventListener('mouseup', function () {
-        if (appState.chart.pan.isPanning) {
-            appState.chart.pan.isPanning = false;
-            canvas.style.cursor = appState.chart.pan.enabled ? 'grab' : 'default';
-        }
-    });
-
-    canvas.addEventListener('mouseleave', function () {
-        if (appState.chart.pan.isPanning) {
-            appState.chart.pan.isPanning = false;
-            canvas.style.cursor = 'default';
-        }
-    });
-
-    // Função global para ativar/desativar pan
-    window.toggleManualPan = function () {
-        appState.chart.pan.enabled = !appState.chart.pan.enabled;
-        canvas.style.cursor = appState.chart.pan.enabled ? 'grab' : 'default';
-
-        const panButton = document.getElementById('panButton');
-        if (panButton) {
-            panButton.textContent = appState.chart.pan.enabled ? '🤚 Pan: ON' : '✋ Pan: OFF';
-            panButton.classList.toggle('active', appState.chart.pan.enabled);
-        }
-    };
-}
-
-// Atualizar gráfico ELO
-function updateEloChart() {
-    if (!eloChart || !sampleData.teams || sampleData.teams.length === 0) {
-        DebugUtils.debugEloChart('insufficient_data');
-        return;
-    }
-
-    DebugUtils.debugEloChart('updating');
-
-    const datasets = [];
-    const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
-
-    // Verificar se existem ajustes intergrupos reais nos dados atuais
-    const hasAdjustments = currentModalityHasAdjustments;
-
-    // Função helper para formatar labels
-    const formatRoundLabel = (round) => {
-        if (round === 'E1') return 'Quartos de Final';
-        if (round === 'E2') return 'Meias-Finais';
-        if (round === 'E3') return 'Final';
-        if (round === 'E3L') return '3º/4º Lugar';
-        if (round === 'Inter-Group') return 'Ajustes Inter-Grupos';
-        return round;
-    };
-
-    // Criar labels com datas formatadas e identificação das fases
-    let labels = [];
-    if (sampleData.gamesDates && sampleData.gamesDates.length > 0) {
-        const roundsOrder = sampleData.roundsByDateOrder || [];
-
-        // Criar labels a partir das datas e fases
-        labels = sampleData.gamesDates.map((date, index) => {
-            if (index === 0) {
-                return 'Início'; // Primeira posição é sempre "Início"
+        },
+        markers: {
+            size: 8, // Tamanho aumentado para garantir visibilidade
+            strokeWidth: 3,
+            strokeOpacity: 1,
+            fillOpacity: 1,
+            discrete: [],
+            hover: {
+                size: 10,
+                sizeOffset: 3
             }
-
-            // Obter a fase/jornada deste ponto (ajustar índice -1 porque roundsOrder não inclui "Início")
-            const roundIdx = index - 1;
-            const round = roundIdx >= 0 && roundIdx < roundsOrder.length ? roundsOrder[roundIdx] : null;
-
-            // Se for ajuste inter-grupos, mostrar apenas isso
-            if (round === 'Inter-Group') {
-                return 'Ajustes Inter-Grupos';
+        },
+        xaxis: {
+            type: 'category', // MUDANÇA: Categórico para remover dias vazios
+            tooltip: {
+                enabled: false
+            },
+            labels: {
+                rotate: -45,
+                hideOverlappingLabels: true
             }
-
-            // Se for playoff, adicionar "(Playoffs)" à data
-            const isPlayoff = round && typeof round === 'string' && round.startsWith('E');
-
-            if (date instanceof Date) {
-                // IMPORTANTE: Usar getDate() e getMonth() SEM UTC porque as datas são locais
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const dateStr = `${day}/${month}`;
-                return isPlayoff ? `${dateStr} (Playoffs)` : dateStr;
+        },
+        yaxis: {
+            title: {
+                text: 'ELO Rating'
             }
-            return '';
-        });
+        },
+        legend: {
+            show: false
+        },
+        tooltip: {
+            enabled: true,
+            shared: false,
+            intersect: true, // CRÍTICO: true para detectar a série correta
+            followCursor: false,
+            offsetY: 100,
+            offsetX: 10,
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                // Se o tooltip está fixo, usar os dados do ponto fixado
+                if (window.tooltipFixed && window.tooltipFixedDataPoint) {
+                    seriesIndex = window.tooltipFixedDataPoint.seriesIndex;
+                    dataPointIndex = window.tooltipFixedDataPoint.dataPointIndex;
+                }
 
-        // Adicionar "Época Anterior" no início se houver época anterior disponível
-        const currentEpochElement = document.getElementById('epoca');
-        if (currentEpochElement) {
-            const currentEpoch = currentEpochElement.value;
-            const currentIndex = availableEpocas.indexOf(currentEpoch);
-            if (currentIndex < availableEpocas.length - 1) {
-                labels.unshift('Época Anterior');
-            }
-        }
+                // Usar os dados armazenados globalmente para garantir consistência
+                const currentSeries = appState.chart.currentSeriesData;
 
-        sampleData.displayGamesDates = sampleData.gamesDates;
-    } else {
-        // Fallback para jornadas se não houver datas
-        let maxRounds = 0;
-        sampleData.teams.forEach(team => {
-            if (sampleData.eloHistory[team.name] && sampleData.eloHistory[team.name].length > maxRounds) {
-                maxRounds = sampleData.eloHistory[team.name].length;
-            }
-        });
-        labels = Array.from({ length: maxRounds }, (_, i) => i === 0 ? 'Início' : `Jornada ${i}`);
+                if (!currentSeries || !currentSeries[seriesIndex]) {
+                    return '';
+                }
 
-        // Adicionar "Ajustes" só se há ajustes reais
-        if (hasAdjustments && labels.length > 1) {
-            labels[labels.length - 1] = 'Ajustes';
-        }
+                const seriesData = currentSeries[seriesIndex];
+                if (!seriesData.data || !seriesData.data[dataPointIndex]) {
+                    return '';
+                }
 
-        // Calcular número de jornadas regulares previstas
-        // Primeiro tentar do calendário (csv_modalidades), depois dos resultados (detalhe)
-        let regularSeasonGames = sampleData.totalRegularSeasonGames || 0;
+                const data = seriesData.data[dataPointIndex];
+                const teamName = seriesData.name;
+                const eloValue = series[seriesIndex][dataPointIndex];
+                const extraData = data.extra || {};
 
-        // Se não temos do calendário, tentar dos resultados já jogados
-        if (regularSeasonGames === 0 && sampleData.rawEloData && sampleData.rawEloData.length > 0) {
-            const regularRounds = sampleData.rawEloData
-                .filter(match => match.Jornada && !isNaN(parseInt(match.Jornada)))
-                .map(match => parseInt(match.Jornada));
-            regularSeasonGames = regularRounds.length > 0 ? Math.max(...regularRounds) : 0;
-        }
-
-        // NÃO calcular automaticamente - usar apenas o número real de jornadas dos dados
-        // (modalidades têm estruturas diferentes: divisões, grupos, etc)
-
-        // Adicionar labels vazias até meio da temporada
-        // labels.length - 1 porque o primeiro é "Início", não uma jornada
-        const jornadasFeitas = labels.length - 1;
-        const meioTemporada = Math.ceil(regularSeasonGames / 2);
-
-        // Se ainda não passou do meio da temporada, adicionar espaços até ao total previsto
-        // Se já passou do meio, não adicionar mais espaços vazios
-        let labelsVazias = 0;
-        if (jornadasFeitas < meioTemporada) {
-            labelsVazias = regularSeasonGames - jornadasFeitas;
-        }
-
-        if (labelsVazias > 0) {
-            for (let i = 0; i < labelsVazias; i++) {
-                labels.push('');
-            }
-        }
-
-        // Adicionar ponto extra no início para "Época Anterior" (só se houver época anterior)
-        const currentEpochElement = document.getElementById('epoca');
-        if (currentEpochElement) {
-            const currentEpoch = currentEpochElement.value;
-            const currentIndex = availableEpocas.indexOf(currentEpoch);
-            if (currentIndex < availableEpocas.length - 1) {
-                labels.unshift('Época Anterior');
-            }
-        }
-    }
-
-    // Garantir número mínimo/máximo de pontos no eixo X (pad labels LOCALMENTE, não modificar sampleData)
-    // IMPORTANTE: NÃO modificar sampleData.gamesDates pois ele é reutilizado em cada atualização
-
-    // Contar jogos reais (ignorar data inicial 01/09 e "Época Anterior")
-    let realGamesCount = 0;
-    if (sampleData.gamesDates) {
-        realGamesCount = sampleData.gamesDates.filter((date, idx) => {
-            if (!date || date === null) return false;
-            if (!(date instanceof Date)) return false;
-            // Ignorar data inicial 01/09
-            if (date.getDate() === 1 && date.getMonth() === 8) return false;
-            return true;
-        }).length;
-    }
-
-    const desiredTotal = (realGamesCount >= 10) ? 20 : 10;
-
-    // Adicionar padding apenas aos labels (NÃO modificar sampleData.gamesDates)
-    while (labels.length < desiredTotal) {
-        labels.push('');
-    }
-
-    DebugUtils.debugEloChart('labels', labels);
-    DebugUtils.debugEloChart('adjustments', hasAdjustments);
-
-    checkboxes.forEach((checkbox, index) => {
-        if (checkbox.checked && sampleData.teams[index]) {
-            const team = sampleData.teams[index];
-            const teamHistory = sampleData.eloHistory[team.name] || [DEFAULT_ELO];
-
-            DebugUtils.debugEloChart('team_added', { name: team.name, history: teamHistory });
-
-            // Duplicar o primeiro valor para criar o ponto "Época Anterior" 
-            // (só se houver época anterior E a equipa estava nessa época)
-            let dataToUse = teamHistory;
-            const currentEpochElement = document.getElementById('epoca');
-            if (currentEpochElement) {
-                const currentEpoch = currentEpochElement.value;
-                const currentIndex = availableEpocas.indexOf(currentEpoch);
-
-                // Verificar se há época anterior disponível
-                const hasPreviousEpoch = currentIndex < availableEpocas.length - 1;
-
-                // Verificar se a equipa estava na época anterior
-                const wasInPreviousSeason = sampleData.teamsFromPreviousSeason &&
-                    sampleData.teamsFromPreviousSeason.has(team.name);
-
-                // Só adicionar ponto da época anterior se AMBAS as condições forem verdadeiras
-                if (hasPreviousEpoch && wasInPreviousSeason) {
-                    dataToUse = [teamHistory[0], ...teamHistory];
-                } else if (hasPreviousEpoch && !wasInPreviousSeason) {
-                    // Equipa nova: adicionar null no início para alinhar com os labels
-                    dataToUse = [null, ...teamHistory];
+                // Usar data completa se disponível, senão usar a categoria (label)
+                let dateDisplay = '';
+                if (extraData.fullDate) {
+                    dateDisplay = new Date(extraData.fullDate).toLocaleDateString('pt-PT');
+                } else if (w.globals.labels && w.globals.labels[dataPointIndex]) {
+                    const label = w.globals.labels[dataPointIndex];
+                    // Usar o label directamente, seja string ou número
+                    dateDisplay = String(label);
                 } else {
-                    // Sem época anterior disponível
-                    dataToUse = teamHistory;
+                    dateDisplay = 'Data desconhecida';
                 }
-            }
 
-            datasets.push({
-                label: team.name,
-                data: dataToUse,
-                borderColor: team.color,
-                backgroundColor: team.color + '20',
-                fill: false,
-                borderWidth: 3,
-                tension: 0.15
-            });
-        }
-    });
+                // Obter logo da equipa
+                const courseInfo = getCourseInfo(teamName);
+                const logoPath = courseInfo.emblemPath || 'assets/taça_ua.png';
+                const teamColor = w.globals.colors[seriesIndex];
 
-    DebugUtils.debugEloChart('datasets_total', datasets.length);
+                // Construir tooltip HTML (formato exemplo)
+                let html = '<div class="apexcharts-tooltip-title" style="background: #fff; color: #333; font-family: Segoe UI; display: flex; align-items: center; justify-content: space-between; padding: 0px 0px; border-bottom: none;">';
+                html += '<span style="font-weight: 600; padding: 0px 10px;">' + teamName + '</span>';
 
-    // Garantir que todos os datasets têm o mesmo comprimento que labels
-    datasets.forEach(ds => {
-        if (!ds.data) ds.data = [];
-        while (ds.data.length < labels.length) ds.data.push(null);
-    });
+                // Ajustar tamanho do emblema (EGI com padding extra)
+                let emblemaStyle = 'height: 48px;';
+                if (logoPath.includes('EGI-07.png')) {
+                    emblemaStyle = 'height: 48px; padding: 8px;';
+                }
+                html += '<img src="' + logoPath + '" style="' + emblemaStyle + '" alt="' + teamName + '">';
+                html += '</div>';
+                html += '<div style="height: 3px; background: ' + teamColor + ';"></div>';
+                html += '<div class="apexcharts-tooltip-body" style="font-family: Segoe UI; padding: 8px 8px;">';
 
-    eloChart.data.labels = labels;
-    eloChart.data.datasets = datasets;            // Calcular min e max dos dados e adicionar padding de 5%
-    if (datasets.length > 0) {
-        let allValues = [];
-        datasets.forEach(dataset => {
-            if (dataset.data) {
-                allValues = allValues.concat(dataset.data.filter(v => v !== null && v !== undefined));
-            }
-        });
+                // Linha de ELO
+                html += '<div><strong>ELO: ' + eloValue + '</strong>';
 
-        if (allValues.length > 0) {
-            const minValue = Math.min(...allValues);
-            const maxValue = Math.max(...allValues);
-            const range = maxValue - minValue;
-            const padding = range > 0 ? range * 0.05 : 50; // Pelo menos 50 pontos de padding se range=0
+                // Delta ELO
+                if (extraData.eloDelta && Math.abs(extraData.eloDelta) > 0.01) {
+                    const isPos = extraData.eloDelta > 0;
+                    const color = isPos ? '#28a745' : '#dc3545';
+                    const sign = isPos ? '+' : '';
+                    html += '<span style="color: ' + color + '; margin-left: 8px; font-weight: bold;">' + sign + extraData.eloDelta + '</span>';
+                }
+                html += '</div>';
 
-            eloChart.options.scales.y.min = minValue - padding;
-            eloChart.options.scales.y.max = maxValue + padding;
-        } else {
-            // Se não há valores válidos, definir escala padrão
-            eloChart.options.scales.y.min = 0;
-            eloChart.options.scales.y.max = 2000;
-        }
-    }
+                // Detalhes do Jogo - usar dados atuais ou do último jogo
+                let gameData = extraData.opponent ? extraData : null;
+                let isLastGame = false;
 
-    eloChart.update('active');
-
-    // Atualizar labels dinâmicos após o gráfico ser renderizado
-    setTimeout(() => {
-        updateDynamicTeamLabels();
-    }, 100);
-}
-
-// Função para criar e posicionar labels dinâmicos no final das linhas
-function updateDynamicTeamLabels() {
-    const labelsContainer = document.getElementById('teamEndLabels');
-    const chartInstance = eloChart;
-
-    if (!chartInstance || !labelsContainer) return;
-
-    labelsContainer.innerHTML = ''; // Limpar labels existentes
-
-    // Obter apenas as equipas ativas (visíveis no gráfico)
-    const activeDatasets = chartInstance.data.datasets || [];
-    const chartArea = chartInstance.chartArea;
-    const canvas = chartInstance.canvas;
-    const canvasRect = canvas.getBoundingClientRect();
-    const containerRect = labelsContainer.getBoundingClientRect();
-
-    // Calcular offset entre canvas e container
-    const offsetX = canvasRect.left - containerRect.left;
-    const offsetY = canvasRect.top - containerRect.top;
-
-    // Coletar informações de todas as equipas primeiro
-    const teamEndpoints = [];
-
-    activeDatasets.forEach((dataset, datasetIndex) => {
-        if (dataset && dataset.data && dataset.data.length > 0) {
-            // Em vez de procurar o último ponto absoluto, encontrar o último ponto VISÍVEL
-            let rightmostVisibleIndex = -1;
-            let rightmostVisibleX = -Infinity;
-
-            // Percorrer todos os pontos para encontrar o mais à direita que está visível
-            for (let i = 0; i < dataset.data.length; i++) {
-                if (dataset.data[i] !== null && dataset.data[i] !== undefined) {
-                    const xPixel = chartInstance.scales.x.getPixelForValue(i);
-
-                    // Verificar se este ponto está na área visível do gráfico
-                    if (xPixel >= chartArea.left && xPixel <= chartArea.right) {
-                        if (xPixel > rightmostVisibleX) {
-                            rightmostVisibleX = xPixel;
-                            rightmostVisibleIndex = i;
+                if (!gameData) {
+                    // Procurar último jogo se não há opponent
+                    for (let i = dataPointIndex - 1; i >= 0; i--) {
+                        if (seriesData.data[i] && seriesData.data[i].extra && seriesData.data[i].extra.opponent) {
+                            gameData = seriesData.data[i].extra;
+                            isLastGame = true;
+                            break;
                         }
                     }
                 }
-            }
 
-            // Se encontrou um ponto visível, usar esse
-            if (rightmostVisibleIndex >= 0) {
-                const visibleValue = dataset.data[rightmostVisibleIndex];
-                const xPixel = chartInstance.scales.x.getPixelForValue(rightmostVisibleIndex);
-                const yPixel = chartInstance.scales.y.getPixelForValue(visibleValue);
+                if (gameData) {
+                    html += '<div style="padding-top: 8px;">';
 
-                // Verificar se o ponto Y também está numa área razoável
-                if (yPixel >= chartArea.top - 50 && yPixel <= chartArea.bottom + 50) {
-                    teamEndpoints.push({
-                        dataset: dataset,
-                        xPosition: xPixel,
-                        yPixel: yPixel,
-                        lastValue: visibleValue,
-                        name: dataset.label,
-                        dataIndex: rightmostVisibleIndex
-                    });
+                    // Labels de jornada/fase
+                    let roundLabel = gameData.round;
+                    if (roundLabel === 'E1') roundLabel = 'Quartos';
+                    else if (roundLabel === 'E2') roundLabel = 'Meias';
+                    else if (roundLabel === 'E3L') roundLabel = 'Jogo 3º Lugar';
+                    else if (roundLabel === 'E3') roundLabel = 'Final';
+                    else if (typeof roundLabel === 'string' && roundLabel.startsWith('J')) {
+                        // Já está formatado
+                    } else if (roundLabel && !isNaN(roundLabel)) {
+                        roundLabel = 'Jornada ' + roundLabel;
+                    }
+
+                    const gameDate = gameData.fullDate ? new Date(gameData.fullDate).toLocaleDateString('pt-PT') : dateDisplay;
+                    if (isLastGame) {
+                        html += '<div style="color: #999; font-size: 0.85em; margin-bottom: 2px;">(último jogo)</div>';
+                    }
+                    html += '<div style="color: #666; font-size: 0.9em;">' + (roundLabel || '') + ' • ' + gameDate + '</div>';
+                    html += '<div style="font-weight: 600; margin-top: 2px;">' + (gameData.result + ' vs ' + gameData.opponent) + '</div>';
+                    html += '</div>';
+                } else {
+                    html += '<div style="margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; color: #666; font-size: 0.9em;">' + dateDisplay + '</div>';
+                    if (extraData.description) {
+                        html += '<div style="font-weight: 600; margin-top: 2px;">' + extraData.description + '</div>';
+                    }
                 }
+
+                // Delta ELO - usar do gameData se disponível
+                if (gameData && gameData.eloDelta && Math.abs(gameData.eloDelta) > 0.01) {
+                    const isPos = gameData.eloDelta > 0;
+                    const color = isPos ? '#28a745' : '#dc3545';
+                    const sign = isPos ? '+' : '';
+                    // Nota: o delta ELO é mostrado logo após o ELO na seção anterior
+                }
+
+                // Forma (Últimos 5 jogos) - usar do gameData se disponível
+                if (gameData && gameData.form && gameData.form.length > 0) {
+                    // Filtrar apenas resultados válidos (V, E, D)
+                    const validForm = gameData.form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
+
+                    if (validForm.length > 0) {
+                        html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
+                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">Forma:</span>';
+                        validForm.forEach(outcome => {
+                            let color = '#6c757d';
+                            let letter = '-';
+                            if (outcome === 'V') { color = '#28a745'; letter = 'V'; }
+                            else if (outcome === 'D') { color = '#dc3545'; letter = 'D'; }
+                            else if (outcome === 'E') { color = '#ffc107'; letter = 'E'; }
+
+                            html += '<span style="width: 16px; height: 16px; border-radius: 50%; background-color: ' + color + '; display: inline-flex; justify-content: center; align-items: center; color: #fff; font-size: 10px; font-weight: bold;" title="' + outcome + '">' + letter + '</span>';
+                        });
+                        html += '</div>';
+                    }
+                } else if (extraData.form && extraData.form.length > 0) {
+                    // Fallback para forma atual se não há gameData
+                    const validForm = extraData.form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
+
+                    if (validForm.length > 0) {
+                        html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
+                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">Forma:</span>';
+                        validForm.forEach(outcome => {
+                            let color = '#6c757d';
+                            let letter = '-';
+                            if (outcome === 'V') { color = '#28a745'; letter = 'V'; }
+                            else if (outcome === 'D') { color = '#dc3545'; letter = 'D'; }
+                            else if (outcome === 'E') { color = '#ffc107'; letter = 'E'; }
+
+                            html += '<span style="width: 16px; height: 16px; border-radius: 50%; background-color: ' + color + '; display: inline-flex; justify-content: center; align-items: center; color: #fff; font-size: 10px; font-weight: bold;" title="' + outcome + '">' + letter + '</span>';
+                        });
+                        html += '</div>';
+                    }
+                }
+
+                html += '</div>';
+                return html;
             }
         }
-    });
+    };
 
-    // Calcular nível de zoom atual para ajustar thresholds dinamicamente
-    const yScale = chartInstance.scales.y;
-    const xScale = chartInstance.scales.x;
+    eloChart = new ApexCharts(document.querySelector("#eloChart"), options);
+    eloChart.render();
 
-    // Calcular fator de zoom baseado na diferença entre escalas atuais e originais
-    const originalYRange = yScale.max - yScale.min;
-    const originalXRange = xScale.max - xScale.min;
-
-    // Estimar zoom baseado na altura visível da escala Y
-    const currentYRange = (eloChart.options.scales?.y?.max || yScale.max) -
-        (eloChart.options.scales?.y?.min || yScale.min);
-    const currentXRange = (eloChart.options.scales?.x?.max || xScale.max) -
-        (eloChart.options.scales?.x?.min || xScale.min);
-
-    const yZoomFactor = originalYRange / currentYRange;
-    const xZoomFactor = originalXRange / currentXRange;
-    const avgZoomFactor = (yZoomFactor + xZoomFactor) / 2;
-
-    // Ajustar thresholds baseado no zoom - quanto maior o zoom, menor o threshold
-    // Isso permite que labels se separem quando há zoom suficiente
-    const baseProximityThreshold = 25;
-    const baseEloThreshold = 15;
-
-    // Reduzir thresholds com zoom para permitir separação de labels
-    const proximityThreshold = Math.max(8, baseProximityThreshold / Math.sqrt(avgZoomFactor));
-    const eloThreshold = Math.max(3, baseEloThreshold / Math.sqrt(avgZoomFactor));
-
-    DebugUtils.debugVisualization('zoom_info', {
-        zoom: avgZoomFactor.toFixed(2),
-        proximity: proximityThreshold.toFixed(1),
-        eloThreshold: eloThreshold.toFixed(1)
-    });
-
-    const processedTeams = new Set();
-    const labelsToShow = [];
-
-    teamEndpoints.forEach((team, index) => {
-        if (processedTeams.has(index)) return;
-
-        // Encontrar equipas próximas
-        const nearbyTeams = [team];
-        const nearbyIndices = [index];
-
-        teamEndpoints.forEach((otherTeam, otherIndex) => {
-            if (otherIndex === index || processedTeams.has(otherIndex)) return;
-
-            const verticalDistance = Math.abs(team.yPixel - otherTeam.yPixel);
-            const eloDistance = Math.abs(team.lastValue - otherTeam.lastValue);
-            const horizontalDistance = Math.abs(team.xPosition - otherTeam.xPosition);
-
-            // Lógica melhorada: equipas são consideradas próximas se:
-            // 1. Estão visualmente próximas (pixels) E têm ELO similar
-            // 2. OU estão muito próximas visualmente independente do ELO
-            const isVisuallyClose = verticalDistance < proximityThreshold;
-            const hasCloseELO = eloDistance < eloThreshold;
-            const isVeryClose = verticalDistance < (proximityThreshold / 2);
-
-            if ((isVisuallyClose && hasCloseELO) || isVeryClose) {
-                // Adicionar verificação de distância horizontal para evitar agrupar linhas muito distantes horizontalmente
-                if (horizontalDistance < 150) {
-                    nearbyTeams.push(otherTeam);
-                    nearbyIndices.push(otherIndex);
+    // Guardar a cor original de cada marker logo após renderizar
+    const saveOriginalMarkerColors = () => {
+        document.querySelectorAll('.apexcharts-marker').forEach(marker => {
+            if (!marker.hasAttribute('data-original-fill')) {
+                const currentFill = marker.getAttribute('fill');
+                if (currentFill && currentFill !== 'none') {
+                    marker.setAttribute('data-original-fill', currentFill);
+                    // console.log('[DEBUG] Guardou cor original do marker:', currentFill);
                 }
             }
         });
+    };
 
-        // Marcar todas as equipas próximas como processadas
-        nearbyIndices.forEach(idx => processedTeams.add(idx));
+    // Guardar cores originais
+    saveOriginalMarkerColors();
 
-        if (nearbyTeams.length === 1) {
-            // Equipa isolada - mostrar normalmente
-            labelsToShow.push(team);
-        } else {
-            // Com zoom alto suficiente, mostrar labels individuais
-            if (avgZoomFactor > 3) {
-                // Zoom alto - mostrar todas as equipas individualmente
-                nearbyTeams.forEach(nearbyTeam => {
-                    labelsToShow.push(nearbyTeam);
-                });
-            } else {
-                // Zoom normal - agrupar equipas próximas e mostrar apenas a com ELO mais alto
-                const highestEloTeam = nearbyTeams.reduce((highest, current) =>
-                    current.lastValue > highest.lastValue ? current : highest
-                );
+    // Se não conseguir na primeira vez, tentar novamente com delay (para garantir que SVG está pronto)
+    setTimeout(saveOriginalMarkerColors, 100);
 
-                // Criar label combinado com informação de múltiplas equipas
-                const combinedTeam = {
-                    ...highestEloTeam,
-                    name: nearbyTeams.length > 3
-                        ? `${highestEloTeam.name} (+${nearbyTeams.length - 1} outras)`
-                        : nearbyTeams.map(t => t.name).join(', '),
-                    isGroup: nearbyTeams.length > 1,
-                    groupSize: nearbyTeams.length
-                };
-
-                labelsToShow.push(combinedTeam);
+    // Adicionar observer para repositionar o tooltip
+    const tooltipObserver = new MutationObserver(() => {
+        const tooltip = document.querySelector('.apexcharts-tooltip');
+        if (tooltip && !window.tooltipFixed) {
+            const currentTop = parseInt(tooltip.style.top) || 0;
+            tooltip.style.top = (currentTop + 75) + 'px';
+            tooltip.style.pointerEvents = 'none';
+        } else if (tooltip && window.tooltipFixed) {
+            // Manter a posição fixada e sempre visível
+            if (window.tooltipFixedPosition) {
+                tooltip.style.top = window.tooltipFixedPosition.top;
+                tooltip.style.left = window.tooltipFixedPosition.left;
             }
+            tooltip.style.display = 'block';
+            tooltip.style.opacity = '1';
+            tooltip.style.pointerEvents = 'auto';
         }
     });
 
-    // Criar os labels visuais para pontos relevantes
-    labelsToShow.forEach((team, index) => {
-        const label = document.createElement('div');
-        label.className = 'team-end-label visible';
-        if (team.isGroup) {
-            label.classList.add('group-label');
-        }
+    tooltipObserver.observe(document.querySelector("#eloChart").parentElement, {
+        childList: true,
+        subtree: true
+    });
+}
 
-        label.style.borderColor = team.dataset.borderColor;
-        label.style.color = team.dataset.borderColor;
+// Funções de pan manual removidas pois ApexCharts tem nativo
 
-        // As coordenadas xPosition e yPixel já são absolutas em relação ao canvas
-        // Calcular posição diretamente sem subtração adicional
-        let labelX = team.xPosition + 8; // Offset padrão de 8px à direita do ponto
-        let labelY = team.yPixel;
+// Listener GLOBAL e ÚNICO para clique fora do gráfico
+if (!window._chartClickListenerAdded) {
+    document.addEventListener('click', function handleGlobalChartClick(e) {
+        if (!window.tooltipFixed) return;
 
-        // Se o ponto estiver fora da área direita, colocar label na borda direita
-        if (team.xPosition > chartArea.right) {
-            labelX = chartArea.right + 8; // Fixar logo após a borda direita
-        }
+        const eloChartElement = document.querySelector('#eloChart');
+        const isClickOutside = !eloChartElement || !eloChartElement.contains(e.target);
 
-        // Com zoom alto, adicionar pequeno offset vertical para labels individuais muito próximas
-        if (avgZoomFactor > 3) {
-            // Verificar se há outras labels muito próximas e ajustar posição
-            const otherLabels = labelsToShow.slice(0, index);
-            const conflictingLabels = otherLabels.filter(other => {
-                return Math.abs(labelY - other.yPixel) < 18 && Math.abs(labelX - (other.xPosition + 8)) < 60;
+        if (isClickOutside) {
+            // Resetar as flags de seleção
+            window.tooltipFixed = null;
+            window.tooltipFixedPosition = null;
+            window.tooltipFixedDataPoint = null;
+
+            // Esconder tooltip
+            const tooltip = document.querySelector('.apexcharts-tooltip');
+            if (tooltip) {
+                tooltip.style.pointerEvents = 'none';
+                tooltip.style.display = 'none';
+                tooltip.removeAttribute('data-shifted');
+            }
+
+            // Remover atributo selected e resetar visual de todos os marcadores
+            document.querySelectorAll('.apexcharts-marker[selected="true"]').forEach(marker => {
+                // console.log('[DEBUG] Antes: Fill:', marker.getAttribute('fill'), 'Filter:', marker.getAttribute('filter'));
+
+                // Obter a cor original guardada no atributo data
+                let originalColor = marker.getAttribute('data-original-fill');
+                // console.log('[DEBUG] Cor original guardada:', originalColor);
+
+                if (!originalColor) {
+                    // Fallback: tentar obter da série
+                    if (eloChart && eloChart.opts.colors) {
+                        const seriesIndex = marker.getAttribute('rel');
+                        if (seriesIndex !== null) {
+                            originalColor = eloChart.opts.colors[seriesIndex];
+                            // console.log('[DEBUG] Fallback - Cor da série:', originalColor);
+                        }
+                    }
+                    if (!originalColor) originalColor = '#ffffff';
+                }
+
+                // Clone o marker para remover todo o histórico de estilos
+                const newMarker = marker.cloneNode(true);
+                newMarker.setAttribute('fill', originalColor);
+                newMarker.setAttribute('selected', 'false');
+                newMarker.removeAttribute('filter');
+
+                // Substituir o marker antigo pelo novo
+                marker.parentNode.replaceChild(newMarker, marker);
+
+                // Disparar mouseleave para forçar saída do estado hover
+                newMarker.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+
+                // console.log('[DEBUG] Depois: Fill:', newMarker.getAttribute('fill'), 'Filter:', newMarker.getAttribute('filter'));
             });
-
-            if (conflictingLabels.length > 0) {
-                labelY += conflictingLabels.length * 18; // Offset de 18px por cada label conflitante
-            }
         }
-
-        // Garantir que a label fica dentro dos limites do canvas
-        labelX = Math.max(chartArea.left + 8, Math.min(chartArea.right + 100, labelX));
-        labelY = Math.max(chartArea.top, Math.min(chartArea.bottom - 20, labelY));
-
-        // Posicionamento final com offset correto (coordenadas já são absolutas)
-        label.style.left = (offsetX + labelX) + 'px';
-        label.style.top = (offsetY + labelY) + 'px';
-        label.textContent = team.name;
-
-        labelsContainer.appendChild(label);
     });
 
-    // Adicionar botão de época anterior
-    addPreviousSeasonButton();
+    window._chartClickListenerAdded = true;
 }
 
-// Função para adicionar botão de época anterior
-function addPreviousSeasonButton() {
-    const labelsContainer = document.getElementById('teamEndLabels');
-    const chartInstance = eloChart;
-
-    if (!chartInstance || !labelsContainer) return;
-
-    const chartArea = chartInstance.chartArea;
-    const canvas = chartInstance.canvas;
-    const canvasRect = canvas.getBoundingClientRect();
-    const containerRect = labelsContainer.getBoundingClientRect();
-
-    const offsetX = canvasRect.left - containerRect.left;
-    const offsetY = canvasRect.top - containerRect.top;
-
-    // Remover botões existentes
-    const existingButtons = labelsContainer.querySelectorAll('.season-nav-btn');
-    existingButtons.forEach(btn => btn.remove());
-
-    // Obter época atual
-    const currentEpochElement = document.getElementById('epoca');
-    if (!currentEpochElement) return;
-
-    const currentEpoch = currentEpochElement.value;
-    const currentIndex = availableEpocas.indexOf(currentEpoch);
-
-    const yPosition = offsetY + chartArea.top - 40; // 40px acima do gráfico
-
-    // Botão Época Anterior (só se houver época anterior)
-    if (currentIndex < availableEpocas.length - 1) {
-        const previousEpoch = availableEpocas[currentIndex + 1];
-        const btnPrev = document.createElement('button');
-        btnPrev.className = 'season-nav-btn previous-season-btn';
-        btnPrev.textContent = '← Época Anterior';
-        btnPrev.title = `Ver época 20${previousEpoch.replace('_', '/')}`;
-        btnPrev.setAttribute('aria-label', `Navegar para época anterior 20${previousEpoch.replace('_', '/')}`);
-
-        // Posicionar à esquerda
-        btnPrev.style.left = (offsetX + chartArea.left) + 'px';
-        btnPrev.style.top = yPosition + 'px';
-
-        btnPrev.onclick = () => {
-            // Obter modalidade atual (sem a época)
-            const modalidadeSelect = document.getElementById('modalidade');
-            const currentMod = modalidadeSelect.value.replace(`_${currentEpoch}`, '');
-
-            // Mudar época
-            currentEpochElement.value = previousEpoch;
-            changeEpoca(previousEpoch);
-
-            // Selecionar a mesma modalidade na nova época
-            setTimeout(() => {
-                const newModValue = `${currentMod}_${previousEpoch}`;
-                modalidadeSelect.value = newModValue;
-                changeModalidade(newModValue);
-            }, 100);
-        };
-
-        labelsContainer.appendChild(btnPrev);
-    }
-
-    // Botão Época Seguinte (só se houver época seguinte)
-    if (currentIndex > 0) {
-        const nextEpoch = availableEpocas[currentIndex - 1];
-        const btnNext = document.createElement('button');
-        btnNext.className = 'season-nav-btn next-season-btn';
-        btnNext.textContent = 'Época Seguinte →';
-        btnNext.title = `Ver época 20${nextEpoch.replace('_', '/')}`;
-        btnNext.setAttribute('aria-label', `Navegar para época seguinte 20${nextEpoch.replace('_', '/')}`);
-
-        // Posicionar à direita do gráfico
-        btnNext.style.right = '20px'; // 20px da borda direita do container
-        btnNext.style.top = yPosition + 'px';
-
-        btnNext.onclick = () => {
-            // Obter modalidade atual (sem a época)
-            const modalidadeSelect = document.getElementById('modalidade');
-            const currentMod = modalidadeSelect.value.replace(`_${currentEpoch}`, '');
-
-            // Mudar época
-            currentEpochElement.value = nextEpoch;
-            changeEpoca(nextEpoch);
-
-            // Selecionar a mesma modalidade na nova época
-            setTimeout(() => {
-                const newModValue = `${currentMod}_${nextEpoch}`;
-                modalidadeSelect.value = newModValue;
-                changeModalidade(newModValue);
-            }, 100);
-        };
-
-        labelsContainer.appendChild(btnNext);
-    }
-}
-
-// Funções de controle de zoom
+// Funções de Zoom e Reset para ApexCharts
 function zoomChart(factor) {
     if (!eloChart) return;
 
-    const chart = eloChart;
-    const xScale = chart.scales.x;
-    const yScale = chart.scales.y;
+    // ApexCharts não tem zoom direto, mas podemos usar xaxis.min/max
+    try {
+        const xaxis = eloChart.opts.xaxis;
+        if (xaxis && eloChart.w.globals.minX !== undefined && eloChart.w.globals.maxX !== undefined) {
+            const minX = eloChart.w.globals.minX;
+            const maxX = eloChart.w.globals.maxX;
+            const range = maxX - minX;
+            const center = (minX + maxX) / 2;
+            const newRange = range / factor;
+            const newMin = center - newRange / 2;
+            const newMax = center + newRange / 2;
 
-    // Calcular novos limites do zoom
-    const xRange = xScale.max - xScale.min;
-    const yRange = yScale.max - yScale.min;
-
-    const newXRange = xRange / factor;
-    const newYRange = yRange / factor;
-
-    const xCenter = (xScale.max + xScale.min) / 2;
-    const yCenter = (yScale.max + yScale.min) / 2;
-
-    // Aplicar zoom
-    chart.options.scales.x.min = xCenter - newXRange / 2;
-    chart.options.scales.x.max = xCenter + newXRange / 2;
-    chart.options.scales.y.min = yCenter - newYRange / 2;
-    chart.options.scales.y.max = yCenter + newYRange / 2;
-
-    chart.update('none');
-
-    // Atualizar labels após zoom
-    setTimeout(() => {
-        updateDynamicTeamLabels();
-    }, 50);
+            eloChart.updateOptions({
+                xaxis: {
+                    min: newMin,
+                    max: newMax
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Erro ao fazer zoom:', e);
+    }
 }
 
 function resetZoom() {
     if (!eloChart) return;
 
-    // Remover limites personalizados
-    delete eloChart.options.scales.x.min;
-    delete eloChart.options.scales.x.max;
-    delete eloChart.options.scales.y.min;
-    delete eloChart.options.scales.y.max;
-
-    eloChart.update('none');
-
-    // Atualizar labels após reset
-    setTimeout(() => {
-        updateDynamicTeamLabels();
-    }, 50);
+    try {
+        // Resetar o zoom para a vista original (sem afetar os dados/pontos)
+        eloChart.zoomX(undefined, undefined);
+    } catch (e) {
+        console.error('Erro ao fazer reset:', e);
+    }
 }
 
 function togglePanMode() {
-    if (window.toggleManualPan) {
-        window.toggleManualPan();
-    }
+    // ApexCharts tem modo pan nativo quando 'pan' está no toolbar
+    // Esta função é para compatibilidade com event listener
+    console.log('Pan mode é automático no ApexCharts');
 }
 
-// Função para obter ELO mais recente e posição no ranking geral
-function getTeamEloInfo(teamName) {
-    const normalizedTeamName = normalizeTeamName(teamName);
+// Atualizar gráfico ELO
+// Funções de pan manual removidas pois ApexCharts tem nativo
 
-    // Obter ELO mais recente
-    const teamHistory = sampleData.eloHistory[normalizedTeamName];
-    if (!teamHistory || teamHistory.length === 0) {
-        return { elo: DEFAULT_ELO, position: null };
+
+// Função updateDynamicTeamLabels removida (legado Chart.js)
+
+/**
+ * Ajusta hora para o dia anterior se for entre 00:00 e 02:00
+ * Jogos após meia-noite até 2 da manhã pertencem ao "dia anterior"
+ */
+function adjustDateForPostMidnightGame(date) {
+    if (!date) return date;
+    const hour = date.getHours();
+    if (hour >= 0 && hour < 2) {
+        // Descontar 1 dia
+        const adjusted = new Date(date);
+        adjusted.setDate(adjusted.getDate() - 1);
+        return adjusted;
+    }
+    return date;
+}
+
+/**
+ * Agrupa todos os jogos por dia (com ajuste para post-midnight)
+ * e calcula o máximo de jogos em qualquer equipa para cada dia
+ * NOTA: Apenas conta FASE REGULAR para expansão, não playoffs nem ajustes
+ */
+function groupGamesByDayAndCalculateMaxGames() {
+    const dayToGames = new Map(); // Map<dayKey, Array<{team, round, time, date, originalDate}>>
+    const dayToMaxTeamGames = new Map(); // Map<dayKey, maxCount>
+
+    if (!sampleData.gameDetails) return { dayToGames, dayToMaxTeamGames };
+
+    // Agrupar APENAS jogos da fase regular (não playoffs, não intergrupos)
+    Object.entries(sampleData.gameDetails).forEach(([teamName, rounds]) => {
+        Object.entries(rounds).forEach(([round, gameData]) => {
+            if (!gameData || !gameData.date || gameData.isAdjustment) return;
+
+            // Pular playoffs (rounds que começam com 'E')
+            if (round.startsWith('E')) return;
+
+            // Pular ajustes intergrupos
+            if (round === 'Inter-Group') return;
+
+            let originalDate = gameData.date;
+            if (!(originalDate instanceof Date)) {
+                originalDate = new Date(originalDate);
+            }
+
+            // Guardar hora original ANTES de ajustar
+            const originalHours = originalDate.getHours();
+            const originalMinutes = originalDate.getMinutes();
+            const gameTime = originalHours * 60 + originalMinutes;
+
+            // Ajustar data para post-midnight
+            let adjustedDate = adjustDateForPostMidnightGame(originalDate);
+
+            const year = adjustedDate.getFullYear();
+            const month = String(adjustedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(adjustedDate.getDate()).padStart(2, '0');
+            const dayKey = `${year}-${month}-${day}`;
+
+            if (!dayToGames.has(dayKey)) {
+                dayToGames.set(dayKey, []);
+            }
+
+            dayToGames.get(dayKey).push({
+                team: teamName,
+                round,
+                time: gameTime, // Hora original para ordenação
+                date: originalDate,
+                adjustedDate: adjustedDate
+            });
+        });
+    });
+
+    // Calcular máximo de jogos por equipa para cada dia
+    dayToGames.forEach((games, dayKey) => {
+        // Contar quantos jogos cada equipa tem neste dia
+        const teamGameCount = {};
+        games.forEach(game => {
+            teamGameCount[game.team] = (teamGameCount[game.team] || 0) + 1;
+        });
+
+        // Máximo é o maior número de jogos de qualquer equipa neste dia
+        const maxCount = Math.max(...Object.values(teamGameCount));
+        dayToMaxTeamGames.set(dayKey, maxCount);
+
+        // Ordenar jogos por hora (original, para respeitar ordem 21, 23, 1)
+        games.sort((a, b) => a.time - b.time);
+    });
+
+    return { dayToGames, dayToMaxTeamGames };
+}
+
+function updateEloChart() {
+    if (!eloChart || !sampleData.teams || sampleData.teams.length === 0) {
+        return;
     }
 
-    const latestElo = Math.round(teamHistory[teamHistory.length - 1]);
+    const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
+    const selectedTeams = [];
 
-    // Calcular ranking geral de ELO
-    const allTeamsElo = [];
-    Object.keys(sampleData.eloHistory).forEach(team => {
-        const history = sampleData.eloHistory[team];
-        if (history && history.length > 0) {
-            const currentElo = history[history.length - 1];
-            allTeamsElo.push({ team, elo: currentElo });
+    checkboxes.forEach(cb => {
+        if (cb.checked) {
+            const teamObj = sampleData.teams.find(t => t.name === cb.dataset.teamName);
+            if (teamObj) selectedTeams.push(teamObj);
         }
     });
 
-    // Ordenar por ELO (maior para menor)
-    allTeamsElo.sort((a, b) => b.elo - a.elo);
+    if (selectedTeams.length === 0) {
+        eloChart.updateSeries([]);
+        eloChart.updateOptions({ xaxis: { categories: [] } });
+        return;
+    }
 
-    // Encontrar posição da equipa
-    const position = allTeamsElo.findIndex(entry => entry.team === normalizedTeamName) + 1;
 
-    return { elo: latestElo, position: position > 0 ? position : null };
+
+    // 1. Usar timeline global construída pelo processador (alinha com eloHistory)
+    let allDates = Array.isArray(sampleData.gamesDates) ? sampleData.gamesDates : [];
+
+    // CRÍTICO: Deduplicar allDates por dia (E2/E3/E3L no mesmo dia só devem contar 1 vez)
+    const allDatesMap = new Map();
+    allDates.forEach(date => {
+        const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        if (!allDatesMap.has(dateKey)) {
+            allDatesMap.set(dateKey, date);
+        } else {
+            // Manter a data com hora mais cedo
+            const existing = allDatesMap.get(dateKey);
+            if (date < existing) {
+                allDatesMap.set(dateKey, date);
+            }
+        }
+    });
+    allDates = Array.from(allDatesMap.values()).sort((a, b) => a - b);
+
+    // Mapear rounds de playoff por dia (para colapsar E3/E3L)
+    const playoffRoundsByDay = new Map(); // Map<dayKey, Set<round>>
+    if (sampleData.gameDetails) {
+        Object.entries(sampleData.gameDetails).forEach(([teamName, rounds]) => {
+            Object.entries(rounds || {}).forEach(([round, gameInfo]) => {
+                if (!gameInfo || !gameInfo.date) return;
+                if (!round || !round.startsWith('E')) return; // apenas playoffs
+
+                let gameDate = gameInfo.date instanceof Date ? gameInfo.date : new Date(gameInfo.date);
+                gameDate = adjustDateForPostMidnightGame(gameDate);
+                const year = gameDate.getFullYear();
+                const month = String(gameDate.getMonth() + 1).padStart(2, '0');
+                const day = String(gameDate.getDate()).padStart(2, '0');
+                const dayKey = `${year}-${month}-${day}`;
+
+                if (!playoffRoundsByDay.has(dayKey)) {
+                    playoffRoundsByDay.set(dayKey, new Set());
+                }
+                playoffRoundsByDay.get(dayKey).add(round);
+            });
+        });
+    }
+
+    if (!allDates.length) {
+        eloChart.updateSeries([]);
+        eloChart.updateOptions({ xaxis: { categories: [] } });
+        return;
+    }
+
+    // Verificar se há equipas da época anterior
+    const hasPreviousSeasonData = sampleData.teamsFromPreviousSeason && sampleData.teamsFromPreviousSeason.size > 0;
+    const previousSeasonIndex = hasPreviousSeasonData ? 0 : -1;
+    const initialSeasonIndex = hasPreviousSeasonData ? 1 : 0;
+
+    // DEBUG: Verificar duplicatas em allDates
+    const dateKeyCounts = {};
+    allDates.forEach(d => {
+        const dk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        dateKeyCounts[dk] = (dateKeyCounts[dk] || 0) + 1;
+    });
+    const duplicateDays = Object.entries(dateKeyCounts).filter(([k, v]) => v > 1);
+    if (duplicateDays.length > 0) {
+        console.warn('[DEBUG] allDates tem dias duplicados:', duplicateDays);
+    }
+
+    // Agrupar jogos por dia e calcular máximo de jogos
+    const { dayToGames, dayToMaxTeamGames } = groupGamesByDayAndCalculateMaxGames();
+
+    // Criar timeline expandida com múltiplos slots para dias com múltiplos jogos
+    const expandedDates = [];
+    const slotToOriginalIndex = new Map(); // Map<slotIndex, originalDateIndex>
+    const slotIndexByOriginalDay = new Map(); // Map<originalDateIndex, [slotIndices]>
+
+    allDates.forEach((d, idx) => {
+        const dateObj = new Date(d);
+
+        // Para datas não-especiais (não início/época anterior), expandir se houver múltiplos jogos
+        const isPreviousSeason = hasPreviousSeasonData && idx === 0;
+        const isInitial = idx === initialSeasonIndex;
+
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const dayKey = `${year}-${month}-${day}`;
+
+        const slotIndices = [];
+
+        if (!isPreviousSeason && !isInitial) {
+            // Calcular slots para o dia: fase regular + playoffs (E3/E3L colapsam)
+            let slotsForDay = 1;
+            const maxGames = dayToMaxTeamGames.get(dayKey);
+            if (maxGames !== undefined && maxGames > 1) {
+                slotsForDay = maxGames;
+            }
+
+            const playoffRounds = playoffRoundsByDay.get(dayKey);
+            if (playoffRounds && playoffRounds.size > 0) {
+                let playoffSlots = playoffRounds.size;
+                // E3 e E3L contam como um único slot (acontecem no mesmo bloco)
+                if (playoffRounds.has('E3') && playoffRounds.has('E3L')) {
+                    playoffSlots -= 1;
+                }
+                playoffSlots = Math.max(playoffSlots, 1);
+                slotsForDay = Math.max(slotsForDay, playoffSlots);
+            }
+
+            for (let i = 0; i < slotsForDay; i++) {
+                const slotDate = new Date(dateObj);
+                expandedDates.push(slotDate);
+                const newSlotIndex = expandedDates.length - 1;
+                slotToOriginalIndex.set(newSlotIndex, idx);
+                slotIndices.push(newSlotIndex);
+            }
+        } else {
+            // Data especial: apenas 1 slot
+            expandedDates.push(dateObj);
+            const newSlotIndex = expandedDates.length - 1;
+            slotToOriginalIndex.set(newSlotIndex, idx);
+            slotIndices.push(newSlotIndex);
+        }
+
+        slotIndexByOriginalDay.set(idx, slotIndices);
+    });
+
+    const timelineSlots = expandedDates.map((d, idx) => {
+        const dateObj = new Date(d);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const dayKey = `${year}-${month}-${day}`;
+
+        // Encontrar índice original desta data
+        const originalIndex = slotToOriginalIndex.get(idx) ?? -1;
+
+        const isPreviousSeason = hasPreviousSeasonData && originalIndex === 0;
+        const isInitial = originalIndex === initialSeasonIndex;
+
+        let label;
+        if (isPreviousSeason) {
+            label = 'Época Anterior';
+        } else if (isInitial) {
+            label = 'Início da Época';
+        } else {
+            // Para múltiplos slots do mesmo dia, adicionar sub-índice
+            const slotIndices = slotIndexByOriginalDay.get(originalIndex) || [];
+            if (slotIndices.length > 1) {
+                const slotPosition = slotIndices.indexOf(idx) + 1;
+                label = `${dateObj.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })} (${slotPosition}/${slotIndices.length})`;
+            } else {
+                label = dateObj.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' });
+            }
+        }
+
+        return {
+            timestamp: dateObj.getTime(),
+            dayKey,
+            slotIndex: idx,
+            originalDateIndex: originalIndex,
+            isVirtual: isInitial,
+            isPreviousSeason: isPreviousSeason,
+            label: label
+        };
+    });
+
+    // Atualizar categorias do Eixo X
+    eloChart.updateOptions({
+        xaxis: {
+            categories: timelineSlots.map(slot => slot.label)
+        }
+    });
+
+    const series = [];
+
+    // 2. Mapear dados de cada equipa para esta Timeline expandida
+    selectedTeams.forEach(team => {
+        const teamName = team.name;
+        const normalizedTeamName = normalizeTeamName(teamName);
+        const isMaterialsTeam = normalizedTeamName === 'Educação Básica';
+        const eloHistory = sampleData.eloHistory[teamName];
+        if (!eloHistory) return;
+
+
+
+        const teamGameDetails = sampleData.gameDetails ? sampleData.gameDetails[teamName] : {};
+
+        // Mapear rounds para índices na timeline
+        const roundToIndexMap = {};
+
+
+
+        // Mapear cada round para seu slot expandido
+        // Para dias com múltiplos jogos, precisamos encontrar o slot correto baseado na hora
+
+        const roundToSlotIndices = new Map(); // Map<round, [slotIndices onde este round pode aparecer]>
+
+        // Primeiro, agrupar rounds da equipa por dia
+        const teamRoundsByDay = new Map(); // Map<dayKey, [rounds]>
+
+        Object.entries(teamGameDetails || {}).forEach(([round, gameInfo]) => {
+            if (!gameInfo || !gameInfo.date || gameInfo.isAdjustment) return;
+
+            let gameDate = gameInfo.date;
+            if (!(gameDate instanceof Date)) {
+                gameDate = new Date(gameDate);
+            }
+
+            // Guardar hora original ANTES do ajuste
+            const originalHours = gameDate.getHours();
+            const originalMinutes = gameDate.getMinutes();
+
+            // Ajustar para post-midnight
+            gameDate = adjustDateForPostMidnightGame(gameDate);
+
+            const year = gameDate.getFullYear();
+            const month = String(gameDate.getMonth() + 1).padStart(2, '0');
+            const day = String(gameDate.getDate()).padStart(2, '0');
+            const dayKey = `${year}-${month}-${day}`;
+
+            if (!teamRoundsByDay.has(dayKey)) {
+                teamRoundsByDay.set(dayKey, []);
+            }
+
+            // CRÍTICO: Calcular time considerando ajuste post-midnight
+            // Jogos às 00:00-01:59 são tratados como 24:00+ do dia anterior
+            let sortTime = originalHours * 60 + originalMinutes;
+            if (originalHours >= 0 && originalHours < 2) {
+                sortTime = (24 + originalHours) * 60 + originalMinutes;
+            }
+
+            teamRoundsByDay.get(dayKey).push({
+                round,
+                time: sortTime,
+                gameInfo
+            });
+        });
+
+        // Ordenar rounds de cada dia por hora
+        teamRoundsByDay.forEach((rounds, dayKey) => {
+            rounds.sort((a, b) => a.time - b.time);
+
+            // Agora encontrar os slots expandidos para este dia
+            const slotIndices = [];
+            for (let i = 0; i < timelineSlots.length; i++) {
+                if (timelineSlots[i].dayKey === dayKey &&
+                    !timelineSlots[i].isPreviousSeason &&
+                    !timelineSlots[i].isVirtual) {
+                    slotIndices.push(i);
+                }
+            }
+
+            // Mapear cada round do dia para seu slot correspondente (1º round -> 1º slot, etc)
+            rounds.forEach((roundData, position) => {
+                if (position < slotIndices.length) {
+                    roundToSlotIndices.set(roundData.round, slotIndices[position]);
+                } else {
+                    // Se há mais rounds que slots, usar o último slot
+                    roundToSlotIndices.set(roundData.round, slotIndices[slotIndices.length - 1]);
+                }
+            });
+        });
+
+        // Adicionar rounds especiais (época anterior, ajustes inter-grupos, etc)
+        Object.entries(teamGameDetails || {}).forEach(([round, gameInfo]) => {
+            if (!gameInfo || !gameInfo.date) return;
+
+            let gameDate = gameInfo.date;
+            if (!(gameDate instanceof Date)) {
+                gameDate = new Date(gameDate);
+            }
+
+            // NÃO ajustar post-midnight para rounds especiais
+            const year = gameDate.getFullYear();
+            const month = String(gameDate.getMonth() + 1).padStart(2, '0');
+            const day = String(gameDate.getDate()).padStart(2, '0');
+            const dayKey = `${year}-${month}-${day}`;
+
+            if (round === 'Inter-Group' && !roundToSlotIndices.has(round)) {
+                // Encontrar o slot da data inter-group
+                const slotIndex = timelineSlots.findIndex(slot => slot.dayKey === dayKey);
+                if (slotIndex >= 0) {
+                    roundToSlotIndices.set(round, slotIndex);
+                }
+            }
+        });
+
+        // Processar todos os pontos da timeline para esta equipa
+        const dataPoints = [];
+        const extraDataPoints = [];
+        let lastKnownElo = null;
+        let lastGameForm = [];  // Rastrear a forma do último jogo
+
+        // Verificar se esta equipa estava na época anterior
+        const teamWasInPreviousSeason = sampleData.teamsFromPreviousSeason &&
+            sampleData.teamsFromPreviousSeason.has(teamName);
+
+        timelineSlots.forEach((slot, idx) => {
+            // Se é o ponto da época anterior e a equipa não estava lá, pular este ponto
+            if (slot.isPreviousSeason && !teamWasInPreviousSeason) {
+                dataPoints.push(null);
+                extraDataPoints.push({});
+                return;
+            }
+
+            let sourceTag = 'carry-forward';
+
+            // Tentar obter jogo usando o mapa de rounds para slots expandidos
+            let gameData = null;
+            let round = null;
+
+            // Procurar se há algum round mapeado para este slot
+            for (const [r, slotIndex] of roundToSlotIndices.entries()) {
+                if (slotIndex === idx) {
+                    round = r;
+                    gameData = teamGameDetails[r];
+                    break;
+                }
+            }
+
+            // CORREÇÃO CRÍTICA: O eloHistory e os slots não têm mapeamento 1:1
+            // porque cada jogo adiciona 2 valores (data do jogo + dia seguinte).
+            // Quando há gameData, devemos usar o ELO final do jogo (finalElo).
+            // Quando NÃO há gameData, devemos usar o último ELO conhecido (lastKnownElo).
+            let eloValue;
+            if (gameData && gameData.finalElo !== undefined) {
+                // Usar o ELO final do jogo (valor APÓS o jogo)
+                eloValue = gameData.finalElo;
+                lastKnownElo = eloValue; // Atualizar último ELO conhecido
+                sourceTag = 'game';
+            } else if (lastKnownElo !== null) {
+                // Sem jogo neste slot: usar o último ELO conhecido (manter linha horizontal)
+                eloValue = lastKnownElo;
+                sourceTag = 'carry-forward';
+            } else {
+                // Pontos especiais (época anterior, início): usar eloHistory[idx]
+                eloValue = eloHistory[idx];
+                if (eloValue !== null && eloValue !== undefined && !isNaN(eloValue)) {
+                    lastKnownElo = eloValue;
+                }
+                sourceTag = 'raw-history';
+            }
+
+            const numericElo = (eloValue === null || eloValue === undefined || isNaN(eloValue)) ? null : Math.round(eloValue);
+
+            let extra = {};
+
+            // Verificar se existe um ajuste inter-grupos para esta jornada
+            const interGroupData = teamGameDetails["Inter-Group"] || null;
+
+            if (gameData && gameData.opponent) {
+                // Tem dados de jogo!
+                extra.opponent = gameData.opponent;
+                extra.result = gameData.result;
+                extra.round = round;
+                extra.fullDate = gameData.date;
+                extra.eloDelta = gameData.eloDelta || null;
+
+                // A forma mostrada no ponto do jogo deve ser APÓS o jogo (incluindo resultado deste jogo)
+                // gameData.form contém os últimos 5 ANTES deste jogo
+                // Precisamos adicionar o resultado deste jogo para mostrar a forma APÓS
+                if (gameData.outcome && ['V', 'E', 'D'].includes(gameData.outcome)) {
+                    const formBeforeGame = gameData.form || [];
+                    const formAfterGame = [...formBeforeGame, gameData.outcome].slice(-5);
+                    extra.form = formAfterGame;
+                    lastGameForm = formAfterGame;  // Guardar para propagar aos pontos seguintes
+                } else {
+                    // Jogo sem resultado conhecido - manter forma anterior
+                    extra.form = gameData.form || [];
+                    lastGameForm = gameData.form || [];
+                }
+
+                dataPoints.push(numericElo);
+                extraDataPoints.push(extra);
+
+                if (numericElo !== null) {
+                    lastKnownElo = numericElo;
+                }
+
+            } else if (slot.isPreviousSeason) {
+                // Ponto da época anterior
+                extra.description = 'ELO Final Época Anterior';
+                extra.fullDate = new Date(slot.timestamp).toISOString();
+                extra.form = [];  // Sem forma na época anterior
+
+                dataPoints.push(numericElo);
+                extraDataPoints.push(extra);
+
+            } else if (slot.isVirtual) {
+                // Ponto do início da época (não é época anterior)
+                extra.description = 'ELO Início da Época';
+                extra.fullDate = new Date(slot.timestamp).toISOString();
+                extra.form = [];  // Sem forma no início
+
+                dataPoints.push(numericElo);
+                extraDataPoints.push(extra);
+
+            } else {
+                // Ponto sem jogo: usar o último ELO conhecido
+                extra.fullDate = new Date(slot.timestamp).toISOString();
+                extra.form = lastGameForm;  // Herdar a forma do último jogo
+
+                dataPoints.push(numericElo);
+                extraDataPoints.push(extra);
+
+                if (numericElo !== null) {
+                    lastKnownElo = numericElo;
+                }
+
+            }
+        });
+
+        // NOTA: ApexCharts só aceita {name, data} nas séries
+        // Os dados extras são guardados separadamente em appState
+        series.push({
+            name: teamName,
+            data: dataPoints
+        });
+
+        // Guardar extraData e cor separadamente para a tooltip
+        // Fallback: se não houver cor, obter do config ou gerar uma cor aleatória
+        let teamColor = team.color;
+        if (!teamColor) {
+            const courseInfo = getCourseInfo(teamName);
+            teamColor = courseInfo.primaryColor;
+        }
+
+        if (!window._chartExtraData) window._chartExtraData = {};
+        window._chartExtraData[teamName] = {
+            color: teamColor,
+            extraData: extraDataPoints
+        };
+
+    });
+
+    // REORDENAR SÉRIES POR ELO FINAL (descending)
+    // CRÍTICO: Usar sampleData.eloHistory (valor real final), não s.data (valor intermédio)
+    series.sort((a, b) => {
+        const getLastValidElo = (teamName) => {
+            // USAR APENAS eloHistory - é o valor final verdadeiro
+            if (sampleData && sampleData.eloHistory && sampleData.eloHistory[teamName]) {
+                const history = sampleData.eloHistory[teamName];
+                for (let i = history.length - 1; i >= 0; i--) {
+                    if (history[i] !== null && history[i] !== undefined && !isNaN(history[i])) {
+                        return history[i];
+                    }
+                }
+            }
+            return 0;
+        };
+
+        const eloA = getLastValidElo(a.name);
+        const eloB = getLastValidElo(b.name);
+        return eloB - eloA; // Ordenar em ordem descending (maior primeiro)
+    });
+
+    // Adicionar pontos para "Ajustes Inter-Grupos" se existirem
+    // Primeiro verificar se há algum ajuste
+    let hasAnyInterGroupAdjustments = false;
+    for (let team of selectedTeams) {
+        const teamGameDetails = sampleData.gameDetails ? sampleData.gameDetails[team.name] : {};
+        const interGroupData = teamGameDetails["Inter-Group"];
+        if (interGroupData && interGroupData.isAdjustment && interGroupData.eloDelta) {
+            hasAnyInterGroupAdjustments = true;
+            break;
+        }
+    }
+
+    selectedTeams.forEach(team => {
+        const teamName = team.name;
+        const teamGameDetails = sampleData.gameDetails ? sampleData.gameDetails[teamName] : {};
+        const interGroupData = teamGameDetails["Inter-Group"];
+        const isMaterialsTeam = normalizeTeamName(teamName) === 'Educação Básica';
+
+        if (interGroupData && interGroupData.isAdjustment && interGroupData.eloDelta) {
+            // Encontrar a série desta equipa
+            const seriesIndex = series.findIndex(s => s.name === teamName);
+            if (seriesIndex >= 0) {
+                // Obter o último ELO
+                const dataPoints = series[seriesIndex].data;
+                const lastEloIndex = dataPoints.length - 1;
+                const lastElo = dataPoints[lastEloIndex] !== null ? dataPoints[lastEloIndex] : null;
+
+                if (lastElo !== null) {
+                    const adjustedElo = lastElo + interGroupData.eloDelta;
+
+                    // Adicionar ponto à série
+                    dataPoints.push(adjustedElo);
+                    // Garantir que o objeto existe
+                    if (!window._chartExtraData[teamName]) {
+                        window._chartExtraData[teamName] = { color: team.color, extraData: [] };
+                    }
+
+                    // Adicionar dados extras
+                    const extraData = window._chartExtraData[teamName].extraData;
+                    extraData.push({
+                        description: 'Ajustes Inter-Grupos',
+                        opponent: null,
+                        result: null,
+                        round: 'Inter-Group',
+                        fullDate: new Date().toISOString(),
+                        eloDelta: interGroupData.eloDelta,
+                        form: extraData[lastEloIndex]?.form || [],
+                        isInterGroupAdjustment: true
+                    });
+
+                }
+            }
+        } else {
+            // Só adicionar pontos fillers se há ajustes noutras equipas
+            if (hasAnyInterGroupAdjustments) {
+                const seriesIndex = series.findIndex(s => s.name === teamName);
+                if (seriesIndex >= 0) {
+                    const dataPoints = series[seriesIndex].data;
+
+                    // Encontrar o último ELO válido
+                    let lastValidElo = null;
+                    for (let i = dataPoints.length - 1; i >= 0; i--) {
+                        if (dataPoints[i] !== null) {
+                            lastValidElo = dataPoints[i];
+                            break;
+                        }
+                    }
+
+                    // Adicionar ponto com mesmo ELO (filler)
+                    dataPoints.push(lastValidElo);
+
+                    const extraData = window._chartExtraData[teamName].extraData;
+                    extraData.push({
+                        description: null,
+                        opponent: null,
+                        result: null,
+                        round: null,
+                        fullDate: new Date().toISOString(),
+                        eloDelta: null,
+                        form: []
+                    });
+
+                }
+            }
+        }
+    });
+
+
+    // Validar que temos séries e dados
+    if (!series || series.length === 0) {
+        console.warn('[ERRO] Nenhuma série de dados! Equipas selecionadas?');
+        // Se não há dados, fazer updateSeries vazio para limpar
+        if (eloChart) {
+            eloChart.updateSeries([]);
+        }
+        return;
+    }
+
+    // Armazenar os dados das séries globalmente para uso na tooltip
+    appState.chart.currentSeriesData = series;
+
+    // Verificar se há algum "Ajustes Inter-Grupos" nas séries
+    let hasInterGroupAdjustments = false;
+    if (window._chartExtraData) {
+        for (let teamName in window._chartExtraData) {
+            const extraData = window._chartExtraData[teamName].extraData;
+            if (extraData && extraData.some(item => item.isInterGroupAdjustment)) {
+                hasInterGroupAdjustments = true;
+                break;
+            }
+        }
+    }
+
+    // Adicionar categoria "Ajustes Inter-Grupos" se existir
+    let categories = timelineSlots.map(slot => slot.label);
+    if (hasInterGroupAdjustments) {
+        categories.push('Ajustes Inter-Grupos');
+    }
+
+
+    // Destruir o gráfico existente e recrear com dados completos
+    // Isto força ApexCharts a renderizar os marcadores com o tamanho correto desde o início
+    if (eloChart) {
+        eloChart.destroy();
+        eloChart = null;
+    }
+
+    const chartContainer = document.querySelector("#eloChart");
+    if (!chartContainer) {
+        console.error('[ERRO] Container #eloChart não encontrado!');
+        return;
+    }
+
+    // CRÍTICO: Limpar completamente o container antes de recrear
+    // ApexCharts deixa SVG residual que bloqueia a nova renderização
+    chartContainer.innerHTML = '';
+
+
+    // Recrear com toda a configuração original + dados
+    const options = {
+        series: series, // Dados já estruturados
+        chart: {
+            id: 'eloChart',
+            type: 'line',
+            height: '100%',
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                    reset: false
+                },
+                autoSelected: 'zoom'
+            },
+            animations: {
+                enabled: false
+            },
+            events: {
+                dataPointSelection: function (event, chartContext, config) {
+                    if (window.tooltipFixed &&
+                        window.tooltipFixedDataPoint &&
+                        window.tooltipFixedDataPoint.seriesIndex === config.seriesIndex &&
+                        window.tooltipFixedDataPoint.dataPointIndex === config.dataPointIndex) {
+                        window.tooltipFixed = null;
+                        window.tooltipFixedPosition = null;
+                        window.tooltipFixedDataPoint = null;
+                    } else {
+                        const wasFixed = window.tooltipFixed;
+                        window.tooltipFixed = null;
+                        window.tooltipFixedPosition = null;
+
+                        window.tooltipFixedDataPoint = {
+                            seriesIndex: config.seriesIndex,
+                            dataPointIndex: config.dataPointIndex
+                        };
+
+                        setTimeout(() => {
+                            const tooltip = document.querySelector('.apexcharts-tooltip');
+                            if (tooltip && tooltip.style.display !== 'none') {
+                                window.tooltipFixed = true;
+                                window.tooltipFixedPosition = {
+                                    top: tooltip.style.top,
+                                    left: tooltip.style.left
+                                };
+                                tooltip.style.pointerEvents = 'auto';
+                            }
+                        }, 100);
+                    }
+                }
+            }
+        },
+        colors: series.map(s => {
+            // Obter a cor baseado no nome da série (que já está reordenada)
+            const team = sampleData.teams.find(t => t.name === s.name);
+            if (team && team.color) {
+                return team.color;
+            }
+            // Fallback se não encontrar a cor
+            const courseInfo = getCourseInfo(s.name);
+            return courseInfo.primaryColor;
+        }),
+        stroke: {
+            width: 3,
+            curve: 'smooth',  // smooth funciona melhor com dados esparsos
+            connectNullData: true,  // Conectar linhas sobre valores null
+            colors: series.map(s => {
+                // Obter a cor baseado no nome da série (que já está reordenada)
+                const team = sampleData.teams.find(t => t.name === s.name);
+                if (team && team.color) {
+                    return team.color;
+                }
+                // Fallback se não encontrar a cor
+                const courseInfo = getCourseInfo(s.name);
+                return courseInfo.primaryColor;
+            })
+        },
+        fill: {
+            type: 'solid'
+        },
+        grid: {
+            borderColor: '#f1f1f1',
+            xaxis: {
+                lines: {
+                    show: true
+                }
+            }
+        },
+        markers: {
+            size: 6,
+            strokeWidth: 2,
+            strokeOpacity: 1,
+            fillOpacity: 1,
+            hover: {
+                size: 8,
+                sizeOffset: 2
+            }
+        },
+        xaxis: {
+            categories: categories,
+            tooltip: {
+                enabled: false
+            },
+            labels: {
+                rotate: -45,
+                hideOverlappingLabels: true
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'ELO Rating'
+            }
+        },
+        legend: {
+            show: false
+        },
+        tooltip: {
+            enabled: true,
+            shared: false,
+            intersect: true,
+            followCursor: false,
+            offsetY: 100,
+            offsetX: 10,
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                if (window.tooltipFixed && window.tooltipFixedDataPoint) {
+                    seriesIndex = window.tooltipFixedDataPoint.seriesIndex;
+                    dataPointIndex = window.tooltipFixedDataPoint.dataPointIndex;
+                }
+
+                const currentSeries = appState.chart.currentSeriesData;
+
+                if (!currentSeries || !currentSeries[seriesIndex]) {
+                    return '';
+                }
+
+                const seriesData = currentSeries[seriesIndex];
+                const eloValue = seriesData.data[dataPointIndex];
+
+                // Verificar se o valor é null
+                if (eloValue === null || eloValue === undefined) {
+                    return '';
+                }
+
+                const teamName = seriesData.name;
+                // Os dados extras estão guardados separadamente em window._chartExtraData
+                const chartExtra = window._chartExtraData && window._chartExtraData[teamName];
+                const extraData = (chartExtra && chartExtra.extraData && chartExtra.extraData[dataPointIndex]) || {};
+
+
+                let dateDisplay = '';
+                if (extraData.fullDate) {
+                    dateDisplay = new Date(extraData.fullDate).toLocaleDateString('pt-PT');
+                } else if (w.globals.labels && w.globals.labels[dataPointIndex]) {
+                    dateDisplay = String(w.globals.labels[dataPointIndex]);
+                } else {
+                    dateDisplay = 'Data desconhecida';
+                }
+
+                const courseInfo = getCourseInfo(teamName);
+                const logoPath = courseInfo.emblemPath || 'assets/taça_ua.png';
+                const teamColor = w.globals.colors[seriesIndex];
+
+                let html = '<div class="apexcharts-tooltip-title" style="background: #fff; color: #333; font-family: Segoe UI; display: flex; align-items: center; justify-content: space-between; padding: 0px 0px; border-bottom: none;">';
+                html += '<span style="font-weight: 600; padding: 0px 10px;">' + teamName + '</span>';
+
+                let emblemaStyle = 'height: 48px;';
+                if (logoPath.includes('EGI-07.png')) {
+                    emblemaStyle = 'height: 48px; padding: 8px;';
+                }
+                html += '<img src="' + logoPath + '" style="' + emblemaStyle + '" alt="' + teamName + '">';
+                html += '</div>';
+                html += '<div style="height: 3px; background: ' + teamColor + ';"></div>';
+                html += '<div class="apexcharts-tooltip-body" style="font-family: Segoe UI; padding: 8px 8px;">';
+
+                html += '<div><strong>ELO: ' + eloValue + '</strong>';
+
+                if (extraData.eloDelta && Math.abs(extraData.eloDelta) > 0.01 || extraData.isInterGroupAdjustment) {
+                    const isPos = extraData.eloDelta > 0;
+                    const color = isPos ? '#28a745' : '#dc3545';
+                    const sign = isPos ? '+' : '';
+                    html += '<span style="color: ' + color + '; margin-left: 8px; font-weight: bold;">' + sign + extraData.eloDelta + '</span>';
+                }
+                html += '</div>';
+
+                let gameData = extraData.opponent ? extraData : null;
+                let isLastGame = false;
+
+                if (!gameData && chartExtra && chartExtra.extraData && !extraData.isInterGroupAdjustment) {
+                    for (let i = dataPointIndex - 1; i >= 0; i--) {
+                        const prevExtra = chartExtra.extraData[i];
+                        if (prevExtra && prevExtra.opponent) {
+                            gameData = prevExtra;
+                            isLastGame = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (gameData) {
+                    html += '<div style="padding-top: 8px;">';
+
+                    let roundLabel = gameData.round;
+                    if (roundLabel === 'E1') roundLabel = 'Quartos';
+                    else if (roundLabel === 'E2') roundLabel = 'Meias';
+                    else if (roundLabel === 'E3L') roundLabel = 'Jogo 3º Lugar';
+                    else if (roundLabel === 'E3') roundLabel = 'Final';
+                    else if (typeof roundLabel === 'string' && roundLabel.startsWith('J')) {
+                        // Já está formatado
+                    } else if (roundLabel && !isNaN(roundLabel)) {
+                        roundLabel = 'Jornada ' + roundLabel;
+                    }
+
+                    const gameDate = gameData.fullDate ? new Date(gameData.fullDate).toLocaleDateString('pt-PT') : dateDisplay;
+                    if (isLastGame) {
+                        html += '<div style="color: #999; font-size: 0.85em; margin-bottom: 2px;">(último jogo)</div>';
+                    }
+                    html += '<div style="color: #666; font-size: 0.9em;">' + (roundLabel || '') + ' • ' + gameDate + '</div>';
+                    html += '<div style="font-weight: 600; margin-top: 2px;">' + (gameData.result + ' vs ' + gameData.opponent) + '</div>';
+                    html += '</div>';
+                } else if (extraData.isInterGroupAdjustment) {
+                    // Encontrar o ELO antes do ajuste (último ponto válido antes deste)
+                    let eloBeforeAdjustment = null;
+                    if (dataPointIndex > 0 && chartExtra && chartExtra.extraData) {
+                        for (let i = dataPointIndex - 1; i >= 0; i--) {
+                            if (seriesData.data[i] !== null && seriesData.data[i] !== undefined) {
+                                eloBeforeAdjustment = seriesData.data[i];
+                                break;
+                            }
+                        }
+                    }
+
+                    if (eloBeforeAdjustment !== null && extraData.eloDelta) {
+                        html += '<div style="font-size: 0.9em; color: #666;">';
+                        html += '<div style="font-weight: 600; margin-top: 2px;">' + extraData.description + '</div>'
+                    } else {
+                        html += '<div style="font-size: 0.9em; color: #666;">ELO final: <strong>' + eloValue + '</strong></div>';
+                    }
+
+                    html += '</div>';
+                } else {
+                    html += '<div style="margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; color: #666; font-size: 0.9em;">' + dateDisplay + '</div>';
+                    if (extraData.description) {
+                        html += '<div style="font-weight: 600; margin-top: 2px;">' + extraData.description + '</div>';
+                    }
+                }
+
+                if (gameData && gameData.form && gameData.form.length > 0) {
+                    const validForm = gameData.form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
+
+                    if (validForm.length > 0) {
+                        html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
+                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">Forma:</span>';
+                        validForm.forEach(outcome => {
+                            let color = '#6c757d';
+                            let letter = '-';
+                            if (outcome === 'V') { color = '#28a745'; letter = 'V'; }
+                            else if (outcome === 'D') { color = '#dc3545'; letter = 'D'; }
+                            else if (outcome === 'E') { color = '#ffc107'; letter = 'E'; }
+
+                            html += '<span style="width: 16px; height: 16px; border-radius: 50%; background-color: ' + color + '; display: inline-flex; justify-content: center; align-items: center; color: #fff; font-size: 10px; font-weight: bold;" title="' + outcome + '">' + letter + '</span>';
+                        });
+                        html += '</div>';
+                    }
+                } else if (extraData && extraData.form && extraData.form.length > 0) {
+                    // console.log('[DEBUG] Renderizando form de extraData:', extraData.form);
+                    const validForm = extraData.form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
+
+                    if (validForm.length > 0) {
+                        html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
+                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">Forma:</span>';
+                        validForm.forEach(outcome => {
+                            let color = '#6c757d';
+                            let letter = '-';
+                            if (outcome === 'V') { color = '#28a745'; letter = 'V'; }
+                            else if (outcome === 'D') { color = '#dc3545'; letter = 'D'; }
+                            else if (outcome === 'E') { color = '#ffc107'; letter = 'E'; }
+
+                            html += '<span style="width: 16px; height: 16px; border-radius: 50%; background-color: ' + color + '; display: inline-flex; justify-content: center; align-items: center; color: #fff; font-size: 10px; font-weight: bold;" title="' + outcome + '">' + letter + '</span>';
+                        });
+                        html += '</div>';
+                    }
+                }
+
+                html += '</div>';
+                return html;
+            }
+        }
+    };
+
+    eloChart = new ApexCharts(chartContainer, options);
+    eloChart.render();
+
+    // Guardar a cor original de cada marker logo após renderizar
+    const saveOriginalMarkerColors = () => {
+        document.querySelectorAll('.apexcharts-marker').forEach(marker => {
+            if (!marker.hasAttribute('data-original-fill')) {
+                const currentFill = marker.getAttribute('fill');
+                if (currentFill && currentFill !== 'none') {
+                    marker.setAttribute('data-original-fill', currentFill);
+                    // console.log('[DEBUG] Guardou cor original do marker:', currentFill);
+                }
+            }
+        });
+    };
+
+    // Guardar cores originais
+    saveOriginalMarkerColors();
+
+    // Se não conseguir na primeira vez, tentar novamente com delay (para garantir que SVG está pronto)
+    setTimeout(saveOriginalMarkerColors, 100);
+
+    // Adicionar observer para repositionar o tooltip (sem acumular deslocamento)
+    const tooltipObserver = new MutationObserver(() => {
+        const tooltip = document.querySelector('.apexcharts-tooltip');
+        if (tooltip && tooltip.style.display === 'none') {
+            // Reset de estado quando o tooltip é escondido
+            tooltip.removeAttribute('data-shifted');
+        }
+
+        if (tooltip && !window.tooltipFixed) {
+            if (!tooltip.getAttribute('data-shifted')) {
+                const currentTop = parseInt(tooltip.style.top) || 0;
+                tooltip.style.top = (currentTop + 75) + 'px';
+                tooltip.setAttribute('data-shifted', 'true');
+            }
+            tooltip.style.pointerEvents = 'none';
+        } else if (tooltip && window.tooltipFixed) {
+            if (window.tooltipFixedPosition) {
+                tooltip.style.top = window.tooltipFixedPosition.top;
+                tooltip.style.left = window.tooltipFixedPosition.left;
+            }
+            tooltip.style.display = 'block';
+            tooltip.style.opacity = '1';
+            tooltip.style.pointerEvents = 'auto';
+        }
+    });
+
+    tooltipObserver.observe(chartContainer.parentElement, {
+        childList: true,
+        subtree: true
+    });
+
+    // ==================== SYSTEM DE OPACIDADE DINÂMICA ====================
+    /**
+     * Atualiza opacidade das linhas quando o rato passa sobre uma
+     */
+    const updateLineOpacity = (hoveredSeriesIndex) => {
+        const svgElement = chartContainer.querySelector('svg');
+        if (!svgElement) return;
+
+        const paths = svgElement.querySelectorAll('.apexcharts-series-' + hoveredSeriesIndex + ' path.apexcharts-line');
+        paths.forEach(path => {
+            path.style.strokeOpacity = '1';
+            path.style.strokeWidth = (3 + 1) + 'px';
+        });
+
+        // Reduzir opacidade das outras séries
+        for (let i = 0; i < series.length; i++) {
+            if (i !== hoveredSeriesIndex) {
+                const otherPaths = svgElement.querySelectorAll('.apexcharts-series-' + i + ' path.apexcharts-line');
+                otherPaths.forEach(path => {
+                    path.style.strokeOpacity = '0.15';
+                });
+            }
+        }
+    };
+
+    /**
+     * Restaura opacidade normal de todas as linhas
+     */
+    const resetLineOpacity = () => {
+        const svgElement = chartContainer.querySelector('svg');
+        if (!svgElement) return;
+
+        for (let i = 0; i < series.length; i++) {
+            const paths = svgElement.querySelectorAll('.apexcharts-series-' + i + ' path.apexcharts-line');
+            paths.forEach(path => {
+                path.style.strokeOpacity = '1';
+                path.style.strokeWidth = '3px';
+            });
+        }
+    };
+
+    // Adicionar listeners de hover ao seletor de equipas
+    const teamCheckboxes = document.querySelectorAll('#teamSelector .team-checkbox');
+    teamCheckboxes.forEach((checkbox, index) => {
+        checkbox.addEventListener('mouseenter', () => {
+            updateLineOpacity(index);
+        });
+
+        checkbox.addEventListener('mouseleave', () => {
+            resetLineOpacity();
+        });
+    });
+
+    // Permitir que o tooltip volte ao comportamento normal ao passar o rato dentro do gráfico
+    const chartContainerWrapper = document.querySelector('#chartContainer');
+    if (chartContainerWrapper) {
+        chartContainerWrapper.addEventListener('mouseenter', function () {
+            const tooltip = document.querySelector('.apexcharts-tooltip');
+            if (tooltip && tooltip.style.display === 'none' && !window.tooltipFixed) {
+                tooltip.style.display = '';  // Permite que ApexCharts controle novamente
+            }
+        });
+
+        chartContainerWrapper.addEventListener('mouseleave', function () {
+            if (!window.tooltipFixed) {
+                const tooltip = document.querySelector('.apexcharts-tooltip');
+                if (tooltip) {
+                    tooltip.style.display = 'none';  // Esconder quando sai
+                }
+            }
+        });
+    }
 }
+
+// Funções de labels dinâmicos e navegação de época removidas/simplificadas
+// ApexCharts lida com legendas e tooltips nativamente
+// Botão de época anterior pode ser reimplementado separadamente se necessário
+function addPreviousSeasonButton() {
+    // Implementação futura: adicionar botão flutuante sobre o gráfico ApexCharts
+}
+
+// Remover listeners e funções antigas se existirem
+function updateDynamicTeamLabels() { }
+
+
 
 // Obter labels dos cabeçalhos baseados na modalidade
 function getGoalHeaders() {
@@ -1596,6 +2531,15 @@ function updateRankingsTableHeaders() {
     // Atualizar os cabeçalhos
     thElements[scoredIndex].textContent = headers.scored;
     thElements[concededIndex].textContent = headers.conceded;
+
+    // Esconder/mostrar coluna ELO Trend em modo compacto
+    const eloTrendIndex = thElements.findIndex(th =>
+        normalizeHeaderText(th.textContent).includes('elotrend') ||
+        normalizeHeaderText(th.textContent).includes('elo') && normalizeHeaderText(th.textContent).includes('trend')
+    );
+    if (eloTrendIndex !== -1) {
+        thElements[eloTrendIndex].style.display = compactModeEnabled ? 'none' : '';
+    }
 }
 
 // Verificar se a modalidade é voleibol
@@ -1603,6 +2547,64 @@ function isVolleyballModality() {
     if (!currentModalidade) return false;
     const modalityName = currentModalidade.replace(/_\d{2}_\d{2}$/, '').toUpperCase();
     return modalityName.includes('VOLEIBOL');
+}
+
+// Obter informações de ELO de uma equipa (para exibição na tabela de classificação)
+function getTeamEloInfo(teamName) {
+    // Normalizar nome da equipa
+    const normalizedName = normalizeTeamName(teamName);
+
+    // Buscar equipa em sampleData.teams
+    const team = sampleData.teams.find(t => normalizeTeamName(t.name) === normalizedName);
+
+    if (!team) {
+        return { elo: 'N/A', position: null };
+    }
+
+    // Obter histórico de ELO da equipa
+    const eloHistory = sampleData.eloHistory[team.name];
+    if (!eloHistory || eloHistory.length === 0) {
+        return { elo: 'N/A', position: null };
+    }
+
+    // Pegar o último ELO não-null
+    let currentElo = null;
+    for (let i = eloHistory.length - 1; i >= 0; i--) {
+        if (eloHistory[i] !== null) {
+            currentElo = Math.round(eloHistory[i]);
+            break;
+        }
+    }
+
+    if (currentElo === null) {
+        return { elo: 'N/A', position: null };
+    }
+
+    // Calcular posição no ranking geral (comparar com todas as equipas)
+    const allTeamsElo = sampleData.teams.map(t => {
+        const hist = sampleData.eloHistory[t.name];
+        if (!hist || hist.length === 0) return { name: t.name, elo: 0 };
+
+        // Pegar último ELO não-null
+        for (let i = hist.length - 1; i >= 0; i--) {
+            if (hist[i] !== null) {
+                return { name: t.name, elo: hist[i] };
+            }
+        }
+        return { name: t.name, elo: 0 };
+    }).sort((a, b) => b.elo - a.elo);
+
+    const position = allTeamsElo.findIndex(t => normalizeTeamName(t.name) === normalizedName) + 1;
+
+    return { elo: currentElo, position: position > 0 ? position : null };
+}
+
+// Toggle modo compacto da tabela
+function toggleCompactMode() {
+    const checkbox = document.getElementById('compactModeCheckbox');
+    compactModeEnabled = checkbox ? checkbox.checked : !compactModeEnabled;
+    localStorage.setItem('mmr_compactModeEnabled', compactModeEnabled);
+    updateRankingsTable();
 }
 
 // Atualizar visibilidade da coluna de empates
@@ -1635,7 +2637,7 @@ function updateRankingsTable() {
     updateRankingsTableHeaders();
 
     if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #666;">Nenhum dado disponível</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: #666;">Nenhum dado disponível</td></tr>';
         progressionLegend.style.display = 'none';
         return;
     }
@@ -1662,6 +2664,64 @@ function updateRankingsTable() {
     // Atualizar legenda dinâmica
     updateProgressionLegend(showProgressionIndicators, structure);
 
+    // Helper para obter forma (últimos 5 resultados) de uma equipa
+    const getTeamForm = (teamName) => {
+        if (!sampleData.gameDetails || !sampleData.gameDetails[teamName]) {
+            return [];
+        }
+
+        const teamGames = sampleData.gameDetails[teamName];
+        const rounds = Object.keys(teamGames).sort((a, b) => {
+            const numA = parseInt(a);
+            const numB = parseInt(b);
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            return a.localeCompare(b);
+        });
+
+        const outcomes = rounds
+            .map(r => teamGames[r]?.outcome)
+            .filter(o => o === 'V' || o === 'E' || o === 'D');
+
+        return outcomes.slice(-5);
+    };
+
+    // Helper para sparkline de ELO (tendência curta)
+    const buildEloSparkline = (teamName) => {
+        if (!ENABLE_RANKING_SPARKLINES) return '';
+        const history = sampleData.eloHistory?.[teamName] || [];
+        const valid = history.filter(v => v !== null && v !== undefined && !isNaN(v));
+        if (!valid.length) return '<span class="sparkline-empty">—</span>';
+
+        const points = valid.slice(-SPARKLINE_POINTS);
+        const width = 80;
+        const height = 28;
+        const padding = 2;
+        const min = Math.min(...points);
+        const max = Math.max(...points);
+        const range = Math.max(1, max - min);
+        const stepX = points.length > 1 ? (width - padding * 2) / (points.length - 1) : 0;
+
+        const coords = points.map((v, i) => {
+            const x = padding + i * stepX;
+            const y = height - padding - ((v - min) / range) * (height - padding * 2);
+            return { x, y };
+        });
+
+        const pathD = coords.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+        const last = coords[coords.length - 1];
+        const minLabel = Math.round(min);
+        const maxLabel = Math.round(max);
+
+        return `
+            <svg class="sparkline" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" title="Evolução de ELO (últimos ${points.length} jogos): ${minLabel} até ${maxLabel}" aria-label="Tendência de ELO">
+                <path class="sparkline-area" d="${pathD} L ${width - padding},${height - padding} L ${padding},${height - padding} Z" />
+                <path class="sparkline-path" d="${pathD}" />
+                <circle class="sparkline-dot" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="2.5" />
+            </svg>
+            <div class="sparkline-range" aria-hidden="true">${minLabel}–${maxLabel}</div>
+        `;
+    };
+
     tbody.innerHTML = '';
 
     teams.forEach((team, index) => {
@@ -1676,10 +2736,18 @@ function updateRankingsTable() {
             getTeamProgression(position, totalTeams, structure, team.team, currentGroup) :
             { type: 'safe', description: 'Zona segura' };
 
+        // Determinar classe CSS para a zona da tabela
+        let zoneClass = 'zone-safe';
+        if (progression.type === 'playoffs' || progression.type === 'promotion-playoffs' || progression.type === 'maintenance-playoffs') {
+            zoneClass = 'zone-playoff';
+        } else if (progression.type === 'relegation' || progression.type === 'maintenance-league') {
+            zoneClass = 'zone-relegation';
+        }
+
         // Obter informações do curso para emblema - aplicar normalização
         const normalizedTeamName = normalizeTeamName(team.team);
         const courseInfo = getCourseInfo(normalizedTeamName);
-        const emblemHtml = courseInfo.emblemPath ?
+        const emblemHtml = (!compactModeEnabled && courseInfo.emblemPath) ?
             `<img src="${courseInfo.emblemPath}" alt="${normalizedTeamName}" class="team-emblem-table" onerror="this.style.display='none'">` :
             '';
 
@@ -1690,6 +2758,15 @@ function updateRankingsTable() {
         // Obter informação do ELO - aplicar normalização
         const eloInfo = getTeamEloInfo(normalizedTeamName);
         const eloDisplay = eloInfo.position ? `${eloInfo.elo} (#${eloInfo.position})` : `${eloInfo.elo}`;
+
+        const formOutcomes = getTeamForm(team.team);
+        const formBadgesHtml = formOutcomes.length
+            ? `<div class="form-badges">${formOutcomes.map((outcome, idx) => {
+                const map = { 'V': { cls: 'win', letter: 'V', text: 'Vitória' }, 'E': { cls: 'draw', letter: 'E', text: 'Empate' }, 'D': { cls: 'loss', letter: 'D', text: 'Derrota' } };
+                const meta = map[outcome] || { cls: 'draw', letter: outcome || '-', text: 'Desconhecido' };
+                return `<span class="form-badge ${meta.cls}" title="${meta.text}">${meta.letter}</span>`;
+            }).join('')}</div>`
+            : '<span class="form-badges empty">—</span>';
 
         row.innerHTML = `
                     <td>
@@ -1712,7 +2789,10 @@ function updateRankingsTable() {
                     <td>${team.goals || 0}</td>
                     <td>${team.conceded || 0}</td>
                     <td style="color: ${goalDiff > 0 ? '#28a745' : goalDiff < 0 ? '#dc3545' : '#666'}">${goalDiffText}</td>
+                    <td class="sparkline-cell" style="display: ${compactModeEnabled ? 'none' : ''}">${buildEloSparkline(team.team)}</td>
+                    <td>${formBadgesHtml}</td>
                 `;
+        row.classList.add(zoneClass);
         tbody.appendChild(row);
     });
 
@@ -2356,6 +3436,9 @@ function createRealBracket() {
 
             // Marcar resultados desconhecidos (caso o detalhe já tenha sido carregado)
             markUnknownResultsFromCalendar();
+
+            // Calcular form (últimos 5 resultados) para cada equipa
+            calculateFormForAllGames();
 
             // Calcular número máximo de jornadas do calendário (antes dos jogos acontecerem)
             const regularRounds = results.data
@@ -3296,7 +4379,6 @@ function createBracket() {
 
             if (legendItem1) {
                 let qualLabel = '';
-                console.log('legendItem1', legendItem1);
                 // Garantir posição caso ausente
                 if (!legendItem1.position) {
                     const idx1 = qualified.playoffs.findIndex(t => normalizeTeamName(t) === normalizeTeamName(resolvedTeam1));
@@ -3379,7 +4461,6 @@ function createBracket() {
 
             if (legendItem2) {
                 let qualLabel = '';
-                console.log('legendItem2:', legendItem2.division);
                 // Garantir posição caso ausente
                 if (!legendItem2.position) {
                     const idx2 = qualified.playoffs.findIndex(t => normalizeTeamName(t) === normalizeTeamName(resolvedTeam2));
@@ -4381,18 +5462,21 @@ function analyzeModalityStructure() {
 // Função auxiliar para ativar só certas equipas
 function setActiveTeams(teamNames) {
     const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
-    checkboxes.forEach((checkbox, index) => {
+    checkboxes.forEach((checkbox) => {
         const label = checkbox.parentElement;
-        if (teamNames.includes(sampleData.teams[index].name)) {
-            checkbox.checked = true;
+        const teamName = checkbox.dataset.teamName || label?.dataset.teamName;
+        const isActive = teamNames.includes(teamName);
+
+        checkbox.checked = isActive;
+        if (isActive) {
             label.classList.add('active');
         } else {
-            checkbox.checked = false;
             label.classList.remove('active');
         }
     });
     updateEloChart();
     updateTeamCountIndicator();
+    reorderTeamSelector();
 }
 
 // Filtro Top 3 - mostra equipas da final e 3º lugar se existir, senão Top 3 por ELO
@@ -4519,8 +5603,28 @@ function filterSensationTeams() {
             };
         }
 
-        const initialElo = history[0]; // Primeiro valor (início da época)
-        const currentElo = history[history.length - 1]; // Último valor (ELO atual)
+        // Encontrar o primeiro ELO não-null (ELO inicial verdadeiro)
+        let initialElo = null;
+        for (let i = 0; i < history.length; i++) {
+            if (history[i] !== null && history[i] !== undefined && !isNaN(history[i])) {
+                initialElo = history[i];
+                break;
+            }
+        }
+
+        // Encontrar o último ELO não-null (ELO atual)
+        let currentElo = null;
+        for (let i = history.length - 1; i >= 0; i--) {
+            if (history[i] !== null && history[i] !== undefined && !isNaN(history[i])) {
+                currentElo = history[i];
+                break;
+            }
+        }
+
+        // Se não encontrou valores válidos, usar ELO default
+        if (initialElo === null) initialElo = team.initialElo || DEFAULT_ELO;
+        if (currentElo === null) currentElo = team.initialElo || DEFAULT_ELO;
+
         const gain = currentElo - initialElo;
 
         return {
@@ -4531,15 +5635,19 @@ function filterSensationTeams() {
         };
     });
 
-    // Ordenar por ganho de ELO decrescente
-    teamsWithGain.sort((a, b) => b.gain - a.gain);
+    // Filtrar apenas equipas com ganho POSITIVO
+    const teamsWithPositiveGain = teamsWithGain.filter(t => t.gain > 0);
 
-    // Pegar top 3 com maior ganho
-    const top3Sensation = teamsWithGain.slice(0, 3).map(t => t.name);
+    // Ordenar por ganho de ELO decrescente
+    teamsWithPositiveGain.sort((a, b) => b.gain - a.gain);
+
+    // Pegar top 3 com maior ganho positivo
+    const top3Sensation = teamsWithPositiveGain.slice(0, 3).map(t => t.name);
 
     DebugUtils.debugBracket('sensation_teams', {
         teams: top3Sensation,
-        details: teamsWithGain.slice(0, 3)
+        details: teamsWithPositiveGain.slice(0, 3),
+        allTeamsWithGain: teamsWithGain
     });
 
     setActiveTeams(top3Sensation);
@@ -4554,6 +5662,7 @@ function resetFilter() {
         label.classList.add('active');
     });
     updateEloChart();
+    reorderTeamSelector();
 }
 
 // Configuração dos cursos carregada de ficheiro externo
@@ -4613,7 +5722,29 @@ function parseDateWithTime(dateStr, timeStr) {
     const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (!dateMatch) return parseDate(dateStr);
 
-    const [, year, month, day] = dateMatch;
+    let [, year, month, day] = dateMatch;
+    year = parseInt(year);
+    month = parseInt(month) - 1; // JavaScript months are 0-indexed
+    day = parseInt(day);
+
+    // FIX: Corrigir anos inconsistentes baseado na época atual
+    // Se currentEpoca é 25_26, todos os jogos devem estar em 2025 ou início de 2026
+    // Se um jogo aparece em 2026 mas o mês é posterior a agosto, é erro de digitação
+    if (currentEpoca === '25_26') {
+        // Época 25_26 vai de setembro 2025 a junho 2026
+        if (year === 2026 && month > 5) {
+            // Mês > junho em 2026 é erro - deve ser 2025
+            console.warn(`[CORREÇÃO DE DATA] Jogo em ${dateStr} corrigido de 2026 para 2025`);
+            year = 2025;
+        }
+    } else if (currentEpoca === '24_25') {
+        // Época 24_25 vai de setembro 2024 a junho 2025
+        if (year === 2025 && month > 5) {
+            // Mês > junho em 2025 é erro - deve ser 2024
+            console.warn(`[CORREÇÃO DE DATA] Jogo em ${dateStr} corrigido de 2025 para 2024`);
+            year = 2024;
+        }
+    }
 
     // Parsear hora (formato: "10h15" ou "23h15")
     let hours = 0, minutes = 0;
@@ -4625,8 +5756,17 @@ function parseDateWithTime(dateStr, timeStr) {
         }
     }
 
+    // FIX: Jogos entre 00:00 e 00:59 acontecem na realidade no "dia anterior" 
+    // (após a meia-noite mas ainda na mesma "noite")
+    // Para efeitos de ordenação, tratá-los como sendo 24h+ do dia anterior
+    if (hours === 0) {
+        // Ajustar: considerar como 24:XX do dia anterior
+        // Isto garante que um jogo às 00:15 aparece DEPOIS de um jogo às 23:00 do mesmo dia
+        hours = 24;
+    }
+
     // Criar data com hora incluída
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), hours, minutes);
+    return new Date(year, month, day, hours, minutes);
 }
 
 function normalizeTeamName(teamName) {
@@ -4741,6 +5881,7 @@ const appState = {
     // Estado do gráfico ELO
     chart: {
         instance: null,
+        currentSeriesData: [], // Armazena os dados das séries atuais para tooltips
         pan: {
             enabled: false,
             isPanning: false,
@@ -4899,10 +6040,27 @@ async function initializeSelectors() {
     // Detectar épocas disponíveis
     availableEpocas = await detectAvailableEpocas();
 
-    // Definir época atual como a mais recente (primeira do array ordenado)
+    // Tentar carregar época e modalidade do cache (localStorage)
+    const cachedEpoca = localStorage.getItem('mmr_selectedEpoca');
+    const cachedModalidade = localStorage.getItem('mmr_selectedModalidade');
+    const cachedCompactMode = localStorage.getItem('mmr_compactModeEnabled');
+
+    // Restaurar modo compacto se existir no cache
+    if (cachedCompactMode !== null) {
+        compactModeEnabled = cachedCompactMode === 'true';
+        const checkbox = document.getElementById('compactModeCheckbox');
+        if (checkbox) checkbox.checked = compactModeEnabled;
+    }
+
+    // Definir época atual - priorizar cache se válido
     if (!currentEpoca && availableEpocas.length > 0) {
-        currentEpoca = availableEpocas[0];
-        DebugUtils.debugFileLoading('default_epoch_set', { epoch: currentEpoca });
+        if (cachedEpoca && availableEpocas.includes(cachedEpoca)) {
+            currentEpoca = cachedEpoca;
+            DebugUtils.debugFileLoading('cached_epoch_loaded', { epoch: currentEpoca });
+        } else {
+            currentEpoca = availableEpocas[0];
+            DebugUtils.debugFileLoading('default_epoch_set', { epoch: currentEpoca });
+        }
     }
 
     // Preencher seletor de época
@@ -4930,7 +6088,10 @@ function updateModalidadeSelector() {
 
     const modalidades = getModalidadesForEpoca(currentEpoca);
 
-    // Tentar preservar modalidade atual se existir na nova época
+    // Tentar carregar modalidade do cache
+    const cachedModalidade = localStorage.getItem('mmr_selectedModalidade');
+
+    // Tentar preservar modalidade atual ou do cache se existir na nova época
     let modalidadeToLoad = null;
 
     // Extrair o nome da modalidade atual sem a época (ex: "FUTSAL MASCULINO_25_26" -> "FUTSAL MASCULINO")
@@ -4939,16 +6100,26 @@ function updateModalidadeSelector() {
         currentModalidadeName = currentModalidade.replace(/_\d{2}_\d{2}$/, '');
     }
 
+    // Também extrair nome da modalidade do cache
+    let cachedModalidadeName = null;
+    if (cachedModalidade) {
+        cachedModalidadeName = cachedModalidade.replace(/_\d{2}_\d{2}$/, '');
+    }
+
     modalidades.forEach((mod, index) => {
         const option = document.createElement('option');
         option.value = mod.value;
         option.textContent = mod.label;
 
-        // Verificar se esta modalidade corresponde à atual
+        // Verificar se esta modalidade corresponde à atual ou cached
         const modName = mod.value.replace(/_\d{2}_\d{2}$/, '');
 
         if (currentModalidadeName && modName === currentModalidadeName) {
             // Preservar modalidade atual se existir na nova época
+            option.selected = true;
+            modalidadeToLoad = mod.value;
+        } else if (!modalidadeToLoad && cachedModalidadeName && modName === cachedModalidadeName) {
+            // Usar modalidade do cache como segunda prioridade
             option.selected = true;
             modalidadeToLoad = mod.value;
         } else if (!modalidadeToLoad && mod.value.includes('FUTSAL MASCULINO')) {
@@ -4971,6 +6142,10 @@ function changeEpoca(epoca) {
     if (!epoca || epoca === currentEpoca) return;
 
     currentEpoca = epoca;
+
+    // Salvar época selecionada no cache
+    localStorage.setItem('mmr_selectedEpoca', epoca);
+
     updateModalidadeSelector();
 }
 
@@ -4979,6 +6154,9 @@ function changeModalidade(mod) {
 
     // Atualizar modalidade atual
     currentModalidade = mod;
+
+    // Salvar modalidade selecionada no cache
+    localStorage.setItem('mmr_selectedModalidade', mod);
 
     // Caminhos relativos
     const classificacaoPath = `elo_ratings/classificacao_${mod}.csv`;
@@ -5732,6 +6910,8 @@ function createGameItem(game) {
         if (gameTime) {
             dateStr += ` • ${gameTime}`;
         }
+    } else {
+        dateStr = 'DATA POR MARCAR';
     }
 
     // Resultado
@@ -6057,6 +7237,53 @@ function hasRealInterGroupAdjustments(teamInterGroupAdjustments, rawEloData = nu
     return result;
 }
 
+// ==================== FUNÇÕES DE PROCESSAMENTO ELO ====================
+
+/**
+ * Processa o histórico de ELO das equipas
+ */
+function processEloHistory(data, initialElosFromFile = {}, previousSeasonTeams = new Set()) {
+    const processor = new EloHistoryProcessor();
+    processor.process(data, initialElosFromFile, previousSeasonTeams);
+}
+
+/**
+ * Marca resultados desconhecidos baseado nos dados do calendário
+ */
+function markUnknownResultsFromCalendar() {
+    if (!sampleData.calendarData || !sampleData.gameDetails) {
+        return;
+    }
+
+    // Comparar dados do calendário (csv_modalidades) com detalhes de ELO
+    sampleData.calendarData.forEach(calendarMatch => {
+        const team1 = normalizeTeamName(calendarMatch['Equipa 1']);
+        const team2 = normalizeTeamName(calendarMatch['Equipa 2']);
+        const round = calendarMatch.Jornada;
+
+        if (team1 && sampleData.gameDetails[team1] && sampleData.gameDetails[team1][round]) {
+            const gameDetail = sampleData.gameDetails[team1][round];
+            // Se não há resultado no calendário mas há detalhes de ELO, o resultado era desconhecido
+            const calendarResult1 = calendarMatch['Golos 1'];
+            const calendarResult2 = calendarMatch['Golos 2'];
+
+            if (!calendarResult1 && !calendarResult2 && gameDetail.result) {
+                gameDetail.unknownResult = true;
+            }
+        }
+
+        if (team2 && sampleData.gameDetails[team2] && sampleData.gameDetails[team2][round]) {
+            const gameDetail = sampleData.gameDetails[team2][round];
+            const calendarResult1 = calendarMatch['Golos 1'];
+            const calendarResult2 = calendarMatch['Golos 2'];
+
+            if (!calendarResult1 && !calendarResult2 && gameDetail.result) {
+                gameDetail.unknownResult = true;
+            }
+        }
+    });
+}
+
 // ==================== PROCESSADOR DE HISTÓRICO ELO ====================
 
 class EloHistoryProcessor {
@@ -6200,22 +7427,27 @@ class EloHistoryProcessor {
                 opponent: team2,
                 result: golos1 !== null && golos2 !== null ? `${golos1}-${golos2}` : null,
                 eloDelta: eloDelta1,
+                finalElo: finalElo1,  // ELO final APÓS o jogo
                 goalsFor: golos1,
                 goalsAgainst: golos2,
                 outcome: resultado1,  // V, E, D ou null se desconhecido
                 date: gameDate,
-                unknownResult: false  // Será marcado depois pela função markUnknownResultsFromCalendar
+                unknownResult: false,  // Será marcado depois pela função markUnknownResultsFromCalendar
+                form: []  // Será preenchido pela função calculateFormForAllGames()
             };
+
 
             sampleData.gameDetails[team2][round] = {
                 opponent: team1,
                 result: golos1 !== null && golos2 !== null ? `${golos2}-${golos1}` : null,
                 eloDelta: eloDelta2,
+                finalElo: finalElo2,  // ELO final APÓS o jogo
                 goalsFor: golos2,
                 goalsAgainst: golos1,
                 outcome: resultado2,  // V, E, D ou null se desconhecido
                 date: gameDate,
-                unknownResult: false  // Será marcado depois pela função markUnknownResultsFromCalendar
+                unknownResult: false,  // Será marcado depois pela função markUnknownResultsFromCalendar
+                form: []  // Será preenchido pela função calculateFormForAllGames()
             };
 
             // Verificar se equipas estavam na época anterior
@@ -6376,8 +7608,14 @@ class EloHistoryProcessor {
             this.gamesDatesList[roundNum].forEach(date => {
                 // Criar chave única baseada em ano-mês-dia (sem hora/timezone)
                 const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                // Se já existe, manter a data mais antiga (hora menor)
                 if (!allDatesMap.has(dateKey)) {
                     allDatesMap.set(dateKey, date);
+                } else {
+                    const existing = allDatesMap.get(dateKey);
+                    if (date < existing) {
+                        allDatesMap.set(dateKey, date);
+                    }
                 }
             });
         });
@@ -6385,9 +7623,28 @@ class EloHistoryProcessor {
         const chronologicalDates = Array.from(allDatesMap.values())
             .sort((a, b) => a - b);
 
+        // EXTRA: Deduplicar novamente por dia completo (garantir zero duplicatas)
+        const finalDatesMap = new Map();
+        chronologicalDates.forEach(date => {
+            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            if (!finalDatesMap.has(dateKey)) {
+                finalDatesMap.set(dateKey, date);
+            }
+        });
+        const finalChronologicalDates = Array.from(finalDatesMap.values()).sort((a, b) => a - b);
+
         // Data inicial baseada na época
         const initialDate = currentEpoca === '25_26' ? new Date('2025-09-01') : new Date('2024-09-01');
-        this.allDates = [initialDate, ...chronologicalDates];
+
+        // Se há equipas da época anterior, adicionar um ponto antes do início
+        const hasPreviousSeasonData = this.teamsFromPreviousSeason && this.teamsFromPreviousSeason.size > 0;
+        if (hasPreviousSeasonData) {
+            const previousSeasonDate = new Date(initialDate);
+            previousSeasonDate.setDate(previousSeasonDate.getDate() - 15); // 15 dias antes do início
+            this.allDates = [previousSeasonDate, initialDate, ...finalChronologicalDates];
+        } else {
+            this.allDates = [initialDate, ...finalChronologicalDates];
+        }
 
         // Criar mapeamento de datas para jornadas (para o tooltip)
         this.dateToRoundMapping = {};
@@ -6434,24 +7691,10 @@ class EloHistoryProcessor {
         // Verificar ajustes intergrupos
         this.hasInterGroupAdjustments = hasRealInterGroupAdjustments(this.teamInterGroupAdjustments);
 
-        // Adicionar ajustes intergrupos DEPOIS de todos os jogos (fase regular + playoffs)
-        if (this.hasInterGroupAdjustments) {
-            let adjustmentDate;
-
-            if (this.allDates.length > 1) {
-                // Ajustes vêm 1 dia depois do último jogo (seja fase regular ou playoff)
-                const lastGameDate = this.allDates[this.allDates.length - 1];
-                adjustmentDate = new Date(lastGameDate);
-                adjustmentDate.setDate(adjustmentDate.getDate() + 1);
-            } else {
-                // Fallback
-                adjustmentDate = new Date('2025-06-01');
-            }
-
-            this.allDates.push(adjustmentDate);
-            this.roundsByDateOrder.push('Inter-Group');
-            DebugUtils.debugProcessedData('ajustes intergrupos programados', 1, adjustmentDate.toLocaleDateString('pt-PT'));
-        } DebugUtils.debugProcessedData('ajustes intergrupos encontrados', this.hasInterGroupAdjustments ? 1 : 0, this.hasInterGroupAdjustments);
+        // REMOVIDO: Não adicionar data extra para ajustes inter-grupos
+        // Os ajustes devem ser aplicados na mesma data do último jogo
+        // Adicionar uma data separada causa pontos vazios no gráfico
+        DebugUtils.debugProcessedData('ajustes intergrupos encontrados', this.hasInterGroupAdjustments ? 1 : 0, this.hasInterGroupAdjustments);
 
         currentModalityHasAdjustments = this.hasInterGroupAdjustments;
         sampleData.gamesDates = this.allDates;
@@ -6500,9 +7743,10 @@ class EloHistoryProcessor {
 
             const team1 = normalizeTeamName(row["Equipa 1"]);
             const team2 = normalizeTeamName(row["Equipa 2"]);
-            const gameDate = parseDate(row.Dia);
+            const gameDate = parseDateWithTime(row.Dia, row.Hora);  // FIX: usar parseDateWithTime para ter correção de ano
             const finalElo1 = parseInt(row["Final Elo 1"]) || parseInt(row["Elo Depois 1"]);
             const finalElo2 = parseInt(row["Final Elo 2"]) || parseInt(row["Elo Depois 2"]);
+
 
             allGames.push({
                 date: gameDate,
@@ -6574,120 +7818,156 @@ class EloHistoryProcessor {
             gameRoundsByDate.set(dateKey, rounds);
         });                // 5. Inicializar histórico de cada equipa
         const teamCurrentElo = {}; // ELO atual de cada equipa
+        const hasPreviousSeasonData = this.teamsFromPreviousSeason && this.teamsFromPreviousSeason.size > 0;
+
         allTeamsWithGames.forEach(teamName => {
             const initialElo = initialElosFromFile[teamName] || this.teamInitialElo[teamName] || DEFAULT_ELO;
             teamCurrentElo[teamName] = initialElo;
-            sampleData.eloHistory[teamName] = [initialElo];
+
+            // Se há equipas da época anterior, adicionar ponto extra no início
+            if (hasPreviousSeasonData) {
+                if (this.teamsFromPreviousSeason.has(teamName)) {
+                    // Equipa estava na época anterior - adicionar ELO inicial nos dois primeiros pontos
+                    // [época anterior, início da época]
+                    sampleData.eloHistory[teamName] = [initialElo, initialElo];
+                } else {
+                    // Equipa nova - adicionar null no ponto da época anterior, e ELO no início da época
+                    // [null (época anterior), início da época]
+                    sampleData.eloHistory[teamName] = [null, initialElo];
+                }
+            } else {
+                // Sem época anterior - apenas ponto inicial
+                sampleData.eloHistory[teamName] = [initialElo];
+            }
         });
 
-        const allDates = [];
-        const roundsOrder = [];
+        // 6. Processar cada data em sequência (usando this.allDates que já tem tudo)
+        // Para cada data, processar os jogos dessa data e atualizar ELO das equipas
+        this.allDates.forEach(date => {
+            const dateKey = this._getLocalDateKey(date);
 
-        // 6. Processar cada data, rodada por rodada
-        Array.from(gameRoundsByDate.keys()).forEach(dateKey => {
-            const rounds = gameRoundsByDate.get(dateKey);
+            if (gameRoundsByDate.has(dateKey)) {
+                const rounds = gameRoundsByDate.get(dateKey);
 
-            // Processar cada rodada de jogos
-            rounds.forEach((roundGames) => {
-                // Todos os jogos desta rodada usam a mesma data
-                allDates.push(roundGames[0].date);
+                // Rastrear quais equipas jogaram nesta data
+                const teamsWhoPlayedToday = new Set();
 
-                // Usar a fase do primeiro jogo como label da rodada
-                roundsOrder.push(roundGames[0].round);
+                // Processar cada rodada de jogos dessa data
+                rounds.forEach((roundGames) => {
+                    // Atualizar ELO das equipas que jogaram
+                    roundGames.forEach(game => {
 
-                // Atualizar ELO das equipas que jogaram
-                roundGames.forEach(game => {
-                    if (game.finalElo1) teamCurrentElo[game.team1] = game.finalElo1;
-                    if (game.finalElo2) teamCurrentElo[game.team2] = game.finalElo2;
+                        if (game.finalElo1) {
+                            teamCurrentElo[game.team1] = game.finalElo1;
+                            teamsWhoPlayedToday.add(game.team1);
+                        }
+                        if (game.finalElo2) {
+                            teamCurrentElo[game.team2] = game.finalElo2;
+                            teamsWhoPlayedToday.add(game.team2);
+                        }
+                    });
                 });
 
-                // Adicionar ponto ao histórico de todas as equipas
-                allTeamsWithGames.forEach(teamName => {
+                // CORREÇÃO: Adicionar ponto apenas às equipas que jogaram nesta data
+                teamsWhoPlayedToday.forEach(teamName => {
                     sampleData.eloHistory[teamName].push(teamCurrentElo[teamName]);
                 });
-            });
+            }
         });
 
-        // 4. Aplicar ajustes inter-grupos DEPOIS de todos os jogos
-        if (this.hasInterGroupAdjustments) {
-            const lastGameDate = allDates.length > 0 ? allDates[allDates.length - 1] : new Date();
-            const adjustmentDate = new Date(lastGameDate);
-            adjustmentDate.setDate(adjustmentDate.getDate() + 1);
+        // REMOVIDO: Pontos filler para ajustes inter-grupos
+        // Estes pontos estavam causando slots extras desnecessários após a final
 
-            allDates.push(adjustmentDate);
-            roundsOrder.push('Inter-Group');
-
-            allTeamsWithGames.forEach(teamName => {
-                const currentElo = sampleData.eloHistory[teamName][sampleData.eloHistory[teamName].length - 1];
-
-                if (this.teamInterGroupAdjustments[teamName]) {
-                    const adjustments = this.teamInterGroupAdjustments[teamName];
-                    const adjustment = adjustments.find(adj => adj.round === "Inter-Group");
-                    if (adjustment && adjustment.finalElo) {
-                        sampleData.eloHistory[teamName].push(adjustment.finalElo);
-                    } else {
-                        sampleData.eloHistory[teamName].push(currentElo);
-                    }
-                } else {
-                    sampleData.eloHistory[teamName].push(currentElo);
-                }
-            });
-        }
-
-        // 5. Guardar array de datas (inicial + todas as datas de eventos)
-        const initialDate = currentEpoca === '25_26' ? new Date('2025-09-01') : new Date('2024-09-01');
-        this.allDates = [initialDate, ...allDates];
+        // 5. Guardar array de datas (época anterior se houver + inicial + todas as datas de eventos)
+        // IMPORTANTE: Usar this.allDates e this.roundsByDateOrder que já incluem os playoffs
+        // Não usar allDates local que foi reconstruído apenas a partir dos jogos regulares/playoffs com dados
         sampleData.gamesDates = this.allDates;
-        sampleData.roundsByDateOrder = roundsOrder;
+        sampleData.roundsByDateOrder = this.roundsByDateOrder;
+
+
 
         // 6. Processar equipas que não jogaram (nem fase regular nem playoffs nem ajustes)
+        // CORREÇÃO: Equipas sem jogos não devem ter pontos para cada data de playoff
+        // Devem ter apenas: ponto inicial (e época anterior se houver)
         sampleData.teams.forEach(team => {
             if (!sampleData.eloHistory[team.name]) {
                 const initialElo = initialElosFromFile[team.name] || this.teamInitialElo[team.name] || DEFAULT_ELO;
-                sampleData.eloHistory[team.name] = [initialElo, ...Array(allDates.length).fill(initialElo)];
+
+                if (hasPreviousSeasonData) {
+                    if (this.teamsFromPreviousSeason.has(team.name)) {
+                        // Equipa estava na época anterior - apenas 2 pontos: época anterior + início
+                        sampleData.eloHistory[team.name] = [initialElo, initialElo];
+                    } else {
+                        // Equipa nova - null na época anterior, ELO no início
+                        sampleData.eloHistory[team.name] = [null, initialElo];
+                    }
+                } else {
+                    // Sem época anterior - apenas ponto inicial
+                    sampleData.eloHistory[team.name] = [initialElo];
+                }
             }
         });
+
+        // Calcular form (últimos 5 resultados) para cada jogo
+        calculateFormForAllGames();
     }
 }
 
-// Função wrapper para compatibilidade com código existente
-function processEloHistory(data, initialElosFromFile = {}, previousSeasonTeams = new Set()) {
-    const processor = new EloHistoryProcessor();
-    processor.process(data, initialElosFromFile, previousSeasonTeams);
-
-    // Marcar resultados desconhecidos do calendário (se já foi carregado)
-    markUnknownResultsFromCalendar();
-}
-
 /**
- * Marca jogos com resultados desconhecidos baseado no calendário
+ * Calcula o array de forma (últimos 5 resultados V/E/D) para cada jogo
  */
-function markUnknownResultsFromCalendar() {
-    if (!sampleData.calendarData || !sampleData.gameDetails) return;
+function calculateFormForAllGames() {
+    if (!sampleData.gameDetails) {
+        // console.log('[DEBUG] sampleData.gameDetails não existe!');
+        return;
+    }
 
-    sampleData.calendarData.forEach(calendarMatch => {
-        const round = calendarMatch.Jornada;
-        const team1 = normalizeTeamName(calendarMatch['Equipa 1']);
-        const team2 = normalizeTeamName(calendarMatch['Equipa 2']);
+    const teamsCount = Object.keys(sampleData.gameDetails).length;
+    // console.log('[DEBUG] calculateFormForAllGames iniciado com', teamsCount, 'equipas');
 
-        // Verificar se há "?" em algum campo
-        const hasUnknownMarker = Object.values(calendarMatch).some(value =>
-            value && value.toString().trim() === '?'
-        );
+    let totalGamesProcessed = 0;
+    let formsCalculated = 0;
 
-        if (hasUnknownMarker) {
-            // Atualizar gameDetails para ambas as equipas - apenas marcar como desconhecido
-            if (sampleData.gameDetails[team1] && sampleData.gameDetails[team1][round]) {
-                sampleData.gameDetails[team1][round].unknownResult = true;
-                // NÃO alterar result e outcome - preservar os valores que vieram do CSV de detalhe
+    // Para cada equipa
+    Object.keys(sampleData.gameDetails).forEach(teamName => {
+        const teamGames = sampleData.gameDetails[teamName];
+
+        const roundsCount = Object.keys(teamGames).length;
+        totalGamesProcessed += roundsCount;
+
+        // Obter lista de jornadas ordenadas numericamente
+        const rounds = Object.keys(teamGames).sort((a, b) => {
+            const numA = parseInt(a);
+            const numB = parseInt(b);
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            // Playoffs vêm depois dos números
+            return a.localeCompare(b);
+        });
+
+        // Para cada jogo, calcular form com base nos jogos anteriores
+        rounds.forEach((round, idx) => {
+            const form = [];
+
+            // Pegar os últimos 5 jogos anteriores
+            for (let i = Math.max(0, idx - 5); i < idx; i++) {
+                const prevRound = rounds[i];
+                const prevGame = teamGames[prevRound];
+                if (prevGame && prevGame.outcome && (prevGame.outcome === 'V' || prevGame.outcome === 'E' || prevGame.outcome === 'D')) {
+                    form.push(prevGame.outcome); // push mantém ordem cronológica
+                }
             }
 
-            if (sampleData.gameDetails[team2] && sampleData.gameDetails[team2][round]) {
-                sampleData.gameDetails[team2][round].unknownResult = true;
-                // NÃO alterar result e outcome - preservar os valores que vieram do CSV de detalhe
+            // Atualizar o form do jogo atual
+            if (teamGames[round]) {
+                teamGames[round].form = form;
+                if (form.length > 0) {
+                    formsCalculated++;
+                }
             }
-        }
+        });
     });
+
+    // console.log(`[DEBUG] Processados ${totalGamesProcessed} jogos, ${formsCalculated} com forma calculada`);
 }
 
 // ==================== SISTEMA DE EVENT DELEGATION ====================
@@ -6695,7 +7975,6 @@ function markUnknownResultsFromCalendar() {
 class EventManager {
     constructor() {
         this.handlers = new Map();
-        this.init();
     }
 
     /**
@@ -6893,6 +8172,9 @@ const groupSelector = new GroupSelector();
 
 // ==================== REGISTRAR EVENT HANDLERS ====================
 
+// Inicializar EventManager
+eventManager.init();
+
 // Seletores de época e modalidade
 eventManager.on('#epoca', 'change', (e) => changeEpoca(e.target.value));
 eventManager.on('#modalidade', 'change', (e) => changeModalidade(e.target.value));
@@ -6945,41 +8227,33 @@ eventManager.on('[data-filter="division"]', 'click', (e) => {
 // Inicializar quando a página carregar
 document.addEventListener('DOMContentLoaded', initApp);
 
+// Recalcular altura do gráfico quando mudar orientação ou resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        if (eloChart) {
+            const isLandscapeMobile = window.matchMedia('(max-width: 932px) and (orientation: landscape)').matches;
+            const newHeight = isLandscapeMobile
+                ? Math.min(Math.max(window.innerHeight * 0.5, 300), 520)
+                : Math.min(Math.max(window.innerHeight * 0.65, 380), 640);
+            eloChart.updateOptions({
+                chart: {
+                    height: newHeight
+                }
+            });
+        }
+    }, 250);
+});
+
 // Event listeners para controles de teclado
 document.addEventListener('keydown', (event) => {
     // Verificar se o usuário está editando texto
     if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
         return;
     }
-
-    switch (event.key) {
-        case '+':
-        case '=':
-            event.preventDefault();
-            zoomChart(1.2);
-            break;
-        case '-':
-            event.preventDefault();
-            zoomChart(0.8);
-            break;
-        case '0':
-            event.preventDefault();
-            resetZoom();
-            break;
-        case 'p':
-        case 'P':
-            event.preventDefault();
-            togglePanMode();
-            break;
-    }
 });
 
-// Atualizar labels dinâmicos quando a janela for redimensionada
-window.addEventListener('resize', () => {
-    setTimeout(() => {
-        updateDynamicTeamLabels();
-    }, 200);
-});
 // Inicializar sistema de debug (desativado por padrão)
 document.addEventListener('DOMContentLoaded', function () {
     // Para ativar debug, descomente a linha abaixo:

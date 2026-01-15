@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Dashboard interativo da Taça UA - Rankings, estatísticas ELO, calendário de jogos e brackets de eliminação">
     <title>Dashboard da Taça UA</title>
     <link rel="icon" type="image/png" href="assets/taça_ua.png">
-    <link rel="shortcut icon" type="image/png" href="assets/taça_ua.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <link rel="icon" type="image/png" href="assets/taça_ua.png">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="debug.js"></script>
     <link rel="stylesheet" href="styles.css">
@@ -33,40 +34,17 @@
         </div>
 
         <div class="dashboard-grid">
-            <!-- Gráfico de ELO -->
-            <div class="card chart-card">
-                <!-- Filtros rápidos -->
-                <div class="quick-filters" id="quickFilters">
-                    <!-- Filtros serão gerados dinamicamente baseados na modalidade -->
-                </div>
-                <div class="chart-header">
-                    <div class="card-title">Evolução de ELO das Equipas</div>
-                    <div class="zoom-controls">
-                        <button class="zoom-btn" data-zoom="in" title="Zoom In" aria-label="Aumentar zoom">🔍+</button>
-                        <button class="zoom-btn" data-zoom="out" title="Zoom Out"
-                            aria-label="Diminuir zoom">🔍-</button>
-                        <button class="zoom-btn" data-zoom="reset" title="Reset Zoom"
-                            aria-label="Resetar zoom">⟲</button>
-                        <button class="zoom-btn" data-action="toggle-pan" id="panModeBtn" title="Pan Mode"
-                            aria-label="Ativar/desativar modo de panorâmica">✋</button>
-                    </div>
-                </div>
-                <div class="chart-wrapper">
-                    <div class="chart-container">
-                        <canvas id="eloChart"></canvas>
-                        <div class="team-end-labels" id="teamEndLabels">
-                            <!-- Labels dinâmicos serão gerados aqui -->
-                        </div>
-                    </div>
-                    <div class="team-selector" id="teamSelector">
-                        <!-- Checkboxes serão gerados dinamicamente -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabela de Classificação -->
+            <!-- Tabela de Classificação (PRIMEIRA SECÇÃO) -->
             <div class="card ranking-card">
-                <div class="card-title">Classificação Geral</div>
+                <div class="card-title">
+                    <span>Classificação Geral</span>
+                    <label
+                        style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85em; font-weight: 500; color: #2a5298; margin-left: auto;">
+                        <input type="checkbox" id="compactModeCheckbox" onchange="toggleCompactMode()"
+                            style="cursor: pointer; width: 16px; height: 16px;">
+                        <span>Modo Compacto</span>
+                    </label>
+                </div>
                 <div class="division-selector" id="divisionSelector">
                     <!-- Botões de divisão serão gerados dinamicamente -->
                 </div>
@@ -83,23 +61,70 @@
                     <table class="rankings-table" id="rankingsTable">
                         <thead>
                             <tr>
-                                <th>Pos.</th>
+                                <th title="Posição na classificação geral">Pos.</th>
                                 <th>Equipa</th>
-                                <th>Pts</th>
-                                <th>J</th>
-                                <th>V</th>
-                                <th class="draws-column">E</th>
-                                <th>D</th>
-                                <th style="color: red;">FC</th>
-                                <th>GM</th>
-                                <th>GS</th>
-                                <th>±</th>
+                                <th title="Pontos acumulados">Pts</th>
+                                <th title="Jogos realizados">J</th>
+                                <th title="Vitórias">V</th>
+                                <th class="draws-column" title="Empates">E</th>
+                                <th title="Derrotas">D</th>
+                                <th style="color: red;" title="Faltas de comparência">FC</th>
+                                <th title="Golos marcados">GM</th>
+                                <th title="Golos sofridos">GS</th>
+                                <th title="Diferença de golos (GM - GS)">±</th>
+                                <th title="Mostra a evolução do rating ELO da equipa nos 5 jogos mais recentes.
+                                    ELO minimo - ELO máximo">
+                                    ELO Trend</th>
+                                <th title="Mostra os últimos 5 resultados da equipa (V=Vitória, E=Empate, D=Derrota)
+                                    Esquerda é o jogo mais antigo, direita o mais recente.">
+                                    Forma</th>
                             </tr>
                         </thead>
                         <tbody id="rankingsBody">
                             <!-- Dados serão preenchidos dinamicamente -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Gráfico de ELO (SECÇÃO COLAPSÁVEL) -->
+            <div class="card chart-card" id="eloChartCard">
+                <div class="chart-header">
+                    <div class="card-title">
+                        <span id="eloChartTitle">
+                            Evolução de ELO das Equipas
+                            <span class="tooltip-icon"
+                                title="ELO representa a força relativa das equipas ao longo da época. Sobe com vitórias, desce com derrotas.">?</span>
+                        </span>
+                        <button class="collapse-btn" id="toggleEloChart" aria-expanded="true"
+                            aria-label="Expandir/Colapsar gráfico de ELO" title="Expandir/Colapsar">
+                            <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-content" id="eloChartContent">
+                    <div class="chart-wrapper">
+                        <div class="team-selector" id="teamSelector">
+                            <!-- Checkboxes serão gerados dinamicamente -->
+                        </div>
+                        <!-- Filtros rápidos -->
+                        <div class="quick-filters" id="quickFilters">
+                            <!-- Filtros serão gerados dinamicamente baseados na modalidade -->
+                        </div>
+                        <div class="season-navigation" id="seasonNavigation"
+                            style="display: flex; justify-content: space-between; padding: 8px 10px; gap: 8px;">
+                            <!-- Botões de navegação entre épocas serão inseridos aqui -->
+                        </div>
+                        <div class="chart-container" id="chartContainer">
+                            <div id="eloChart"></div>
+                            <div class="team-end-labels" id="teamEndLabels">
+                                <!-- Labels dinâmicos serão gerados aqui -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -164,13 +189,12 @@
     </div>
 
     <!-- Debug Panel (oculto por padrão) -->
-    <div id="debug-panel"
-        style="display: none; position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 10px; border-radius: 5px; z-index: 10000; font-family: monospace; font-size: 12px;">
-        <div style="margin-bottom: 10px; font-weight: bold;">🐛 Debug Panel</div>
-        <button data-debug="enable" style="margin: 2px; padding: 5px; font-size: 11px;">Ativar Debug</button>
-        <button data-debug="enable-all" style="margin: 2px; padding: 5px; font-size: 11px;">Debug Verbose</button>
-        <button data-debug="disable" style="margin: 2px; padding: 5px; font-size: 11px;">Desativar</button>
-        <button data-debug="close" style="margin: 2px; padding: 5px; font-size: 11px;">Fechar</button>
+    <div id="debug-panel" class="debug-panel">
+        <div class="debug-panel-title">🐛 Debug Panel</div>
+        <button data-debug="enable" class="debug-btn">Ativar Debug</button>
+        <button data-debug="enable-all" class="debug-btn">Debug Verbose</button>
+        <button data-debug="disable" class="debug-btn">Desativar</button>
+        <button data-debug="close" class="debug-btn">Fechar</button>
     </div>
 
     <script src="app.js"></script>
