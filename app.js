@@ -166,7 +166,8 @@ function createTeamSelector() {
         divisionTitle.className = 'team-division-title';
         const groupCount = Object.keys(groups).length;
         const teamCount = Object.values(groups).flat().length;
-        divisionTitle.textContent = `${division}ª Divisão (${teamCount} equipa${teamCount !== 1 ? 's' : ''})`;
+        const divisionLabel = division === 'geral' ? 'Divisão Geral' : `${division}ª Divisão`;
+        divisionTitle.textContent = `${divisionLabel} (${teamCount} equipa${teamCount !== 1 ? 's' : ''})`;
 
         divisionHeader.appendChild(chevron);
         divisionHeader.appendChild(divisionTitle);
@@ -1215,11 +1216,8 @@ if (!window._chartClickListenerAdded) {
 
             // Remover atributo selected e resetar visual de todos os marcadores
             document.querySelectorAll('.apexcharts-marker[selected="true"]').forEach(marker => {
-                // console.log('[DEBUG] Antes: Fill:', marker.getAttribute('fill'), 'Filter:', marker.getAttribute('filter'));
-
                 // Obter a cor original guardada no atributo data
                 let originalColor = marker.getAttribute('data-original-fill');
-                // console.log('[DEBUG] Cor original guardada:', originalColor);
 
                 if (!originalColor) {
                     // Fallback: tentar obter da série
@@ -1227,25 +1225,19 @@ if (!window._chartClickListenerAdded) {
                         const seriesIndex = marker.getAttribute('rel');
                         if (seriesIndex !== null) {
                             originalColor = eloChart.opts.colors[seriesIndex];
-                            // console.log('[DEBUG] Fallback - Cor da série:', originalColor);
                         }
                     }
                     if (!originalColor) originalColor = '#ffffff';
                 }
 
-                // Clone o marker para remover todo o histórico de estilos
-                const newMarker = marker.cloneNode(true);
-                newMarker.setAttribute('fill', originalColor);
-                newMarker.setAttribute('selected', 'false');
-                newMarker.removeAttribute('filter');
+                // Resetar atributos diretamente sem substituir o elemento
+                marker.setAttribute('fill', originalColor);
+                marker.setAttribute('selected', 'false');
+                marker.removeAttribute('filter');
+                marker.style.filter = '';
 
-                // Substituir o marker antigo pelo novo
-                marker.parentNode.replaceChild(newMarker, marker);
-
-                // Disparar mouseleave para forçar saída do estado hover
-                newMarker.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
-
-                // console.log('[DEBUG] Depois: Fill:', newMarker.getAttribute('fill'), 'Filter:', newMarker.getAttribute('filter'));
+                // Remover qualquer transformação ou estado hover
+                marker.removeAttribute('transform');
             });
         }
     });

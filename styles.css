@@ -296,7 +296,8 @@ body {
   margin-top: 10px;
   margin-bottom: 20px;
   padding-left: 30px;
-  overflow: hidden;
+  padding-top: 20px;
+  overflow: visible;
   height: clamp(360px, 60vh, 640px);
 }
 
@@ -1550,9 +1551,10 @@ body {
     margin-bottom: 15px;
     padding-left: 5px;
     padding-right: 5px;
+    padding-top: 15px;
     max-width: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow: visible;
     box-sizing: border-box;
   }
 
@@ -2443,10 +2445,12 @@ body {
   .chart-container {
     padding-left: 5px;
     padding-right: 5px;
+    padding-top: 12px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     height: clamp(250px, 45vh, 360px);
+    overflow: visible;
   }
 
   .chart-container canvas {
