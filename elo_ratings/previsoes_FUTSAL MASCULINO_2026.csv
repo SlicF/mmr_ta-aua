@@ -1,0 +1,114 @@
+﻿jornada,dia,hora,team_a,team_b,expected_elo_a,expected_elo_a_std,expected_elo_b,expected_elo_b_std,prob_vitoria_a,prob_empate,prob_vitoria_b,divisao,grupo
+5,2025-12-04 00:00:00,22h15,Eng. Eletrónica e Telecomunicações,Contabilidade,829.0,0.0,991.0,0.0,6.91,10.86,82.23,1,
+5,2025-12-17 00:00:00,23h15,Gestão e Planeamento em Turismo,Bioquímica,1070.0,0.0,988.0,0.0,63.21,16.68,20.11,1,
+4,,,Biologia,Eng. e Gestão Industrial B,385.0,0.0,692.0,0.0,1.32,4.19,94.49,2,B
+4,,,Eng. Computacional,Eng. do Ambiente,619.0,0.0,384.0,0.0,93.71,4.42,1.87,2,B
+4,,,MOC,Gestão,308.0,0.0,574.0,0.0,1.24,4.40,94.36,2,B
+4,,,Matemática,Tradução,693.0,0.0,218.0,0.0,94.27,4.34,1.39,2,B
+4,,,Administração Pública,Eng. Aeroespacial,712.0,0.0,461.0,0.0,94.57,4.24,1.19,2,C
+4,,,Ciências Biomédicas,Gestão Pública,579.0,0.0,716.0,0.0,10.33,12.43,77.24,2,C
+4,,,Eng. Computadores e Telemática,Biotecnologia,964.0,0.0,333.0,0.0,94.67,4.21,1.12,2,C
+4,,,Eng. Civil,Eng. Mecânica B,379.0,0.0,415.0,0.0,30.69,18.80,50.51,2,C
+4,,,Marketing,MTC,632.0,0.0,444.0,0.0,87.46,8.27,4.27,2,C
+5,,,Eng. Química,Eng. Física,822.0,0.0,723.0,0.0,67.92,15.91,16.17,1,
+5,,,Automação e Sistemas de Produção,Eng. Informática,391.0,0.0,587.0,0.0,3.95,7.50,88.55,2,A
+5,,,Biologia e Geologia,Design,360.0,0.0,385.0,0.0,33.82,18.97,47.21,2,A
+5,,,Economia,Música,711.0,0.0,534.0,0.0,84.85,9.45,5.70,2,A
+5,,,Eng. de Materiais,Ciências do Mar,750.0,0.0,524.0,0.0,93.09,5.02,1.89,2,A
+5,,,Eng. e Gestão Industrial B,Eng. Computacional,698.2,31.8,634.9,36.0,58.28,16.67,25.05,2,B
+5,,,Eng. do Ambiente,MOC,368.1,36.0,296.2,31.7,59.94,16.77,23.29,2,B
+5,,,Gestão,Matemática,585.8,31.7,688.6,32.2,17.48,15.40,67.12,2,B
+5,,,Tradução,Línguas e Relações Empresariais,222.4,32.2,473.0,0.0,2.05,4.83,93.12,2,B
+5,,,Biotecnologia,Eng. Civil,338.6,30.0,374.3,97.1,34.58,15.92,49.50,2,C
+5,,,Eng. Aeroespacial,Ciências Biomédicas,446.4,31.3,564.5,71.4,16.32,14.20,69.48,2,C
+5,,,Eng. Mecânica B,Administração Pública,419.7,97.1,726.6,31.3,2.04,4.77,93.19,2,C
+5,,,Gestão Pública,Marketing,730.5,71.4,649.1,51.4,61.26,15.07,23.67,2,C
+5,,,MTC,Eng. Computadores e Telemática,426.9,51.4,958.4,30.0,1.32,3.90,94.78,2,C
+6,,,Bioquímica,Enfermagem,978.5,88.4,954.0,0.0,46.82,16.54,36.64,1,
+6,,,Contabilidade,Eng. Mecânica,1006.6,61.8,1246.0,0.0,2.50,6.27,91.23,1,
+6,,,Eng. e Gestão Industrial,Eng. Química,897.0,0.0,834.0,83.0,54.84,16.33,28.83,1,
+6,,,Eng. Biomédica,Gestão e Planeamento em Turismo,991.0,0.0,1079.5,88.4,22.42,14.04,63.54,1,
+6,,,Eng. Física,Fisioterapia,711.0,83.0,929.0,0.0,6.28,7.76,85.96,1,
+6,,,Finanças,Eng. Eletrónica e Telecomunicações,1122.0,0.0,813.4,61.8,92.52,4.83,2.65,1,
+6,,,Ciências do Mar,Economia,507.1,36.9,726.6,57.2,5.10,6.75,88.15,2,A
+6,,,Design,Automação e Sistemas de Produção,388.0,98.2,374.5,49.5,46.98,14.85,38.17,2,A
+6,,,Eng. Informática,Psicologia,603.5,49.5,501.0,0.0,68.85,14.21,16.94,2,A
+6,,,Música,Biologia e Geologia,518.4,57.2,357.0,98.2,75.08,10.56,14.36,2,A
+6,,,Eng. Computacional,Biologia,631.0,58.3,378.8,31.8,91.11,5.84,3.05,2,B
+6,,,Línguas e Relações Empresariais,Gestão,485.8,36.5,581.1,52.2,19.31,14.63,66.06,2,B
+6,,,MOC,Eng. e Gestão Industrial B,292.3,55.6,702.1,56.5,1.59,4.50,93.91,2,B
+6,,,Matemática,Eng. do Ambiente,693.3,53.4,372.0,57.9,92.97,4.82,2.21,2,B
+6,,,Administração Pública,Biotecnologia,730.9,35.5,337.3,53.0,93.75,4.48,1.77,2,C
+6,,,Eng. Computadores e Telemática,Gestão Pública,956.4,33.1,733.9,85.9,86.62,7.86,5.52,2,C
+6,,,Eng. Civil,MTC,375.6,110.2,428.9,53.0,31.35,14.55,54.10,2,C
+6,,,Eng. Mecânica B,Eng. Aeroespacial,415.4,94.5,441.3,51.2,37.92,14.83,47.25,2,C
+6,,,Marketing,Ciências Biomédicas,645.7,66.2,569.7,81.6,60.43,14.37,25.20,2,C
+7,,,Bioquímica,Eng. Biomédica,980.1,110.3,982.9,77.9,41.12,15.04,43.84,1,
+7,,,Eng. Eletrónica e Telecomunicações,Eng. Física,811.1,63.9,704.0,90.1,66.16,13.74,20.10,1,
+7,,,Enfermagem,Eng. Química,951.6,88.8,832.3,97.2,66.78,12.50,20.72,1,
+7,,,Eng. Mecânica,Finanças,1259.6,41.9,1126.6,39.2,74.90,12.30,12.80,1,
+7,,,Fisioterapia,Eng. e Gestão Industrial,940.0,52.3,900.2,89.1,51.52,14.84,33.64,1,
+7,,,Gestão e Planeamento em Turismo,Contabilidade,1083.5,101.1,997.8,64.1,61.99,12.58,25.43,1,
+7,,,Automação e Sistemas de Produção,Música,372.9,65.8,522.8,66.2,13.30,11.28,75.42,2,A
+7,,,Biologia e Geologia,Ciências do Mar,352.6,106.7,500.8,44.7,15.69,10.43,73.88,2,A
+7,,,Economia,Eng. de Materiais,732.9,63.5,766.9,36.9,34.49,17.76,47.75,2,A
+7,,,Psicologia,Design,489.2,79.3,389.6,111.3,61.47,13.38,25.15,2,A
+7,,,Biologia,MOC,373.2,38.3,292.8,56.6,61.80,15.57,22.63,2,B
+7,,,Eng. e Gestão Industrial B,Matemática,701.5,57.1,695.7,54.9,43.02,17.36,39.62,2,B
+7,,,Eng. do Ambiente,Línguas e Relações Empresariais,369.6,59.2,480.5,55.5,17.65,13.68,68.67,2,B
+7,,,Gestão,Tradução,586.3,68.3,216.0,36.7,93.98,4.37,1.65,2,B
+7,,,Biotecnologia,Eng. Mecânica B,337.9,54.2,414.9,107.9,27.25,13.48,59.27,2,C
+7,,,Ciências Biomédicas,Eng. Computadores e Telemática,566.1,94.0,962.2,42.8,2.18,4.93,92.89,2,C
+7,,,Eng. Aeroespacial,Marketing,441.7,68.0,649.3,79.1,8.13,8.82,83.05,2,C
+7,,,Gestão Pública,Eng. Civil,728.1,87.5,373.3,121.4,90.70,5.79,3.51,2,C
+7,,,MTC,Administração Pública,431.3,66.9,730.3,38.6,2.79,5.02,92.19,2,C
+8,,,Contabilidade,Bioquímica,994.5,75.2,979.4,121.6,48.22,12.63,39.15,1,
+8,,,Eng. e Gestão Industrial,Eng. Eletrónica e Telecomunicações,898.4,102.3,815.2,74.0,59.85,13.83,26.32,1,
+8,,,Eng. Biomédica,Enfermagem,983.7,96.0,955.7,98.4,47.21,14.08,38.71,1,
+8,,,Eng. Física,Eng. Mecânica,699.8,101.1,1265.9,57.2,1.41,4.00,94.59,1,
+8,,,Eng. Química,Fisioterapia,828.3,104.8,941.8,69.5,21.41,13.30,65.29,1,
+8,,,Finanças,Gestão e Planeamento em Turismo,1120.2,53.3,1086.8,112.4,48.03,14.94,37.03,1,
+8,,,Ciências do Mar,Automação e Sistemas de Produção,505.8,55.9,367.6,76.7,74.17,11.30,14.53,2,A
+8,,,Design,Eng. Informática,386.9,119.7,609.4,65.9,9.37,8.83,81.80,2,A
+8,,,Eng. de Materiais,Biologia e Geologia,767.0,60.7,347.6,115.0,93.25,4.76,1.99,2,A
+8,,,Música,Psicologia,528.1,74.4,492.0,89.2,51.12,15.22,33.66,2,A
+8,,,Línguas e Relações Empresariais,Eng. e Gestão Industrial B,485.7,69.5,702.2,75.4,6.74,8.49,84.77,2,B
+8,,,MOC,Eng. Computacional,288.7,73.1,636.6,59.7,2.10,5.04,92.86,2,B
+8,,,Matemática,Biologia,695.1,73.1,377.3,57.6,92.19,5.23,2.58,2,B
+8,,,Tradução,Eng. do Ambiente,215.2,39.6,364.4,72.1,12.25,11.63,76.12,2,B
+8,,,Administração Pública,Gestão Pública,733.5,42.5,730.0,88.8,42.05,15.64,42.31,2,C
+8,,,Biotecnologia,Eng. Aeroespacial,335.1,68.0,436.7,73.5,20.72,14.11,65.17,2,C
+8,,,Eng. Computadores e Telemática,Marketing,962.0,45.8,654.3,84.2,92.38,5.11,2.51,2,C
+8,,,Eng. Civil,Ciências Biomédicas,371.4,119.9,566.2,93.1,13.41,9.71,76.88,2,C
+8,,,Eng. Mecânica B,MTC,417.7,119.2,428.2,68.0,41.79,14.12,44.09,2,C
+9,,,Bioquímica,Finanças,977.8,132.5,1121.0,69.2,19.80,10.70,69.50,1,
+9,,,Eng. Eletrónica e Telecomunicações,Eng. Química,812.6,85.4,824.9,113.4,39.65,14.50,45.85,1,
+9,,,Enfermagem,Fisioterapia,955.8,109.5,945.2,80.1,44.63,14.79,40.58,1,
+9,,,Eng. Biomédica,Contabilidade,983.6,107.1,996.2,87.0,39.65,14.47,45.88,1,
+9,,,Eng. Mecânica,Eng. e Gestão Industrial,1263.6,58.7,901.0,112.4,92.57,5.16,2.27,1,
+9,,,Gestão e Planeamento em Turismo,Eng. Física,1086.1,123.5,702.1,100.9,90.65,5.66,3.69,1,
+9,,,Automação e Sistemas de Produção,Eng. de Materiais,361.8,86.8,767.1,62.0,1.75,5.12,93.13,2,A
+9,,,Biologia e Geologia,Economia,347.4,113.3,732.8,80.3,2.91,5.12,91.97,2,A
+9,,,Eng. Informática,Música,613.4,72.8,530.2,87.0,62.02,13.64,24.34,2,A
+9,,,Psicologia,Ciências do Mar,489.9,102.0,511.6,66.1,36.87,14.32,48.81,2,A
+9,,,Biologia,Línguas e Relações Empresariais,374.8,59.2,480.1,73.6,20.09,13.51,66.40,2,B
+9,,,Eng. e Gestão Industrial B,Tradução,707.9,79.4,209.4,53.7,94.36,4.29,1.35,2,B
+9,,,Eng. do Ambiente,Gestão,370.2,80.7,587.1,68.0,7.09,8.22,84.69,2,B
+9,,,Eng. Computacional,Matemática,638.2,60.9,697.6,73.9,29.06,15.40,55.54,2,B
+9,,,Ciências Biomédicas,Administração Pública,570.0,97.8,733.1,63.0,13.41,10.08,76.51,2,C
+9,,,Eng. Aeroespacial,Eng. Computadores e Telemática,441.0,84.4,965.3,48.6,1.31,4.55,94.14,2,C
+9,,,Gestão Pública,Eng. Mecânica B,730.3,102.5,417.6,130.1,87.34,6.81,5.85,2,C
+9,,,MTC,Biotecnologia,428.2,80.3,330.8,81.1,63.23,13.66,23.11,2,C
+9,,,Marketing,Eng. Civil,651.1,84.0,367.6,124.6,86.09,6.91,7.00,2,C
+10,,,Eng. e Gestão Industrial,Gestão e Planeamento em Turismo,899.3,110.4,1086.9,122.6,15.98,9.04,74.98,1,
+10,,,Enfermagem,Contabilidade,956.2,120.2,996.8,98.0,35.85,13.39,50.76,1,
+10,,,Eng. Física,Bioquímica,701.4,101.4,974.7,139.1,8.50,8.01,83.49,1,
+10,,,Eng. Química,Eng. Mecânica,825.7,123.6,1265.2,61.0,1.83,4.70,93.47,1,
+10,,,Finanças,Eng. Biomédica,1124.1,78.2,982.9,118.3,70.20,11.10,18.70,1,
+10,,,Fisioterapia,Eng. Eletrónica e Telecomunicações,944.9,92.3,811.9,96.7,69.78,11.63,18.59,1,
+11,,,Bioquímica,Eng. e Gestão Industrial,977.3,138.9,896.3,114.9,56.72,11.75,31.53,1,
+11,,,Contabilidade,Finanças,997.9,107.7,1127.8,86.3,19.71,12.42,67.87,1,
+11,,,Eng. Eletrónica e Telecomunicações,Enfermagem,807.9,104.9,955.1,129.6,19.76,10.62,69.62,1,
+11,,,Eng. Biomédica,Eng. Física,979.2,125.3,698.7,105.1,85.33,7.29,7.38,1,
+11,,,Eng. Mecânica,Fisioterapia,1265.0,61.7,948.8,99.9,91.23,5.88,2.89,1,
+11,,,Gestão e Planeamento em Turismo,Eng. Química,1089.9,128.1,825.9,121.9,82.29,7.88,9.83,1,

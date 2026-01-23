@@ -437,11 +437,16 @@ body {
 }
 
 .team-groups-container {
-  padding: 8px;
+  padding: 8px 8px 12px 8px;
   display: block;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.35s ease, padding 0.35s ease;
+}
+
+.team-groups-container[data-state="expanded"] {
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .team-group {
@@ -1562,7 +1567,7 @@ body {
     position: relative;
     width: 100%;
     height: auto;
-    max-height: 200px !important;
+    max-height: 40vh !important;
     overflow-y: auto !important;
     overflow-x: hidden;
     display: flex;
@@ -1592,12 +1597,15 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, #f8f9fa 50%, transparent);
+    background: linear-gradient(to top, #f8f9fa 80%, transparent);
     text-align: center;
     font-size: 0.7em;
     color: #666;
-    padding: 8px 0 4px;
     pointer-events: none;
+    font-weight: 500;
+    z-index: 5;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
     display: var(--show-scroll-indicator, block);
   }
 
@@ -1640,7 +1648,22 @@ body {
   }
 
   .division-selector {
-    flex-wrap: wrap;
+    display: flex; /* Ensure flexbox is used */
+    flex-wrap: nowrap; /* Prevent wrapping initially */
+    overflow-x: auto; /* Allow scrolling if many divisions */
+    padding-bottom: 5px; /* Space for scrollbar */
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    margin-bottom: 15px; /* Add some space below */
+  }
+  
+  /* Hide scrollbar for cleaner look but keep functionality */
+  .division-selector::-webkit-scrollbar {
+    height: 4px;
+  }
+  .division-selector::-webkit-scrollbar-thumb {
+    background: rgba(42, 82, 152, 0.3);
+    border-radius: 4px;
   }
 
   /* Ajustes para emblemas do calendário de jogos */
@@ -1795,19 +1818,21 @@ body {
 
   /* Estilos gerais */
   body {
-    padding: 10px;
+    padding: 8px; /* Reduced padding */
     overflow-x: hidden;
   }
 
   .container {
-    padding: 15px;
-    border-radius: 10px;
+    padding: 12px; /* Reduced container padding */
+    border-radius: 8px;
     max-width: 100%;
     overflow-x: hidden;
   }
 
   .header h1 {
-    font-size: 1.8em;
+    font-size: 1.5em; /* Smaller font for title */
+    line-height: 1.2;
+    margin-bottom: 8px;
   }
 
   .header p {
@@ -1862,10 +1887,19 @@ body {
   /* Tabela de classificação */
   .table-wrapper {
     overflow-x: auto;
-    margin: 0 -15px;
-    padding: 0 15px;
-    max-width: calc(100vw - 60px);
+    margin: 0 -12px; /* Negative margin to span full width of reduced container */
+    padding: 0 12px;
+    max-width: calc(100% + 24px); /* Compensate for margins */
     -webkit-overflow-scrolling: touch;
+    background: linear-gradient(to right, white 30%, rgba(255,255,255,0)),
+                linear-gradient(to right, rgba(255,255,255,0), white 70%) 0 100%,
+                radial-gradient(farthest-side at 0 50%, rgba(0,0,0,0.2), rgba(0,0,0,0)),
+                radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,0.2), rgba(0,0,0,0)) 0 100%;
+    background-repeat: no-repeat;
+    background-color: white;
+    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+    background-position: 0 0, 100% 0, 0 0, 100% 0;
+    background-attachment: local, local, scroll, scroll;
   }
 
   .rankings-table {
@@ -1922,14 +1956,23 @@ body {
 
   .division-selector,
   .group-selector {
-    flex-wrap: wrap;
-    gap: 6px;
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping for better horizontal scroll feel */
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Make buttons larger touch targets */
+  .division-btn, .group-btn {
+      flex-shrink: 0;
   }
 
   .division-btn,
   .group-btn {
-    font-size: 0.8em;
-    padding: 6px 10px;
+    font-size: 0.85em;
+    padding: 8px 12px; /* Larger touch area */
     white-space: nowrap;
   }
 

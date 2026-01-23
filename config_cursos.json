@@ -126,12 +126,18 @@
       "emblem": "assets/Logos/NEEB-07.png",
       "colors": ["#e94183", "#6c757d"]
     },
+    "Edcucação Básica": {
+      "displayName": "Educação Básica",
+      "nucleus": "NEEB",
+      "emblem": "assets/Logos/NEEB-07.png",
+      "colors": ["#e94183", "#6c757d"]
+    },
     "Educação Básica": {
       "displayName": "Educação Básica",
       "nucleus": "NEEB",
       "emblem": "assets/Logos/NEEB-07.png",
       "colors": ["#e94183", "#6c757d"]
-    },    
+    },
     "Ed. Básica": {
       "displayName": "Educação Básica",
       "nucleus": "NEEB",

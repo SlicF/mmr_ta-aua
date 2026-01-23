@@ -265,7 +265,17 @@ function createTeamSelector() {
                     groupsContainer.style.paddingBottom = '8px';
                 });
                 groupsContainer.dataset.state = 'expanded';
+                groupsContainer.dataset.state = 'expanded';
                 chevron.style.transform = 'rotate(0deg)';
+
+                // Remover restrição de altura após animação
+                const transitionEndHandler = () => {
+                    if (groupsContainer.dataset.state === 'expanded') {
+                        groupsContainer.style.maxHeight = 'none';
+                    }
+                    groupsContainer.removeEventListener('transitionend', transitionEndHandler);
+                };
+                groupsContainer.addEventListener('transitionend', transitionEndHandler);
             } else {
                 // colapsar
                 const contentHeight = groupsContainer.scrollHeight;
@@ -820,7 +830,7 @@ function initEloChart() {
         chart: {
             id: 'eloChart',
             type: 'line',
-            height: chartHeight,
+            height: '100%',
             toolbar: {
                 show: true,
                 tools: {
