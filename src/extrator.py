@@ -1643,6 +1643,9 @@ def main():
         print(
             "O arquivo Excel não mudou desde a última execução. Nenhum processamento necessário."
         )
+        if os.getenv('GITHUB_OUTPUT'):
+            with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+                print(f"data_changed=false", file=fh)
         return
 
     print("Arquivo Excel mudou ou primeira execução. Processando dados...")
@@ -1669,6 +1672,10 @@ def main():
         file_path, season_override=season_detected, sheets_to_process=sheets_to_process
     )
     processor.process_all_sheets()
+
+    if os.getenv('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f"data_changed=true", file=fh)
 
 
 if __name__ == "__main__":

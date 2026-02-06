@@ -23,17 +23,25 @@ jobs:
           pip install -r requirements.txt
 
       - name: Executar extrator
+        id: extractor
         run: |
           cd src && python extrator.py
 
       - name: Executar MMR / processamento
+        if: steps.extractor.outputs.data_changed == 'true'
         run: |
           cd src && python mmr_taçaua.py
 
+      - name: Executar Preditor / Previsões
+        if: steps.extractor.outputs.data_changed == 'true'
+        run: |
+          cd src && python preditor.py
+
       - name: Commit e push dos novos ficheiros
+        if: steps.extractor.outputs.data_changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git diff-index --quiet HEAD || git commit -m "Atualização automática de resultados"
+          git diff-index --quiet HEAD || git commit -m "Atualização automática de resultados e previsões"
           git push
