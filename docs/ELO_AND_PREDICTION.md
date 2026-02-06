@@ -1,85 +1,137 @@
-# Sistema de ELO e Preditor da Taça UA
+# Documentação Técnica: Sistema de ELO e Motor de Previsão
 
-Este documento detalha o funcionamento matemático e lógico por trás do sistema de rankings (ELO) e do motor de previsões utilizados na Taça UA.
+Esta documentação providencia uma análise aprofundada dos algoritmos matemáticos e estatísticos utilizados no projeto `mmr_taçaua`.
 
-## 1. Sistema ELO (CompleteTacauaEloSystem)
+---
 
-O sistema de classificação utiliza uma variante personalizada do sistema ELO, adaptada para ligas desportivas universitárias com fases de grupos, playoffs e pausas de inverno.
+## 🏗️ 1. Arquitetura do Sistema ELO (`CompleteTacauaEloSystem`)
 
-### Fórmula Base
-A atualização do ELO após cada jogo segue a fórmula clássica:
+A classe `CompleteTacauaEloSystem` (em `src/preditor.py` e `src/mmr_taçaua.py`) implementa um modelo ELO modificado, especificamente calibrado para o contexto da Taça UA.
+
+### 1.1 Fórmula Fundamental
+Ao contrário do ELO clássico (binário: ganha/perde), o nosso sistema é contínuo e sensível à margem de vitória.
 
 $$ \Delta ELO = K \times (Score_{real} - Score_{esperado}) $$
 
-Onde:
-- **Score_esperado**: Probabilidade de vitória da equipa A sobre a B.
-  $$ P(A) = \frac{1}{1 + 10^{(ELO_B - ELO_A)/250}} $$
-  *(Nota: O divisor 250 aumenta a sensibilidade comparado com o padrão de 400 do xadrez)*
+**Parâmetros:**
+- **K (Fator de Volatilidade):** Determina o quanto um único jogo afeta o ranking.
+- **Score Esperado:** Probabilidade a priori baseada na diferença de força.
+- **Score Real:** Resultado normalizado do jogo.
 
-- **Score_real**:
-  - Vitória: 1.0
-  - Empate: 0.5
-  - Derrota: 0.0
+### 1.2 Win Probability (Função Logística)
+A probabilidade esperada de vitória da Equipa A contra Equipa B é calculada usando uma curva logística com base 10:
 
-### Fator K Dinâmico ($K_{factor}$)
-O fator K determina a volatilidade do ranking. No nosso sistema, ele não é estático, mas calculado para cada jogo:
+$$ P(A) = \frac{1}{1 + 10^{(ELO_B - ELO_A)/250}} $$
+
+> **Nota Técnica:** O divisor **250** (em vez do padrão 400 do xadrez) aumenta a sensibilidade do modelo. Uma diferença de 250 pontos ELO implica 90% de probabilidade de vitória, enquanto no xadrez seriam precisos 400 pontos. Isto reflete a maior variância e desnível entre equipas universitárias.
+
+### 1.3 Fator K Dinâmico ($K_{factor}$)
+O grande diferencial deste sistema é o $K$ dinâmico, calculado jogo a jogo:
 
 $$ K = K_{base} \times M_{fase} \times M_{proporcao} $$
 
-#### 1. K Base ($K_{base}$)
-O valor base é **100**.
+Onde $K_{base} = 100$.
 
-#### 2. Multiplicador de Fase ($M_{fase}$)
-Ajusta o impacto do jogo consoante o momento da época:
+#### A. Multiplicador de Fase ($M_{fase}$) - "Season Phase Multiplier"
+O peso dos jogos varia temporalmente e contextualmente:
 
-- **Playoffs**: `1.5` (Jogos decisivos valem mais)
-- **Terceiro Lugar (E3L)**: `0.75` (Jogos de consolação valem menos)
-- **Início da Época (primeiro 1/3)**: Valor elevado para permitir calibração rápida.
-  $$ \frac{1}{\log_{16}(4 \times progresso)} $$
-- **Pós-Inverno**: Aceleração temporária para recalibrar equipas após a pausa.
-- **Fase Regular (restante)**: `1.0`
+1.  **Fase de Calibração (Início da Época):**
+    Nos primeiros 33% dos jogos, o K é amplificado para permitir que novas equipas atinjam rapidamente o seu "verdadeiro" ELO.
+    $$ M_{fase} = \frac{1}{\log_{16}(4 \times progresso_{scaled})} $$
 
-#### 3. Multiplicador de Proporção ($M_{proporcao}$)
-Recompensa vitórias expressivas (goleadas), mas com retornos decrescentes (raiz décima):
+2.  **Pós-Inverno (Recalibração):**
+    Após a pausa semestral, aplica-se uma lógica similar para reajustar equipas que possam ter mudado de forma.
 
-$$ M_{proporcao} = \max(\frac{Golos_A}{Golos_B}, \frac{Golos_B}{Golos_A})^{1/10} $$
+3.  **Playoffs:** $M_{fase} = 1.5$ (50% mais impacto).
+4.  **Jogos de 3º/4º Lugar:** $M_{fase} = 0.75$ (25% menos impacto).
 
-*(Se golos = 0, assume-se 0.5 para evitar divisão por zero)*
+#### B. Multiplicador de Proporção ($M_{proporcao}$) - "Margin of Victory"
+Para evitar que vitórias por 1-0 ou 10-0 tenham o mesmo peso, usamos um multiplicador logarítmico suave:
 
----
+$$ M_{proporcao} = \left( \frac{\max(Golos_A, Golos_B)}{\min(Golos_A, Golos_B)} \right)^{1/10} $$
 
-## 2. Motor de Previsão (Preditor)
-
-O sistema não se limita a calcular o passado; ele simula o futuro utilizando **Simulação de Monte Carlo**.
-
-### Metodologia
-Para prever o desfecho da época:
-1. O sistema simula os jogos restantes milhares de vezes (ex: 10.000 iterações).
-2. Em cada simulação, cada jogo futuro é jogado virtualmente.
-3. Os resultados são agregados para calcular probabilidades finais (ex: % de ser Campeão, % de ir aos Playoffs).
-
-### Simulação de Resultados (SportScoreSimulator)
-Cada desporto tem características de pontuação diferentes. O simulador utiliza distribuições estatísticas adaptadas:
-
-- **Futsal/Futebol**: Baseado em Distribuição de Poisson ajustada aos ELOs das equipas.
-- **Voleibol**: Simulação set-a-set (melhor de 3 ou 5), considerando probabilidades de vencer cada set.
-- **Basquetebol/Andebol**: Distribuição Normal para pontos, com média e desvio padrão baseados na força das equipas.
-
-### Backtesting "Viagem no Tempo" (`backtest_validation.py`)
-Para garantir a confiança nas previsões, o sistema possui um validador histórico:
-1. O sistema "viaja" para uma jornada passada (ex: Jornada 8).
-2. "Esquece" todos os resultados que aconteceram depois dessa data.
-3. Gera previsões para o resto da época.
-4. Compara as probabilidades geradas com o que **realmente aconteceu**.
-5. Calcula métricas de erro (Brier Score, RMSE) para calibrar o modelo.
+> **Exemplo:** Uma vitória por 10-1 resulta num multiplicador de $10^{0.1} \approx 1.26$. O vencedor ganha 26% mais pontos do que numa vitória tangencial. A raiz décima impede inflação excessiva de pontos em desportos de alta pontuação.
 
 ---
 
-## 3. Gestão de Equipas (`mmr_taçaua.py`)
+## 🔮 2. Motor de Simulação (`SportScoreSimulator`)
 
-### Normalização
-O sistema lida automaticamente com erros humanos na introdução de nomes (ex: "Eng. Informatica" vs "Eng. Informática" vs "EI").
+O `preditor.py` utiliza simulação de Monte Carlo para prever o futuro. Em vez de prever apenas o vencedor, simula **resultados exatos** para cada jogo.
 
-### Transições de Época
-- Equipas mantêm parte do seu ELO de uma época para a outra (soft reset).
-- O sistema deteta automaticamente mudanças de nome de cursos (ex: Fusões ou alterações oficiais).
+### 2.1 Modelos Estatísticos por Desporto
+
+O simulador distingue entre tipos de desporto para gerar resultados realistas:
+
+#### Tipo A: Futebol/Futsal (Distribuição de Poisson)
+Desportos de baixa pontuação são modelados como processos de Poisson independentes para cada equipa.
+- **Lambda ($\lambda$):** A média de golos esperada para uma equipa num jogo é derivada do seu ELO relativo.
+  - Se ELO > Adversário: $\lambda$ aumenta.
+  - Se ELO < Adversário: $\lambda$ diminui.
+  - Média base: ~2.5 golos/jogo (ajustável).
+
+$$ Golos \sim Poisson(\lambda_{ELO}) $$
+$$ P(k \text{ golos}) = \frac{\lambda^k e^{-\lambda}}{k!} $$
+
+> Isto permite a ocorrência natural de empates (quando Poisson(A) == Poisson(B)).
+
+#### Tipo B: Basquetebol/Andebol (Distribuição Normal)
+Desportos de alta pontuação seguem uma distribuição Normal (Gaussiana).
+- **Média ($\mu$):** Baseada no ELO (ex: equipa forte média 60 pontos, fraca 40).
+- **Desvio Padrão ($\sigma$):** Fixo por modalidade (ex: 15 pontos no basquete), permitindo "upsets".
+
+$$ Pontos \sim \mathcal{N}(\mu_{ELO}, \sigma^2) $$
+
+> **Destaque:** No basquetebol, o modelo previne empates forçando prolongamento (adiciona simulação de 5 min se Scores iguais).
+
+#### Tipo C: Voleibol (Simulação Set-a-Set)
+Simula cada set individualmente como uma Bernoulli Trial baseada nas probabilidades de ELO.
+- Vence o jogo quem chegar primeiro a 2 (Melhor de 3) ou 3 (Melhor de 5) sets.
+- O resultado é sempre exato (ex: 3-0, 3-2, 2-1).
+
+### 2.2 Pipeline de Monte Carlo
+Para prever a classificação final:
+
+1.  **Estado Inicial:** Carrega classificação atual e ELOs atuais.
+2.  **Iteração (x10.000):**
+    - Para cada jogo futuro no calendário:
+        a. Determina ELOs atuais das equipas.
+        b. `SportScoreSimulator` gera um resultado (ex: 3-1).
+        c. Atualiza os ELOs das equipas (o sistema aprende durante a simulação!).
+        d. Atualiza a classificação virtual.
+    - No final da época virtual, determina o Campeão e lugares de Playoff.
+3.  **Agregação:**
+    - Conta quantas vezes a Equipa X foi campeã em 10.000 universos paralelos.
+    - Resultado: "Equipa X tem 24.5% de probabilidade de ser Campeã".
+
+---
+
+## ⚙️ 3. Otimizações de Performance (Windows/Linux)
+
+O sistema foi altamente otimizado para performance computacional (`src/preditor.py`):
+
+### Paralelismo (`ProcessPoolExecutor`)
+Devido ao **GIL (Global Interpreter Lock)** do Python, threads normais não aceleram simulações de CPU intensivo.
+- O sistema usa `multiprocessing` para lançar processos operários independentes.
+- Cada processo corre uma fatia das 10.000 simulações em paralelo (ex: 4 cores = 2.500 sims cada).
+
+### Compatibilidade Windows
+O módulo `multiprocessing` no Windows obriga a que o código principal esteja protegido por `if __name__ == "__main__":`.
+- O script deteta o SO e usa `spawn` (Windows) ou `fork` (Linux).
+- Configura automaticamente o `locale` e encoding para lidar com UTF-8 no terminal Windows (powershell).
+
+---
+
+## 🧪 4. Validação (Backtesting)
+
+O ficheiro `src/backtest_validation.py` permite validar se o modelo é fiável.
+
+### Brier Score
+Mede a precisão das probabilidades probabilísticas.
+$$ BS = \frac{1}{N} \sum (ProbabilidadePrevista - ResultadoReal)^2 $$
+- **0.0:** Pervisão perfeita.
+- **0.25:** Chute aleatório (50/50).
+- O nosso modelo visa **BS < 0.15**.
+
+### RMSE (Root Mean Square Error)
+Mede o erro médio na previsão da posição final na tabela.
+- Se o modelo diz que equipa fica em 2º e ela fica em 4º, erro = 2.

@@ -2,6 +2,8 @@
 
 Sistema avançado de análise de dados desportivos para a **Taça Universidade de Aveiro**. Este projeto calcula classificações ELO dinâmicas, gera previsões probabilísticas para jogos futuros e mantém um dashboard interativo.
 
+👉 **Website Oficial:** [https://slicf.github.io/mmr_ta-aua/](https://slicf.github.io/mmr_ta-aua/)
+
 ## 📂 Estrutura do Repositório
 
 O projeto segue uma estrutura organizada para separar código, dados e interface web:
@@ -26,15 +28,11 @@ O projeto segue uma estrutura organizada para separar código, dados e interface
 O sistema lê os ficheiros Excel de resultados (`data/Resultados Taça UA...xlsx`) e converte-os para um formato normalizado.
 
 ### 2. Cálculo de ELO
-Utiliza um algoritmo ELO personalizado que considera:
-- Margem de vitória (goleadas valem mais).
-- Fase da época (playoffs valem mais).
-- Força do adversário.
-
+Utiliza um algoritmo ELO personalizado que considera margem de vitória, fase da época e força do adversário.
 👉 **[Ver Documentação Completa do Sistema ELO](docs/ELO_AND_PREDICTION.md)**
 
 ### 3. Previsão (Monte Carlo)
-Para prever o futuro (quem vai aos playoffs? quem será campeão?), o sistema simula o resto da época **10.000 vezes** jogo a jogo, utilizando distribuições estatísticas adaptadas a cada desporto (Poisson para Futsal, Normal para Basquete, etc.).
+Para prever o futuro, o sistema simula a época **10.000 vezes** utilizando distribuições estatísticas adaptadas a cada desporto (Poisson, Normal, etc.).
 
 ## 🛠️ Instalação e Uso
 
@@ -50,11 +48,26 @@ Para prever o futuro (quem vai aos playoffs? quem será campeão?), o sistema si
    python mmr_taçaua.py  # Recalcula ELOs e Classificações
    ```
 
+## 💻 Suporte para Windows
+
+O projeto foi otimizado para correr nativamente em Windows:
+- **Encoding:** O código força UTF-8 (`sys.stdout`, `sys.stderr`) para evitar problemas com caracteres na consola.
+- **Paths:** Todos os caminhos usam barras `/` ou `os.path.join` para compatibilidade cross-platform.
+- **Multiprocessing:** O `preditor.py` implementa proteções (`if __name__ == "__main__":`) e lógica específica para contornar limitações de *forking* do Windows, permitindo simulações paralelas eficientes.
+
+Para correr em PowerShell:
+```powershell
+# Opcional, mas recomendado para visualizar emojis/caracteres corretamente
+Set-ItemEnv -Path env:PYTHONUTF8 -Value 1
+cd src
+python extrator.py
+```
+
 ## 🌐 Website
 O dashboard está disponível publicamente via GitHub Pages. Os dados na pasta `/docs` são servidos automaticamente.
 
 ## 🧪 Validação
-O sistema inclui um módulo de "Backtesting" que viaja no tempo para verificar se as previsões feitas no passado teriam acertado nos resultados que já aconteceram.
+O sistema inclui um módulo de "Backtesting" que viaja no tempo para verificar se as previsões passadas teriam acertado.
 
 ```bash
 cd src
