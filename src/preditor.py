@@ -554,7 +554,7 @@ def load_course_mapping() -> Tuple[Dict[str, str], Dict[str, str]]:
     - mapping_to_short: {"Eng. e Gestão Industrial" -> "EGI", "EGI" -> "EGI"}
     """
     try:
-        with open("../config/config_cursos.json", encoding="utf-8-sig") as f:
+        with open("../docs/config/config_cursos.json", encoding="utf-8-sig") as f:
             config = json.load(f)
             mapping_display = {}
             mapping_short = {}
@@ -2071,7 +2071,7 @@ def calculate_historical_draw_rate(modalidade: str, past_seasons: List[str]) -> 
     total_draws = 0
 
     for season_pattern in past_seasons:
-        csv_file = f"../output/csv_modalidades/{modalidade}_{season_pattern}.csv"
+        csv_file = f"../docs/output/csv_modalidades/{modalidade}_{season_pattern}.csv"
         if not os.path.exists(csv_file):
             continue
 
@@ -2316,7 +2316,7 @@ def main(
             print("\n⚠️ Aviso: Hardset carregado mas nenhuma modalidade foi detectada")
             print("ℹ️ Processando TODAS as modalidades...\n")
 
-    modalidades_path = "../output/csv_modalidades"
+    modalidades_path = "../docs/output/csv_modalidades"
     for modalidade_file in os.listdir(modalidades_path):
         # Filtro de ficheiros por épocas
         ano_passado_2d = str(ano_atual - 2)[2:]
@@ -2363,7 +2363,7 @@ def main(
         all_teams_in_epoch = set()
 
         # Carregar ELOs mais recentes do ficheiro de ELO
-        elo_file = f"../output/elo_ratings/elo_{modalidade}{date_pattern}.csv"
+        elo_file = f"../docs/output/elo_ratings/elo_{modalidade}{date_pattern}.csv"
         initial_elos = {}
         if os.path.exists(elo_file):
             with open(elo_file, newline="", encoding="utf-8-sig") as csvfile:
@@ -2559,9 +2559,9 @@ def main(
             # Guardar resultados (APENAS equipas com fixtures)
             # Se há hardset, guardar na pasta cenarios com sufixo _hardset
             if hardset_manager and hardset_manager.fixed_results:
-                output_file = f"../output/cenarios/forecast_{modalidade}_{ano_atual}_hardset.csv"
+                output_file = f"../docs/output/cenarios/forecast_{modalidade}_{ano_atual}_hardset.csv"
             else:
-                output_file = f"../output/previsoes/forecast_{modalidade}_{ano_atual}.csv"
+                output_file = f"../docs/output/previsoes/forecast_{modalidade}_{ano_atual}.csv"
 
             with open(output_file, "w", newline="", encoding="utf-8-sig") as csvfile:
                 fieldnames = [
@@ -2635,10 +2635,10 @@ def main(
             # Se há hardset, guardar na pasta cenarios com sufixo _hardset
             if hardset_manager and hardset_manager.fixed_results:
                 predictions_file = (
-                    f"../output/cenarios/previsoes_{modalidade}_{ano_atual}_hardset.csv"
+                    f"../docs/output/cenarios/previsoes_{modalidade}_{ano_atual}_hardset.csv"
                 )
             else:
-                predictions_file = f"../output/previsoes/previsoes_{modalidade}_{ano_atual}.csv"
+                predictions_file = f"../docs/output/previsoes/previsoes_{modalidade}_{ano_atual}.csv"
 
             future_count = 0
 

@@ -25,7 +25,7 @@ class BacktestValidator:
     def _find_available_seasons(self) -> List[str]:
         """Encontra todas as épocas disponíveis para esta modalidade."""
         seasons = []
-        modalidades_path = "../output/csv_modalidades"
+        modalidades_path = "../docs/output/csv_modalidades"
 
         if not os.path.exists(modalidades_path):
             return seasons
@@ -70,7 +70,7 @@ class BacktestValidator:
 
         Retorna (training_matches, test_matches, all_matches)
         """
-        csv_file = f"../output/csv_modalidades/{self.modalidade}_{season}.csv"
+        csv_file = f"../docs/output/csv_modalidades/{self.modalidade}_{season}.csv"
 
         if not os.path.exists(csv_file):
             return [], [], []
@@ -215,7 +215,7 @@ class BacktestValidator:
             print(f"❌ Falha ao importar preditor: {e}")
             return None
 
-        csv_file = f"../output/csv_modalidades/{self.modalidade}_{season}.csv"
+        csv_file = f"../docs/output/csv_modalidades/{self.modalidade}_{season}.csv"
         if not os.path.exists(csv_file):
             return None
 
@@ -268,7 +268,7 @@ class BacktestValidator:
         initial_elos: Dict[str, float] = {}
         previous_season = self._get_previous_season(season)
         if previous_season:
-            prev_elo_file = f"../output/elo_ratings/elo_{self.modalidade}_{previous_season}.csv"
+            prev_elo_file = f"../docs/output/elo_ratings/elo_{self.modalidade}_{previous_season}.csv"
             if os.path.exists(prev_elo_file):
                 try:
                     with open(prev_elo_file, newline="", encoding="utf-8-sig") as f:
@@ -769,7 +769,7 @@ class BacktestValidator:
             print("❌ MODELO FRACO - Requer calibração ou mais dados")
 
         # Guardar resumo em JSON
-        summary_file = f"../output/elo_ratings/backtest_summary_{self.modalidade}.json"
+        summary_file = f"../docs/output/elo_ratings/backtest_summary_{self.modalidade}.json"
         with open(summary_file, "w", encoding="utf-8") as f:
             json.dump(
                 {
@@ -827,7 +827,7 @@ if __name__ == "__main__":
 
     # Carregar mapeamento de cursos
     try:
-        with open("../config/config_cursos.json", encoding="utf-8-sig") as f:
+        with open("../docs/config/config_cursos.json", encoding="utf-8-sig") as f:
             config = json.load(f)
             course_mapping = {}
             for course_key, course_info in config.get("courses", {}).items():

@@ -278,7 +278,7 @@ class ExcelProcessor:
     def __init__(
         self,
         file_path: str,
-        output_dir: str = "../output/csv_modalidades",
+        output_dir: str = "../docs/output/csv_modalidades",
         season_override: Optional[str] = None,
         sheets_to_process: Optional[List[str]] = None,
     ):
@@ -1548,7 +1548,7 @@ def main():
     """Função principal."""
     # 1) Ler config/env para obter a URL do documento de resultados
     config_url: Optional[str] = None
-    config_path = Path("../config/config.json")
+    config_path = Path("../docs/config/config.json")
     if config_path.exists():
         try:
             with open(config_path, "r", encoding="utf-8") as f:

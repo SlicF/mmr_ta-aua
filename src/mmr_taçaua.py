@@ -17,7 +17,7 @@ logger = logging.getLogger("mmr_tacaua")
 
 
 # Carregar configuração de cursos do ficheiro JSON
-def load_courses_config(config_path="../config/config_cursos.json"):
+def load_courses_config(config_path="../docs/config/config_cursos.json"):
     """
     Carrega a configuração dos cursos do ficheiro JSON
 
@@ -57,7 +57,7 @@ def is_playoff_jornada(jornada_value) -> bool:
     return s.startswith("E") or s.startswith("MP") or s.startswith("LP")
 
 
-def detect_latest_season_from_csv_files(input_dir="../output/csv_modalidades"):
+def detect_latest_season_from_csv_files(input_dir="../docs/output/csv_modalidades"):
     """
     Detecta a época mais recente com base nos nomes dos arquivos CSV
 
@@ -1979,7 +1979,7 @@ class EloRatingSystem:
 class TournamentProcessor:
     """Processa todos os torneios na pasta especificada"""
 
-    def __init__(self, input_dir="../output/csv_modalidades", output_dir="../output/elo_ratings"):
+    def __init__(self, input_dir="../docs/output/csv_modalidades", output_dir="../docs/output/elo_ratings"):
         """
         Inicializa o processador de torneios
 
