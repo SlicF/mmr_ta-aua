@@ -24,11 +24,11 @@ jobs:
 
       - name: Executar extrator
         run: |
-          python extrator.py
+          cd src && python extrator.py
 
       - name: Executar MMR / processamento
         run: |
-          python mmr_taçaua.py
+          cd src && python mmr_taçaua.py
 
       - name: Commit e push dos novos ficheiros
         run: |

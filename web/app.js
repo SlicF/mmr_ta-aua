@@ -3427,7 +3427,7 @@ function createRealBracket() {
         return;
     }
 
-    const jogosPath = `csv_modalidades/${modalidade}.csv`;
+    const jogosPath = `../output/csv_modalidades/${modalidade}.csv`;
 
     Papa.parse(jogosPath, {
         download: true,
@@ -5675,7 +5675,7 @@ let coursesConfig = {};
  */
 async function loadCoursesConfig() {
     try {
-        const response = await fetch('config_cursos.json');
+        const response = await fetch('../config/config_cursos.json');
         if (!response.ok) {
             throw new Error('Erro ao carregar config_cursos.json');
         }
@@ -6161,10 +6161,10 @@ function changeModalidade(mod) {
     localStorage.setItem('mmr_selectedModalidade', mod);
 
     // Caminhos relativos
-    const classificacaoPath = `elo_ratings/classificacao_${mod}.csv`;
-    const detalhePath = `elo_ratings/detalhe_${mod}.csv`;
-    const eloPath = `elo_ratings/elo_${mod}.csv`;
-    const jogosPath = `csv_modalidades/${mod}.csv`;
+    const classificacaoPath = `../output/elo_ratings/classificacao_${mod}.csv`;
+    const detalhePath = `../output/elo_ratings/detalhe_${mod}.csv`;
+    const eloPath = `../output/elo_ratings/elo_${mod}.csv`;
+    const jogosPath = `../output/csv_modalidades/${mod}.csv`;
 
     // Reset dos dados e variáveis globais
     sampleData = {
@@ -6273,7 +6273,7 @@ function changeModalidade(mod) {
                 const previousEpochIndex = availableEpocas.indexOf(currentEpoch) + 1;
                 if (previousEpochIndex < availableEpocas.length) {
                     const previousEpoch = availableEpocas[previousEpochIndex];
-                    const previousEloPath = `elo_ratings/elo_${mod.replace(currentEpoch, previousEpoch)}.csv`;
+                    const previousEloPath = `../output/elo_ratings/elo_${mod.replace(currentEpoch, previousEpoch)}.csv`;
 
                     Papa.parse(previousEloPath, {
                         download: true,

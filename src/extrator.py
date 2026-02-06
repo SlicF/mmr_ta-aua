@@ -278,7 +278,7 @@ class ExcelProcessor:
     def __init__(
         self,
         file_path: str,
-        output_dir: str = "csv_modalidades",
+        output_dir: str = "../output/csv_modalidades",
         season_override: Optional[str] = None,
         sheets_to_process: Optional[List[str]] = None,
     ):
@@ -1548,7 +1548,7 @@ def main():
     """Função principal."""
     # 1) Ler config/env para obter a URL do documento de resultados
     config_url: Optional[str] = None
-    config_path = Path("config.json")
+    config_path = Path("../config/config.json")
     if config_path.exists():
         try:
             with open(config_path, "r", encoding="utf-8") as f:
@@ -1621,7 +1621,7 @@ def main():
     else:
         # fallback: usar ficheiro local existente (compatibilidade antiga)
         # tentar usar padrão com época corrente
-        default_local = f"Resultados Taça UA {current_season_token()}.xlsx"
+        default_local = f"../data/Resultados Taça UA {current_season_token()}.xlsx"
         if not os.path.exists(default_local):
             print("Erro: Nenhum ficheiro local encontrado e URL não disponível/valida.")
             print(
@@ -1637,7 +1637,7 @@ def main():
         or extract_season_from_filename(Path(file_path).name)
         or current_season_token()
     )
-    backup_file = f"backup_Resultados Taça UA {season_for_backup}.xlsx"
+    backup_file = f"../data/backup_Resultados Taça UA {season_for_backup}.xlsx"
 
     if os.path.exists(backup_file) and files_are_identical(file_path, backup_file):
         print(
