@@ -1855,152 +1855,179 @@ def monte_carlo_forecast(
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
 ]:
-    """
-    Simula futuros possíveis com playoffs e estima probabilidades.
-
-    NOTA SOBRE PROBABILIDADES ELEVADAS:
-    É normal ter p_champion próximo de 100% para equipas muito fortes!
-    Isto é correcto porque:
-    - A fórmula de probabilidade ELO é: P(A vence) = 1/(1 + 10^((ELO_B - ELO_A)/250))
-    - Se ELO_A >> ELO_B, a probabilidade é realmente muito elevada
-    - Com 100.000 simulações, a equipa forte vence na grande maioria das vezes
-    - Variabilidade existe: lesões, dias ruins, sorte adversária, etc.
-
-    Args:
-        real_points: Dicionário com pontos reais já alcançados ({team: points})
-
-    Retorna (results, match_forecasts).
-    """
+    """OTIMIZADO PARA LINUX - Batching + Chunking + Agregação Eficiente"""
     if real_points is None:
         real_points = {}
+
     playoff_count = defaultdict(int)
     semifinal_count = defaultdict(int)
     final_count = defaultdict(int)
     champion_count = defaultdict(int)
-    expected_points_all = defaultdict(list)
-    regular_season_places = defaultdict(list)
-    final_elos_list = defaultdict(list)
     promotion_count = defaultdict(int)
     relegation_count = defaultdict(int)
 
-    # Estatísticas de jogos futuros: match_id -> {1: count, X: count, 2: count}
+    # Agregação eficiente: somas em vez de listas
+    expected_points_sum = defaultdict(float)
+    expected_points_sq_sum = defaultdict(float)
+    regular_places_sum = defaultdict(float)
+    regular_places_sq_sum = defaultdict(float)
+    final_elos_sum = defaultdict(float)
+    final_elos_sq_sum = defaultdict(float)
+
     match_stats = defaultdict(lambda: {"1": 0, "X": 0, "2": 0, "total": 0})
-
-    # Rastrear ELOs de cada equipa em cada jogo: match_id -> {team_a_elos: [], team_b_elos: []}
-    match_elo_stats = defaultdict(lambda: {"team_a_elos": [], "team_b_elos": []})
-
-    # Rastrear distribuição de placares: match_id -> {"3-2": count, "2-1": count, ...}
+    match_elo_sum = defaultdict(
+        lambda: {"a_sum": 0.0, "a_sq": 0.0, "b_sum": 0.0, "b_sq": 0.0, "count": 0}
+    )
     match_score_stats = defaultdict(lambda: defaultdict(int))
 
-    # Executar simulações em paralelo com ProcessPoolExecutor
     num_workers = get_num_workers()
     print(f"\n✓ Detectados {num_workers} cores disponíveis")
+
+    # Batching adaptativo
+    if n_simulations >= 1000000:
+        batch_size = 50000
+        chunksize = 500
+    elif n_simulations >= 100000:
+        batch_size = 10000
+        chunksize = 100
+    else:
+        batch_size = n_simulations
+        chunksize = max(1, n_simulations // (num_workers * 4))
+
+    num_batches = (n_simulations + batch_size - 1) // batch_size
     print(
-        f"✓ Executando {n_simulations} simulações em paralelo com ProcessPoolExecutor...\n"
+        f"✓ {n_simulations} simulações em {num_batches} batch(es) | Chunksize: {chunksize}\n"
     )
 
-    # Inicializar rastreador de progresso global
     global _progress_tracker
     _progress_tracker = ProgressTracker(num_workers, n_simulations)
 
-    # Preparar argumentos para as simulações
-    simulation_args = []
-    for sim_idx in range(n_simulations):
-        worker_id = sim_idx % num_workers
-        args_tuple = (
-            sim_idx,
-            worker_id,
-            teams,
-            fixtures,
-            elo_system,
-            score_simulator,
-            n_simulations,
-            team_division,
-            has_liguilla,
-            real_points,
-            playoff_slots,
-            total_playoff_slots,
-        )
-        simulation_args.append(args_tuple)
+    for batch_num in range(num_batches):
+        batch_start = batch_num * batch_size
+        batch_end = min(batch_start + batch_size, n_simulations)
 
-    # Executar simulações em paralelo (ProcessPoolExecutor supera o GIL)
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        futures = [
-            executor.submit(_run_single_simulation_worker, args)
-            for args in simulation_args
-        ]
+        simulation_args = []
+        for sim_idx in range(batch_start, batch_end):
+            worker_id = sim_idx % num_workers
+            args_tuple = (
+                sim_idx,
+                worker_id,
+                teams,
+                fixtures,
+                elo_system,
+                score_simulator,
+                n_simulations,
+                team_division,
+                has_liguilla,
+                real_points,
+                playoff_slots,
+                total_playoff_slots,
+            )
+            simulation_args.append(args_tuple)
 
-        for future in as_completed(futures):
-            sim_result = future.result()
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            for sim_result in executor.map(
+                _run_single_simulation_worker, simulation_args, chunksize=chunksize
+            ):
+                _progress_tracker.increment()
 
-            # Atualizar progresso no processo principal
-            _progress_tracker.increment()
+                for team in teams:
+                    if team in sim_result["expected_points"]:
+                        val = sim_result["expected_points"][team]
+                        expected_points_sum[team] += val
+                        expected_points_sq_sum[team] += val * val
 
-            # Agregar resultados
-            for team in teams:
-                if team in sim_result["expected_points"]:
-                    expected_points_all[team].append(
-                        sim_result["expected_points"][team]
-                    )
-                    final_elos_list[team].append(sim_result["final_elos"][team])
-                    regular_season_places[team].append(
-                        sim_result["regular_season_places"][team]
-                    )
+                        elo_val = sim_result["final_elos"][team]
+                        final_elos_sum[team] += elo_val
+                        final_elos_sq_sum[team] += elo_val * elo_val
 
-            # Playoff counts
-            for team, count in sim_result["playoff_count"].items():
-                playoff_count[team] += count
-            for team, count in sim_result["semifinal_count"].items():
-                semifinal_count[team] += count
-            for team, count in sim_result["final_count"].items():
-                final_count[team] += count
-            for team, count in sim_result["champion_count"].items():
-                champion_count[team] += count
+                        place_val = sim_result["regular_season_places"][team]
+                        regular_places_sum[team] += place_val
+                        regular_places_sq_sum[team] += place_val * place_val
 
-            # Promotion/relegation counts
-            for team, count in sim_result["promotion_count"].items():
-                promotion_count[team] += count
-            for team, count in sim_result["relegation_count"].items():
-                relegation_count[team] += count
+                for team, count in sim_result["playoff_count"].items():
+                    playoff_count[team] += count
+                for team, count in sim_result["semifinal_count"].items():
+                    semifinal_count[team] += count
+                for team, count in sim_result["final_count"].items():
+                    final_count[team] += count
+                for team, count in sim_result["champion_count"].items():
+                    champion_count[team] += count
+                for team, count in sim_result["promotion_count"].items():
+                    promotion_count[team] += count
+                for team, count in sim_result["relegation_count"].items():
+                    relegation_count[team] += count
 
-            # Match stats
-            for mid, stats in sim_result["match_stats"].items():
-                for key in ["1", "X", "2", "total"]:
-                    match_stats[mid][key] += stats[key]
+                for mid, stats in sim_result["match_stats"].items():
+                    for key in ["1", "X", "2", "total"]:
+                        match_stats[mid][key] += stats[key]
 
-            # Match ELO stats
-            for mid, elo_data in sim_result["match_elo_stats"].items():
-                match_elo_stats[mid]["team_a_elos"].extend(elo_data["team_a_elos"])
-                match_elo_stats[mid]["team_b_elos"].extend(elo_data["team_b_elos"])
+                for mid, elo_data in sim_result["match_elo_stats"].items():
+                    for elo_a in elo_data["team_a_elos"]:
+                        match_elo_sum[mid]["a_sum"] += elo_a
+                        match_elo_sum[mid]["a_sq"] += elo_a * elo_a
+                        match_elo_sum[mid]["count"] += 1
+                    for elo_b in elo_data["team_b_elos"]:
+                        match_elo_sum[mid]["b_sum"] += elo_b
+                        match_elo_sum[mid]["b_sq"] += elo_b * elo_b
 
-            # Match score stats
-            for mid, score_data in sim_result["match_score_stats"].items():
-                for score_key, count in score_data.items():
-                    match_score_stats[mid][score_key] += count
+                for mid, score_data in sim_result["match_score_stats"].items():
+                    for score_key, count in score_data.items():
+                        match_score_stats[mid][score_key] += count
 
-    # Calcular estatísticas
+        import gc
+
+        gc.collect()
+
     results = {}
     for team in teams:
-        xpts_values = expected_points_all.get(team, [0.0])
-        rs_places = regular_season_places.get(team, [len(teams)])
-        elos_team = final_elos_list.get(team, [teams[team].elo])
+        n = n_simulations
+
+        mean_xpts = (
+            expected_points_sum[team] / n if team in expected_points_sum else 0.0
+        )
+        variance_xpts = (
+            (expected_points_sq_sum[team] / n - mean_xpts**2)
+            if team in expected_points_sq_sum
+            else 0.0
+        )
+        std_xpts = variance_xpts**0.5 if variance_xpts > 0 else 0.0
+
+        mean_place = (
+            regular_places_sum[team] / n if team in regular_places_sum else len(teams)
+        )
+        variance_place = (
+            (regular_places_sq_sum[team] / n - mean_place**2)
+            if team in regular_places_sq_sum
+            else 0.0
+        )
+        std_place = variance_place**0.5 if variance_place > 0 else 0.0
+
+        mean_elo = (
+            final_elos_sum[team] / n if team in final_elos_sum else teams[team].elo
+        )
+        variance_elo = (
+            (final_elos_sq_sum[team] / n - mean_elo**2)
+            if team in final_elos_sq_sum
+            else 0.0
+        )
+        std_elo = variance_elo**0.5 if variance_elo > 0 else 0.0
 
         results[team] = {
             "p_playoffs": playoff_count[team] / n_simulations,
             "p_meias_finais": semifinal_count[team] / n_simulations,
             "p_finais": final_count[team] / n_simulations,
             "p_champion": champion_count[team] / n_simulations,
-            "expected_points": np.mean(xpts_values),
-            "expected_points_std": np.std(xpts_values),
-            "expected_place": np.mean(rs_places),
-            "expected_place_std": np.std(rs_places),
-            "avg_final_elo": np.mean(elos_team),
-            "avg_final_elo_std": np.std(elos_team),
+            "expected_points": mean_xpts,
+            "expected_points_std": std_xpts,
+            "expected_place": mean_place,
+            "expected_place_std": std_place,
+            "avg_final_elo": mean_elo,
+            "avg_final_elo_std": std_elo,
             "p_promocao": promotion_count[team] / n_simulations,
             "p_descida": relegation_count[team] / n_simulations,
         }
 
-    # Calcular probabilidades de jogos futuros
     match_forecasts = {}
     for mid, stats in match_stats.items():
         total = stats["total"]
@@ -2011,20 +2038,25 @@ def monte_carlo_forecast(
                 "p_win_b": stats["2"] / total,
             }
 
-    # Calcular médias e std dos ELOs por jogo
     match_elo_forecast = {}
-    for mid, elo_data in match_elo_stats.items():
-        team_a_elos = elo_data["team_a_elos"]
-        team_b_elos = elo_data["team_b_elos"]
-        if team_a_elos and team_b_elos:
+    for mid, elo_sums in match_elo_sum.items():
+        count = elo_sums["count"]
+        if count > 0:
+            mean_a = elo_sums["a_sum"] / count
+            variance_a = elo_sums["a_sq"] / count - mean_a**2
+            std_a = variance_a**0.5 if variance_a > 0 else 0.0
+
+            mean_b = elo_sums["b_sum"] / count
+            variance_b = elo_sums["b_sq"] / count - mean_b**2
+            std_b = variance_b**0.5 if variance_b > 0 else 0.0
+
             match_elo_forecast[mid] = {
-                "elo_a_mean": np.mean(team_a_elos),
-                "elo_a_std": np.std(team_a_elos),
-                "elo_b_mean": np.mean(team_b_elos),
-                "elo_b_std": np.std(team_b_elos),
+                "elo_a_mean": mean_a,
+                "elo_a_std": std_a,
+                "elo_b_mean": mean_b,
+                "elo_b_std": std_b,
             }
 
-    # Mostrar sumário de execução paralela
     if _progress_tracker:
         _progress_tracker.print_summary()
 
@@ -2048,14 +2080,7 @@ def monte_carlo_forecast_with_hardset(
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
 ]:
-    """
-    Monte Carlo COM suporte para resultados fixados.
-
-    Jogos com resultados fixados:
-    - Usam sempre o mesmo resultado em todas as 10k simulações
-    - Atualizam ELOs de forma determinística
-    - Criam efeito borboleta nos jogos seguintes
-    """
+    """OTIMIZADO PARA LINUX - Batching + Chunking + Agregação Eficiente (COM HARDSET)"""
     if real_points is None:
         real_points = {}
 
@@ -2069,123 +2094,172 @@ def monte_carlo_forecast_with_hardset(
     semifinal_count = defaultdict(int)
     final_count = defaultdict(int)
     champion_count = defaultdict(int)
-    expected_points_all = defaultdict(list)
-    regular_season_places = defaultdict(list)
-    final_elos_list = defaultdict(list)
     promotion_count = defaultdict(int)
     relegation_count = defaultdict(int)
 
+    # Agregação eficiente: somas em vez de listas
+    expected_points_sum = defaultdict(float)
+    expected_points_sq_sum = defaultdict(float)
+    regular_places_sum = defaultdict(float)
+    regular_places_sq_sum = defaultdict(float)
+    final_elos_sum = defaultdict(float)
+    final_elos_sq_sum = defaultdict(float)
+
     match_stats = defaultdict(lambda: {"1": 0, "X": 0, "2": 0, "total": 0})
-    match_elo_stats = defaultdict(lambda: {"team_a_elos": [], "team_b_elos": []})
+    match_elo_sum = defaultdict(
+        lambda: {"a_sum": 0.0, "a_sq": 0.0, "b_sum": 0.0, "b_sq": 0.0, "count": 0}
+    )
     match_score_stats = defaultdict(lambda: defaultdict(int))
 
-    # Executar simulações em paralelo COM hardset
     num_workers = get_num_workers()
     print(f"\n✓ Detectados {num_workers} cores disponíveis")
+
+    # Batching adaptativo
+    if n_simulations >= 1000000:
+        batch_size = 50000
+        chunksize = 500
+    elif n_simulations >= 100000:
+        batch_size = 10000
+        chunksize = 100
+    else:
+        batch_size = n_simulations
+        chunksize = max(1, n_simulations // (num_workers * 4))
+
+    num_batches = (n_simulations + batch_size - 1) // batch_size
     print(
-        f"✓ Executando {n_simulations} simulações em paralelo com hardset (ProcessPoolExecutor)...\n"
+        f"✓ {n_simulations} simulações em {num_batches} batch(es) | Chunksize: {chunksize}\n"
     )
 
-    # Inicializar rastreador de progresso global
     global _progress_tracker
     _progress_tracker = ProgressTracker(num_workers, n_simulations)
 
-    # Preparar argumentos para as simulações
-    simulation_args = []
-    for sim_idx in range(n_simulations):
-        worker_id = sim_idx % num_workers
-        args_tuple = (
-            sim_idx,
-            worker_id,
-            teams,
-            fixtures,
-            elo_system,
-            score_simulator,
-            n_simulations,
-            team_division,
-            has_liguilla,
-            real_points,
-            playoff_slots,
-            total_playoff_slots,
-            hardset_manager,
-        )
-        simulation_args.append(args_tuple)
+    for batch_num in range(num_batches):
+        batch_start = batch_num * batch_size
+        batch_end = min(batch_start + batch_size, n_simulations)
 
-    # Executar simulações em paralelo (ProcessPoolExecutor supera o GIL)
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        futures = [
-            executor.submit(_run_single_simulation_with_hardset_worker, args)
-            for args in simulation_args
-        ]
+        simulation_args = []
+        for sim_idx in range(batch_start, batch_end):
+            worker_id = sim_idx % num_workers
+            args_tuple = (
+                sim_idx,
+                worker_id,
+                teams,
+                fixtures,
+                elo_system,
+                score_simulator,
+                n_simulations,
+                team_division,
+                has_liguilla,
+                real_points,
+                playoff_slots,
+                total_playoff_slots,
+                hardset_manager,
+            )
+            simulation_args.append(args_tuple)
 
-        for future in as_completed(futures):
-            sim_result = future.result()
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            for sim_result in executor.map(
+                _run_single_simulation_with_hardset_worker,
+                simulation_args,
+                chunksize=chunksize,
+            ):
+                _progress_tracker.increment()
 
-            # Atualizar progresso no processo principal
-            _progress_tracker.increment()
+                for team in teams:
+                    if team in sim_result["expected_points"]:
+                        val = sim_result["expected_points"][team]
+                        expected_points_sum[team] += val
+                        expected_points_sq_sum[team] += val * val
 
-            # Agregar resultados (mesmo código que em monte_carlo_forecast)
-            for team in teams:
-                if team in sim_result["expected_points"]:
-                    expected_points_all[team].append(
-                        sim_result["expected_points"][team]
-                    )
-                    final_elos_list[team].append(sim_result["final_elos"][team])
-                    regular_season_places[team].append(
-                        sim_result["regular_season_places"][team]
-                    )
+                        elo_val = sim_result["final_elos"][team]
+                        final_elos_sum[team] += elo_val
+                        final_elos_sq_sum[team] += elo_val * elo_val
 
-            # Playoff counts
-            for team, count in sim_result["playoff_count"].items():
-                playoff_count[team] += count
-            for team, count in sim_result["semifinal_count"].items():
-                semifinal_count[team] += count
-            for team, count in sim_result["final_count"].items():
-                final_count[team] += count
-            for team, count in sim_result["champion_count"].items():
-                champion_count[team] += count
+                        place_val = sim_result["regular_season_places"][team]
+                        regular_places_sum[team] += place_val
+                        regular_places_sq_sum[team] += place_val * place_val
 
-            # Promotion/relegation counts
-            for team, count in sim_result["promotion_count"].items():
-                promotion_count[team] += count
-            for team, count in sim_result["relegation_count"].items():
-                relegation_count[team] += count
+                for team, count in sim_result["playoff_count"].items():
+                    playoff_count[team] += count
+                for team, count in sim_result["semifinal_count"].items():
+                    semifinal_count[team] += count
+                for team, count in sim_result["final_count"].items():
+                    final_count[team] += count
+                for team, count in sim_result["champion_count"].items():
+                    champion_count[team] += count
+                for team, count in sim_result["promotion_count"].items():
+                    promotion_count[team] += count
+                for team, count in sim_result["relegation_count"].items():
+                    relegation_count[team] += count
 
-            # Match stats
-            for mid, stats in sim_result["match_stats"].items():
-                for key in ["1", "X", "2", "total"]:
-                    match_stats[mid][key] += stats[key]
+                for mid, stats in sim_result["match_stats"].items():
+                    for key in ["1", "X", "2", "total"]:
+                        match_stats[mid][key] += stats[key]
 
-            # Match ELO stats
-            for mid, elo_data in sim_result["match_elo_stats"].items():
-                match_elo_stats[mid]["team_a_elos"].extend(elo_data["team_a_elos"])
-                match_elo_stats[mid]["team_b_elos"].extend(elo_data["team_b_elos"])
+                for mid, elo_data in sim_result["match_elo_stats"].items():
+                    for elo_a in elo_data["team_a_elos"]:
+                        match_elo_sum[mid]["a_sum"] += elo_a
+                        match_elo_sum[mid]["a_sq"] += elo_a * elo_a
+                        match_elo_sum[mid]["count"] += 1
+                    for elo_b in elo_data["team_b_elos"]:
+                        match_elo_sum[mid]["b_sum"] += elo_b
+                        match_elo_sum[mid]["b_sq"] += elo_b * elo_b
 
-            # Match score stats
-            for mid, score_data in sim_result["match_score_stats"].items():
-                for score_key, count in score_data.items():
-                    match_score_stats[mid][score_key] += count
+                for mid, score_data in sim_result["match_score_stats"].items():
+                    for score_key, count in score_data.items():
+                        match_score_stats[mid][score_key] += count
 
-    # Calcular estatísticas finais
+        import gc
+
+        gc.collect()
+
     results = {}
     for team in teams:
-        xpts_values = expected_points_all.get(team, [0.0])
-        rs_places = regular_season_places.get(team, [len(teams)])
-        elos_team = final_elos_list.get(team, [teams[team].elo])
+        n = n_simulations
+
+        mean_xpts = (
+            expected_points_sum[team] / n if team in expected_points_sum else 0.0
+        )
+        variance_xpts = (
+            (expected_points_sq_sum[team] / n - mean_xpts**2)
+            if team in expected_points_sq_sum
+            else 0.0
+        )
+        std_xpts = variance_xpts**0.5 if variance_xpts > 0 else 0.0
+
+        mean_place = (
+            regular_places_sum[team] / n if team in regular_places_sum else len(teams)
+        )
+        variance_place = (
+            (regular_places_sq_sum[team] / n - mean_place**2)
+            if team in regular_places_sq_sum
+            else 0.0
+        )
+        std_place = variance_place**0.5 if variance_place > 0 else 0.0
+
+        mean_elo = (
+            final_elos_sum[team] / n if team in final_elos_sum else teams[team].elo
+        )
+        variance_elo = (
+            (final_elos_sq_sum[team] / n - mean_elo**2)
+            if team in final_elos_sq_sum
+            else 0.0
+        )
+        std_elo = variance_elo**0.5 if variance_elo > 0 else 0.0
 
         results[team] = {
             "p_playoffs": playoff_count[team] / n_simulations,
             "p_meias_finais": semifinal_count[team] / n_simulations,
             "p_finais": final_count[team] / n_simulations,
             "p_champion": champion_count[team] / n_simulations,
-            "expected_points": np.mean(xpts_values),
-            "expected_points_std": np.std(xpts_values),
-            "expected_place": np.mean(rs_places),
-            "expected_place_std": np.std(rs_places),
-            "avg_final_elo": np.mean(elos_team),
-            "avg_final_elo_std": np.std(elos_team),
-            "p_promocao": promotion_count.get(team, 0) / n_simulations,
-            "p_descida": relegation_count.get(team, 0) / n_simulations,
+            "expected_points": mean_xpts,
+            "expected_points_std": std_xpts,
+            "expected_place": mean_place,
+            "expected_place_std": std_place,
+            "avg_final_elo": mean_elo,
+            "avg_final_elo_std": std_elo,
+            "p_promocao": promotion_count[team] / n_simulations,
+            "p_descida": relegation_count[team] / n_simulations,
         }
 
     match_forecasts = {}
@@ -2199,18 +2273,24 @@ def monte_carlo_forecast_with_hardset(
             }
 
     match_elo_forecast = {}
-    for mid, elo_data in match_elo_stats.items():
-        team_a_elos = elo_data["team_a_elos"]
-        team_b_elos = elo_data["team_b_elos"]
-        if team_a_elos and team_b_elos:
+    for mid, elo_sums in match_elo_sum.items():
+        count = elo_sums["count"]
+        if count > 0:
+            mean_a = elo_sums["a_sum"] / count
+            variance_a = elo_sums["a_sq"] / count - mean_a**2
+            std_a = variance_a**0.5 if variance_a > 0 else 0.0
+
+            mean_b = elo_sums["b_sum"] / count
+            variance_b = elo_sums["b_sq"] / count - mean_b**2
+            std_b = variance_b**0.5 if variance_b > 0 else 0.0
+
             match_elo_forecast[mid] = {
-                "elo_a_mean": np.mean(team_a_elos),
-                "elo_a_std": np.std(team_a_elos),
-                "elo_b_mean": np.mean(team_b_elos),
-                "elo_b_std": np.std(team_b_elos),
+                "elo_a_mean": mean_a,
+                "elo_a_std": std_a,
+                "elo_b_mean": mean_b,
+                "elo_b_std": std_b,
             }
 
-    # Mostrar sumário de execução paralela
     if _progress_tracker:
         _progress_tracker.print_summary()
 
