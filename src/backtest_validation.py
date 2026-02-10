@@ -381,7 +381,7 @@ class BacktestValidator:
             str(r.get("Jornada", "")).upper().startswith(("LM", "PM")) for r in all_rows
         )
 
-        results, _, _ = monte_carlo_forecast(
+        results, _, _, _ = monte_carlo_forecast(
             teams,
             fixtures,
             elo_system,
@@ -769,7 +769,9 @@ class BacktestValidator:
             print("❌ MODELO FRACO - Requer calibração ou mais dados")
 
         # Guardar resumo em JSON
-        summary_file = f"../docs/output/elo_ratings/backtest_summary_{self.modalidade}.json"
+        summary_file = (
+            f"../docs/output/elo_ratings/backtest_summary_{self.modalidade}.json"
+        )
         with open(summary_file, "w", encoding="utf-8") as f:
             json.dump(
                 {
