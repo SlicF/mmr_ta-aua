@@ -6,18 +6,21 @@ from enum import Enum
 import logging
 import unicodedata
 import json
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # Configuração de logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    filename="mmr_tacaua.log",
+    filename=str(REPO_ROOT / "mmr_tacaua.log"),
 )
 logger = logging.getLogger("mmr_tacaua")
 
 
 # Carregar configuração de cursos do ficheiro JSON
-def load_courses_config(config_path="../docs/config/config_cursos.json"):
+def load_courses_config(config_path: str = None):
     """
     Carrega a configuração dos cursos do ficheiro JSON
 
@@ -27,6 +30,9 @@ def load_courses_config(config_path="../docs/config/config_cursos.json"):
     Returns:
         Dict com configuração dos cursos
     """
+    if config_path is None:
+        config_path = str(REPO_ROOT / "docs" / "config" / "config_cursos.json")
+
     try:
         with open(config_path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -57,7 +63,7 @@ def is_playoff_jornada(jornada_value) -> bool:
     return s.startswith("E") or s.startswith("MP") or s.startswith("LP")
 
 
-def detect_latest_season_from_csv_files(input_dir="../docs/output/csv_modalidades"):
+def detect_latest_season_from_csv_files(input_dir: str = None):
     """
     Detecta a época mais recente com base nos nomes dos arquivos CSV
 
@@ -67,6 +73,9 @@ def detect_latest_season_from_csv_files(input_dir="../docs/output/csv_modalidade
     Returns:
         String da época mais recente (ex: "25_26") ou None se não encontrar
     """
+    if input_dir is None:
+        input_dir = str(REPO_ROOT / "docs" / "output" / "csv_modalidades")
+
     season_pattern = re.compile(r"(\d{2})_(\d{2})\.csv$")
     seasons = []
 
@@ -1979,7 +1988,7 @@ class EloRatingSystem:
 class TournamentProcessor:
     """Processa todos os torneios na pasta especificada"""
 
-    def __init__(self, input_dir="../docs/output/csv_modalidades", output_dir="../docs/output/elo_ratings"):
+    def __init__(self, input_dir: str = None, output_dir: str = None):
         """
         Inicializa o processador de torneios
 
@@ -1987,12 +1996,14 @@ class TournamentProcessor:
             input_dir: Diretório de entrada contendo arquivos CSV
             output_dir: Diretório de saída para os resultados
         """
-        self.input_dir = input_dir
-        self.output_dir = output_dir
+        self.input_dir = input_dir or str(
+            REPO_ROOT / "docs" / "output" / "csv_modalidades"
+        )
+        self.output_dir = output_dir or str(REPO_ROOT / "docs" / "output" / "elo_ratings")
         self.elo_system = EloRatingSystem()
 
         # Criar diretório de saída se não existir
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
 
     def process_all_tournaments(self):
         """Processa todos os arquivos CSV da época mais recente"""

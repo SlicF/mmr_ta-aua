@@ -1546,9 +1546,10 @@ class ExcelProcessor:
 
 def main():
     """Função principal."""
+    repo_root = Path(__file__).resolve().parents[1]
     # 1) Ler config/env para obter a URL do documento de resultados
     config_url: Optional[str] = None
-    config_path = Path("./docs/config/config.json")
+    config_path = repo_root / "docs" / "config" / "config.json"
     if config_path.exists():
         try:
             with open(config_path, "r", encoding="utf-8") as f:
@@ -1621,14 +1622,26 @@ def main():
     else:
         # fallback: usar ficheiro local existente (compatibilidade antiga)
         # tentar usar padrão com época corrente
-        default_local = f"./data/Resultados Taça UA {current_season_token()}.xlsx"
-        if not os.path.exists(default_local):
-            print("Erro: Nenhum ficheiro local encontrado e URL não disponível/valida.")
-            print(
-                "Defina 'results_url' em config.json ou a variável de ambiente RESULTS_URL."
-            )
-            return
-        file_path = default_local
+        default_local = (
+            repo_root / "data" / f"Resultados Taça UA {current_season_token()}.xlsx"
+        )
+        if default_local.exists():
+            file_path = str(default_local)
+        else:
+            # fallback final: procurar qualquer Excel local em data/ ou na raiz
+            candidates = list((repo_root / "data").glob("Resultados Taça UA*.xlsx"))
+            candidates += list(repo_root.glob("Resultados Taça UA*.xlsx"))
+            if not candidates:
+                print(
+                    "Erro: Nenhum ficheiro local encontrado e URL não disponível/valida."
+                )
+                print(
+                    "Defina 'results_url' em config.json ou a variável de ambiente RESULTS_URL."
+                )
+                return
+            # escolher o mais recente por data de modificação
+            latest = max(candidates, key=lambda p: p.stat().st_mtime)
+            file_path = str(latest)
 
     # 4) Preparar backup e verificação de mudanças
     # Tenta inferir época para nome do backup
@@ -1637,7 +1650,9 @@ def main():
         or extract_season_from_filename(Path(file_path).name)
         or current_season_token()
     )
-    backup_file = f"./data/backup_Resultados Taça UA {season_for_backup}.xlsx"
+    backup_file = str(
+        repo_root / "data" / f"backup_Resultados Taça UA {season_for_backup}.xlsx"
+    )
 
     if os.path.exists(backup_file) and files_are_identical(file_path, backup_file):
         print(
@@ -1669,7 +1684,10 @@ def main():
 
     # 6) Processar o ficheiro
     processor = ExcelProcessor(
-        file_path, season_override=season_detected, sheets_to_process=sheets_to_process
+        file_path,
+        output_dir=str(repo_root / "docs" / "output" / "csv_modalidades"),
+        season_override=season_detected,
+        sheets_to_process=sheets_to_process,
     )
     processor.process_all_sheets()
 
