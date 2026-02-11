@@ -1380,23 +1380,58 @@ def calculate_promotions_relegations(
     elif num_groups_div2 == 2:
         # Se há liguilha (LM presente) usa regra de 3 equipas: 2 ficam na 1ª, 1 desce
         if has_liguilla:
-            grp_keys = list(div2_groups.keys())
-            top_a = div2_groups[grp_keys[0]][0][0] if div2_groups[grp_keys[0]] else None
-            top_b = div2_groups[grp_keys[1]][0][0] if div2_groups[grp_keys[1]] else None
-            ninth = ranking_div1[8][0] if len(ranking_div1) >= 9 else None
-            candidates = [c for c in [top_a, top_b, ninth] if c]
-            # Sort by ELO expected strength
-            candidates_sorted = sorted(
-                candidates,
-                key=lambda t: sim_teams[t].elo if t in sim_teams else 1500,
-                reverse=True,
-            )
-            keep = candidates_sorted[:2]
-            drop = candidates_sorted[2:] if len(candidates_sorted) > 2 else []
-            promoted.update(keep)
-            for t in drop:
-                if t == ninth:
+            down_list = [t for t, _ in reversed(ranking_div1)]
+            # Descem diretos os 3 ultimos (4o a contar do fim vai a liguilha)
+            for t in down_list:
+                if t in protected_as:
+                    continue
+                if len(relegated) < 3:
                     relegated.add(t)
+
+            grp_keys = list(div2_groups.keys())
+            top_a = (
+                next_non_b([t for t, _ in div2_groups[grp_keys[0]]])
+                if grp_keys
+                else None
+            )
+            top_b = (
+                next_non_b([t for t, _ in div2_groups[grp_keys[1]]])
+                if len(grp_keys) > 1
+                else None
+            )
+
+            # Sobem diretos os 1os de cada grupo (2a divisao)
+            if top_a:
+                promoted.add(top_a)
+            if top_b:
+                promoted.add(top_b)
+
+            # Liguillha: 2os de cada grupo + 4o a contar do fim da 1a divisao
+            second_a = (
+                next_non_b([t for t, _ in div2_groups[grp_keys[0]][1:]])
+                if grp_keys and len(div2_groups[grp_keys[0]]) > 1
+                else None
+            )
+            second_b = (
+                next_non_b([t for t, _ in div2_groups[grp_keys[1]][1:]])
+                if len(grp_keys) > 1 and len(div2_groups[grp_keys[1]]) > 1
+                else None
+            )
+            fourth_worst = down_list[3] if len(down_list) >= 4 else None
+            candidates = [c for c in [second_a, second_b, fourth_worst] if c]
+
+            if candidates:
+                # Escolhe vencedor por ELO (regra de desempate simplificada)
+                winner = max(
+                    candidates,
+                    key=lambda t: sim_teams.get(t, Team(t, 1500)).elo,
+                )
+                # So ha promocao se o vencedor for da 2a divisao
+                if winner != fourth_worst:
+                    promoted.add(winner)
+                    if fourth_worst:
+                        relegated.add(fourth_worst)
+                # Se o 4o a contar do fim vencer, mantém-se e nao ha promocao extra
         else:
             # Sem liguilha: sobem 2 por grupo, descem 4
             for grp_list in div2_groups.values():
