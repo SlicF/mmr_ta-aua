@@ -7,6 +7,7 @@ let compactModeEnabled = false; // Modo compacto da tabela (sem emblemas e ELO T
 let predictionsTooltipFixed = false; // Estado do tooltip de previsões (fixo ou não)
 let predictionsTooltipState = { distribution: null, isTeamA: false, itemsShown: 10 }; // Estado para gestão de batches
 let predictionsTooltipCurrentDistribution = null; // Guardar o distribution atual para evitar re-render
+let favoriteTeam = localStorage.getItem('favoriteTeam'); // Equipa favorita do utilizador
 
 // Mostrar painel de debug com Ctrl+Shift+D
 document.addEventListener('keydown', function (e) {
@@ -16,6 +17,101 @@ document.addEventListener('keydown', function (e) {
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     }
 });
+
+// ==================== FAVORITE TEAM SYSTEM ====================
+
+/**
+ * Alternar equipa favorita
+ */
+function toggleFavorite(teamName) {
+    // Normalizar o nome da equipa para ser consistente em todo o lado
+    const normalizedTeamName = normalizeTeamName(teamName);
+
+    if (favoriteTeam === normalizedTeamName) {
+        // Se já é favorita, remove
+        favoriteTeam = null;
+        localStorage.removeItem('favoriteTeam');
+        showNotification('Equipa favorita removida');
+    } else {
+        favoriteTeam = normalizedTeamName;
+        localStorage.setItem('favoriteTeam', normalizedTeamName);
+        // Mostrar no formato preferido (nome limpo)
+        const displayName = getPreferredTeamLabel(normalizedTeamName);
+        showNotification(`Equipa favorita: ${displayName}`);
+    }
+
+    // Atualizar UI em todo o lado
+    updateFavoriteUI();
+}
+
+/**
+ * Atualizar UI com a nova equipa favorita
+ */
+function updateFavoriteUI() {
+    // Atualizar Tabela
+    updateRankingsTable();
+
+    // Atualizar Gráfico (re-render para destacar linha/pontos)
+    updateEloChart();
+
+    // Atualizar Calendário
+    updateCalendar();
+
+    // Atualizar Previsões
+    updatePredictionsDisplay();
+
+    // Atualizar Selector de equipas no gráfico
+    // Não precisa de re-render total, apenas classes
+    document.querySelectorAll('.team-checkbox').forEach(label => {
+        const input = label.querySelector('input');
+        if (input && favoriteTeam) {
+            const teamInCheckbox = input.dataset.teamName;
+            const teamCanonical = resolveCanonicalCourseKey(teamInCheckbox);
+            const favoriteCanonical = resolveCanonicalCourseKey(favoriteTeam);
+
+            if (teamCanonical === favoriteCanonical) {
+                label.classList.add('favorite-team-selected');
+            } else {
+                label.classList.remove('favorite-team-selected');
+            }
+        } else {
+            label.classList.remove('favorite-team-selected');
+        }
+    });
+
+    // Se a equipa favorita existe na modalidade atual, forçar visualização
+    if (favoriteTeam) {
+        // Verificar se equipa existe na modalidade atual
+        // (Isto será tratado na lógica de navegação, aqui é só update visual)
+    }
+}
+
+/**
+ * Verifica se uma equipa é a favorita (comparando com normalização)
+ */
+function isTeamFavorite(teamName) {
+    if (!favoriteTeam || !teamName) return false;
+    const teamCanonical = resolveCanonicalCourseKey(teamName);
+    const favoriteCanonical = resolveCanonicalCourseKey(favoriteTeam);
+    return teamCanonical === favoriteCanonical;
+}
+
+/**
+ * Mostrar notificação toast
+ */
+function showNotification(message) {
+    let toast = document.getElementById('notification-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'notification-toast';
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.className = 'show';
+
+    setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+}
 
 // ==================== SISTEMA DE COLAPSÁVEIS ====================
 
@@ -201,7 +297,8 @@ function createTeamSelector() {
 
             teams.forEach(team => {
                 const label = document.createElement('label');
-                label.className = 'team-checkbox active';
+                const isFavorite = isTeamFavorite(team.name);
+                label.className = isFavorite ? 'team-checkbox active favorite-team-selected' : 'team-checkbox active';
                 label.dataset.teamName = team.name;
 
                 const checkbox = document.createElement('input');
@@ -225,8 +322,10 @@ function createTeamSelector() {
 
                 const teamNameSpan = document.createElement('span');
                 teamNameSpan.className = 'team-name';
-                teamNameSpan.title = team.fullName;
-                teamNameSpan.textContent = team.name;
+                // Gráfico sempre usa nome curto
+                const teamCourseInfo = getCourseInfo(team.name);
+                teamNameSpan.title = teamCourseInfo.fullName;
+                teamNameSpan.textContent = teamCourseInfo.shortName;
 
                 label.appendChild(checkbox);
                 if (team.emblemPath) {
@@ -241,7 +340,7 @@ function createTeamSelector() {
                 label.appendChild(teamDot);
                 label.appendChild(teamNameSpan);
 
-                label.title = team.fullName;
+                label.title = teamCourseInfo.fullName;
                 teamsInGroupDiv.appendChild(label);
             });
 
@@ -780,6 +879,9 @@ function switchDivision(division) {
     updatePredictionsSelectors();
     refreshPredictionsTeamsForSelection();
     updatePredictionsDisplay();
+
+    // Sincronizar com o gráfico ELO (exceto se for divisão com grupos, aí mostra todos)
+    filterDivision(division);
 }
 
 // Atualizar seletor de grupos (usa GroupSelector class)
@@ -823,6 +925,18 @@ function switchGroup(group) {
     updatePredictionsSelectors();
     refreshPredictionsTeamsForSelection();
     updatePredictionsDisplay();
+
+    // Sincronizar com o gráfico ELO
+    if (group) {
+        // Extrair letra do grupo se necessário (ex: "Grupo A" -> "A")
+        const groupLetter = group.replace('Grupo ', '');
+        filterGroup(groupLetter);
+    } else {
+        // Se grupo for null (clicou "Todos"), mostrar toda a divisão
+        if (appState.view.division) {
+            filterDivision(appState.view.division);
+        }
+    }
 }
 
 // Inicializar gráfico ELO com ApexCharts
@@ -2465,16 +2579,40 @@ function getGoalHeaders() {
 
     // Basquetebol usa "Cestos Feitos" e "Cestos Sofridos"
     if (modalityName.includes('BASQUETEBOL')) {
-        return { scored: 'CF', conceded: 'CS' };
+        return {
+            scored: 'CF',
+            conceded: 'CS',
+            scoredTitle: 'Cestos feitos',
+            concededTitle: 'Cestos sofridos',
+            diffTitle: 'Diferença de cestos (CF - CS)',
+            expectedLabel: 'Cestos Esp.',
+            expectedTitle: 'Cestos esperados'
+        };
     }
 
     // Voleibol usa "Sets Ganhos" e "Sets Perdidos"
     if (modalityName.includes('VOLEIBOL')) {
-        return { scored: 'SG', conceded: 'SP' };
+        return {
+            scored: 'SG',
+            conceded: 'SP',
+            scoredTitle: 'Sets ganhos',
+            concededTitle: 'Sets perdidos',
+            diffTitle: 'Diferença de sets (SG - SP)',
+            expectedLabel: 'Sets Esp.',
+            expectedTitle: 'Sets esperados'
+        };
     }
 
     // Futebol, Futsal e Andebol mantêm "Golos Marcados" e "Golos Sofridos"
-    return { scored: 'GM', conceded: 'GS' };
+    return {
+        scored: 'GM',
+        conceded: 'GS',
+        scoredTitle: 'Golos marcados',
+        concededTitle: 'Golos sofridos',
+        diffTitle: 'Diferença de golos (GM - GS)',
+        expectedLabel: 'Golos Esp.',
+        expectedTitle: 'Golos esperados'
+    };
 }
 
 // Atualizar cabeçalhos da tabela de classificação
@@ -2543,9 +2681,12 @@ function updateRankingsTableHeaders() {
         return;
     }
 
-    // Atualizar os cabeçalhos
+    // Atualizar os cabeçalhos (texto e títulos)
     thElements[scoredIndex].textContent = headers.scored;
+    thElements[scoredIndex].title = headers.scoredTitle;
     thElements[concededIndex].textContent = headers.conceded;
+    thElements[concededIndex].title = headers.concededTitle;
+    thElements[diffIndex].title = headers.diffTitle;
 
     // Esconder/mostrar coluna ELO Trend em modo compacto
     const eloTrendIndex = thElements.findIndex(th =>
@@ -2554,6 +2695,15 @@ function updateRankingsTableHeaders() {
     );
     if (eloTrendIndex !== -1) {
         thElements[eloTrendIndex].style.display = compactModeEnabled ? 'none' : '';
+    }
+
+    // Esconder/mostrar coluna Forma em modo compacto
+    const formIndex = thElements.findIndex(th =>
+        normalizeHeaderText(th.textContent).includes('forma') ||
+        normalizeHeaderText(th.textContent).includes('form')
+    );
+    if (formIndex !== -1) {
+        thElements[formIndex].style.display = compactModeEnabled ? 'none' : '';
     }
 }
 
@@ -2775,8 +2925,9 @@ function updateRankingsTable() {
 
         // Obter informações do curso para emblema - aplicar normalização
         const normalizedTeamName = normalizeTeamName(team.team);
-        const displayTeamName = normalizedTeamName;
         const courseInfo = getCourseInfo(normalizedTeamName);
+        // Tabela usa nome curto em modo compacto, nome completo caso contrário
+        const displayTeamName = compactModeEnabled ? courseInfo.shortName : courseInfo.fullName;
         const emblemHtml = (!compactModeEnabled && courseInfo.emblemPath) ?
             `<img src="${courseInfo.emblemPath}" alt="${normalizedTeamName}" class="team-emblem-table" onerror="this.style.display='none'">` :
             '';
@@ -2802,7 +2953,12 @@ function updateRankingsTable() {
                     <td>
                         <span class="rank-badge ${progressionClass}" title="${badgeTitle}">${position}</span>
                     </td>
-                    <td class="team-cell">
+                    <td class="team-cell ${isTeamFavorite(team.team) ? 'favorite-team-row' : ''}">
+                        <button class="favorite-btn ${isTeamFavorite(team.team) ? 'active' : ''}" 
+                                onclick="toggleFavorite('${team.team}')" 
+                                title="${isTeamFavorite(team.team) ? 'Remover dos favoritos' : 'Marcar como favorita'}">
+                            ${isTeamFavorite(team.team) ? '★' : '☆'}
+                        </button>
                         ${emblemHtml}
                         <div class="team-color-indicator" style="background-color: ${courseInfo.primaryColor}"></div>
                         <div class="team-info-container">
@@ -2820,7 +2976,7 @@ function updateRankingsTable() {
                     <td>${team.conceded || 0}</td>
                     <td style="color: ${goalDiff > 0 ? '#28a745' : goalDiff < 0 ? '#dc3545' : '#666'}">${goalDiffText}</td>
                     <td class="sparkline-cell" style="display: ${compactModeEnabled ? 'none' : ''}">${buildEloSparkline(team.team)}</td>
-                    <td>${formBadgesHtml}</td>
+                    <td class="form-column" style="display: ${compactModeEnabled ? 'none' : ''}">${formBadgesHtml}</td>
                 `;
         row.classList.add(zoneClass);
         tbody.appendChild(row);
@@ -4360,12 +4516,13 @@ function createBracket() {
             const resolvedTeam1 = resolveTeamName(match.team1);
             const resolvedTeam2 = resolveTeamName(match.team2);
 
-            const displayTeam1 = normalizeTeamName(resolvedTeam1);
-            const displayTeam2 = normalizeTeamName(resolvedTeam2);
-
             // Obter informações das equipas - aplicar normalização
             const team1Info = getCourseInfo(normalizeTeamName(resolvedTeam1));
             const team2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
+
+            // Brackets sempre usam nome curto
+            const displayTeam1 = team1Info.shortName;
+            const displayTeam2 = team2Info.shortName;
 
             // Usar cor da equipa ou cinza neutro como fallback
             const team1Color = team1Info.colors ? team1Info.colors[0] : '#6c757d';
@@ -4376,7 +4533,8 @@ function createBracket() {
             const hasScore = (match.score1 !== null && match.score2 !== null);
             const matchPlayed = hasScore && !match.predicted; // Permitir unknownResult
             const showScore = hasScore && !match.predicted; // Mostrar score mesmo se unknownResult
-            team1Div.className = `bracket-team ${matchPlayed && match.winner === match.team1 ? 'winner' : ''}`;
+            const isFavorite1 = isTeamFavorite(resolvedTeam1);
+            team1Div.className = `bracket-team ${matchPlayed && match.winner === match.team1 ? 'winner' : ''} ${isFavorite1 ? 'favorite-team-bracket' : ''}`;
 
             // Definir cor de fundo se for vencedor E jogo foi realizado, senão border colorida
             if (matchPlayed && match.winner === match.team1) {
@@ -4455,7 +4613,8 @@ function createBracket() {
 
             const team2Div = document.createElement('div');
             // ⚠️ Usar mesma lógica de matchPlayed calculada acima
-            team2Div.className = `bracket-team ${matchPlayed && match.winner === match.team2 ? 'winner' : ''}`;
+            const isFavorite2 = isTeamFavorite(resolvedTeam2);
+            team2Div.className = `bracket-team ${matchPlayed && match.winner === match.team2 ? 'winner' : ''} ${isFavorite2 ? 'favorite-team-bracket' : ''}`;
 
             // Definir cor de fundo se for vencedor E jogo foi realizado, senão border colorida
             if (matchPlayed && match.winner === match.team2) {
@@ -4618,7 +4777,7 @@ function createSecondaryBracket() {
     if (sampleData.secondaryBracket.isTable) {
         // Criar tabela de classificação para liguilhas
         const tableDiv = document.createElement('div');
-        tableDiv.className = 'bracket-league-table';
+        tableDiv.className = 'maintenance-league-table';
 
         // Obter labels corretos para golos/cestos
         const headers = getGoalHeaders();
@@ -4724,6 +4883,10 @@ function createSecondaryBracket() {
                 const team1Info = getCourseInfo(normalizeTeamName(resolvedTeam1));
                 const team2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
 
+                // Liguinha sempre usa nome curto
+                const displayTeam1 = team1Info.shortName;
+                const displayTeam2 = team2Info.shortName;
+
                 // Usar cor da equipa ou cinza neutro como fallback
                 const team1Color = team1Info.colors ? team1Info.colors[0] : '#6c757d';
                 const team2Color = team2Info.colors ? team2Info.colors[0] : '#6c757d';
@@ -4733,7 +4896,8 @@ function createSecondaryBracket() {
                 const hasScore = (match.score1 !== null && match.score2 !== null);
                 const matchPlayed = hasScore && !match.predicted; // Permitir unknownResult
                 const showScore = hasScore && !match.predicted; // Mostrar score mesmo se unknownResult
-                team1Div.className = `bracket-team ${matchPlayed && match.winner === match.team1 ? 'winner' : ''}`;
+                const isFavorite1 = isTeamFavorite(resolvedTeam1);
+                team1Div.className = `bracket-team ${matchPlayed && match.winner === match.team1 ? 'winner' : ''} ${isFavorite1 ? 'favorite-team-bracket' : ''}`;
 
                 if (matchPlayed && match.winner === match.team1) {
                     team1Div.style.background = `linear-gradient(135deg, ${team1Color}, ${team1Color}dd)`;
@@ -4750,10 +4914,10 @@ function createSecondaryBracket() {
                 team1Div.innerHTML = `
                         <div class="bracket-team-content">
                             ${team1Info.emblemPath ?
-                        `<img src="${team1Info.emblemPath}" alt="${normalizeTeamName(resolvedTeam1)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                        `<img src="${team1Info.emblemPath}" alt="${displayTeam1}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
                         ''
                     }
-                            <span>${normalizeTeamName(resolvedTeam1)}</span>
+                            <span>${displayTeam1}</span>
                         </div>
                         <span class="score">${showScore ? match.score1 : '-'}</span>
                         ${elo1Html}
@@ -4786,7 +4950,8 @@ function createSecondaryBracket() {
 
                 const team2Div = document.createElement('div');
                 // ⚠️ Usar mesma lógica de matchPlayed calculada acima
-                team2Div.className = `bracket-team ${matchPlayed && match.winner === match.team2 ? 'winner' : ''}`;
+                const isFavorite2 = isTeamFavorite(resolvedTeam2);
+                team2Div.className = `bracket-team ${matchPlayed && match.winner === match.team2 ? 'winner' : ''} ${isFavorite2 ? 'favorite-team-bracket' : ''}`;
 
                 if (matchPlayed && match.winner === match.team2) {
                     team2Div.style.background = `linear-gradient(135deg, ${team2Color}, ${team2Color}dd)`;
@@ -4803,10 +4968,10 @@ function createSecondaryBracket() {
                 team2Div.innerHTML = `
                         <div class="bracket-team-content">
                             ${team2Info.emblemPath ?
-                        `<img src="${team2Info.emblemPath}" alt="${normalizeTeamName(resolvedTeam2)}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
+                        `<img src="${team2Info.emblemPath}" alt="${displayTeam2}" class="bracket-team-emblem" onerror="this.style.display='none'">` :
                         ''
                     }
-                            <span>${normalizeTeamName(resolvedTeam2)}</span>
+                            <span>${displayTeam2}</span>
                         </div>
                         <span class="score">${showScore ? match.score2 : '-'}</span>
                         ${elo2Html}
@@ -5957,7 +6122,7 @@ function getCourseInfo(courseName) {
 
     if (courseInfo) {
         return {
-            shortName: courseKey,
+            shortName: courseInfo.shortName || courseKey,
             fullName: courseInfo.displayName || courseKey,
             nucleus: courseInfo.nucleus,
             emblemPath: courseInfo.emblem,
@@ -6280,6 +6445,65 @@ function changeEpoca(epoca) {
     updateModalidadeSelector();
 }
 
+/**
+ * Procura o ranking key onde uma equipa existe
+ * Retorna a chave de rankings ou null se não encontrada
+ */
+function findRankingKeyForTeam(teamName) {
+    console.log('[FavoriteTeam] Procurando equipa:', teamName);
+    console.log('[FavoriteTeam] sampleData.rankings disponível?', !!sampleData.rankings);
+    console.log('[FavoriteTeam] sampleData.teams disponível?', !!sampleData.teams);
+    console.log('[FavoriteTeam] sampleData.teams.length:', sampleData.teams ? sampleData.teams.length : 0);
+    if (sampleData.teams && sampleData.teams.length > 0) {
+        console.log('[FavoriteTeam] Primeiras 3 equipas em sampleData.teams:', sampleData.teams.slice(0, 3).map(t => t.name));
+    }
+
+    if (!teamName || !sampleData.rankings) {
+        console.log('[FavoriteTeam] Saída antecipada: teamName=', teamName, 'rankings=', !!sampleData.rankings);
+        return null;
+    }
+
+    console.log('[FavoriteTeam] Rankings keys disponíveis:', Object.keys(sampleData.rankings));
+
+    // Procurar em todas as chaves de rankings pela equipa
+    for (const [rankingKey, teams] of Object.entries(sampleData.rankings)) {
+        console.log(`[FavoriteTeam] Verificando ${rankingKey}: ${teams.length} equipas`);
+        const teamExists = teams.some(t => t.team === teamName);
+        if (teamExists) {
+            console.log('[FavoriteTeam] ✓ Encontrada em ranking key:', rankingKey);
+            return rankingKey;
+        }
+    }
+
+    console.log('[FavoriteTeam] ✗ Não encontrada em nenhum ranking key');
+    return null;
+}
+
+/**
+ * Obtém a divisão e o grupo a partir de uma chave de rankings
+ * E.g. "1ª Divisão - Grupo A" -> { division: "1ª Divisão", group: "Grupo A" }
+ */
+function parseRankingKey(rankingKey) {
+    if (!rankingKey) return { division: null, group: null };
+
+    // Se for "1ª Divisão - Grupo A", extrair ambos
+    if (rankingKey.includes(' - Grupo ')) {
+        const parts = rankingKey.split(' - ');
+        return { division: parts[0], group: parts[1] };
+    }
+
+    // Se for só "1ª Divisão" ou "Grupo A" ou "geral"
+    if (rankingKey.startsWith('Grupo ')) {
+        return { division: null, group: rankingKey };
+    }
+
+    if (rankingKey === 'geral') {
+        return { division: null, group: null };
+    }
+
+    return { division: rankingKey, group: null };
+}
+
 function changeModalidade(mod) {
     if (!mod) return;
 
@@ -6336,8 +6560,42 @@ function changeModalidade(mod) {
             // Todos os arquivos carregados, atualizar interface
             setTimeout(() => {
                 if (loadToken !== currentLoadToken) return;
+
+                // ===== PASSO 1: Auto-navegar para a equipa favorita ANTES de renderizar seletores =====
+                console.log('[AutoNav] favoriteTeam:', favoriteTeam);
+                if (favoriteTeam) {
+                    // Procurar diretamente a equipa nos rankings
+                    const rankingKey = findRankingKeyForTeam(favoriteTeam);
+
+                    if (rankingKey) {
+                        // A equipa favorita está nesta modalidade
+                        console.log('[FavoriteTeam] Auto-navegando para:', rankingKey);
+                        DebugUtils.debugRankingsProcessing('favorite_team_navigation', {
+                            team: favoriteTeam,
+                            rankingKey: rankingKey
+                        });
+
+                        // Definir directamente no appState ANTES de renderizar os seletores
+                        // A "divisão" é realmente a chave de rankings completa
+                        appState.view.division = rankingKey;
+
+                        // Extrair grupo se existir
+                        const { group: rankingGroup } = parseRankingKey(rankingKey);
+                        appState.view.group = rankingGroup;
+
+                        currentDivision = rankingKey;
+                        currentGroup = rankingGroup;
+
+                        console.log('[FavoriteTeam] Set appState:', { division: rankingKey, group: rankingGroup });
+                    } else {
+                        console.log('[FavoriteTeam] Não encontrada nesta modalidade:', favoriteTeam);
+                    }
+                }
+
+                // ===== PASSO 2: Renderizar seletores (que vão respeitar appState.view já definido) =====
                 createTeamSelector();
                 createDivisionSelector();
+                updateGroupSelector(); // Garantir que seletor de grupos é renderizado
                 updateQuickFilters(); // Atualizar filtros baseados na estrutura
                 updateRankingsTable();
                 initializeCalendarSelectors(); // Inicializar calendário
@@ -6345,6 +6603,20 @@ function changeModalidade(mod) {
                     updateEloChart();
                 }
                 // Brackets serão carregados depois de processar rankings
+
+                // ===== PASSO 3: Sincronizar gráfico com a vista final =====
+                console.log('[AutoNav] Antes de filtrar, appState.view:', { division: appState.view.division, group: appState.view.group });
+                if (appState.view.group) {
+                    // Seletor de grupo já trata da lógica de filtrar
+                    const groupLetter = appState.view.group.replace('Grupo ', '');
+                    console.log('[AutoNav] Filtrando por grupo:', groupLetter, 'para:', appState.view.group);
+                    filterGroup(groupLetter);
+                } else if (appState.view.division) {
+                    console.log('[AutoNav] Filtrando por divisão:', appState.view.division);
+                    filterDivision(appState.view.division);
+                } else {
+                    console.log('[AutoNav] Sem divisão/grupo específico, mostrando tudo');
+                }
 
                 // Disparar evento indicando que os dados foram carregados
                 document.dispatchEvent(new CustomEvent('data:loaded'));
@@ -6767,6 +7039,14 @@ function switchCalendarDivision(division) {
 
     // Atualizar calendário
     updateCalendar();
+
+    // Sincronizar com gráfico ELO
+    filterDivision(division);
+
+    // Atualizar previsões
+    updatePredictionsSelectors();
+    refreshPredictionsTeamsForSelection();
+    updatePredictionsDisplay();
 }
 
 // Trocar grupo no calendário (não usado - grupos integrados na divisão)
@@ -6803,6 +7083,16 @@ function switchCalendarGroup(group) {
 
     // Atualizar calendário
     updateCalendar();
+
+    // Sincronizar com gráfico ELO
+    if (group) {
+        filterGroup(group);
+    }
+
+    // Atualizar previsões
+    updatePredictionsSelectors();
+    refreshPredictionsTeamsForSelection();
+    updatePredictionsDisplay();
 }        // Mudar jornada (navegação com setas)
 function changeJornada(direction) {
     if (availableJornadas.length === 0) return;
@@ -7043,14 +7333,18 @@ function createGameItem(game) {
     const gameTime = game.time || game.Hora || '';
     const hasDate = gameDate && gameDate !== '';
 
-    div.className = `game-item ${hasResult ? 'played' : 'not-played'}`;
+    div.className = `game-item ${hasResult ? 'played' : 'not-played'} ${isTeamFavorite(team1) || isTeamFavorite(team2) ? 'favorite-team-game' : ''}`;
 
     // Obter informações das equipas
     const team1Info = getCourseInfo(team1);
     const team2Info = getCourseInfo(team2);
 
-    // Data e hora do jogo formatadas
-    let dateStr = '';
+    // Calendário sempre usa nome curto
+    const displayTeam1 = team1Info.shortName;
+    const displayTeam2 = team2Info.shortName;
+
+    // Formatar data e hora
+    let dateStr;
     if (hasDate) {
         dateStr = formatGameDate(gameDate);
         if (gameTime) {
@@ -7081,9 +7375,9 @@ function createGameItem(game) {
 
     // Emblemas
     const emblem1Html = team1Info.emblemPath ?
-        `<img src="${team1Info.emblemPath}" class="game-team-emblem" alt="${team1}" onerror="this.style.display='none'">` : '';
+        `<img src="${team1Info.emblemPath}" class="game-team-emblem" alt="${displayTeam1}" onerror="this.style.display='none'">` : '';
     const emblem2Html = team2Info.emblemPath ?
-        `<img src="${team2Info.emblemPath}" class="game-team-emblem" alt="${team2}" onerror="this.style.display='none'">` : '';
+        `<img src="${team2Info.emblemPath}" class="game-team-emblem" alt="${displayTeam2}" onerror="this.style.display='none'">` : '';
 
     div.innerHTML = `
                 <div class="game-date">${dateStr}</div>
@@ -7091,11 +7385,11 @@ function createGameItem(game) {
                     <div class="game-team home">
                         ${elo1Html}
                         ${emblem1Html}
-                        <span class="game-team-name">${team1}</span>
+                        <span class="game-team-name">${displayTeam1}</span>
                     </div>
                     ${scoreHtml}
                     <div class="game-team away">
-                        <span class="game-team-name">${team2}</span>
+                        <span class="game-team-name">${displayTeam2}</span>
                         ${emblem2Html}
                         ${elo2Html}
                     </div>
@@ -8327,9 +8621,13 @@ class DivisionSelector extends SelectorComponent {
 
         this.element.style.display = 'flex';
 
-        // Validar divisão atual
+        // Validar divisão atual: usar a já definida se for válida, senão usar a primeira
         if (!appState.view.division || !divisions.includes(appState.view.division)) {
+            console.log('[DivisionSelector] appState.view.division antes:', appState.view.division, 'divisions:', divisions);
             appState.view.division = divisions[0];
+            console.log('[DivisionSelector] Divisão indefinida, usando primeira:', divisions[0], 'de:', divisions);
+        } else {
+            console.log('[DivisionSelector] Mantendo divisão já definida:', appState.view.division);
         }
 
         divisions.forEach(division => {
@@ -8477,7 +8775,7 @@ eventManager.on('#teamSelector input[type="checkbox"]', 'change', (e) => {
 eventManager.on('[data-filter="top3"]', 'click', () => filterTop3());
 eventManager.on('[data-filter="division"]', 'click', (e) => {
     const division = e.target.dataset.division;
-    if (division) filterDivision(division);
+    if (division) switchDivision(division); // Usar switchDivision para sincronizar tudo
 });
 
 // Inicializar quando a página carregar
@@ -8553,23 +8851,55 @@ function getForecastDataForCurrentGroup() {
 function refreshPredictionsTeamsForSelection() {
     const forecastSubset = getForecastDataForCurrentGroup();
 
+    console.log('[Predictions] refreshPredictionsTeamsForSelection chamada');
+    console.log('[Predictions] forecastSubset.length:', forecastSubset.length);
+
     PredictionsState.availableTeams = forecastSubset
         .map(row => row.team)
         .filter(team => team && team.trim() !== '')
         .sort((a, b) => a.localeCompare(b, 'pt-PT'));
 
+    console.log('[Predictions] availableTeams:', PredictionsState.availableTeams.length, 'equipas');
+    console.log('[Predictions] Lista de equipas disponíveis:', PredictionsState.availableTeams);
+    console.log('[Predictions] favoriteTeam:', favoriteTeam);
+    console.log('[Predictions] favoriteTeam está no array?', PredictionsState.availableTeams.includes(favoriteTeam));
+    console.log('[Predictions] selectedTeam antes:', PredictionsState.selectedTeam);
+
     if (PredictionsState.availableTeams.length === 0) {
         PredictionsState.selectedTeam = null;
         PredictionsState.currentTeamIndex = 0;
+        console.log('[Predictions] Nenhuma equipa disponível');
         return;
     }
 
     if (!PredictionsState.selectedTeam || !PredictionsState.availableTeams.includes(PredictionsState.selectedTeam)) {
-        PredictionsState.currentTeamIndex = 0;
-        PredictionsState.selectedTeam = PredictionsState.availableTeams[0];
+        // Se houver equipa favorita e ela estiver disponível, selecionar automaticamente
+        // Precisa fazer matching usando normalização porque favoriteTeam pode ser "EI" e availableTeams ter "Eng. Informática"
+        if (favoriteTeam) {
+            // Procurar equipa com chave canónica igual
+            const favoriteCanonical = resolveCanonicalCourseKey(favoriteTeam);
+            const matchingTeam = PredictionsState.availableTeams.find(team => {
+                const teamCanonical = resolveCanonicalCourseKey(team);
+                return teamCanonical === favoriteCanonical;
+            });
+
+            if (matchingTeam) {
+                PredictionsState.selectedTeam = matchingTeam;
+                console.log('[Predictions] ✓ Equipa favorita encontrada e selecionada:', matchingTeam, '(favorita:', favoriteTeam, ')');
+            } else {
+                PredictionsState.currentTeamIndex = 0;
+                PredictionsState.selectedTeam = PredictionsState.availableTeams[0];
+                console.log('[Predictions] Primeira equipa selecionada (favorita não encontrada):', PredictionsState.selectedTeam);
+            }
+        } else {
+            PredictionsState.currentTeamIndex = 0;
+            PredictionsState.selectedTeam = PredictionsState.availableTeams[0];
+            console.log('[Predictions] Primeira equipa selecionada:', PredictionsState.selectedTeam);
+        }
         return;
     }
 
+    console.log('[Predictions] Equipa já selecionada mantida:', PredictionsState.selectedTeam);
     PredictionsState.currentTeamIndex = PredictionsState.availableTeams.indexOf(PredictionsState.selectedTeam);
 }
 
@@ -8802,6 +9132,9 @@ function updatePredictionsDisplay() {
     // Atualizar estatísticas gerais
     updatePredictionsStats();
 
+    // Atualizar cabeçalhos da tabela de previsões conforme a modalidade
+    updatePredictionsTableHeaders();
+
     // Atualizar tabela de previsões
     updatePredictionsTable();
 }
@@ -8822,7 +9155,26 @@ function updateTeamSliderDisplay() {
     const nextTeam = totalTeams > 1 ? PredictionsState.availableTeams[nextIndex] : null;
 
     // Atualizar nome
-    document.getElementById('selectedTeamName').textContent = courseInfo.fullName || courseInfo.shortName || teamName;
+    const nameEl = document.getElementById('selectedTeamName');
+    nameEl.textContent = courseInfo.fullName || courseInfo.shortName || teamName;
+
+    // Botão de favorito - usar isTeamFavorite() para comparação correta
+    const isFav = isTeamFavorite(teamName);
+    const starBtn = document.createElement('span');
+    starBtn.className = 'favorite-star-btn';
+    starBtn.style.cursor = 'pointer';
+    starBtn.style.marginLeft = '10px';
+    starBtn.style.color = isFav ? '#fbbf24' : '#ccc';
+    starBtn.style.fontSize = '1.2em';
+    starBtn.innerHTML = isFav ? '★' : '☆';
+    starBtn.title = isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
+
+    starBtn.onclick = (e) => {
+        e.stopPropagation();
+        toggleFavorite(teamName);
+    };
+
+    nameEl.appendChild(starBtn);
 
     // Atualizar emblema
     const emblemContainer = document.getElementById('selectedTeamEmblem');
@@ -8991,6 +9343,29 @@ function updatePredictionsStats() {
 }
 
 /**
+ * Atualiza os cabeçalhos da tabela de previsões baseado na modalidade
+ */
+function updatePredictionsTableHeaders() {
+    const headers = getGoalHeaders();
+    const predictionsTable = document.getElementById('predictionsTable');
+
+    if (!predictionsTable) return;
+
+    const thead = predictionsTable.querySelector('thead tr');
+    if (!thead) return;
+
+    const thElements = Array.from(thead.querySelectorAll('th'));
+
+    // Encontrar a coluna "Golos Esp." (última coluna)
+    const expectedGoalsIndex = thElements.length - 1;
+
+    if (expectedGoalsIndex >= 0 && expectedGoalsIndex < thElements.length) {
+        thElements[expectedGoalsIndex].textContent = headers.expectedLabel;
+        thElements[expectedGoalsIndex].title = headers.expectedTitle;
+    }
+}
+
+/**
  * Atualiza a tabela de previsões jogo a jogo
  */
 function updatePredictionsTable() {
@@ -9036,8 +9411,12 @@ function updatePredictionsTable() {
         const distribution = game.distribuicao_placares || '';
         const encodedDistribution = distribution ? encodeURIComponent(distribution) : '';
 
+        // Verificar se o adversário é a equipa favorita
+        const isFavoriteOpponent = isTeamFavorite(opponent);
+        const favoriteClass = isFavoriteOpponent ? ' favorite-team-prediction' : '';
+
         return `
-            <tr data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}">
+            <tr data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" class="${favoriteClass}">
                 <td>${game.jornada || '-'}</td>
                 <td>${dateStr}</td>
                 <td>

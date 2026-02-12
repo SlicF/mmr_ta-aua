@@ -1216,11 +1216,10 @@ body {
 
 .bracket {
   display: flex;
-  gap: 80px;
+  gap: 120px;
   min-width: 900px;
-  justify-content: center;
   position: relative;
-  padding: 20px;
+  padding: 10px;
 }
 
 .bracket-round {
@@ -1284,6 +1283,28 @@ body {
 .bracket-team:not(.winner):hover {
   background: #e9ecef;
   transform: translateX(2px);
+}
+
+/* Destaque para equipa favorita no bracket */
+.bracket-team.favorite-team-bracket {
+  border-left-color: #fbbf24;
+  border-left-width: 5px;
+  background: rgba(251, 191, 36, 0.1);
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+}
+
+.bracket-team.favorite-team-bracket::after {
+  content: "★";
+  color: #fbbf24;
+  font-size: 1.1em;
+  margin-left: 8px;
+  position: absolute;
+  right: 55px;
+}
+
+.bracket-team.favorite-team-bracket.winner::after {
+  color: white;
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.8);
 }
 
 /* Estilo especial para a final */
@@ -1441,91 +1462,93 @@ body {
   text-align: center;
 }
 
-.bracket-league-table {
+.maintenance-league-table {
   background: white;
   border-radius: 8px;
-  padding: 24px;
+  padding: 8px;
   margin-top: 20px;
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
   border: 1px solid #e5e7eb;
+  box-sizing: border-box;
 }
 
-.bracket-league-table h3 {
+.maintenance-league-table h3 {
   text-align: center;
   color: #666;
-  margin-bottom: 20px;
-  font-size: 1.3em;
+  margin-bottom: 10px;
+  font-size: 1.1em;
   font-weight: 600;
 }
 
-.bracket-league-table table {
+.maintenance-league-table table {
   width: 100%;
   border-collapse: collapse;
   font-size: 15px;
+  table-layout: auto;
 }
 
-.bracket-league-table th {
+.maintenance-league-table th {
   background: #e2e8f0;
   color: #475569;
-  padding: 10px 8px;
+  padding: 6px 4px;
   text-align: center;
   font-weight: 600;
   font-size: 0.85em;
 }
 
-.bracket-league-table td {
-  padding: 10px 8px;
+.maintenance-league-table td {
+  padding: 6px 4px;
   border-bottom: 1px solid #f1f5f9;
   text-align: center;
   font-size: 0.9em;
 }
 
-.bracket-league-table td.team-cell {
+.maintenance-league-table td.team-cell {
   text-align: left;
 }
 
-.bracket-league-table tr:hover {
+.maintenance-league-table tr:hover {
   background: #f8fafc;
 }
 
-.bracket-league-table .position {
+.maintenance-league-table .position {
   font-weight: bold;
   text-align: center;
-  width: 40px;
+  width: 30px;
 }
 
-.bracket-league-table .team-cell {
+.maintenance-league-table .team-cell {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
 }
 
-.bracket-league-table .team-emblem {
-  width: 50px;
-  height: 50px;
+.maintenance-league-table .team-emblem {
+  width: 40px;
+  height: 40px;
   object-fit: contain;
-  margin-right: 10px;
+  flex-shrink: 0;
 }
 
-.bracket-league-table .team-qualification-label {
+.maintenance-league-table .team-qualification-label {
   display: inline-block;
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: 11px;
+  padding: 3px 6px;
   border-radius: 4px;
-  margin-right: 12px;
   font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.bracket-league-table .qual-1div {
+.maintenance-league-table .qual-1div {
   background: #e3f2fd;
   color: #1976d2;
   border: 1px solid #1976d2;
 }
 
-.bracket-league-table .qual-2div {
+.maintenance-league-table .qual-2div {
   background: #fff3e0;
   color: #f57c00;
   border: 1px solid #f57c00;
@@ -1705,29 +1728,31 @@ body {
 
   /* Ajustes para o bracket dos playoffs */
   .bracket-team {
-    padding: 8px 10px;
+    padding: 6px 8px;
     flex-wrap: nowrap;
-    gap: 8px;
+    gap: 6px;
+    min-height: 36px;
   }
 
   .bracket-team-content {
-    gap: 8px;
+    gap: 6px;
     flex: 1;
     min-width: 0;
     overflow: hidden;
   }
 
   .bracket-team-emblem {
-    width: 32px !important;
-    height: 32px !important;
+    width: 28px !important;
+    height: 28px !important;
+    flex-shrink: 0;
   }
 
   .bracket-team-emblem[src*="EGI-07.png"] {
-    padding: 6px !important;
+    padding: 5px !important;
   }
 
-  .bracket-team-name {
-    font-size: 0.85em;
+  .bracket-team-content span {
+    font-size: 0.75em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1736,17 +1761,147 @@ body {
   }
 
   .score {
-    font-size: 0.85em;
+    font-size: 0.8em;
     flex-shrink: 0;
     margin-left: auto;
+    min-width: 28px;
+    text-align: right;
   }
 
   .bracket-elo-change {
-    font-size: 0.65em;
-    padding: 2px 4px;
-    margin-left: 4px;
+    font-size: 0.6em;
+    padding: 2px 3px;
+    margin-left: 3px;
     white-space: nowrap;
     flex-shrink: 0;
+  }
+
+  /* Ajustes específicos para bracket */
+  .bracket {
+    min-width: 450px;
+    gap: 10px;
+    padding: 00px;
+  }
+
+  .bracket-round {
+    min-width: 140px;
+    gap: 25px;
+  }
+
+  .bracket-round h3 {
+    font-size: 0.9em;
+    margin-bottom: 15px;
+    padding: 6px;
+  }
+
+  .bracket-match {
+    padding: 8px;
+  }
+
+  .bracket-container {
+    padding: 10px;
+  }
+
+  /* Ajustes para a liguinha/bracket secundário */
+  .bracket-league-table {
+    font-size: 0.85em;
+    padding: 12px;
+    overflow-x: auto;
+  }
+
+  .bracket-league-table h3 {
+    font-size: 0.95em;
+    margin-bottom: 8px;
+  }
+
+  .bracket-league-table table {
+    font-size: 0.8em;
+    min-width: 100%;
+  }
+
+  .bracket-league-table th {
+    padding: 4px 2px;
+    font-size: 0.75em;
+  }
+
+  .bracket-league-table td {
+    padding: 4px 2px;
+    font-size: 0.85em;
+  }
+
+  .bracket-league-table {
+    padding: 4px;
+  }
+
+  .bracket-league-table td.team-cell {
+    min-width: 0;
+  }
+
+  .bracket-league-table .team-cell {
+    gap: 2px;
+  }
+
+  .bracket-league-table .team-emblem {
+    width: 28px;
+    height: 28px;
+  }
+
+  .bracket-league-table .team-qualification-label {
+    font-size: 8px;
+    padding: 2px 3px;
+  }
+
+  .bracket-league-table .position {
+    width: 24px;
+  }
+
+  .maintenance-league-table {
+    padding: 4px;
+  }
+
+  .maintenance-league-table th {
+    padding: 4px 2px;
+    font-size: 0.75em;
+  }
+
+  .maintenance-league-table td {
+    padding: 4px 2px;
+  }
+
+  .maintenance-league-table td.team-cell {
+    min-width: 0;
+  }
+
+  .maintenance-league-table .team-cell {
+    gap: 2px;
+  }
+
+  .maintenance-league-table .team-emblem {
+    width: 28px;
+    height: 28px;
+  }
+
+  .maintenance-league-table .team-qualification-label {
+    font-size: 8px;
+    padding: 2px 3px;
+  }
+
+  .maintenance-league-table .position {
+    width: 24px;
+  }
+
+  .maintenance-league-table h3 {
+    font-size: 0.95em;
+    margin-bottom: 8px;
+  }
+
+  /* Ajuste para o card do bracket secundário */
+  #secondaryBracketCard {
+    overflow-x: auto;
+  }
+
+  #secondaryBracketCard .bracket-container {
+    min-width: 100%;
   }
 
   /* Estilos de calendário de jogos */
@@ -1841,7 +1996,7 @@ body {
   }
 
   .container {
-    padding: 12px; /* Reduced container padding */
+    padding: 6px; /* Reduced container padding */
     border-radius: 8px;
     max-width: 100%;
     overflow-x: hidden;
@@ -1903,40 +2058,19 @@ body {
   }
 
   /* Tabela de classificação */
-  .table-wrapper {
-    overflow-x: auto;
-    margin: 0 -12px; /* Negative margin to span full width of reduced container */
-    padding: 0 12px;
-    max-width: calc(100% + 24px); /* Compensate for margins */
-    -webkit-overflow-scrolling: touch;
-    background:
-      linear-gradient(to right, white 30%, rgba(255, 255, 255, 0)),
-      linear-gradient(to right, rgba(255, 255, 255, 0), white 70%) 0 100%,
-      radial-gradient(
-        farthest-side at 0 50%,
-        rgba(0, 0, 0, 0.2),
-        rgba(0, 0, 0, 0)
-      ),
-      radial-gradient(
-          farthest-side at 100% 50%,
-          rgba(0, 0, 0, 0.2),
-          rgba(0, 0, 0, 0)
-        )
-        0 100%;
-    background-repeat: no-repeat;
-    background-color: white;
-    background-size:
-      40px 100%,
-      40px 100%,
-      14px 100%,
-      14px 100%;
-    background-position:
-      0 0,
-      100% 0,
-      0 0,
-      100% 0;
-    background-attachment: local, local, scroll, scroll;
-  }
+    .table-wrapper {
+        overflow-x: auto;
+        margin: 0 0px;
+        padding: 0px 0px;
+        max-width: calc(100% + 24px);
+        -webkit-overflow-scrolling: touch;
+        background: linear-gradient(to right, white 30%, rgba(255, 255, 255, 0)), linear-gradient(to right, rgba(255, 255, 255, 0), white 70%) 0 100%, radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)), radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) 0 100%;
+        background-repeat: no-repeat;
+        background-color: white;
+        background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+        background-position: 0 0, 100% 0, 0 0, 100% 0;
+        background-attachment: local, local, scroll, scroll;
+    }
 
   .rankings-table {
     font-size: 0.75em;
@@ -2349,6 +2483,19 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+/* Destaque para jogo da equipa favorita */
+.game-item.favorite-team-game {
+  border-left: 4px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.08);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.25);
+}
+
+.game-item.favorite-team-game:hover {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #fbbf24;
+  box-shadow: 0 6px 16px rgba(251, 191, 36, 0.35);
+}
+
 .game-date {
   min-width: 160px;
   font-size: 0.9em;
@@ -2494,14 +2641,14 @@ body {
   }
 
   .card {
-    padding: 12px;
-    margin-bottom: 15px;
-    max-width: 100%;
-    width: 100%;
-    overflow-x: hidden;
-    margin-left: 0;
-    margin-right: 0;
-    box-sizing: border-box;
+      padding: 6px 3px;
+      margin-bottom: 5px;
+      max-width: 100%;
+      width: 100%;
+      overflow-x: hidden;
+      margin-left: 0;
+      margin-right: 0;
+      box-sizing: border-box;
   }
 
   .chart-card {
@@ -2644,12 +2791,88 @@ body {
     font-size: 1.1em;
   }
 
+  .bracket-league-table {
+    padding: 3px !important;
+  }
+
+  .bracket-league-table h3 {
+    font-size: 0.85em !important;
+    margin-bottom: 6px !important;
+  }
+
+  .bracket-league-table th {
+    padding: 3px 1px !important;
+    font-size: 0.7em !important;
+  }
+
+  .bracket-league-table td {
+    padding: 3px 1px !important;
+    font-size: 0.8em !important;
+  }
+
+  .bracket-league-table .team-cell {
+    gap: 1px !important;
+    font-size: 0.8em !important;
+  }
+
+  .bracket-league-table td.team-cell {
+    min-width: 0 !important;
+  }
+
+  .bracket-league-table .team-emblem {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .bracket-league-table .team-qualification-label {
+    font-size: 7px !important;
+    padding: 1px 2px !important;
+  }
+
+  .maintenance-league-table {
+    padding: 0px !important;
+  }
+
+  .maintenance-league-table h3 {
+    font-size: 0.85em !important;
+    margin-bottom: 6px !important;
+  }
+
+  .maintenance-league-table th {
+    padding: 3px 1px !important;
+    font-size: 0.7em !important;
+  }
+
+  .maintenance-league-table td {
+    padding: 3px 1px !important;
+    font-size: 0.8em !important;
+  }
+
+  .maintenance-league-table .team-cell {
+    gap: 1px !important;
+    font-size: 0.8em !important;
+  }
+
+  .maintenance-league-table td.team-cell {
+    min-width: 0 !important;
+  }
+
+  .maintenance-league-table .team-emblem {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .maintenance-league-table .team-qualification-label {
+    font-size: 7px !important;
+    padding: 1px 2px !important;
+  }
+
   .bracket {
-    min-width: 500px;
+    min-width: 300px;
   }
 
   .bracket-round {
-    min-width: 120px;
+    min-width: 180px;
   }
 
   .match-team {
@@ -2870,7 +3093,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 0px;
   width: 450px;
   height: 140px;
 }
@@ -2879,7 +3102,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: -15px;
   flex: 1;
   max-width: 250px;
 }
@@ -3006,6 +3229,7 @@ body {
   overflow-wrap: break-word;
   max-width: 250px;
   line-height: 1.2;
+  margin-bottom: -20px;
 }
 
 /* Estatísticas Gerais */
@@ -3258,13 +3482,13 @@ body {
 /* Responsividade */
 @media (max-width: 768px) {
   .team-slider-container {
-    gap: 10px;
-    padding: 20px 10px;
+    gap: 0px;
+    padding: 0px 0px;
   }
 
   .slider-arrow {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     font-size: 20px;
   }
 
@@ -3293,12 +3517,12 @@ body {
   }
 
   .team-slider-ghost {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
   }
 
   .team-slider-ghost img[src*="EGI-07.png"] {
-    padding: 16px;
+    padding: 14px;
     box-sizing: border-box;
   }
 
@@ -3309,7 +3533,7 @@ body {
 
   .team-slider-name {
     font-size: 1.1em;
-    max-width: 120px;
+    max-width: 170px;
   }
 
   .predictions-stats-grid {
@@ -3336,4 +3560,107 @@ body {
     width: 36px;
     height: 36px;
   }
+}
+
+/* ==================== FAVORITE TEAM STYLES ==================== */
+.favorite-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  color: #cbd5e1;
+  transition: all 0.2s ease;
+  padding: 0 4px;
+  margin-right: 4px;
+  line-height: 1;
+}
+
+.favorite-btn:hover {
+  color: #fbbf24;
+  transform: scale(1.2);
+}
+
+.favorite-btn.active {
+  color: #fbbf24;
+  text-shadow: 0 0 2px rgba(251, 191, 36, 0.5);
+}
+
+.favorite-team-row {
+  background-color: rgba(251, 191, 36, 0.05) !important;
+  border-left: 3px solid #fbbf24 !important;
+}
+
+.favorite-team-row:hover {
+  background-color: rgba(251, 191, 36, 0.1) !important;
+}
+
+/* Selector no Gráfico */
+.team-checkbox.favorite-team-selected {
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.2);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+}
+
+.team-checkbox.favorite-team-selected::after {
+  content: "★";
+  color: #fbbf24;
+  margin-left: auto;
+  font-size: 0.9em;
+}
+
+/* Garantir contraste do texto quando favorita e ativa */
+.team-checkbox.favorite-team-selected.active {
+  color: white;
+  font-weight: 600;
+  background: rgba(42, 82, 152, 0.95);
+  border-color: #fbbf24;
+}
+
+.team-checkbox.favorite-team-selected.active .team-name {
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Highlight no Calendário */
+.game-card.favorite-team-game {
+  border: 2px solid #fbbf24;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+}
+
+/* Highlight na Tabela de Previsões */
+.predictions-table tbody tr.favorite-team-prediction {
+  background: rgba(251, 191, 36, 0.08);
+  border-left: 3px solid #fbbf24;
+}
+
+.predictions-table tbody tr.favorite-team-prediction:hover {
+  background: rgba(251, 191, 36, 0.15);
+}
+
+/* Toast Notification */
+#notification-toast {
+  visibility: hidden;
+  min-width: 250px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 12px 16px;
+  position: fixed;
+  z-index: 10000;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  font-size: 0.95em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition:
+    opacity 0.3s,
+    bottom 0.3s;
+}
+
+#notification-toast.show {
+  visibility: visible;
+  opacity: 1;
+  bottom: 50px;
 }

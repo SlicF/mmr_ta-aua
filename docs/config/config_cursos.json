@@ -2,468 +2,673 @@
   "courses": {
     "AP": {
       "displayName": "Administração Pública",
+      "shortName": "AP",
       "nucleus": "NEAP",
       "emblem": "assets/Logos/NEAP-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
     "Administração Pública": {
       "displayName": "Administração Pública",
+      "shortName": "AP",
       "nucleus": "NEAP",
       "emblem": "assets/Logos/NEAP-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
     "ASP": {
       "displayName": "Automação e Sistemas de Produção",
+      "shortName": "ASP",
       "nucleus": "NEEMec",
       "emblem": "assets/Logos/NEEMec-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
     "Automação e Sistemas de Produção": {
       "displayName": "Automação e Sistemas de Produção",
+      "shortName": "ASP",
       "nucleus": "NEEMec",
       "emblem": "assets/Logos/NEEMec-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
     "Biologia": {
       "displayName": "Biologia",
+      "shortName": "Biologia",
       "nucleus": "NEB",
       "emblem": "assets/Logos/NEB-07.png",
       "colors": ["#76c5bc", "#6c757d"]
     },
+    "BG": {
+      "displayName": "Biologia e Geologia",
+      "shortName": "BG",
+      "nucleus": "NEBG",
+      "emblem": "assets/Logos/NEBG-07.png",
+      "colors": ["#16a1dc", "#6c757d"]
+    },
     "Biologia e Geologia": {
       "displayName": "Biologia e Geologia",
+      "shortName": "BG",
       "nucleus": "NEBG",
       "emblem": "assets/Logos/NEBG-07.png",
       "colors": ["#16a1dc", "#6c757d"]
     },
     "Bioquímica": {
       "displayName": "Bioquímica",
+      "shortName": "Bioquímica",
       "nucleus": "NEQ",
       "emblem": "assets/Logos/NEQ-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
+    "Biotec": {
+      "displayName": "Biotecnologia",
+      "shortName": "Biotec",
+      "nucleus": "NECiB",
+      "emblem": "assets/Logos/NECiB-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
     "Biotecnologia": {
       "displayName": "Biotecnologia",
+      "shortName": "Biotec",
       "nucleus": "NECiB",
       "emblem": "assets/Logos/NECiB-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "CBM": {
       "displayName": "Ciências Biomédicas",
+      "shortName": "CBM",
       "nucleus": "NECiB",
       "emblem": "assets/Logos/NECiB-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Ciências Biomédicas": {
       "displayName": "Ciências Biomédicas",
+      "shortName": "CBM",
       "nucleus": "NECiB",
       "emblem": "assets/Logos/NECiB-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "CBM B": {
       "displayName": "Ciências Biomédicas B",
+      "shortName": "CBM B",
       "nucleus": "NECiB",
       "emblem": "assets/Logos/NECiB-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Ciências Biomédicas B": {
       "displayName": "Ciências Biomédicas B",
+      "shortName": "CBM B",
       "nucleus": "NECiB",
       "emblem": "assets/Logos/NECiB-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
-    "Ciências do Mar": {
+    "CM": {
       "displayName": "Ciências do Mar",
+      "shortName": "CM",
       "nucleus": "NECM",
       "emblem": "assets/Logos/NECM-07.png",
       "colors": ["#1c91a8", "#6c757d"]
     },
+    "Ciências do Mar": {
+      "displayName": "Ciências do Mar",
+      "shortName": "CM",
+      "nucleus": "NECM",
+      "emblem": "assets/Logos/NECM-07.png",
+      "colors": ["#1c91a8", "#6c757d"]
+    },
+    "Contab": {
+      "displayName": "Contabilidade",
+      "shortName": "Contabilidade",
+      "nucleus": "NAE-ISCA",
+      "emblem": "assets/Logos/NAE_ISCA-07.png",
+      "colors": ["#1e4395", "#6c757d"]
+    },
     "Contabilidade": {
       "displayName": "Contabilidade",
+      "shortName": "Contabilidade",
       "nucleus": "NAE-ISCA",
       "emblem": "assets/Logos/NAE_ISCA-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
     "DPT": {
       "displayName": "DPT",
+      "shortName": "DPT",
       "nucleus": "NAE-ESAN",
       "emblem": "assets/Logos/NAE_ESAN-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Design": {
       "displayName": "Design",
+      "shortName": "Design",
       "nucleus": "NED",
       "emblem": "assets/Logos/NED-07.png",
       "colors": ["#e73630", "#6c757d"]
     },
     "ECT": {
       "displayName": "Eng. Computadores e Telemática",
+      "shortName": "ECT",
       "nucleus": "NEECT",
       "emblem": "assets/Logos/NEECT-07.png",
       "colors": ["#4c65a4", "#6c757d"]
     },
     "Eng. Computadores e Telemática": {
       "displayName": "Eng. Computadores e Telemática",
+      "shortName": "ECT",
       "nucleus": "NEECT",
       "emblem": "assets/Logos/NEECT-07.png",
       "colors": ["#4c65a4", "#6c757d"]
     },
     "EET": {
       "displayName": "Eng. Eletrónica e Telecomunicações",
+      "shortName": "EET",
       "nucleus": "NEEETA",
       "emblem": "assets/Logos/NEEETA-07.png",
       "colors": ["#3362ae", "#6c757d"]
     },
     "Eng. Eletrónica e Telecomunicações": {
       "displayName": "Eng. Eletrónica e Telecomunicações",
+      "shortName": "EET",
       "nucleus": "NEEETA",
       "emblem": "assets/Logos/NEEETA-07.png",
       "colors": ["#3362ae", "#6c757d"]
     },
     "EET B": {
       "displayName": "Eng. Eletrónica e Telecomunicações B",
+      "shortName": "EET B",
       "nucleus": "NEEETA",
       "emblem": "assets/Logos/NEEETA-07.png",
       "colors": ["#3362ae", "#6c757d"]
     },
     "Eng. Eletrónica e Telecomunicações B": {
       "displayName": "Eng. Eletrónica e Telecomunicações B",
+      "shortName": "EET B",
       "nucleus": "NEEETA",
       "emblem": "assets/Logos/NEEETA-07.png",
       "colors": ["#3362ae", "#6c757d"]
     },
     "EGI": {
       "displayName": "Eng. e Gestão Industrial",
+      "shortName": "EGI",
       "nucleus": "AEGIA",
       "emblem": "assets/Logos/EGI-07.png",
       "colors": ["#ff6d10", "#6c757d"]
     },
     "Eng. e Gestão Industrial": {
       "displayName": "Eng. e Gestão Industrial",
+      "shortName": "EGI",
       "nucleus": "AEGIA",
       "emblem": "assets/Logos/EGI-07.png",
       "colors": ["#ff6d10", "#6c757d"]
     },
     "EGI B": {
       "displayName": "Eng. e Gestão Industrial B",
+      "shortName": "EGI B",
       "nucleus": "AEGIA",
       "emblem": "assets/Logos/EGI-07.png",
       "colors": ["#ff6d10", "#6c757d"]
     },
     "EI": {
       "displayName": "Eng. Informática",
+      "shortName": "EI",
       "nucleus": "NEI",
       "emblem": "assets/Logos/NEI-07.png",
       "colors": ["#178d4a", "#6c757d"]
     },
     "Economia": {
       "displayName": "Economia",
+      "shortName": "Economia",
       "nucleus": "NEEC",
       "emblem": "assets/Logos/NEEC-07.png",
       "colors": ["#e73630", "#6c757d"]
     },
+    "EB": {
+      "displayName": "Educação Básica",
+      "shortName": "EB",
+      "nucleus": "NEEB",
+      "emblem": "assets/Logos/NEEB-07.png",
+      "colors": ["#e94183", "#6c757d"]
+    },
     "Educaçao Básica": {
       "displayName": "Educação Básica",
+      "shortName": "EB",
       "nucleus": "NEEB",
       "emblem": "assets/Logos/NEEB-07.png",
       "colors": ["#e94183", "#6c757d"]
     },
     "Edcucação Básica": {
       "displayName": "Educação Básica",
+      "shortName": "EB",
       "nucleus": "NEEB",
       "emblem": "assets/Logos/NEEB-07.png",
       "colors": ["#e94183", "#6c757d"]
     },
     "Educação Básica": {
       "displayName": "Educação Básica",
+      "shortName": "EB",
       "nucleus": "NEEB",
       "emblem": "assets/Logos/NEEB-07.png",
       "colors": ["#e94183", "#6c757d"]
     },
     "Ed. Básica": {
       "displayName": "Educação Básica",
+      "shortName": "EB",
       "nucleus": "NEEB",
       "emblem": "assets/Logos/NEEB-07.png",
       "colors": ["#e94183", "#6c757d"]
     },
     "Ed.Básica": {
       "displayName": "Educação Básica",
+      "shortName": "EB",
       "nucleus": "NEEB",
       "emblem": "assets/Logos/NEEB-07.png",
       "colors": ["#e94183", "#6c757d"]
     },
     "Enfermagem": {
       "displayName": "Enfermagem",
+      "shortName": "Enfermagem",
       "nucleus": "NAE-ESSUA",
       "emblem": "assets/Logos/NAE_ESSUA-07.png",
       "colors": ["#1ca152", "#6c757d"]
     },
-    "Eng. Aeroespacial": {
+    "Aero": {
       "displayName": "Eng. Aeroespacial",
+      "shortName": "Aero",
       "nucleus": "NEEETA",
       "emblem": "assets/Logos/NEEETA-07.png",
       "colors": ["#3362ae", "#6c757d"]
     },
-    "Eng. Ambiente": {
+    "Eng. Aeroespacial": {
+      "displayName": "Eng. Aeroespacial",
+      "shortName": "Aero",
+      "nucleus": "NEEETA",
+      "emblem": "assets/Logos/NEEETA-07.png",
+      "colors": ["#3362ae", "#6c757d"]
+    },
+    "EAmb": {
       "displayName": "Eng. do Ambiente",
+      "shortName": "EAmb",
       "nucleus": "NEEA",
       "emblem": "assets/Logos/NEEA-07.png",
       "colors": ["#a05389", "#6c757d"]
     },
-    "Eng. Biomédica": {
+    "Eng. Ambiente": {
+      "displayName": "Eng. do Ambiente",
+      "shortName": "EAmb",
+      "nucleus": "NEEA",
+      "emblem": "assets/Logos/NEEA-07.png",
+      "colors": ["#a05389", "#6c757d"]
+    },
+    "Biomédica": {
       "displayName": "Eng. Biomédica",
+      "shortName": "Biomédica",
       "nucleus": "NEEF",
       "emblem": "assets/Logos/NEEF-07.png",
       "colors": ["#f9dd53", "#6c757d"]
     },
+    "Eng. Biomédica": {
+      "displayName": "Eng. Biomédica",
+      "shortName": "Biomédica",
+      "nucleus": "NEEF",
+      "emblem": "assets/Logos/NEEF-07.png",
+      "colors": ["#f9dd53", "#6c757d"]
+    },
+    "Civil": {
+      "displayName": "Eng. Civil",
+      "shortName": "Civil",
+      "nucleus": "NEBEC",
+      "emblem": "assets/Logos/NEBEC-07.png",
+      "colors": ["#f08344", "#6c757d"]
+    },
     "Eng. Civil": {
       "displayName": "Eng. Civil",
+      "shortName": "Civil",
       "nucleus": "NEBEC",
       "emblem": "assets/Logos/NEBEC-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
     "Eng. Cívil": {
       "displayName": "Eng. Civil",
+      "shortName": "Civil",
       "nucleus": "NEBEC",
       "emblem": "assets/Logos/NEBEC-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
     "Eng.Cívil": {
       "displayName": "Eng. Civil",
+      "shortName": "Civil",
       "nucleus": "NEBEC",
       "emblem": "assets/Logos/NEBEC-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
+    "Computacional": {
+      "displayName": "Eng. Computacional",
+      "shortName": "Computacional",
+      "nucleus": "NEEF",
+      "emblem": "assets/Logos/NEEF-07.png",
+      "colors": ["#f9dd53", "#6c757d"]
+    },
     "Eng. Compotacional": {
       "displayName": "Eng. Computacional",
+      "shortName": "Computacional",
       "nucleus": "NEEF",
       "emblem": "assets/Logos/NEEF-07.png",
       "colors": ["#f9dd53", "#6c757d"]
     },
     "Eng. Computacional": {
       "displayName": "Eng. Computacional",
+      "shortName": "Computacional",
+      "nucleus": "NEEF",
+      "emblem": "assets/Logos/NEEF-07.png",
+      "colors": ["#f9dd53", "#6c757d"]
+    },
+    "EF": {
+      "displayName": "Eng. Física",
+      "shortName": "EF",
       "nucleus": "NEEF",
       "emblem": "assets/Logos/NEEF-07.png",
       "colors": ["#f9dd53", "#6c757d"]
     },
     "Eng. Física": {
       "displayName": "Eng. Física",
+      "shortName": "EF",
       "nucleus": "NEEF",
       "emblem": "assets/Logos/NEEF-07.png",
       "colors": ["#f9dd53", "#6c757d"]
     },
     "Eng. Informática": {
       "displayName": "Eng. Informática",
+      "shortName": "EI",
       "nucleus": "NEI",
       "emblem": "assets/Logos/NEI-07.png",
       "colors": ["#178d4a", "#6c757d"]
     },
     "Eng. Informática ": {
       "displayName": "Eng. Informática",
+      "shortName": "EI",
       "nucleus": "NEI",
       "emblem": "assets/Logos/NEI-07.png",
       "colors": ["#178d4a", "#6c757d"]
     },
     "Eng. Informática B": {
       "displayName": "Eng. Informática B",
+      "shortName": "EI B",
       "nucleus": "NEI",
       "emblem": "assets/Logos/NEI-07.png",
       "colors": ["#178d4a", "#6c757d"]
     },
+    "Materiais": {
+      "displayName": "Eng. de Materiais",
+      "shortName": "Materiais",
+      "nucleus": "NEM",
+      "emblem": "assets/Logos/NEM-07.png",
+      "colors": ["#e73630", "#6c757d"]
+    },
     "Eng. Materiais": {
       "displayName": "Eng. de Materiais",
+      "shortName": "Materiais",
       "nucleus": "NEM",
       "emblem": "assets/Logos/NEM-07.png",
       "colors": ["#e73630", "#6c757d"]
     },
     "Eng. de Materiais": {
       "displayName": "Eng. de Materiais",
+      "shortName": "Materiais",
       "nucleus": "NEM",
       "emblem": "assets/Logos/NEM-07.png",
       "colors": ["#e73630", "#6c757d"]
     },
     "Eng. Materias": {
       "displayName": "Eng. de Materiais",
+      "shortName": "Materiais",
       "nucleus": "NEM",
       "emblem": "assets/Logos/NEM-07.png",
       "colors": ["#e73630", "#6c757d"]
     },
+    "Mecânica": {
+      "displayName": "Eng. Mecânica",
+      "shortName": "Mecânica",
+      "nucleus": "NEEMec",
+      "emblem": "assets/Logos/NEEMec-07.png",
+      "colors": ["#f08344", "#6c757d"]
+    },
     "Eng. Mecânica": {
       "displayName": "Eng. Mecânica",
+      "shortName": "Mecânica",
       "nucleus": "NEEMec",
       "emblem": "assets/Logos/NEEMec-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
     "Eng. Mecânica B": {
       "displayName": "Eng. Mecânica B",
+      "shortName": "Mecânica B",
       "nucleus": "NEEMec",
       "emblem": "assets/Logos/NEEMec-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
+    "EQ": {
+      "displayName": "Eng. Química",
+      "shortName": "EQ",
+      "nucleus": "NEEQu",
+      "emblem": "assets/Logos/NEEQu-07.png",
+      "colors": ["#f08344", "#6c757d"]
+    },
     "Eng. Química": {
       "displayName": "Eng. Química",
+      "shortName": "EQ",
       "nucleus": "NEEQu",
       "emblem": "assets/Logos/NEEQu-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
     "Estudos Editoriais": {
       "displayName": "Estudos Editoriais",
+      "shortName": "Estudos Editoriais",
       "nucleus": "NEEE",
       "emblem": "assets/Logos/NEEE-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
     "Finanças": {
       "displayName": "Finanças",
+      "shortName": "Finanças",
       "nucleus": "NAE-ISCA",
       "emblem": "assets/Logos/NAE_ISCA-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
     "Fisioterapia": {
       "displayName": "Fisioterapia",
+      "shortName": "Fisioterapia",
       "nucleus": "NAE-ESSUA",
       "emblem": "assets/Logos/NAE_ESSUA-07.png",
       "colors": ["#1ca152", "#6c757d"]
     },
     "Física": {
       "displayName": "Física",
+      "shortName": "Física",
       "nucleus": "NEEF",
       "emblem": "assets/Logos/NEEF-07.png",
       "colors": ["#f9dd53", "#6c757d"]
     },
     "GPT": {
       "displayName": "Gestão e Planeamento em Turismo",
+      "shortName": "GPT",
       "nucleus": "NEGPT",
       "emblem": "assets/Logos/NEGPT-07.png",
       "colors": ["#0d7b3e", "#6c757d"]
     },
     "Gestão e Planeamento em Turismo": {
       "displayName": "Gestão e Planeamento em Turismo",
+      "shortName": "GPT",
       "nucleus": "NEGPT",
       "emblem": "assets/Logos/NEGPT-07.png",
       "colors": ["#0d7b3e", "#6c757d"]
     },
     "Geologia": {
       "displayName": "Geologia",
+      "shortName": "Geologia",
       "nucleus": "NEGeo",
       "emblem": "assets/Logos/NEGeo-07.png",
       "colors": ["#b26b2c", "#6c757d"]
     },
     "Gestao": {
       "displayName": "Gestão",
+      "shortName": "Gestão",
       "nucleus": "NEG",
       "emblem": "assets/Logos/NEG-07.png",
       "colors": ["#be2628", "#6c757d"]
     },
+    "Gest. Comercial": {
+      "displayName": "Gestão Comercial",
+      "shortName": "Gest. Comercial",
+      "nucleus": "NAE-ESTGA",
+      "emblem": "assets/Logos/NAE_ESTGA-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
     "Gestao Comercial": {
       "displayName": "Gestão Comercial",
+      "shortName": "Gest. Comercial",
+      "nucleus": "NAE-ESTGA",
+      "emblem": "assets/Logos/NAE_ESTGA-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Gest. Pública": {
+      "displayName": "Gestão Pública",
+      "shortName": "Gest. Pública",
       "nucleus": "NAE-ESTGA",
       "emblem": "assets/Logos/NAE_ESTGA-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Gestao Pública": {
       "displayName": "Gestão Pública",
+      "shortName": "Gest. Pública",
       "nucleus": "NAE-ESTGA",
       "emblem": "assets/Logos/NAE_ESTGA-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Gestão": {
       "displayName": "Gestão",
+      "shortName": "Gestão",
       "nucleus": "NEG",
       "emblem": "assets/Logos/NEG-07.png",
       "colors": ["#be2628", "#6c757d"]
     },
     "Gestão Comercial": {
       "displayName": "Gestão Comercial",
+      "shortName": "Gest. Comercial",
       "nucleus": "NAE-ESTGA",
       "emblem": "assets/Logos/NAE_ESTGA-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Gestão Pública": {
       "displayName": "Gestão Pública",
+      "shortName": "Gest. Pública",
       "nucleus": "NAE-ESTGA",
       "emblem": "assets/Logos/NAE_ESTGA-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "LLC": {
       "displayName": "Línguas, Literaturas e Culturas",
+      "shortName": "LLC",
+      "nucleus": "NELLC",
+      "emblem": "assets/Logos/NELLC-07.png",
+      "colors": ["#1e4395", "#6c757d"]
+    },
+    "Línguas, Literaturas e Culturas": {
+      "displayName": "Línguas, Literaturas e Culturas",
+      "shortName": "LLC",
       "nucleus": "NELLC",
       "emblem": "assets/Logos/NELLC-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
     "LRE": {
       "displayName": "Línguas e Relações Empresariais",
+      "shortName": "LRE",
+      "nucleus": "NELRE",
+      "emblem": "assets/Logos/NELRE-07.png",
+      "colors": ["#e72a30", "#6c757d"]
+    },
+    "Línguas e Relações Empresariais": {
+      "displayName": "Línguas e Relações Empresariais",
+      "shortName": "LRE",
       "nucleus": "NELRE",
       "emblem": "assets/Logos/NELRE-07.png",
       "colors": ["#e72a30", "#6c757d"]
     },
     "Marketing": {
       "displayName": "Marketing",
+      "shortName": "Marketing",
       "nucleus": "NAE-ISCA",
       "emblem": "assets/Logos/NAE_ISCA-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
     "MTC": {
       "displayName": "MTC",
+      "shortName": "MTC",
       "nucleus": "NEMTC",
       "emblem": "assets/Logos/NEMTC-07.png",
       "colors": ["#209548", "#6c757d"]
     },
     "MOC": {
       "displayName": "MOC",
+      "shortName": "MOC",
       "nucleus": "NEMOC",
       "emblem": "assets/Logos/NEMOC-07.png",
       "colors": ["#209548", "#6c757d"]
     },
     "Matemática": {
       "displayName": "Matemática",
+      "shortName": "Matemática",
       "nucleus": "NEMAT",
       "emblem": "assets/Logos/NEMAT-07.png",
       "colors": ["#16a1dc", "#6c757d"]
     },
     "Medicina": {
       "displayName": "Medicina",
+      "shortName": "Medicina",
       "nucleus": "NECiB",
       "emblem": "assets/Logos/NECiB-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Música": {
       "displayName": "Música",
+      "shortName": "Música",
       "nucleus": "NEMu",
       "emblem": "assets/Logos/NEMu-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
     "Psicologia": {
       "displayName": "Psicologia",
+      "shortName": "Psicologia",
       "nucleus": "NEP",
       "emblem": "assets/Logos/NEP-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
     "Química": {
       "displayName": "Química",
+      "shortName": "Química",
       "nucleus": "NEQ",
       "emblem": "assets/Logos/NEQ-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "TI": {
       "displayName": "Tecnologias de Informação",
+      "shortName": "TI",
       "nucleus": "NAE-ESTGA",
       "emblem": "assets/Logos/NAE_ESTGA-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Tecnologias de Informação": {
       "displayName": "Tecnologias de Informação",
+      "shortName": "TI",
       "nucleus": "NAE-ESTGA",
       "emblem": "assets/Logos/NAE_ESTGA-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Terapia da Fala": {
       "displayName": "Terapia da Fala",
+      "shortName": "Terapia da Fala",
       "nucleus": "NAE-ESSUA",
       "emblem": "assets/Logos/NAE_ESSUA-07.png",
       "colors": ["#1ca152", "#6c757d"]
     },
     "Tradução": {
       "displayName": "Tradução",
+      "shortName": "Tradução",
+      "shortName": "Tradução",
       "nucleus": "NET",
       "emblem": "assets/Logos/NET-07.png",
       "colors": ["#1e4395", "#6c757d"]
