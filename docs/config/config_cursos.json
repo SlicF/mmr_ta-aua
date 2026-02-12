@@ -18,6 +18,12 @@
       "emblem": "assets/Logos/NEEMec-07.png",
       "colors": ["#f08344", "#6c757d"]
     },
+    "Automação e Sistemas de Produção": {
+      "displayName": "Automação e Sistemas de Produção",
+      "nucleus": "NEEMec",
+      "emblem": "assets/Logos/NEEMec-07.png",
+      "colors": ["#f08344", "#6c757d"]
+    },
     "Biologia": {
       "displayName": "Biologia",
       "nucleus": "NEB",
@@ -48,7 +54,19 @@
       "emblem": "assets/Logos/NECiB-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
+    "Ciências Biomédicas": {
+      "displayName": "Ciências Biomédicas",
+      "nucleus": "NECiB",
+      "emblem": "assets/Logos/NECiB-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
     "CBM B": {
+      "displayName": "Ciências Biomédicas B",
+      "nucleus": "NECiB",
+      "emblem": "assets/Logos/NECiB-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Ciências Biomédicas B": {
       "displayName": "Ciências Biomédicas B",
       "nucleus": "NECiB",
       "emblem": "assets/Logos/NECiB-07.png",
@@ -84,7 +102,19 @@
       "emblem": "assets/Logos/NEECT-07.png",
       "colors": ["#4c65a4", "#6c757d"]
     },
+    "Eng. Computadores e Telemática": {
+      "displayName": "Eng. Computadores e Telemática",
+      "nucleus": "NEECT",
+      "emblem": "assets/Logos/NEECT-07.png",
+      "colors": ["#4c65a4", "#6c757d"]
+    },
     "EET": {
+      "displayName": "Eng. Eletrónica e Telecomunicações",
+      "nucleus": "NEEETA",
+      "emblem": "assets/Logos/NEEETA-07.png",
+      "colors": ["#3362ae", "#6c757d"]
+    },
+    "Eng. Eletrónica e Telecomunicações": {
       "displayName": "Eng. Eletrónica e Telecomunicações",
       "nucleus": "NEEETA",
       "emblem": "assets/Logos/NEEETA-07.png",
@@ -96,7 +126,19 @@
       "emblem": "assets/Logos/NEEETA-07.png",
       "colors": ["#3362ae", "#6c757d"]
     },
+    "Eng. Eletrónica e Telecomunicações B": {
+      "displayName": "Eng. Eletrónica e Telecomunicações B",
+      "nucleus": "NEEETA",
+      "emblem": "assets/Logos/NEEETA-07.png",
+      "colors": ["#3362ae", "#6c757d"]
+    },
     "EGI": {
+      "displayName": "Eng. e Gestão Industrial",
+      "nucleus": "AEGIA",
+      "emblem": "assets/Logos/EGI-07.png",
+      "colors": ["#ff6d10", "#6c757d"]
+    },
+    "Eng. e Gestão Industrial": {
       "displayName": "Eng. e Gestão Industrial",
       "nucleus": "AEGIA",
       "emblem": "assets/Logos/EGI-07.png",
@@ -234,6 +276,12 @@
       "emblem": "assets/Logos/NEM-07.png",
       "colors": ["#e73630", "#6c757d"]
     },
+    "Eng. de Materiais": {
+      "displayName": "Eng. de Materiais",
+      "nucleus": "NEM",
+      "emblem": "assets/Logos/NEM-07.png",
+      "colors": ["#e73630", "#6c757d"]
+    },
     "Eng. Materias": {
       "displayName": "Eng. de Materiais",
       "nucleus": "NEM",
@@ -283,6 +331,12 @@
       "colors": ["#f9dd53", "#6c757d"]
     },
     "GPT": {
+      "displayName": "Gestão e Planeamento em Turismo",
+      "nucleus": "NEGPT",
+      "emblem": "assets/Logos/NEGPT-07.png",
+      "colors": ["#0d7b3e", "#6c757d"]
+    },
+    "Gestão e Planeamento em Turismo": {
       "displayName": "Gestão e Planeamento em Turismo",
       "nucleus": "NEGPT",
       "emblem": "assets/Logos/NEGPT-07.png",

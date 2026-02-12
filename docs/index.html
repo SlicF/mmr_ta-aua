@@ -186,6 +186,79 @@
                 </div>
             </div>
         </div>
+
+        <!-- Secção de Previsões -->
+        <div class="card predictions-card">
+            <div class="card-title predictions-title">
+                <span>Previsões da Época</span>
+                <span class="predictions-sim-count" id="predictionsSimCount" aria-live="polite"></span>
+            </div>
+
+            <!-- Seletores de Divisão e Grupo (interligados com a classificação) -->
+            <div class="predictions-filters">
+                <div class="division-selector" id="predictionsDivisionSelector" style="display: none;">
+                    <!-- Botões de divisão serão gerados dinamicamente -->
+                </div>
+                <div class="group-selector" id="predictionsGroupSelector" style="display: none;">
+                    <!-- Botões de grupo serão gerados dinamicamente -->
+                </div>
+            </div>
+
+            <!-- Seletor de Equipa estilo Slider -->
+            <div class="team-slider-container">
+                <button class="slider-arrow slider-prev" id="prevTeamBtn" aria-label="Equipa anterior">
+                    &lt;
+                </button>
+
+                <div class="team-slider-display" id="teamSliderDisplay">
+                    <div class="team-slider-ghost" id="prevTeamEmblem" aria-hidden="true"></div>
+                    <div class="team-slider-main" id="teamSliderMain">
+                        <div class="team-slider-name" id="selectedTeamName">
+                            Selecione uma modalidade
+                        </div>
+                        <div class="team-slider-emblem" id="selectedTeamEmblem">
+                            <!-- Emblema será inserido aqui -->
+                        </div>
+                    </div>
+                    <div class="team-slider-ghost" id="nextTeamEmblem" aria-hidden="true"></div>
+                </div>
+
+                <button class="slider-arrow slider-next" id="nextTeamBtn" aria-label="Próxima equipa">
+                    &gt;
+                </button>
+            </div>
+
+            <!-- Previsões Gerais -->
+            <div class="predictions-stats-section">
+                <h3 class="predictions-section-title">PREVISÕES GERAIS</h3>
+                <div class="predictions-stats-grid" id="predictionsStatsGrid">
+                    <!-- Estatísticas serão geradas dinamicamente -->
+                </div>
+            </div>
+
+            <!-- Previsões Jornada a Jornada -->
+            <div class="predictions-table-section">
+                <h3 class="predictions-section-title">Previsões jornada a jornada</h3>
+                <div class="predictions-table-wrapper">
+                    <table class="predictions-table" id="predictionsTable">
+                        <thead>
+                            <tr>
+                                <th>Jornada</th>
+                                <th>Data</th>
+                                <th>Adversário</th>
+                                <th title="Probabilidade de vitória">P(V)</th>
+                                <th title="Probabilidade de empate">P(E)</th>
+                                <th title="Probabilidade de derrota">P(D)</th>
+                                <th title="Golos esperados">Golos Esp.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictionsTableBody">
+                            <!-- Previsões serão preenchidas dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Debug Panel (oculto por padrão) -->

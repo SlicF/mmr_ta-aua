@@ -45,9 +45,15 @@ html {
 }
 
 body {
-  font-family: "Inter", "Segoe UI", "SF Pro Display", system-ui, -apple-system,
+  font-family:
+    "Inter",
+    "Segoe UI",
+    "SF Pro Display",
+    system-ui,
+    -apple-system,
     sans-serif;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 20%,
       rgba(37, 99, 235, 0.14),
       transparent 25%
@@ -167,7 +173,9 @@ body {
   border-radius: 6px;
   padding: 25px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   border: 1px solid rgba(42, 82, 152, 0.1);
 }
 
@@ -279,7 +287,9 @@ body {
 .chart-content {
   max-height: 1200px;
   overflow: visible;
-  transition: max-height 0.4s ease, opacity 0.4s ease;
+  transition:
+    max-height 0.4s ease,
+    opacity 0.4s ease;
   opacity: 1;
 }
 
@@ -411,7 +421,9 @@ body {
   padding: 6px 10px;
   background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
   border-bottom: 1px solid #e2e8f0;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
   user-select: none;
 }
 
@@ -441,7 +453,9 @@ body {
   display: block;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.35s ease;
+  transition:
+    max-height 0.35s ease,
+    padding 0.35s ease;
 }
 
 .team-groups-container[data-state="expanded"] {
@@ -983,10 +997,14 @@ body {
 @keyframes pulse-danger {
   0%,
   100% {
-    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow:
+      0 0 0 2px rgba(220, 53, 69, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.15);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 4px rgba(220, 53, 69, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -1656,7 +1674,7 @@ body {
     gap: 8px;
     margin-bottom: 15px; /* Add some space below */
   }
-  
+
   /* Hide scrollbar for cleaner look but keep functionality */
   .division-selector::-webkit-scrollbar {
     height: 4px;
@@ -1891,14 +1909,32 @@ body {
     padding: 0 12px;
     max-width: calc(100% + 24px); /* Compensate for margins */
     -webkit-overflow-scrolling: touch;
-    background: linear-gradient(to right, white 30%, rgba(255,255,255,0)),
-                linear-gradient(to right, rgba(255,255,255,0), white 70%) 0 100%,
-                radial-gradient(farthest-side at 0 50%, rgba(0,0,0,0.2), rgba(0,0,0,0)),
-                radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,0.2), rgba(0,0,0,0)) 0 100%;
+    background:
+      linear-gradient(to right, white 30%, rgba(255, 255, 255, 0)),
+      linear-gradient(to right, rgba(255, 255, 255, 0), white 70%) 0 100%,
+      radial-gradient(
+        farthest-side at 0 50%,
+        rgba(0, 0, 0, 0.2),
+        rgba(0, 0, 0, 0)
+      ),
+      radial-gradient(
+          farthest-side at 100% 50%,
+          rgba(0, 0, 0, 0.2),
+          rgba(0, 0, 0, 0)
+        )
+        0 100%;
     background-repeat: no-repeat;
     background-color: white;
-    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
-    background-position: 0 0, 100% 0, 0 0, 100% 0;
+    background-size:
+      40px 100%,
+      40px 100%,
+      14px 100%,
+      14px 100%;
+    background-position:
+      0 0,
+      100% 0,
+      0 0,
+      100% 0;
     background-attachment: local, local, scroll, scroll;
   }
 
@@ -1963,10 +1999,11 @@ body {
     padding-bottom: 4px;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   /* Make buttons larger touch targets */
-  .division-btn, .group-btn {
-      flex-shrink: 0;
+  .division-btn,
+  .group-btn {
+    flex-shrink: 0;
   }
 
   .division-btn,
@@ -2749,4 +2786,554 @@ body {
 
 .debug-btn:hover {
   background: #555;
+}
+
+/* ==================== SECÇÃO DE PREVISÕES ==================== */
+
+.predictions-card {
+  margin-top: 20px;
+}
+
+.predictions-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.predictions-sim-count {
+  font-size: 0.75em;
+  color: #666;
+  font-weight: 500;
+  background: rgba(42, 82, 152, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.predictions-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0 20px;
+}
+
+/* Slider de Equipas */
+.team-slider-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 30px 20px;
+  border-radius: 12px;
+}
+
+.slider-arrow {
+  background: #2a5298;
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(42, 82, 152, 0.2);
+  padding: 0;
+}
+
+.slider-arrow:hover:not(:disabled) {
+  background: #1e3a6e;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(42, 82, 152, 0.3);
+}
+
+.slider-arrow:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.slider-arrow:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.slider-arrow:focus-visible {
+  outline: 3px solid #2a5298;
+  outline-offset: 2px;
+}
+
+.team-slider-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 450px;
+  height: 140px;
+}
+
+.team-slider-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+  max-width: 250px;
+}
+
+@keyframes slideOut-left {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translateX(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut-right {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translateX(-40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.team-slider-emblem {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+}
+
+.team-slider-emblem.slide-left {
+  animation-name: slideOut-left;
+}
+
+.team-slider-emblem.slide-right {
+  animation-name: slideOut-right;
+}
+
+.team-slider-emblem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.team-slider-emblem img[src*="EGI-07.png"] {
+  padding: 50px;
+  box-sizing: border-box;
+}
+
+.team-slider-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.team-slider-ghost {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0.5;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+}
+
+.team-slider-ghost.slide-left {
+  animation-name: slideOut-left;
+}
+
+.team-slider-ghost.slide-right {
+  animation-name: slideOut-right;
+}
+
+.team-slider-ghost img[src*="EGI-07.png"] {
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.team-slider-ghost-emblem {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  filter: grayscale(100%);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.team-slider-ghost-emblem[src*="EGI-07.png"] {
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.team-slider-name {
+  font-size: 1.3em;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-height: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 250px;
+  line-height: 1.2;
+}
+
+/* Estatísticas Gerais */
+.predictions-stats-section {
+  margin-bottom: 40px;
+}
+
+.predictions-section-title {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #2a5298;
+  text-align: center;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.predictions-section-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #2a5298, transparent);
+}
+
+.predictions-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 5px 15px;
+  padding: 0px 15px;
+}
+
+.stat-card {
+  background: white;
+  border: 2px solid rgba(42, 82, 152, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(42, 82, 152, 0.15);
+  border-color: rgba(42, 82, 152, 0.3);
+}
+
+.stat-label {
+  font-size: 0.85em;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 2em;
+  font-weight: 700;
+  color: #2a5298;
+  margin-bottom: 5px;
+}
+
+.stat-description {
+  font-size: 0.75em;
+  color: #999;
+  font-style: italic;
+}
+
+/* Tabela de Previsões */
+.predictions-table-section {
+  margin-top: -20px;
+}
+
+.predictions-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.predictions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1em;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.predictions-table th {
+  padding: 3px 3px;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.5px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border: none;
+}
+
+.predictions-table th:first-child {
+  border-top-left-radius: 6px;
+}
+
+.predictions-table th:last-child {
+  border-top-right-radius: 6px;
+}
+
+.predictions-table th:nth-child(3) {
+  text-align: left;
+}
+
+.predictions-table th:first-child,
+.predictions-table td:first-child {
+  width: 70px;
+  max-width: 70px;
+}
+
+.predictions-table td {
+  padding: 1px 1px;
+  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
+  height: auto;
+  min-height: 46px;
+  vertical-align: middle;
+  background: white;
+}
+
+.predictions-table td:nth-child(3) {
+  text-align: left;
+}
+
+.predictions-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.predictions-table tbody tr:hover {
+  background-color: rgba(42, 82, 152, 0.08);
+  cursor: pointer;
+}
+
+.predictions-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prediction-opponent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prediction-opponent-emblem {
+  width: 62px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.prediction-opponent-emblem[src*="EGI-07.png"] {
+  padding: 11px;
+  box-sizing: border-box;
+}
+
+.prediction-opponent-name {
+  font-weight: 500;
+  text-align: left;
+}
+
+.prediction-prob {
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.prediction-prob.high {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.prediction-prob.medium {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #f57c00;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.prediction-prob.low {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.no-predictions-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 1.1em;
+}
+
+/* Tooltip das Previsões */
+.predictions-tooltip {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: auto;
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+.predictions-tooltip > div {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  width: 350px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e2e8f0;
+  max-height: 600px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+[id^="predictions-tooltip-chart"] {
+  flex-shrink: 0;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .team-slider-container {
+    gap: 10px;
+    padding: 20px 10px;
+  }
+
+  .slider-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .team-slider-display {
+    width: 280px;
+    height: 120px;
+  }
+
+  .team-slider-main {
+    max-width: 120px;
+  }
+
+  .team-slider-emblem {
+    width: 90px;
+    height: 90px;
+  }
+
+  .team-slider-emblem img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .team-slider-emblem img[src*="EGI-07.png"] {
+    padding: 40px;
+    box-sizing: border-box;
+  }
+
+  .team-slider-ghost {
+    width: 80px;
+    height: 80px;
+  }
+
+  .team-slider-ghost img[src*="EGI-07.png"] {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .team-slider-ghost-emblem[src*="EGI-07.png"] {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .team-slider-name {
+    font-size: 1.1em;
+    max-width: 120px;
+  }
+
+  .predictions-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 5px 15px;
+    padding: 15px;
+  }
+
+  .stat-value {
+    font-size: 1.5em;
+  }
+
+  .predictions-table {
+    font-size: 0.8em;
+  }
+
+  .predictions-table th,
+  .predictions-table td {
+    padding: 8px 6px;
+    min-height: 40px;
+  }
+
+  .prediction-opponent-emblem {
+    width: 36px;
+    height: 36px;
+  }
 }

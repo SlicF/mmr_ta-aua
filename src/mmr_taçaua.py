@@ -1999,7 +1999,9 @@ class TournamentProcessor:
         self.input_dir = input_dir or str(
             REPO_ROOT / "docs" / "output" / "csv_modalidades"
         )
-        self.output_dir = output_dir or str(REPO_ROOT / "docs" / "output" / "elo_ratings")
+        self.output_dir = output_dir or str(
+            REPO_ROOT / "docs" / "output" / "elo_ratings"
+        )
         self.elo_system = EloRatingSystem()
 
         # Criar diretório de saída se não existir
@@ -2357,6 +2359,16 @@ class TournamentProcessor:
 def main():
     """Função principal do programa"""
     try:
+        # Apagar CSVs antigos da pasta de previsões
+        previsoes_dir = REPO_ROOT / "docs" / "output" / "previsoes"
+        if previsoes_dir.exists():
+            for csv_file in previsoes_dir.glob("*.csv"):
+                try:
+                    csv_file.unlink()
+                    logger.info(f"Apagado ficheiro de previsão antigo: {csv_file.name}")
+                except Exception as e:
+                    logger.warning(f"Erro ao apagar {csv_file.name}: {e}")
+
         logger.info("A iniciar processamento de torneios")
         processor = TournamentProcessor()
         processor.process_all_tournaments()

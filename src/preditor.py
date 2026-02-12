@@ -16,6 +16,11 @@ OTIMIZAÇÕES DE PERFORMANCE IMPLEMENTADAS:
   - Objetos são reconstruídos em cada worker process
   - Evita problemas de pickling complexo
 
+✓ Probabilidade de Empate Dinâmica: Baseada em diferença de ELO
+  - Usa distribuição gaussiana: p_draw(elo_diff) = peak * exp(-(elo_diff²)/(2*sigma²))
+  - Empates mais prováveis quando ELOs são similares
+  - Taxa histórica de empates define a média, não probabilidade constante
+
 MELHORIAS FUTURAS SUGERIDAS:
 ============================
 → joblib: Biblioteca otimizada para ML pipelines
@@ -453,6 +458,52 @@ class SportScoreSimulator:
             return self.division_draw_rates[division]
         return self.division_draw_rates.get(None, 0.0)
 
+    def _calculate_draw_probability(
+        self, elo_a: float, elo_b: float, target_draw_rate: float
+    ) -> float:
+        """
+        Calcula a probabilidade de empate baseada na diferença de ELO usando uma curva gaussiana.
+
+        A probabilidade de empate é máxima quando os ELOs são iguais e decresce com a diferença.
+
+        Args:
+            elo_a: ELO da equipa A
+            elo_b: ELO da equipa B
+            target_draw_rate: Taxa média histórica de empates (usada para calibração)
+
+        Returns:
+            Probabilidade de empate para este confronto específico
+
+        Fórmula: p_draw = peak_rate * exp(-(elo_diff²) / (2 * sigma²))
+
+        Onde:
+        - peak_rate: Probabilidade máxima quando ELOs são iguais (~1.5x target_draw_rate)
+        - sigma: Controla quão rápido a probabilidade decai (200 pontos ELO)
+        - elo_diff: Diferença absoluta de ELO
+        """
+        if target_draw_rate <= 0:
+            return 0.0
+
+        elo_diff = abs(elo_a - elo_b)
+
+        # Parâmetros da curva gaussiana
+        # sigma controla a largura da curva (quão sensível é à diferença de ELO)
+        # Valor de 180 significa que uma diferença de ~180 ELO reduz significativamente a prob de empate
+        sigma = 180.0
+
+        # peak_rate é calibrado para que a média overall seja próxima do target_draw_rate
+        # Usando factor ~2.5 para elevar o pico da curva gaussiana significativamente
+        # Este factor foi ajustado para obter picos mais pronunciados de empate
+        peak_rate = target_draw_rate * 2.5
+
+        # Curva gaussiana: máxima no centro (elo_diff=0), decai para as caudas
+        draw_probability = peak_rate * np.exp(-(elo_diff**2) / (2 * sigma**2))
+
+        # Garantir que não excede limites razoáveis
+        draw_probability = min(peak_rate, max(0.0, draw_probability))
+
+        return draw_probability
+
     def simulate_score(
         self,
         elo_a: float,
@@ -520,9 +571,18 @@ class SportScoreSimulator:
                     if score_a != score_b:
                         return (score_a, score_b)
             else:
-                # Em época regular, combinar empates forçados com empates naturais
-                if target_draw_rate > 0 and random.random() < (
-                    target_draw_rate * forced_draw_fraction
+                # Em época regular, usar probabilidade de empate dinâmica baseada em ELO
+                # Calcular probabilidade de empate para este confronto específico
+                draw_probability = self._calculate_draw_probability(
+                    elo_a, elo_b, target_draw_rate
+                )
+
+                # Fração de empates que são forçados (o resto vem naturalmente do Poisson)
+                forced_draw_fraction = self.params.get("forced_draw_fraction", 0.7)
+
+                # Decidir se este jogo terá empate forçado
+                if draw_probability > 0 and random.random() < (
+                    draw_probability * forced_draw_fraction
                 ):
                     # Empate forçado com placar realista
                     goals = max(0, int(np.random.poisson(base_goals)))
@@ -1082,10 +1142,17 @@ def simulate_season(
         elo_a_before = teams[a].elo
         elo_b_before = teams[b].elo
 
-        # Calcular expected points considerando probabilidade de empate por divisao
+        # Calcular expected points considerando probabilidade de empate dinâmica baseada em ELO
         p_a = elo_system.elo_win_probability(teams[a].elo, teams[b].elo)
         p_b = 1 - p_a
-        p_draw = score_simulator._get_division_draw_rate(division)
+
+        # Usar probabilidade de empate dinâmica que considera a diferença de ELO
+        target_draw_rate = score_simulator._get_division_draw_rate(division)
+        p_draw = score_simulator._calculate_draw_probability(
+            teams[a].elo, teams[b].elo, target_draw_rate
+        )
+
+        # Ajustar probabilidades de vitória para considerar empates
         p_a = p_a * (1 - p_draw)
         p_b = p_b * (1 - p_draw)
 
@@ -1645,8 +1712,22 @@ def _run_single_simulation_worker(args_tuple):
         expected_points_sim[team] = total_xpts
         final_elos_sim[team] = final_elos.get(team, teams[team].elo)
 
-    for place, (team, _) in enumerate(ranking, 1):
-        regular_season_places_sim[team] = place
+    # Calcular posição por grupo (em vez de global)
+    standings_by_group_for_places = defaultdict(list)
+    if team_division:
+        for team, pts in ranking:
+            div, grp = team_division.get(team, (1, "")) if team_division else (1, "")
+            standings_by_group_for_places[(div, grp)].append((team, pts))
+
+        for group_key in standings_by_group_for_places:
+            for place, (team, _) in enumerate(
+                standings_by_group_for_places[group_key], 1
+            ):
+                regular_season_places_sim[team] = place
+    else:
+        # Se não há divisões, usar ranking global
+        for place, (team, _) in enumerate(ranking, 1):
+            regular_season_places_sim[team] = place
 
     # Contar playoffs
     playoff_count_sim = {}
@@ -1802,8 +1883,22 @@ def _run_single_simulation_with_hardset_worker(args_tuple):
         expected_points_sim[team] = total_xpts
         final_elos_sim[team] = final_elos.get(team, teams[team].elo)
 
-    for place, (team, _) in enumerate(ranking, 1):
-        regular_season_places_sim[team] = place
+    # Calcular posição por grupo (em vez de global)
+    standings_by_group_for_places = defaultdict(list)
+    if team_division:
+        for team, pts in ranking:
+            div, grp = team_division.get(team, (1, "")) if team_division else (1, "")
+            standings_by_group_for_places[(div, grp)].append((team, pts))
+
+        for group_key in standings_by_group_for_places:
+            for place, (team, _) in enumerate(
+                standings_by_group_for_places[group_key], 1
+            ):
+                regular_season_places_sim[team] = place
+    else:
+        # Se não há divisões, usar ranking global
+        for place, (team, _) in enumerate(ranking, 1):
+            regular_season_places_sim[team] = place
 
     # Contar playoffs
     playoff_count_sim = {}
@@ -3054,17 +3149,20 @@ def main(
             # Calcular pontos reais já alcançados na época regular
             real_points = calculate_real_points(past_matches_rows, course_mapping)
 
+            # Calcular número de simulações
+            n_simulations = (
+                10000
+                if not deep_simulation and not deeper_simulation
+                else (1000000 if deeper_simulation else 100000)
+            )
+
             results, match_forecasts, match_elo_forecast, match_score_stats = (
                 monte_carlo_forecast_with_hardset(
                     teams_with_fixtures,
                     fixtures,
                     elo_system,
                     score_simulator,
-                    n_simulations=(
-                        10000
-                        if not deep_simulation and not deeper_simulation
-                        else (1000000 if deeper_simulation else 100000)
-                    ),
+                    n_simulations=n_simulations,
                     team_division=team_division,
                     has_liguilla=has_liguilla,
                     real_points=real_points,
@@ -3130,14 +3228,14 @@ def main(
                     docs_dir,
                     "output",
                     "cenarios",
-                    f"forecast_{modalidade}_{ano_atual}_hardset.csv",
+                    f"forecast_{modalidade}_{ano_atual}_{n_simulations}_hardset.csv",
                 )
             else:
                 output_file = os.path.join(
                     docs_dir,
                     "output",
                     "previsoes",
-                    f"forecast_{modalidade}_{ano_atual}.csv",
+                    f"forecast_{modalidade}_{ano_atual}_{n_simulations}.csv",
                 )
 
             with open(output_file, "w", newline="", encoding="utf-8-sig") as csvfile:
@@ -3151,8 +3249,8 @@ def main(
                     "p_descida",
                     "expected_points",
                     "expected_points_std",
-                    "expected_place",
-                    "expected_place_std",
+                    "expected_place_in_group",
+                    "expected_place_in_group_std",
                     "avg_final_elo",
                     "avg_final_elo_std",
                 ]
@@ -3199,8 +3297,8 @@ def main(
                             "p_descida": f"{p_descida:.4f}",
                             "expected_points": f"{expected_points:.2f}",
                             "expected_points_std": f"{expected_points_std:.2f}",
-                            "expected_place": f"{expected_place:.2f}",
-                            "expected_place_std": f"{expected_place_std:.2f}",
+                            "expected_place_in_group": f"{expected_place:.2f}",
+                            "expected_place_in_group_std": f"{expected_place_std:.2f}",
                             "avg_final_elo": f"{avg_final_elo:.1f}",
                             "avg_final_elo_std": f"{avg_final_elo_std:.1f}",
                         }
@@ -3215,14 +3313,14 @@ def main(
                     docs_dir,
                     "output",
                     "cenarios",
-                    f"previsoes_{modalidade}_{ano_atual}_hardset.csv",
+                    f"previsoes_{modalidade}_{ano_atual}_{n_simulations}_hardset.csv",
                 )
             else:
                 predictions_file = os.path.join(
                     docs_dir,
                     "output",
                     "previsoes",
-                    f"previsoes_{modalidade}_{ano_atual}.csv",
+                    f"previsoes_{modalidade}_{ano_atual}_{n_simulations}.csv",
                 )
 
             future_count = 0
@@ -3243,6 +3341,10 @@ def main(
                     "prob_vitoria_a",
                     "prob_empate",
                     "prob_vitoria_b",
+                    "expected_goals_a",
+                    "expected_goals_a_std",
+                    "expected_goals_b",
+                    "expected_goals_b_std",
                     "distribuicao_placares",
                     "divisao",
                     "grupo",
@@ -3270,14 +3372,54 @@ def main(
 
                         # Obter distribuição completa de placares
                         score_dist = match_score_stats.get(mid, {})
+                        expected_goals_a = 0.0
+                        expected_goals_b = 0.0
+                        expected_goals_a_std = 0.0
+                        expected_goals_b_std = 0.0
+
                         if score_dist:
-                            # Ordenar por frequência (probabilidade)
+                            # Calcular total de simulações
+                            total_sims = sum(score_dist.values())
+
+                            # Primeiro passo: calcular médias ponderadas (expected_goals)
+                            for score_str, count in score_dist.items():
+                                try:
+                                    parts = score_str.split("-")
+                                    if len(parts) == 2:
+                                        goals_a = int(parts[0])
+                                        goals_b = int(parts[1])
+                                        weight = count / total_sims
+                                        expected_goals_a += goals_a * weight
+                                        expected_goals_b += goals_b * weight
+                                except (ValueError, IndexError):
+                                    pass
+
+                            # Segundo passo: calcular variância ponderada e desvio padrão
+                            variance_a = 0.0
+                            variance_b = 0.0
+                            for score_str, count in score_dist.items():
+                                try:
+                                    parts = score_str.split("-")
+                                    if len(parts) == 2:
+                                        goals_a = int(parts[0])
+                                        goals_b = int(parts[1])
+                                        weight = count / total_sims
+                                        variance_a += weight * (
+                                            (goals_a - expected_goals_a) ** 2
+                                        )
+                                        variance_b += weight * (
+                                            (goals_b - expected_goals_b) ** 2
+                                        )
+                                except (ValueError, IndexError):
+                                    pass
+
+                            expected_goals_a_std = variance_a**0.5
+                            expected_goals_b_std = variance_b**0.5
+
+                            # Ordenar by frequência (probabilidade)
                             sorted_scores = sorted(
                                 score_dist.items(), key=lambda x: x[1], reverse=True
                             )
-
-                            # Calcular total para converter em percentagens
-                            total_sims = sum(score_dist.values())
 
                             # Criar string com TODOS os placares e suas probabilidades
                             distribuicao_str = "|".join(
@@ -3303,6 +3445,10 @@ def main(
                                 "prob_vitoria_a": f"{stats_a:.4f}",
                                 "prob_empate": f"{stats_draw:.4f}",
                                 "prob_vitoria_b": f"{stats_b:.4f}",
+                                "expected_goals_a": f"{expected_goals_a:.2f}",
+                                "expected_goals_a_std": f"{expected_goals_a_std:.2f}",
+                                "expected_goals_b": f"{expected_goals_b:.2f}",
+                                "expected_goals_b_std": f"{expected_goals_b_std:.2f}",
                                 "distribuicao_placares": distribuicao_str,
                                 "divisao": match.get("divisao", ""),
                                 "grupo": match.get("grupo", ""),
