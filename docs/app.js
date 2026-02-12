@@ -8654,86 +8654,34 @@ function updatePredictionsSelectors() {
 
 let previsoesFilesCache = null;
 
-async function getPrevisoesFileList() {
-    if (previsoesFilesCache) {
-        return previsoesFilesCache;
-    }
-
-    try {
-        const response = await fetch('output/previsoes/');
-        if (!response.ok) {
-            return null;
-        }
-
-        const html = await response.text();
-        const files = [];
-        const linkRegex = /href="([^"]+\.csv)"/gi;
-        let match;
-
-        while ((match = linkRegex.exec(html)) !== null) {
-            const raw = match[1];
-            const decoded = decodeURIComponent(raw);
-            const filename = decoded.split('/').pop();
-            if (filename) {
-                files.push(filename);
-            }
-        }
-
-        previsoesFilesCache = files;
-        return files;
-    } catch (error) {
-        return null;
-    }
-}
-
 /**
- * Tenta carregar um ficheiro CSV usando a maior simulacao disponivel
+ * Carrega um ficheiro de previsões com simulações fixas
  * @param {string} fileType - "forecast" ou "previsoes"
  * @param {string} modalidadeBase - Nome da modalidade
  * @param {string} anoCompleto - Ano completo (ex: "2026")
  * @returns {Promise<{data: string, sims: number}|null>} - Conteudo do ficheiro CSV e num simulacoes ou null se nao encontrar
  */
 async function tryLoadWithSimulations(fileType, modalidadeBase, anoCompleto) {
-    const files = await getPrevisoesFileList();
-    if (!files || files.length === 0) {
-        console.log('Nao foi possivel listar ficheiros de previsoes.');
-        return null;
-    }
+    // GitHub Pages não suporta directory listing, por isso usamos simulações fixas
+    const simulations = [1000000, 100000, 10000];
 
-    const prefix = `${fileType}_${modalidadeBase}_${anoCompleto}_`;
-    const matching = files.filter(file => file.startsWith(prefix));
+    for (const sims of simulations) {
+        const filename = `output/previsoes/${fileType}_${modalidadeBase}_${anoCompleto}_${sims}.csv`;
 
-    if (matching.length === 0) {
-        console.log(`Nenhum ficheiro de ${fileType} encontrado para ${modalidadeBase} ${anoCompleto}`);
-        return null;
-    }
-
-    let bestFile = null;
-    let bestSims = -1;
-
-    for (const file of matching) {
-        const simsPart = file.replace(prefix, '').replace('.csv', '');
-        const sims = parseInt(simsPart, 10);
-        if (!Number.isNaN(sims) && sims > bestSims) {
-            bestSims = sims;
-            bestFile = file;
+        try {
+            const response = await fetch(filename);
+            if (response.ok) {
+                const csvdata = await response.text();
+                console.log(`✓ Ficheiro encontrado: ${filename} (${sims.toLocaleString()} simulacoes)`);
+                return { data: csvdata, sims: sims };
+            }
+        } catch (error) {
+            // Continuar para o próximo número de simulações
         }
     }
 
-    if (!bestFile) {
-        console.log(`Nenhum ficheiro de ${fileType} encontrado para ${modalidadeBase} ${anoCompleto}`);
-        return null;
-    }
-
-    const filename = `output/previsoes/${bestFile}`;
-    const response = await fetch(filename);
-    if (!response.ok) {
-        return null;
-    }
-
-    const csvdata = await response.text();
-    console.log(`✓ Ficheiro encontrado: ${filename} (${bestSims.toLocaleString()} simulacoes)`);
-    return { data: csvdata, sims: bestSims };
+    console.warn(`Nenhum ficheiro de ${fileType} encontrado para ${modalidadeBase} ${anoCompleto}`);
+    return null;
 }
 
 /**
