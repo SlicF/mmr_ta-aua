@@ -1422,7 +1422,6 @@ function resetZoom() {
 function togglePanMode() {
     // ApexCharts tem modo pan nativo quando 'pan' está no toolbar
     // Esta função é para compatibilidade com event listener
-    console.log('Pan mode é automático no ApexCharts');
 }
 
 // Atualizar gráfico ELO
@@ -6450,32 +6449,22 @@ function changeEpoca(epoca) {
  * Retorna a chave de rankings ou null se não encontrada
  */
 function findRankingKeyForTeam(teamName) {
-    console.log('[FavoriteTeam] Procurando equipa:', teamName);
-    console.log('[FavoriteTeam] sampleData.rankings disponível?', !!sampleData.rankings);
-    console.log('[FavoriteTeam] sampleData.teams disponível?', !!sampleData.teams);
-    console.log('[FavoriteTeam] sampleData.teams.length:', sampleData.teams ? sampleData.teams.length : 0);
     if (sampleData.teams && sampleData.teams.length > 0) {
-        console.log('[FavoriteTeam] Primeiras 3 equipas em sampleData.teams:', sampleData.teams.slice(0, 3).map(t => t.name));
     }
 
     if (!teamName || !sampleData.rankings) {
-        console.log('[FavoriteTeam] Saída antecipada: teamName=', teamName, 'rankings=', !!sampleData.rankings);
         return null;
     }
 
-    console.log('[FavoriteTeam] Rankings keys disponíveis:', Object.keys(sampleData.rankings));
 
     // Procurar em todas as chaves de rankings pela equipa
     for (const [rankingKey, teams] of Object.entries(sampleData.rankings)) {
-        console.log(`[FavoriteTeam] Verificando ${rankingKey}: ${teams.length} equipas`);
         const teamExists = teams.some(t => t.team === teamName);
         if (teamExists) {
-            console.log('[FavoriteTeam] ✓ Encontrada em ranking key:', rankingKey);
             return rankingKey;
         }
     }
 
-    console.log('[FavoriteTeam] ✗ Não encontrada em nenhum ranking key');
     return null;
 }
 
@@ -6562,14 +6551,12 @@ function changeModalidade(mod) {
                 if (loadToken !== currentLoadToken) return;
 
                 // ===== PASSO 1: Auto-navegar para a equipa favorita ANTES de renderizar seletores =====
-                console.log('[AutoNav] favoriteTeam:', favoriteTeam);
                 if (favoriteTeam) {
                     // Procurar diretamente a equipa nos rankings
                     const rankingKey = findRankingKeyForTeam(favoriteTeam);
 
                     if (rankingKey) {
                         // A equipa favorita está nesta modalidade
-                        console.log('[FavoriteTeam] Auto-navegando para:', rankingKey);
                         DebugUtils.debugRankingsProcessing('favorite_team_navigation', {
                             team: favoriteTeam,
                             rankingKey: rankingKey
@@ -6586,9 +6573,7 @@ function changeModalidade(mod) {
                         currentDivision = rankingKey;
                         currentGroup = rankingGroup;
 
-                        console.log('[FavoriteTeam] Set appState:', { division: rankingKey, group: rankingGroup });
                     } else {
-                        console.log('[FavoriteTeam] Não encontrada nesta modalidade:', favoriteTeam);
                     }
                 }
 
@@ -6605,17 +6590,13 @@ function changeModalidade(mod) {
                 // Brackets serão carregados depois de processar rankings
 
                 // ===== PASSO 3: Sincronizar gráfico com a vista final =====
-                console.log('[AutoNav] Antes de filtrar, appState.view:', { division: appState.view.division, group: appState.view.group });
                 if (appState.view.group) {
                     // Seletor de grupo já trata da lógica de filtrar
                     const groupLetter = appState.view.group.replace('Grupo ', '');
-                    console.log('[AutoNav] Filtrando por grupo:', groupLetter, 'para:', appState.view.group);
                     filterGroup(groupLetter);
                 } else if (appState.view.division) {
-                    console.log('[AutoNav] Filtrando por divisão:', appState.view.division);
                     filterDivision(appState.view.division);
                 } else {
-                    console.log('[AutoNav] Sem divisão/grupo específico, mostrando tudo');
                 }
 
                 // Disparar evento indicando que os dados foram carregados
@@ -8565,11 +8546,25 @@ class EventManager {
      * Dispatch de eventos para handlers registrados
      */
     dispatchEvent(eventType, event) {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+
         for (const [key, handlers] of this.handlers) {
             const [type, selector] = key.split(':');
 
-            if (type === eventType && event.target.matches(selector)) {
-                handlers.forEach(handler => handler(event));
+            if (type !== eventType) {
+                continue;
+            }
+
+            const matchedTarget = event.target.closest(selector);
+            if (matchedTarget) {
+                const delegatedEvent = Object.assign({}, event, {
+                    target: matchedTarget,
+                    currentTarget: matchedTarget,
+                    originalEvent: event
+                });
+                handlers.forEach(handler => handler(delegatedEvent));
             }
         }
     }
@@ -8623,11 +8618,8 @@ class DivisionSelector extends SelectorComponent {
 
         // Validar divisão atual: usar a já definida se for válida, senão usar a primeira
         if (!appState.view.division || !divisions.includes(appState.view.division)) {
-            console.log('[DivisionSelector] appState.view.division antes:', appState.view.division, 'divisions:', divisions);
             appState.view.division = divisions[0];
-            console.log('[DivisionSelector] Divisão indefinida, usando primeira:', divisions[0], 'de:', divisions);
         } else {
-            console.log('[DivisionSelector] Mantendo divisão já definida:', appState.view.division);
         }
 
         divisions.forEach(division => {
@@ -8851,24 +8843,16 @@ function getForecastDataForCurrentGroup() {
 function refreshPredictionsTeamsForSelection() {
     const forecastSubset = getForecastDataForCurrentGroup();
 
-    console.log('[Predictions] refreshPredictionsTeamsForSelection chamada');
-    console.log('[Predictions] forecastSubset.length:', forecastSubset.length);
 
     PredictionsState.availableTeams = forecastSubset
         .map(row => row.team)
         .filter(team => team && team.trim() !== '')
         .sort((a, b) => a.localeCompare(b, 'pt-PT'));
 
-    console.log('[Predictions] availableTeams:', PredictionsState.availableTeams.length, 'equipas');
-    console.log('[Predictions] Lista de equipas disponíveis:', PredictionsState.availableTeams);
-    console.log('[Predictions] favoriteTeam:', favoriteTeam);
-    console.log('[Predictions] favoriteTeam está no array?', PredictionsState.availableTeams.includes(favoriteTeam));
-    console.log('[Predictions] selectedTeam antes:', PredictionsState.selectedTeam);
 
     if (PredictionsState.availableTeams.length === 0) {
         PredictionsState.selectedTeam = null;
         PredictionsState.currentTeamIndex = 0;
-        console.log('[Predictions] Nenhuma equipa disponível');
         return;
     }
 
@@ -8885,21 +8869,17 @@ function refreshPredictionsTeamsForSelection() {
 
             if (matchingTeam) {
                 PredictionsState.selectedTeam = matchingTeam;
-                console.log('[Predictions] ✓ Equipa favorita encontrada e selecionada:', matchingTeam, '(favorita:', favoriteTeam, ')');
             } else {
                 PredictionsState.currentTeamIndex = 0;
                 PredictionsState.selectedTeam = PredictionsState.availableTeams[0];
-                console.log('[Predictions] Primeira equipa selecionada (favorita não encontrada):', PredictionsState.selectedTeam);
             }
         } else {
             PredictionsState.currentTeamIndex = 0;
             PredictionsState.selectedTeam = PredictionsState.availableTeams[0];
-            console.log('[Predictions] Primeira equipa selecionada:', PredictionsState.selectedTeam);
         }
         return;
     }
 
-    console.log('[Predictions] Equipa já selecionada mantida:', PredictionsState.selectedTeam);
     PredictionsState.currentTeamIndex = PredictionsState.availableTeams.indexOf(PredictionsState.selectedTeam);
 }
 
@@ -9002,7 +8982,6 @@ async function tryLoadWithSimulations(fileType, modalidadeBase, anoCompleto) {
             const response = await fetch(filename);
             if (response.ok) {
                 const csvdata = await response.text();
-                console.log(`✓ Ficheiro encontrado: ${filename} (${sims.toLocaleString()} simulacoes)`);
                 return { data: csvdata, sims: sims };
             }
         } catch (error) {
@@ -9146,26 +9125,34 @@ function updateTeamSliderDisplay() {
     const teamName = PredictionsState.selectedTeam;
     if (!teamName) return;
 
+    // Setar custom properties dos gaps responsivos
+    const sliderContainer = document.querySelector('.team-slider-container');
+    if (sliderContainer) {
+        const gaps = getResponsiveGaps();
+        sliderContainer.style.setProperty('--gap1', `${gaps.gap1}px`);
+        sliderContainer.style.setProperty('--gap2', `${gaps.gap2}px`);
+        sliderContainer.style.setProperty('--gap3', `${gaps.gap3}px`);
+    }
+
     const courseInfo = getCourseInfo(teamName);
     const totalTeams = PredictionsState.availableTeams.length;
     const currentIndex = PredictionsState.currentTeamIndex;
-    const prevIndex = totalTeams > 0 ? (currentIndex - 1 + totalTeams) % totalTeams : 0;
-    const nextIndex = totalTeams > 0 ? (currentIndex + 1) % totalTeams : 0;
-    const prevTeam = totalTeams > 1 ? PredictionsState.availableTeams[prevIndex] : null;
-    const nextTeam = totalTeams > 1 ? PredictionsState.availableTeams[nextIndex] : null;
 
     // Atualizar nome
     const nameEl = document.getElementById('selectedTeamName');
     nameEl.textContent = courseInfo.fullName || courseInfo.shortName || teamName;
 
+    // Remover estrela anterior se existir
+    const oldStar = nameEl.querySelector('.favorite-star-btn');
+    if (oldStar) {
+        oldStar.remove();
+    }
+
     // Botão de favorito - usar isTeamFavorite() para comparação correta
     const isFav = isTeamFavorite(teamName);
     const starBtn = document.createElement('span');
     starBtn.className = 'favorite-star-btn';
-    starBtn.style.cursor = 'pointer';
-    starBtn.style.marginLeft = '10px';
     starBtn.style.color = isFav ? '#fbbf24' : '#ccc';
-    starBtn.style.fontSize = '1.2em';
     starBtn.innerHTML = isFav ? '★' : '☆';
     starBtn.title = isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
 
@@ -9176,33 +9163,80 @@ function updateTeamSliderDisplay() {
 
     nameEl.appendChild(starBtn);
 
-    // Atualizar emblema
+    // Atualizar emblema central
     const emblemContainer = document.getElementById('selectedTeamEmblem');
     renderPredictionsEmblem(emblemContainer, courseInfo, teamName);
 
-    const prevEmblem = document.getElementById('prevTeamEmblem');
-    const nextEmblem = document.getElementById('nextTeamEmblem');
-    if (prevEmblem) {
-        if (prevTeam) {
-            renderPredictionsEmblem(prevEmblem, getCourseInfo(prevTeam), prevTeam, true);
+    // Atualizar todos os ghosts
+    for (let offset = -3; offset <= 3; offset++) {
+        if (offset === 0) continue; // Pular o centro
+
+        const ghostIndex = (currentIndex + offset + totalTeams) % totalTeams;
+        const ghostTeam = PredictionsState.availableTeams[ghostIndex];
+
+        let ghostElement;
+        if (offset < 0) {
+            ghostElement = document.querySelector(`.ghost-left-${Math.abs(offset)}`);
         } else {
-            prevEmblem.innerHTML = '';
+            ghostElement = document.querySelector(`.ghost-right-${offset}`);
+        }
+
+        if (ghostElement && ghostTeam) {
+            const ghostInfo = getCourseInfo(ghostTeam);
+            renderPredictionsEmblem(ghostElement, ghostInfo, ghostTeam, true);
+        } else if (ghostElement) {
+            ghostElement.innerHTML = '';
         }
     }
-    if (nextEmblem) {
-        if (nextTeam) {
-            renderPredictionsEmblem(nextEmblem, getCourseInfo(nextTeam), nextTeam, true);
-        } else {
-            nextEmblem.innerHTML = '';
+
+    // Limpar estilos inline dos ghosts DEPOIS de renderizar tudo
+    // Usar requestAnimationFrame para garantir que o browser processou o re-render primeiro
+    requestAnimationFrame(() => {
+        // Verificar se ainda está animando - se sim, esperar mais
+        const mainEmblem = document.getElementById('selectedTeamEmblem');
+
+        if (mainEmblem && mainEmblem.classList.contains('animating')) {
+            // Ainda está animando, esperar até terminar
+            return;
         }
-    }
+
+        const allGhosts = document.querySelectorAll('.team-slider-ghost');
+        allGhosts.forEach(ghost => {
+            if (!ghost.classList.contains('animating')) {
+                ghost.style.removeProperty('transform');
+                ghost.style.removeProperty('opacity');
+                ghost.style.removeProperty('filter');
+                ghost.style.removeProperty('visibility');
+            }
+        });
+    });
 }
 
-function renderPredictionsEmblem(container, courseInfo, teamName, isGhost = false) {
+function renderPredictionsEmblem(container, courseInfo, teamName, isGhost = false, invisibleStart = false) {
     if (!container) return;
+
     if (courseInfo.emblemPath) {
         const ghostClass = isGhost ? 'team-slider-ghost-emblem' : '';
-        container.innerHTML = `<img src="${courseInfo.emblemPath}" alt="${courseInfo.fullName || teamName}" class="${ghostClass}">`;
+        const existingImg = container.querySelector('img');
+
+        // Se a imagem já existe e é a mesma, não re-renderizar (evitar piscar)
+        if (existingImg) {
+            const currentSrc = existingImg.src;
+            const newSrc = courseInfo.emblemPath;
+
+            // Comparar apenas o final do caminho (filename)
+            const currentFilename = currentSrc.split('/').pop().split('\\').pop();
+            const newFilename = newSrc.split('/').pop().split('\\').pop();
+
+            if (currentFilename === newFilename) {
+                // Mesma imagem, não fazer nada
+                return;
+            }
+        }
+
+        // Criar nova imagem (com opacity 0 se invisibleStart for true)
+        const styleAttr = invisibleStart ? ' style="opacity: 0;"' : '';
+        container.innerHTML = `<img src="${courseInfo.emblemPath}" alt="${courseInfo.fullName || teamName}" class="${ghostClass}"${styleAttr}>`;
     } else if (!isGhost) {
         container.innerHTML = `<div class="team-slider-fallback" style="background: ${courseInfo.primaryColor};"></div>`;
     } else {
@@ -9210,42 +9244,298 @@ function renderPredictionsEmblem(container, courseInfo, teamName, isGhost = fals
     }
 }
 
-function animateTeamSlider(direction, onMidpoint) {
-    const selectedEmblem = document.getElementById('selectedTeamEmblem');
-    const prevEmblem = document.getElementById('prevTeamEmblem');
-    const nextEmblem = document.getElementById('nextTeamEmblem');
+function getResponsiveGaps() {
+    const width = window.innerWidth;
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-    if (!selectedEmblem) return;
+    // Mobile (≤480px)
+    if (width <= 480) {
+        const scale = clamp(width / 380, 0.9, 1.08);
+        return {
+            gap1: Math.round(50 * scale),
+            gap2: Math.round(85 * scale),
+            gap3: Math.round(112 * scale),
+            gap4: Math.round(138 * scale)
+        };
+    }
+    // Tablet (≤768px)
+    else if (width <= 768) {
+        const scale = clamp(width / 700, 0.92, 1.12);
+        return {
+            gap1: Math.round(75 * scale),
+            gap2: Math.round(135 * scale),
+            gap3: Math.round(175 * scale),
+            gap4: Math.round(215 * scale)
+        };
+    }
+    // Desktop
+    const scale = clamp(width / 1200, 0.9, 1.15);
+    return {
+        gap1: Math.round(95 * scale),
+        gap2: Math.round(165 * scale),
+        gap3: Math.round(210 * scale),
+        gap4: Math.round(255 * scale)
+    };
+}
 
-    const className = direction === 'prev' ? 'slide-right' : 'slide-left';
+function getResponsiveScales() {
+    const width = window.innerWidth;
 
-    // Remover classes de animação anteriores
-    [selectedEmblem, prevEmblem, nextEmblem].forEach(el => {
-        if (el) {
-            el.classList.remove('slide-left', 'slide-right');
-            void el.offsetWidth; // Forçar reflow
-        }
-    });
+    // Mobile (≤480px) - animações mais contidas
+    if (width <= 480) {
+        return {
+            scale1: 0.65,
+            scale2: 0.45,
+            scale3: 0.3,
+            scale4: 0.1,
+            opacity1: 0.45,
+            opacity2: 0.3,
+            opacity3: 0.18,
+            opacity4: 0.1
+        };
+    }
+    // Tablet (≤768px)
+    else if (width <= 768) {
+        return {
+            scale1: 0.75,
+            scale2: 0.55,
+            scale3: 0.4,
+            scale4: 0.35,
+            opacity1: 0.55,
+            opacity2: 0.4,
+            opacity3: 0.3,
+            opacity4: 0.2
+        };
+    }
+    // Desktop - valores originais
+    return {
+        scale1: 0.7,
+        scale2: 0.5,
+        scale3: 0.35,
+        scale4: 0.3,
+        opacity1: 0.5,
+        opacity2: 0.35,
+        opacity3: 0.2,
+        opacity4: 0.1
+    };
+}
 
-    // Adicionar classe de animação
-    [selectedEmblem, prevEmblem, nextEmblem].forEach(el => {
-        if (el) {
-            el.classList.add(className);
-        }
-    });
+function animateTeamSlider(direction) {
+    const mainEmblem = document.getElementById('selectedTeamEmblem');
+    const allGhosts = document.querySelectorAll('.team-slider-ghost');
+    const sliderContainer = document.querySelector('.team-slider-container');
 
-    // Executar o callback no meio da animação (50% = 200ms para 400ms)
-    if (onMidpoint) {
-        setTimeout(onMidpoint, 200);
+    if (!mainEmblem) return;
+
+    // Obter gaps e escalas responsivos
+    const gaps = getResponsiveGaps();
+    const scales = getResponsiveScales();
+
+    // Definir custom properties dos gaps no container para que o CSS use corretos
+    if (sliderContainer) {
+        sliderContainer.style.setProperty('--gap1', `${gaps.gap1}px`);
+        sliderContainer.style.setProperty('--gap2', `${gaps.gap2}px`);
+        sliderContainer.style.setProperty('--gap3', `${gaps.gap3}px`);
     }
 
-    selectedEmblem.addEventListener('animationend', () => {
-        [selectedEmblem, prevEmblem, nextEmblem].forEach(el => {
-            if (el) {
-                el.classList.remove(className);
+    // Limpar classes de animação anteriores
+    mainEmblem.classList.remove('slide-left', 'slide-right', 'enter-from-left', 'enter-from-right', 'animating');
+
+    // Limpar variáveis CSS anteriores
+    mainEmblem.style.removeProperty('--start-x');
+    mainEmblem.style.removeProperty('--start-scale');
+    mainEmblem.style.removeProperty('--end-x');
+    mainEmblem.style.removeProperty('--end-scale');
+
+    allGhosts.forEach(ghost => {
+        ghost.classList.remove('animating');
+
+        // Remover estilos inline para permitir que o CSS base controle novamente
+        ghost.style.removeProperty('animation');
+        ghost.style.removeProperty('--start-x');
+        ghost.style.removeProperty('--start-scale');
+        ghost.style.removeProperty('--start-opacity');
+        ghost.style.removeProperty('--end-x');
+        ghost.style.removeProperty('--end-scale');
+        ghost.style.removeProperty('--end-opacity');
+        ghost.style.removeProperty('transform');
+        ghost.style.removeProperty('opacity');
+        ghost.style.removeProperty('filter');
+        ghost.style.removeProperty('visibility');
+    });
+
+    void mainEmblem.offsetWidth; // Forçar reflow
+
+    if (direction === 'prev') {
+        // Navegar para trás (seta esquerda)
+        // Emblema principal sai para a direita (0 → 1)
+        mainEmblem.style.setProperty('--start-x', '-50%');
+        mainEmblem.style.setProperty('--start-scale', '1');
+        mainEmblem.style.setProperty('--end-x', `calc(-50% + ${gaps.gap1}px)`);
+        mainEmblem.style.setProperty('--end-scale', `${scales.scale1}`);
+        mainEmblem.classList.add('slide-right', 'animating');
+
+        // Animar ghosts: todos movem uma posição para a direita
+        allGhosts.forEach(ghost => {
+            const position = parseInt(ghost.dataset.position);
+            const newPos = position + 1;
+
+            if (position === 3) {
+                // Ghost mais à direita: desaparece
+                ghost.style.animation = 'fadeOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === -1) {
+                // Ghost esquerdo que vai para o centro: anima para ser o novo principal
+                ghost.style.setProperty('--start-x', `calc(-50% - ${gaps.gap1}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale1}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity1}`);
+                ghost.style.setProperty('--end-x', '-50%');
+                ghost.style.setProperty('--end-scale', '1');
+                ghost.style.setProperty('--end-opacity', '1');
+                ghost.style.animation = 'ghostToMain 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === -2) {
+                // Ghost esquerdo na posição -2: move para posição -1
+                ghost.style.setProperty('--start-x', `calc(-50% - ${gaps.gap2}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale2}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity2}`);
+                ghost.style.setProperty('--end-x', `calc(-50% - ${gaps.gap1}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale1}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity1}`);
+                ghost.style.animation = 'ghostShiftRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === -3) {
+                // Ghost na posição -3: move para posição -2
+                ghost.style.setProperty('--start-x', `calc(-50% - ${gaps.gap3}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale3}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity3}`);
+                ghost.style.setProperty('--end-x', `calc(-50% - ${gaps.gap2}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale2}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity2}`);
+                ghost.style.animation = 'ghostShiftRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === -4) {
+                // Ghost temporário na posição -4: desliza para -3 com fade-in
+                ghost.classList.remove('temp-ghost-invisible');  // Remover classe antes da animação
+                ghost.style.setProperty('--start-x', `calc(-50% - ${gaps.gap4}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale4}`);
+                ghost.style.setProperty('--start-opacity', '0');
+                ghost.style.setProperty('--end-x', `calc(-50% - ${gaps.gap3}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale3}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity3}`);
+                ghost.style.animation = 'ghostShiftRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === 1) {
+                // Ghost direito próximo: move para posição 2
+                ghost.style.setProperty('--start-x', `calc(-50% + ${gaps.gap1}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale1}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity1}`);
+                ghost.style.setProperty('--end-x', `calc(-50% + ${gaps.gap2}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale2}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity2}`);
+                ghost.style.animation = 'ghostShiftRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === 2) {
+                // Ghost direito na posição 2: move para posição 3
+                ghost.style.setProperty('--start-x', `calc(-50% + ${gaps.gap2}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale2}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity2}`);
+                ghost.style.setProperty('--end-x', `calc(-50% + ${gaps.gap3}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale3}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity3}`);
+                ghost.style.animation = 'ghostShiftRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
             }
+            ghost.classList.add('animating');
         });
-    }, { once: true });
+    } else {
+        // Navegar para frente (seta direita): ghost direito vem para o centro
+        // Emblema principal sai para a esquerda (0 → -1)
+        mainEmblem.style.setProperty('--start-x', '-50%');
+        mainEmblem.style.setProperty('--start-scale', '1');
+        mainEmblem.style.setProperty('--end-x', `calc(-50% - ${gaps.gap1}px)`);
+        mainEmblem.style.setProperty('--end-scale', `${scales.scale1}`);
+        mainEmblem.classList.add('slide-left', 'animating');
+
+        // Animar ghosts: todos movem uma posição para a esquerda
+        allGhosts.forEach(ghost => {
+            const position = parseInt(ghost.dataset.position);
+            const newPos = position - 1;
+
+            if (position === -3) {
+                // Ghost mais à esquerda: desaparece
+                ghost.style.animation = 'fadeOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === 1) {
+                // Ghost direito que vai para o centro: anima para ser o novo principal
+                ghost.style.setProperty('--start-x', `calc(-50% + ${gaps.gap1}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale1}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity1}`);
+                ghost.style.setProperty('--end-x', '-50%');
+                ghost.style.setProperty('--end-scale', '1');
+                ghost.style.setProperty('--end-opacity', '1');
+                ghost.style.animation = 'ghostToMain 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === 2) {
+                // Ghost direito na posição 2: move para posição 1
+                ghost.style.setProperty('--start-x', `calc(-50% + ${gaps.gap2}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale2}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity2}`);
+                ghost.style.setProperty('--end-x', `calc(-50% + ${gaps.gap1}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale1}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity1}`);
+                ghost.style.animation = 'ghostShiftLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === 3) {
+                // Ghost na posição 3: move para posição 2
+                ghost.style.setProperty('--start-x', `calc(-50% + ${gaps.gap3}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale3}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity3}`);
+                ghost.style.setProperty('--end-x', `calc(-50% + ${gaps.gap2}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale2}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity2}`);
+                ghost.style.animation = 'ghostShiftLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === 4) {
+                // Ghost temporário na posição 4: desliza para 3 com fade-in
+                ghost.classList.remove('temp-ghost-invisible');  // Remover classe antes da animação
+                ghost.style.setProperty('--start-x', `calc(-50% + ${gaps.gap4}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale4}`);
+                ghost.style.setProperty('--start-opacity', '0');
+                ghost.style.setProperty('--end-x', `calc(-50% + ${gaps.gap3}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale3}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity3}`);
+                ghost.style.animation = 'ghostShiftLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === -1) {
+                // Ghost esquerdo próximo: move para posição -2
+                ghost.style.setProperty('--start-x', `calc(-50% - ${gaps.gap1}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale1}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity1}`);
+                ghost.style.setProperty('--end-x', `calc(-50% - ${gaps.gap2}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale2}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity2}`);
+                ghost.style.animation = 'ghostShiftLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            } else if (position === -2) {
+                // Ghost esquerdo na posição -2: move para posição -3
+                ghost.style.setProperty('--start-x', `calc(-50% - ${gaps.gap2}px)`);
+                ghost.style.setProperty('--start-scale', `${scales.scale2}`);
+                ghost.style.setProperty('--start-opacity', `${scales.opacity2}`);
+                ghost.style.setProperty('--end-x', `calc(-50% - ${gaps.gap3}px)`);
+                ghost.style.setProperty('--end-scale', `${scales.scale3}`);
+                ghost.style.setProperty('--end-opacity', `${scales.opacity3}`);
+                ghost.style.animation = 'ghostShiftLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            }
+            ghost.classList.add('animating');
+        });
+    }
+
+    return new Promise(resolve => {
+        mainEmblem.addEventListener('animationend', () => {
+            mainEmblem.classList.remove('slide-left', 'slide-right', 'animating');
+
+            // Remover variáveis CSS depois da animação terminar
+            mainEmblem.style.removeProperty('--start-x');
+            mainEmblem.style.removeProperty('--start-scale');
+            mainEmblem.style.removeProperty('--end-x');
+            mainEmblem.style.removeProperty('--end-scale');
+
+            allGhosts.forEach(ghost => {
+                ghost.classList.remove('animating');
+                ghost.style.removeProperty('animation');
+                // NÃO remover transform, opacity, filter aqui - deixar para updateTeamSliderDisplay fazer o cleanup
+            });
+            resolve();
+        }, { once: true });
+    });
 }
 
 /**
@@ -9483,25 +9773,112 @@ function formatPredictionDate(dateStr) {
 /**
  * Navega para a equipa anterior
  */
-function navigateToPreviousTeam() {
+async function navigateToPreviousTeam() {
     const totalTeams = PredictionsState.availableTeams.length;
     if (totalTeams === 0) return;
-    PredictionsState.currentTeamIndex = (PredictionsState.currentTeamIndex - 1 + totalTeams) % totalTeams;
+
+    // Obter gaps e escalas responsivos
+    const gaps = getResponsiveGaps();
+    const scales = getResponsiveScales();
+
+    // Calcular novo índice
+    const newIndex = (PredictionsState.currentTeamIndex - 1 + totalTeams) % totalTeams;
+
+    // Criar ghost temporário na posição -4 para o novo emblema
+    const newGhostIndex = (newIndex - 3 + totalTeams) % totalTeams;
+    const newGhostTeam = PredictionsState.availableTeams[newGhostIndex];
+    const ghostLeft3 = document.querySelector('.ghost-left-3');
+
+    // Criar elemento temporário na posição -4 (fora de vista)
+    const tempGhost = document.createElement('div');
+    tempGhost.className = 'team-slider-ghost temp-ghost-invisible';
+    tempGhost.dataset.position = '-4';
+    tempGhost.style.left = '50%';
+    tempGhost.style.transform = `translate(calc(-50% - ${gaps.gap4}px), -50%) scale(${scales.scale4})`;
+    tempGhost.style.pointerEvents = 'none';
+
+    if (newGhostTeam) {
+        const newGhostInfo = getCourseInfo(newGhostTeam);
+        renderPredictionsEmblem(tempGhost, newGhostInfo, newGhostTeam, true);
+    }
+
+    ghostLeft3.parentElement.appendChild(tempGhost);
+
+    // Iniciar animação (ghost -4 desliza para -3 com fade-in, -3 desliza para -2, etc)
+    const animationPromise = animateTeamSlider('prev');
+
+    // Atualizar índice após animação
+    PredictionsState.currentTeamIndex = newIndex;
     PredictionsState.selectedTeam = PredictionsState.availableTeams[PredictionsState.currentTeamIndex];
-    animateTeamSlider('prev', () => updatePredictionsDisplay());
+
+    await animationPromise;
+
+    // Remover ghost temporário
+    tempGhost.remove();
+
+    // Atualizar display
+    updateTeamSliderDisplay();
+
+    // Atualizar stats e tabelas
+    updatePredictionsStats();
+    updatePredictionsTableHeaders();
+    updatePredictionsTable();
 }
 
 /**
  * Navega para a próxima equipa
  */
-function navigateToNextTeam() {
+async function navigateToNextTeam() {
     const totalTeams = PredictionsState.availableTeams.length;
     if (totalTeams === 0) return;
-    PredictionsState.currentTeamIndex = (PredictionsState.currentTeamIndex + 1) % totalTeams;
-    PredictionsState.selectedTeam = PredictionsState.availableTeams[PredictionsState.currentTeamIndex];
-    animateTeamSlider('next', () => updatePredictionsDisplay());
-}
 
+    // Obter gaps e escalas responsivos
+    const gaps = getResponsiveGaps();
+    const scales = getResponsiveScales();
+
+    // Calcular novo índice
+    const newIndex = (PredictionsState.currentTeamIndex + 1) % totalTeams;
+
+    // Criar ghost temporário na posição 4 para o novo emblema
+    const newGhostIndex = (newIndex + 3) % totalTeams;
+    const newGhostTeam = PredictionsState.availableTeams[newGhostIndex];
+    const ghostRight3 = document.querySelector('.ghost-right-3');
+
+    // Criar elemento temporário na posição 4 (fora de vista)
+    const tempGhost = document.createElement('div');
+    tempGhost.className = 'team-slider-ghost temp-ghost-invisible';
+    tempGhost.dataset.position = '4';
+    tempGhost.style.left = '50%';
+    tempGhost.style.transform = `translate(calc(-50% + ${gaps.gap4}px), -50%) scale(${scales.scale4})`;
+    tempGhost.style.pointerEvents = 'none';
+
+    if (newGhostTeam) {
+        const newGhostInfo = getCourseInfo(newGhostTeam);
+        renderPredictionsEmblem(tempGhost, newGhostInfo, newGhostTeam, true);
+    }
+
+    ghostRight3.parentElement.appendChild(tempGhost);
+
+    // Iniciar animação (ghost 4 desliza para 3 com fade-in, 3 desliza para 2, etc)
+    const animationPromise = animateTeamSlider('next');
+
+    // Atualizar índice após animação
+    PredictionsState.currentTeamIndex = newIndex;
+    PredictionsState.selectedTeam = PredictionsState.availableTeams[PredictionsState.currentTeamIndex];
+
+    await animationPromise;
+
+    // Remover ghost temporário
+    tempGhost.remove();
+
+    // Atualizar display
+    updateTeamSliderDisplay();
+
+    // Atualizar stats e tabelas
+    updatePredictionsStats();
+    updatePredictionsTableHeaders();
+    updatePredictionsTable();
+}
 // Event listeners para os botões do slider
 document.getElementById('prevTeamBtn')?.addEventListener('click', navigateToPreviousTeam);
 document.getElementById('nextTeamBtn')?.addEventListener('click', navigateToNextTeam);

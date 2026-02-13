@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="debug.js"></script>
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=18">
 </head>
 
 <body>
@@ -137,7 +137,10 @@
                     <div class="jornada-arrow-container">
                         <button class="jornada-arrow" id="prevJornadaBtn" data-jornada-nav="prev"
                             title="Jornada anterior" aria-label="Navegar para jornada anterior">
-                            &lt;
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
                         </button>
                         <div class="epoca-switch-label" id="prevEpocaLabel" style="display: none;"></div>
                     </div>
@@ -147,7 +150,10 @@
                     <div class="jornada-arrow-container">
                         <button class="jornada-arrow" id="nextJornadaBtn" data-jornada-nav="next"
                             title="Jornada seguinte" aria-label="Navegar para próxima jornada">
-                            &gt;
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
                         </button>
                         <div class="epoca-switch-label" id="nextEpocaLabel" style="display: none;"></div>
                     </div>
@@ -206,12 +212,19 @@
 
             <!-- Seletor de Equipa estilo Slider -->
             <div class="team-slider-container">
-                <button class="slider-arrow slider-prev" id="prevTeamBtn" aria-label="Equipa anterior">
-                    &lt;
-                </button>
-
                 <div class="team-slider-display" id="teamSliderDisplay">
-                    <div class="team-slider-ghost" id="prevTeamEmblem" aria-hidden="true"></div>
+                    <!-- Ghosts à esquerda -->
+                    <div class="team-slider-ghost ghost-left-3" data-position="-3" aria-hidden="true"></div>
+                    <div class="team-slider-ghost ghost-left-2" data-position="-2" aria-hidden="true"></div>
+                    <div class="team-slider-ghost ghost-left-1" data-position="-1" aria-hidden="true"></div>
+
+                    <button class="slider-arrow slider-prev" id="prevTeamBtn" aria-label="Equipa anterior">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+
                     <div class="team-slider-main" id="teamSliderMain">
                         <div class="team-slider-name" id="selectedTeamName">
                             Selecione uma modalidade
@@ -220,12 +233,19 @@
                             <!-- Emblema será inserido aqui -->
                         </div>
                     </div>
-                    <div class="team-slider-ghost" id="nextTeamEmblem" aria-hidden="true"></div>
-                </div>
 
-                <button class="slider-arrow slider-next" id="nextTeamBtn" aria-label="Próxima equipa">
-                    &gt;
-                </button>
+                    <button class="slider-arrow slider-next" id="nextTeamBtn" aria-label="Próxima equipa">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+
+                    <!-- Ghosts à direita -->
+                    <div class="team-slider-ghost ghost-right-1" data-position="1" aria-hidden="true"></div>
+                    <div class="team-slider-ghost ghost-right-2" data-position="2" aria-hidden="true"></div>
+                    <div class="team-slider-ghost ghost-right-3" data-position="3" aria-hidden="true"></div>
+                </div>
             </div>
 
             <!-- Previsões Gerais -->
@@ -270,7 +290,7 @@
         <button data-debug="close" class="debug-btn">Fechar</button>
     </div>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=6"></script>
 </body>
 
 </html>
