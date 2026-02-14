@@ -1,0 +1,722 @@
+{
+  "ANDEBOL MISTO": {
+    "global": {
+      "draw": {
+        "base_draw_rate": 0.04597701149425287,
+        "elo_sensitivity": 0.008968131798128437,
+        "model_intercept": -2.31209175561292,
+        "model_coef_linear": -0.008968131798128437,
+        "model_coef_quadratic": 6.408862665296841e-06,
+        "n_games": 174,
+        "median_elo_diff": 103.5,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 7.5120481927710845,
+        "margin_std": 5.3882267371716495,
+        "margin_elo_slope": 0.014113425173742459,
+        "margin_elo_intercept": 5.7253395781554355,
+        "margin_elo_r2": 0.08216636569967913,
+        "mean_margin_small_diff": 6.089743589743589,
+        "mean_margin_large_diff": 10.41025641025641,
+        "n_games": 166,
+        "distribution": "poisson",
+        "lambda": 7.5120481927710845,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 20.594827586206897,
+        "base_goals_per_team_std": 7.003256773105182,
+        "total_goals_mean": 41.189655172413794,
+        "total_goals_std": 10.707377781770553,
+        "dispersion_k": 14.908095857121586,
+        "n_games": 174,
+        "status": "calibrated"
+      }
+    },
+    "division_1": {
+      "draw": {
+        "base_draw_rate": 0.05555555555555555,
+        "elo_sensitivity": 0.005009095863389167,
+        "model_intercept": -2.3745362843976325,
+        "model_coef_linear": 0.005009095863389167,
+        "model_coef_quadratic": -6.724510561460294e-05,
+        "n_games": 90,
+        "median_elo_diff": 107.0,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 8.564705882352941,
+        "margin_std": 6.045799823160713,
+        "margin_elo_slope": 0.013811946842527477,
+        "margin_elo_intercept": 6.716829888315029,
+        "margin_elo_r2": 0.06799143515018997,
+        "mean_margin_small_diff": 6.783783783783784,
+        "mean_margin_large_diff": 11.565217391304348,
+        "n_games": 85,
+        "distribution": "poisson",
+        "lambda": 8.564705882352941,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 22.644444444444446,
+        "base_goals_per_team_std": 7.150464027073287,
+        "total_goals_mean": 45.28888888888889,
+        "total_goals_std": 10.035763210133874,
+        "dispersion_k": 18.001629638618972,
+        "n_games": 90,
+        "status": "calibrated"
+      }
+    },
+    "division_2": {
+      "draw": {
+        "base_draw_rate": 0.03571428571428571,
+        "elo_sensitivity": 0.019205775844714223,
+        "model_intercept": -2.373447933895139,
+        "model_coef_linear": -0.019205775844714223,
+        "model_coef_quadratic": 4.4968757397369405e-05,
+        "n_games": 84,
+        "median_elo_diff": 95.0,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 6.407407407407407,
+        "margin_std": 4.331275231420361,
+        "margin_elo_slope": 0.013129432790092587,
+        "margin_elo_intercept": 4.8443565383350276,
+        "margin_elo_r2": 0.09889156107922303,
+        "mean_margin_small_diff": 5.463414634146342,
+        "mean_margin_large_diff": 8.75,
+        "n_games": 81,
+        "distribution": "poisson",
+        "lambda": 6.407407407407407,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 18.398809523809526,
+        "base_goals_per_team_std": 6.122888247185991,
+        "total_goals_mean": 36.79761904761905,
+        "total_goals_std": 9.606272457178276,
+        "dispersion_k": 17.731761636010347,
+        "n_games": 84,
+        "status": "calibrated"
+      }
+    }
+  },
+  "BASQUETEBOL FEMININO": {
+    "global": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 71,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 8.67605633802817,
+        "margin_std": 5.949966618174375,
+        "margin_elo_slope": 0.013230153191310198,
+        "margin_elo_intercept": 7.210677116951221,
+        "margin_elo_r2": 0.04938507446662947,
+        "mean_margin_small_diff": 7.3076923076923075,
+        "mean_margin_large_diff": 11.461538461538462,
+        "n_games": 71,
+        "distribution": "poisson",
+        "lambda": 8.67605633802817,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 8.52112676056338,
+        "base_goals_per_team_std": 6.304166194388198,
+        "total_goals_mean": 17.04225352112676,
+        "total_goals_std": 6.9493876915768436,
+        "dispersion_k": 2.325636806089448,
+        "n_games": 71,
+        "status": "calibrated"
+      }
+    },
+    "division_1": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 71,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 8.67605633802817,
+        "margin_std": 5.949966618174375,
+        "margin_elo_slope": 0.013230153191310198,
+        "margin_elo_intercept": 7.210677116951221,
+        "margin_elo_r2": 0.04938507446662947,
+        "mean_margin_small_diff": 7.3076923076923075,
+        "mean_margin_large_diff": 11.461538461538462,
+        "n_games": 71,
+        "distribution": "poisson",
+        "lambda": 8.67605633802817,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 8.52112676056338,
+        "base_goals_per_team_std": 6.304166194388198,
+        "total_goals_mean": 17.04225352112676,
+        "total_goals_std": 6.9493876915768436,
+        "dispersion_k": 2.325636806089448,
+        "n_games": 71,
+        "status": "calibrated"
+      }
+    }
+  },
+  "BASQUETEBOL MASCULINO": {
+    "global": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 187,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 5.32620320855615,
+        "margin_std": 4.399259541656529,
+        "margin_elo_slope": 0.0037058953127778985,
+        "margin_elo_intercept": 4.951630335257674,
+        "margin_elo_r2": 0.004989284404143522,
+        "mean_margin_small_diff": 4.823529411764706,
+        "mean_margin_large_diff": 5.464285714285714,
+        "n_games": 187,
+        "distribution": "poisson",
+        "lambda": 5.32620320855615,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 9.491978609625669,
+        "base_goals_per_team_std": 4.670271189502776,
+        "total_goals_mean": 18.983957219251337,
+        "total_goals_std": 6.2867962270387645,
+        "dispersion_k": 7.313445481535473,
+        "n_games": 187,
+        "status": "calibrated"
+      }
+    },
+    "division_1": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 75,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 4.946666666666666,
+        "margin_std": 4.360101935607572,
+        "margin_elo_slope": -0.0013110537205994872,
+        "margin_elo_intercept": 5.087299029096305,
+        "margin_elo_r2": 0.0006261386791012761,
+        "mean_margin_small_diff": 5.05,
+        "mean_margin_large_diff": 5.166666666666667,
+        "n_games": 75,
+        "distribution": "poisson",
+        "lambda": 4.946666666666666,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 10.446666666666667,
+        "base_goals_per_team_std": 4.539510497350519,
+        "total_goals_mean": 20.893333333333334,
+        "total_goals_std": 6.2408831283899415,
+        "dispersion_k": 10.740904855846832,
+        "n_games": 75,
+        "status": "calibrated"
+      }
+    },
+    "division_2": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 112,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 5.580357142857143,
+        "margin_std": 4.407052774606093,
+        "margin_elo_slope": 0.007396467345934261,
+        "margin_elo_intercept": 4.863428129397658,
+        "margin_elo_r2": 0.019883400460847744,
+        "mean_margin_small_diff": 4.67741935483871,
+        "mean_margin_large_diff": 5.6875,
+        "n_games": 112,
+        "distribution": "poisson",
+        "lambda": 5.580357142857143,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 8.852678571428571,
+        "base_goals_per_team_std": 4.647454368895879,
+        "total_goals_mean": 17.705357142857142,
+        "total_goals_std": 5.986052826686175,
+        "dispersion_k": 6.1485151301459915,
+        "n_games": 112,
+        "status": "calibrated"
+      }
+    }
+  },
+  "FUTEBOL DE 7 MASCULINO": {
+    "global": {
+      "draw": {
+        "base_draw_rate": 0.12121212121212122,
+        "elo_sensitivity": 7.750239028810585e-05,
+        "model_intercept": -1.7380720082395336,
+        "model_coef_linear": 7.750239028810585e-05,
+        "model_coef_quadratic": -1.4163345258656942e-05,
+        "n_games": 198,
+        "median_elo_diff": 83.5,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 2.9310344827586206,
+        "margin_std": 2.055511813369822,
+        "margin_elo_slope": 0.0025991534215799687,
+        "margin_elo_intercept": 2.6281285455011574,
+        "margin_elo_r2": 0.01599954483558788,
+        "mean_margin_small_diff": 2.8222222222222224,
+        "mean_margin_large_diff": 3.4571428571428573,
+        "n_games": 174,
+        "distribution": "poisson",
+        "lambda": 2.9310344827586206,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 2.414141414141414,
+        "base_goals_per_team_std": 2.095016217049169,
+        "total_goals_mean": 4.828282828282828,
+        "total_goals_std": 2.50873385120259,
+        "dispersion_k": 2.9509983726396802,
+        "n_games": 198,
+        "status": "calibrated"
+      }
+    },
+    "division_1": {
+      "draw": {
+        "base_draw_rate": 0.12903225806451613,
+        "elo_sensitivity": 0.011663204052722413,
+        "model_intercept": -2.0927162649923705,
+        "model_coef_linear": 0.011663204052722413,
+        "model_coef_quadratic": -5.876059345605402e-05,
+        "n_games": 93,
+        "median_elo_diff": 79.0,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 2.925925925925926,
+        "margin_std": 2.0534690778709797,
+        "margin_elo_slope": 0.005343644813172265,
+        "margin_elo_intercept": 2.2964973436731286,
+        "margin_elo_r2": 0.07290175502923903,
+        "mean_margin_small_diff": 2.488372093023256,
+        "mean_margin_large_diff": 3.8421052631578947,
+        "n_games": 81,
+        "distribution": "poisson",
+        "lambda": 2.925925925925926,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 2.381720430107527,
+        "base_goals_per_team_std": 2.117385598161809,
+        "total_goals_mean": 4.763440860215054,
+        "total_goals_std": 2.6084966603673556,
+        "dispersion_k": 2.6991761453505165,
+        "n_games": 93,
+        "status": "calibrated"
+      }
+    },
+    "division_2": {
+      "draw": {
+        "base_draw_rate": 0.11428571428571428,
+        "elo_sensitivity": 0.007683748110077182,
+        "model_intercept": -1.5300064081228693,
+        "model_coef_linear": -0.007683748110077182,
+        "model_coef_quadratic": 1.3117334111881616e-05,
+        "n_games": 105,
+        "median_elo_diff": 88.0,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 2.935483870967742,
+        "margin_std": 2.0572789817814305,
+        "margin_elo_slope": -0.00015340386545070235,
+        "margin_elo_intercept": 2.953194594659615,
+        "margin_elo_r2": 5.194761285381932e-05,
+        "mean_margin_small_diff": 3.127659574468085,
+        "mean_margin_large_diff": 3.0,
+        "n_games": 93,
+        "distribution": "poisson",
+        "lambda": 2.935483870967742,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 2.442857142857143,
+        "base_goals_per_team_std": 2.0745788852247604,
+        "total_goals_mean": 4.885714285714286,
+        "total_goals_std": 2.41548293786755,
+        "dispersion_k": 3.2066016010527467,
+        "n_games": 105,
+        "status": "calibrated"
+      }
+    }
+  },
+  "FUTSAL FEMININO": {
+    "global": {
+      "draw": {
+        "base_draw_rate": 0.015151515151515152,
+        "elo_sensitivity": 370.29064381796366,
+        "model_intercept": -18589.40333800658,
+        "model_coef_linear": 370.29064381796366,
+        "model_coef_quadratic": -1.8416209319417463,
+        "n_games": 66,
+        "median_elo_diff": 75.5,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 5.446153846153846,
+        "margin_std": 3.926363630758968,
+        "margin_elo_slope": 0.0003574446892483798,
+        "margin_elo_intercept": 5.410222406160786,
+        "margin_elo_r2": 7.663213744993988e-05,
+        "mean_margin_small_diff": 5.195121951219512,
+        "mean_margin_large_diff": 5.75,
+        "n_games": 65,
+        "distribution": "poisson",
+        "lambda": 5.446153846153846,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 3.8484848484848486,
+        "base_goals_per_team_std": 3.8207663210504594,
+        "total_goals_mean": 7.696969696969697,
+        "total_goals_std": 3.741534675284255,
+        "dispersion_k": 1.3777815743390427,
+        "n_games": 66,
+        "status": "calibrated"
+      }
+    },
+    "division_1": {
+      "draw": {
+        "base_draw_rate": 0.015151515151515152,
+        "elo_sensitivity": 370.29064381796366,
+        "model_intercept": -18589.40333800658,
+        "model_coef_linear": 370.29064381796366,
+        "model_coef_quadratic": -1.8416209319417463,
+        "n_games": 66,
+        "median_elo_diff": 75.5,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 5.446153846153846,
+        "margin_std": 3.926363630758968,
+        "margin_elo_slope": 0.0003574446892483798,
+        "margin_elo_intercept": 5.410222406160786,
+        "margin_elo_r2": 7.663213744993988e-05,
+        "mean_margin_small_diff": 5.195121951219512,
+        "mean_margin_large_diff": 5.75,
+        "n_games": 65,
+        "distribution": "poisson",
+        "lambda": 5.446153846153846,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 3.8484848484848486,
+        "base_goals_per_team_std": 3.8207663210504594,
+        "total_goals_mean": 7.696969696969697,
+        "total_goals_std": 3.741534675284255,
+        "dispersion_k": 1.3777815743390427,
+        "n_games": 66,
+        "status": "calibrated"
+      }
+    }
+  },
+  "FUTSAL MASCULINO": {
+    "global": {
+      "draw": {
+        "base_draw_rate": 0.12267657992565056,
+        "elo_sensitivity": 0.0017944152965222533,
+        "model_intercept": -1.6624099827041072,
+        "model_coef_linear": -0.0017944152965222533,
+        "model_coef_quadratic": -7.779284425401188e-06,
+        "n_games": 269,
+        "median_elo_diff": 92.0,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 3.4364406779661016,
+        "margin_std": 2.507654899291073,
+        "margin_elo_slope": 0.002448738174027257,
+        "margin_elo_intercept": 3.1593182239325426,
+        "margin_elo_r2": 0.008364954205788405,
+        "mean_margin_small_diff": 3.325,
+        "mean_margin_large_diff": 3.8444444444444446,
+        "n_games": 236,
+        "distribution": "poisson",
+        "lambda": 3.4364406779661016,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 3.150557620817844,
+        "base_goals_per_team_std": 2.4368625208584502,
+        "total_goals_mean": 6.301115241635688,
+        "total_goals_std": 2.8063984681766145,
+        "dispersion_k": 3.56059338575651,
+        "n_games": 269,
+        "status": "calibrated"
+      }
+    },
+    "division_1": {
+      "draw": {
+        "base_draw_rate": 0.10101010101010101,
+        "elo_sensitivity": 0.007565136607082253,
+        "model_intercept": -2.7780506647940784,
+        "model_coef_linear": 0.007565136607082253,
+        "model_coef_quadratic": -1.3214805743069875e-05,
+        "n_games": 99,
+        "median_elo_diff": 96.0,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 3.247191011235955,
+        "margin_std": 2.4231138796241227,
+        "margin_elo_slope": 0.0034313963733034513,
+        "margin_elo_intercept": 2.9020079580878004,
+        "margin_elo_r2": 0.014668872726220703,
+        "mean_margin_small_diff": 3.0434782608695654,
+        "mean_margin_large_diff": 4.333333333333333,
+        "n_games": 89,
+        "distribution": "poisson",
+        "lambda": 3.247191011235955,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 3.0757575757575757,
+        "base_goals_per_team_std": 2.335349384848292,
+        "total_goals_mean": 6.151515151515151,
+        "total_goals_std": 2.6566616720368104,
+        "dispersion_k": 3.978086687904239,
+        "n_games": 99,
+        "status": "calibrated"
+      }
+    },
+    "division_2": {
+      "draw": {
+        "base_draw_rate": 0.13529411764705881,
+        "elo_sensitivity": 0.004139387680087848,
+        "model_intercept": -1.2239973876737023,
+        "model_coef_linear": -0.004139387680087848,
+        "model_coef_quadratic": -1.9342652219389176e-05,
+        "n_games": 170,
+        "median_elo_diff": 92.0,
+        "status": "calibrated"
+      },
+      "margin": {
+        "mean_margin": 3.5510204081632653,
+        "margin_std": 2.550666642137188,
+        "margin_elo_slope": 0.0017868589199537684,
+        "margin_elo_intercept": 3.3351994549402777,
+        "margin_elo_r2": 0.004662793518959219,
+        "mean_margin_small_diff": 3.5,
+        "mean_margin_large_diff": 3.6666666666666665,
+        "n_games": 147,
+        "distribution": "poisson",
+        "lambda": 3.5510204081632653,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 3.1941176470588237,
+        "base_goals_per_team_std": 2.4930422209763985,
+        "total_goals_mean": 6.3882352941176475,
+        "total_goals_std": 2.886455663539257,
+        "dispersion_k": 3.3769971710322877,
+        "n_games": 170,
+        "status": "calibrated"
+      }
+    }
+  },
+  "VOLEIBOL FEMININO": {
+    "global": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 234,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 1.705128205128205,
+        "margin_std": 0.4559851088148395,
+        "margin_elo_slope": 0.0007527703489989663,
+        "margin_elo_intercept": 1.6197048553533395,
+        "margin_elo_r2": 0.02809747560888095,
+        "mean_margin_small_diff": 1.65,
+        "mean_margin_large_diff": 1.8695652173913044,
+        "n_games": 234,
+        "distribution": "poisson",
+        "lambda": 1.705128205128205,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 1.1474358974358974,
+        "base_goals_per_team_std": 0.9114969877686784,
+        "total_goals_mean": 2.2948717948717947,
+        "total_goals_std": 0.45598510881483945,
+        "dispersion_k": 10.0,
+        "n_games": 234,
+        "status": "calibrated"
+      }
+    },
+    "division_1": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 104,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 1.7596153846153846,
+        "margin_std": 0.42731703929401865,
+        "margin_elo_slope": 0.0003357244057717154,
+        "margin_elo_intercept": 1.7159808962229204,
+        "margin_elo_r2": 0.008384610792248035,
+        "mean_margin_small_diff": 1.7551020408163265,
+        "mean_margin_large_diff": 1.88,
+        "n_games": 104,
+        "distribution": "poisson",
+        "lambda": 1.7596153846153846,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 1.1201923076923077,
+        "base_goals_per_team_std": 0.930248085985287,
+        "total_goals_mean": 2.2403846153846154,
+        "total_goals_std": 0.42731703929401865,
+        "dispersion_k": 10.0,
+        "n_games": 104,
+        "status": "calibrated"
+      }
+    },
+    "division_2": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 130,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 1.6615384615384616,
+        "margin_std": 0.4731863538224522,
+        "margin_elo_slope": 0.0012368048537217085,
+        "margin_elo_intercept": 1.5375059624771545,
+        "margin_elo_r2": 0.04986376185889953,
+        "mean_margin_small_diff": 1.5774647887323943,
+        "mean_margin_large_diff": 1.8571428571428572,
+        "n_games": 130,
+        "distribution": "poisson",
+        "lambda": 1.6615384615384616,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 1.1692307692307693,
+        "base_goals_per_team_std": 0.8956172047894083,
+        "total_goals_mean": 2.3384615384615386,
+        "total_goals_std": 0.4731863538224522,
+        "dispersion_k": 10.0,
+        "n_games": 130,
+        "status": "calibrated"
+      }
+    }
+  },
+  "VOLEIBOL MASCULINO": {
+    "global": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 256,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 1.71875,
+        "margin_std": 0.4496092053105675,
+        "margin_elo_slope": 0.00026697880230891637,
+        "margin_elo_intercept": 1.6854454372979093,
+        "margin_elo_r2": 0.003919397139451731,
+        "mean_margin_small_diff": 1.697674418604651,
+        "mean_margin_large_diff": 1.7301587301587302,
+        "n_games": 256,
+        "distribution": "poisson",
+        "lambda": 1.71875,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 1.140625,
+        "base_goals_per_team_std": 0.9162966819622343,
+        "total_goals_mean": 2.28125,
+        "total_goals_std": 0.4496092053105675,
+        "dispersion_k": 10.0,
+        "n_games": 256,
+        "status": "calibrated"
+      }
+    },
+    "division_1": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 103,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 1.7378640776699028,
+        "margin_std": 0.43979618069538357,
+        "margin_elo_slope": 0.00014912584487177785,
+        "margin_elo_intercept": 1.7171732286498778,
+        "margin_elo_r2": 0.0014011434157543236,
+        "mean_margin_small_diff": 1.7142857142857142,
+        "mean_margin_large_diff": 1.7,
+        "n_games": 103,
+        "distribution": "poisson",
+        "lambda": 1.7378640776699028,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 1.1310679611650485,
+        "base_goals_per_team_std": 0.9229047775317823,
+        "total_goals_mean": 2.262135922330097,
+        "total_goals_std": 0.43979618069538345,
+        "dispersion_k": 10.0,
+        "n_games": 103,
+        "status": "calibrated"
+      }
+    },
+    "division_2": {
+      "draw": {
+        "base_draw_rate": 0.0,
+        "elo_sensitivity": 0.0,
+        "n_games": 153,
+        "status": "single_class"
+      },
+      "margin": {
+        "mean_margin": 1.7058823529411764,
+        "margin_std": 0.45564509955381377,
+        "margin_elo_slope": 0.0003381767389290524,
+        "margin_elo_intercept": 1.6668837229956588,
+        "margin_elo_r2": 0.005604340067918698,
+        "mean_margin_small_diff": 1.6896551724137931,
+        "mean_margin_large_diff": 1.7575757575757576,
+        "n_games": 153,
+        "distribution": "poisson",
+        "lambda": 1.7058823529411764,
+        "status": "calibrated"
+      },
+      "goals": {
+        "base_goals_per_team": 1.1470588235294117,
+        "base_goals_per_team_std": 0.9117647058823529,
+        "total_goals_mean": 2.2941176470588234,
+        "total_goals_std": 0.45564509955381377,
+        "dispersion_k": 10.0,
+        "n_games": 153,
+        "status": "calibrated"
+      }
+    }
+  }
+}

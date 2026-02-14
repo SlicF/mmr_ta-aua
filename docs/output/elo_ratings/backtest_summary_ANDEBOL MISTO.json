@@ -1,0 +1,63 @@
+{
+  "modalidade": "ANDEBOL MISTO",
+  "num_seasons": 1,
+  "avg_brier_score": 0.0373088925,
+  "avg_rmse_place": 7.263810283177831,
+  "avg_rmse_points": 2.42408464796411,
+  "seasons": [
+    {
+      "season": "24_25",
+      "cutoff_jornada": 8,
+      "num_teams": 24,
+      "brier_score_champion": 0.0373088925,
+      "rmse_expected_place": 7.263810283177831,
+      "rmse_expected_points": 2.42408464796411,
+      "calibration_champion": {
+        "0-10%": {
+          "predicted": 0.0027842105263157896,
+          "observed": 0.0,
+          "count": 19,
+          "calibrated": true
+        },
+        "30-40%": {
+          "predicted": 0.3739,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "10-20%": {
+          "predicted": 0.14329999999999998,
+          "observed": 0.25,
+          "count": 4,
+          "calibrated": true
+        }
+      },
+      "calibration_playoffs": {
+        "0-10%": {
+          "predicted": 0.011199999999999998,
+          "observed": 0.0,
+          "count": 15,
+          "calibrated": true
+        },
+        "90-100%": {
+          "predicted": 0.9797571428571429,
+          "observed": 1.0,
+          "count": 7,
+          "calibrated": true
+        },
+        "50-60%": {
+          "predicted": 0.5756,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "30-40%": {
+          "predicted": 0.3981,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        }
+      }
+    }
+  ]
+}

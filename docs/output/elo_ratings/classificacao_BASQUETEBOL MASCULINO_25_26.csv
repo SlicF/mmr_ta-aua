@@ -11,11 +11,11 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 1,,10,Eng. Aeroespacial,2,3,1,0,2,27,23,4,0
 1,,11,Tecnologias de Informação,2,4,1,0,3,35,32,3,0
 1,,12,Eng. Informática ,0,3,0,0,3,20,34,-14,0
-2,A,1,GPT,4,3,2,0,1,32,14,18,0
+2,A,1,Gestão e Planeamento em Turismo,4,3,2,0,1,32,14,18,0
 2,A,2,Contabilidade,4,2,2,0,0,22,6,16,0
 2,A,3,Design,4,2,2,0,0,24,21,3,0
 2,A,4,Biologia e Geologia,2,2,1,0,1,15,14,1,0
-2,A,5,LRE,2,2,1,0,1,16,15,1,0
+2,A,5,Línguas e Relações Empresariais,2,2,1,0,1,16,15,1,0
 2,A,6,Eng. Cívil,2,1,1,0,0,21,2,19,0
 2,A,7,Física,2,3,1,0,2,30,33,-3,0
 2,A,8,Economia,0,2,0,0,2,9,31,-22,0
@@ -28,4 +28,4 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,B,6,Ciências do Mar,2,2,1,0,1,20,19,1,0
 2,B,7,Eng. Mecânica B,2,3,1,0,2,15,26,-11,0
 2,B,8,Eng. Computacional,0,2,0,0,2,17,28,-11,0
-2,B,9,LLC,0,3,0,0,3,19,35,-16,0
+2,B,9,"Línguas, Literaturas e Culturas",0,3,0,0,3,19,35,-16,0

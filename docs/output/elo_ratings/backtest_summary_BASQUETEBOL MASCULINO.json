@@ -1,0 +1,69 @@
+{
+  "modalidade": "BASQUETEBOL MASCULINO",
+  "num_seasons": 1,
+  "avg_brier_score": 0.027033027333333334,
+  "avg_rmse_place": 11.880999333333314,
+  "avg_rmse_points": 1.3504924046833746,
+  "seasons": [
+    {
+      "season": "24_25",
+      "cutoff_jornada": 8,
+      "num_teams": 30,
+      "brier_score_champion": 0.027033027333333334,
+      "rmse_expected_place": 11.880999333333314,
+      "rmse_expected_points": 1.3504924046833746,
+      "calibration_champion": {
+        "0-10%": {
+          "predicted": 0.009612499999999998,
+          "observed": 0.0,
+          "count": 24,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.12821666666666667,
+          "observed": 0.16666666666666666,
+          "count": 6,
+          "calibrated": true
+        }
+      },
+      "calibration_playoffs": {
+        "30-40%": {
+          "predicted": 0.3027,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "20-30%": {
+          "predicted": 0.2709,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "70-80%": {
+          "predicted": 0.7835,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "90-100%": {
+          "predicted": 1.0,
+          "observed": 1.0,
+          "count": 6,
+          "calibrated": true
+        },
+        "0-10%": {
+          "predicted": 0.004725,
+          "observed": 0.0,
+          "count": 20,
+          "calibrated": true
+        },
+        "50-60%": {
+          "predicted": 0.5484,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        }
+      }
+    }
+  ]
+}

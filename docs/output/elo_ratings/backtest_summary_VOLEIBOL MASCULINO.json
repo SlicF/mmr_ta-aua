@@ -1,0 +1,75 @@
+{
+  "modalidade": "VOLEIBOL MASCULINO",
+  "num_seasons": 1,
+  "avg_brier_score": 0.02659527,
+  "avg_rmse_place": 14.388263541511881,
+  "avg_rmse_points": 4.070322006224363,
+  "seasons": [
+    {
+      "season": "24_25",
+      "cutoff_jornada": 8,
+      "num_teams": 36,
+      "brier_score_champion": 0.02659527,
+      "rmse_expected_place": 14.388263541511881,
+      "rmse_expected_points": 4.070322006224363,
+      "calibration_champion": {
+        "0-10%": {
+          "predicted": 0.015281818181818181,
+          "observed": 0.030303030303030304,
+          "count": 33,
+          "calibrated": true
+        },
+        "20-30%": {
+          "predicted": 0.2818,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "10-20%": {
+          "predicted": 0.10695,
+          "observed": 0.0,
+          "count": 2,
+          "calibrated": true
+        }
+      },
+      "calibration_playoffs": {
+        "0-10%": {
+          "predicted": 0.004916,
+          "observed": 0.0,
+          "count": 25,
+          "calibrated": true
+        },
+        "90-100%": {
+          "predicted": 0.99985,
+          "observed": 1.0,
+          "count": 2,
+          "calibrated": true
+        },
+        "80-90%": {
+          "predicted": 0.89445,
+          "observed": 1.0,
+          "count": 2,
+          "calibrated": true
+        },
+        "50-60%": {
+          "predicted": 0.5494,
+          "observed": 0.5,
+          "count": 2,
+          "calibrated": true
+        },
+        "70-80%": {
+          "predicted": 0.721925,
+          "observed": 0.75,
+          "count": 4,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.102,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": true
+        }
+      }
+    }
+  ]
+}

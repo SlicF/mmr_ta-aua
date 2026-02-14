@@ -1,0 +1,69 @@
+{
+  "modalidade": "VOLEIBOL FEMININO",
+  "num_seasons": 1,
+  "avg_brier_score": 0.029908419393939394,
+  "avg_rmse_place": 13.355467593484178,
+  "avg_rmse_points": 2.319197177336614,
+  "seasons": [
+    {
+      "season": "24_25",
+      "cutoff_jornada": 8,
+      "num_teams": 33,
+      "brier_score_champion": 0.029908419393939394,
+      "rmse_expected_place": 13.355467593484178,
+      "rmse_expected_points": 2.319197177336614,
+      "calibration_champion": {
+        "10-20%": {
+          "predicted": 0.13219999999999998,
+          "observed": 0.5,
+          "count": 2,
+          "calibrated": false
+        },
+        "0-10%": {
+          "predicted": 0.009466666666666667,
+          "observed": 0.0,
+          "count": 30,
+          "calibrated": true
+        },
+        "40-50%": {
+          "predicted": 0.4516,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        }
+      },
+      "calibration_playoffs": {
+        "90-100%": {
+          "predicted": 0.9948333333333332,
+          "observed": 1.0,
+          "count": 6,
+          "calibrated": true
+        },
+        "0-10%": {
+          "predicted": 0.005087499999999999,
+          "observed": 0.0,
+          "count": 24,
+          "calibrated": true
+        },
+        "60-70%": {
+          "predicted": 0.623,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "80-90%": {
+          "predicted": 0.8928,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "30-40%": {
+          "predicted": 0.3931,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        }
+      }
+    }
+  ]
+}

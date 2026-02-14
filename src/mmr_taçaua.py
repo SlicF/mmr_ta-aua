@@ -867,11 +867,32 @@ class StandingsCalculator:
         return pd.DataFrame(final_standings)
 
     def _resolve_head_to_head_tiebreak(self, tied_teams, df_games, original_standings):
-        """Resolve empate usando confrontos diretos entre equipas empatadas"""
+        """
+        Resolve empate usando confrontos diretos entre equipas empatadas.
+
+        Aplica os critérios do regulamento:
+        b) Pontos nos jogos entre equipas empatadas
+        c) Diferença de golos nos jogos entre equipas empatadas
+        d) Golos marcados nos jogos entre equipas empatadas
+        e) Diferença de golos geral
+        f) Golos marcados geral
+
+        IMPORTANTE: Aplica critérios h2h mesmo com jogos parciais.
+        Quando não há jogos h2h entre certas equipas, usa critérios gerais para desempatar.
+        """
+        # Criar cópia de df_games com nomes normalizados para correspondência correta
+        df_games_normalized = df_games.copy()
+        df_games_normalized["Equipa 1"] = df_games_normalized["Equipa 1"].apply(
+            normalize_team_name
+        )
+        df_games_normalized["Equipa 2"] = df_games_normalized["Equipa 2"].apply(
+            normalize_team_name
+        )
+
         # Filtrar apenas jogos entre equipas empatadas
-        head_to_head_games = df_games[
-            (df_games["Equipa 1"].isin(tied_teams))
-            & (df_games["Equipa 2"].isin(tied_teams))
+        head_to_head_games = df_games_normalized[
+            (df_games_normalized["Equipa 1"].isin(tied_teams))
+            & (df_games_normalized["Equipa 2"].isin(tied_teams))
         ]
 
         # Inicializar estatísticas do confronto direto

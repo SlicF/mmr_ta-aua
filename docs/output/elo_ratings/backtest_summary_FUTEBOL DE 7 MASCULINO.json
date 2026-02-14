@@ -1,0 +1,63 @@
+{
+  "modalidade": "FUTEBOL DE 7 MASCULINO",
+  "num_seasons": 1,
+  "avg_brier_score": 0.018641781290322578,
+  "avg_rmse_place": 12.239337747844303,
+  "avg_rmse_points": 1.6526258305522088,
+  "seasons": [
+    {
+      "season": "24_25",
+      "cutoff_jornada": 8,
+      "num_teams": 31,
+      "brier_score_champion": 0.018641781290322578,
+      "rmse_expected_place": 12.239337747844303,
+      "rmse_expected_points": 1.6526258305522088,
+      "calibration_champion": {
+        "0-10%": {
+          "predicted": 0.005184615384615385,
+          "observed": 0.0,
+          "count": 26,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.14135,
+          "observed": 0.0,
+          "count": 4,
+          "calibrated": true
+        },
+        "20-30%": {
+          "predicted": 0.2998,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        }
+      },
+      "calibration_playoffs": {
+        "0-10%": {
+          "predicted": 0.002209090909090909,
+          "observed": 0.045454545454545456,
+          "count": 22,
+          "calibrated": true
+        },
+        "90-100%": {
+          "predicted": 0.9955571428571428,
+          "observed": 1.0,
+          "count": 7,
+          "calibrated": true
+        },
+        "70-80%": {
+          "predicted": 0.7939,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "10-20%": {
+          "predicted": 0.1886,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        }
+      }
+    }
+  ]
+}

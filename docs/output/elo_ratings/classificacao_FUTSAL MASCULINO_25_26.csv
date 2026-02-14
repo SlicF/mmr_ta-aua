@@ -4,9 +4,9 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 1,,3,Contabilidade,10,4,3,1,0,10,5,5,0
 1,,4,Bioquímica,7,4,2,1,1,13,5,8,0
 1,,5,Eng. Biomédica,7,5,2,1,2,18,13,5,0
-1,,6,GPT,6,4,2,0,2,7,10,-3,0
-1,,7,Eng. e Gestão Industrial,6,5,2,0,3,19,14,5,0
-1,,8,Enfermagem,6,5,2,0,3,18,16,2,0
+1,,6,Gestão e Planeamento em Turismo,6,4,2,0,2,7,10,-3,0
+1,,7,Enfermagem,6,5,2,0,3,18,16,2,0
+1,,8,Eng. e Gestão Industrial,6,5,2,0,3,19,14,5,0
 1,,9,Fisioterapia,4,5,1,1,3,10,12,-2,0
 1,,10,Eng. Química,3,4,0,3,1,7,11,-4,0
 1,,11,Eng. Eletrónica e Telecomunicações,0,4,0,0,4,6,23,-17,0
@@ -18,14 +18,14 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,A,5,Ciências do Mar,4,3,1,1,1,11,12,-1,0
 2,A,6,Música,3,3,1,0,2,10,17,-7,0
 2,A,7,Biologia e Geologia,1,3,0,1,2,9,15,-6,0
-2,A,8,ASP,1,3,0,1,2,5,16,-11,0
+2,A,8,Automação e Sistemas de Produção,1,3,0,1,2,5,16,-11,0
 2,A,9,Design,1,4,0,1,3,8,21,-13,0
 2,B,1,Eng. Computacional,9,3,3,0,0,16,7,9,0
 2,B,2,Matemática,6,2,2,0,0,9,3,6,0
 2,B,3,EGI B,6,2,2,0,0,10,5,5,0
 2,B,4,Eng. Ambiente,3,2,1,0,1,8,10,-2,0
 2,B,5,Gestão,3,3,1,0,2,9,11,-2,0
-2,B,6,LRE,3,3,1,0,2,9,10,-1,0
+2,B,6,Línguas e Relações Empresariais,3,3,1,0,2,9,10,-1,0
 2,B,7,Biologia,3,3,1,0,2,9,10,-1,0
 2,B,8,Tradução,1,3,0,1,2,4,10,-6,0
 2,B,9,MOC,1,3,0,1,2,2,10,-8,0

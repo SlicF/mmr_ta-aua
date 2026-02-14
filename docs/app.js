@@ -9595,7 +9595,7 @@ function updatePredictionsStats() {
             description: `± ${(teamData.expected_points_std || 0).toFixed(1)} pontos`
         },
         {
-            label: 'Posição Esperada',
+            label: 'Posição Esperada no Grupo',
             value: `${expectedPlaceRank > 0 ? expectedPlaceRank : '-'}º`,
             description: `Valor esperado: ${expectedPlaceValue} (± ${expectedPlaceStd} posições)`
         },

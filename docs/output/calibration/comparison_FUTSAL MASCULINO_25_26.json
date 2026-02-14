@@ -1,0 +1,74 @@
+{
+  "comparison": {
+    "season": "25_26",
+    "modalidade": "FUTSAL MASCULINO",
+    "cutoff_jornada": 8,
+    "fixed_model": null,
+    "calibrated_model": null,
+    "calibrated_params_used": {
+      "sport_type": "futsal",
+      "base_goals": 3.150557620817844,
+      "base_goals_std": 2.4368625208584502,
+      "dispersion_k": 3.56059338575651,
+      "base_draw_rate": 0.12267657992565056,
+      "draw_elo_sensitivity": 0.0017944152965222533,
+      "draw_multiplier": 1.4,
+      "draw_model": {
+        "intercept": -1.6624099827041072,
+        "coef_linear": -0.0017944152965222533,
+        "coef_quadratic": -7.779284425401188e-06
+      },
+      "margin_elo_slope": 0.002448738174027257,
+      "margin_elo_intercept": 3.1593182239325426,
+      "division_params": {
+        "1": {
+          "base_goals": 3.0757575757575757,
+          "dispersion_k": 3.978086687904239,
+          "base_draw_rate": 0.10101010101010101
+        },
+        "2": {
+          "base_goals": 3.1941176470588237,
+          "dispersion_k": 3.3769971710322877,
+          "base_draw_rate": 0.13529411764705881
+        }
+      }
+    },
+    "improvement": {},
+    "status": "completed"
+  },
+  "evaluation": {
+    "modalidade": "FUTSAL MASCULINO",
+    "components": {
+      "draw_multiplier": {
+        "value": 1.4,
+        "base_draw_rate": 0.12267657992565056,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Ótimo para taxa de empates 12.3%"
+      },
+      "draw_model": {
+        "intercept": -1.6624099827041072,
+        "coef_linear": -0.0017944152965222533,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Modelo logístico calibrado"
+      },
+      "goals_distribution": {
+        "base_goals": 3.150557620817844,
+        "dispersion_k": 3.56059338575651,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Distribuição calibrada: 3.15 golos/equipa, dispersão=3.56"
+      },
+      "margin_distribution": {
+        "slope": 0.002448738174027257,
+        "intercept": 3.1593182239325426,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Margem varia com ELO: slope=0.0024"
+      }
+    },
+    "overall_score": 1.0,
+    "status": "evaluated"
+  }
+}

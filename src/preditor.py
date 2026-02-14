@@ -434,9 +434,48 @@ class SportScoreSimulator:
                 "elo_adjustment_limit": 1.0,  # Um meio termo
             },
         }
-        self.params = self.baselines.get(sport_type, self.baselines["futsal"])
+        self.params = self.baselines.get(sport_type, self.baselines["futsal"]).copy()
         self.division_baselines = {}
         self.division_draw_rates = {}
+        self.default_draw_rate = 0.0
+
+    def apply_calibrated_params(self, calibrated_params: Dict[str, float]) -> None:
+        """Aplica parâmetros calibrados ao simulador."""
+        if not calibrated_params:
+            return
+
+        # Atualizar parâmetros base
+        for key in (
+            "base_goals",
+            "base_goals_std",
+            "dispersion_k",
+            "base_draw_rate",
+            "draw_elo_sensitivity",
+            "margin_elo_slope",
+            "margin_elo_intercept",
+        ):
+            if key in calibrated_params:
+                self.params[key] = calibrated_params[key]
+
+        # Modelo de empate calibrado
+        if "draw_model" in calibrated_params:
+            self.params["draw_model"] = calibrated_params["draw_model"]
+
+        # Definir taxa base de empate como fallback
+        if "base_draw_rate" in calibrated_params:
+            self.default_draw_rate = calibrated_params["base_draw_rate"]
+
+        # Divisões (opcional)
+        division_params = calibrated_params.get("division_params")
+        if division_params:
+            for div, div_cfg in division_params.items():
+                # Atualizar baselines por divisão (se houver)
+                base_goals = div_cfg.get("base_goals")
+                if base_goals is not None:
+                    self.division_baselines[int(div)] = {"mean": base_goals}
+                # Atualizar taxa de empate por divisão (se houver)
+                if "base_draw_rate" in div_cfg:
+                    self.division_draw_rates[int(div)] = div_cfg["base_draw_rate"]
 
     def set_division_baselines(
         self, baselines: Dict[Optional[int], Dict[str, float]]
@@ -456,7 +495,11 @@ class SportScoreSimulator:
     def _get_division_draw_rate(self, division: Optional[int]) -> float:
         if division in self.division_draw_rates:
             return self.division_draw_rates[division]
-        return self.division_draw_rates.get(None, 0.0)
+        if None in self.division_draw_rates:
+            return self.division_draw_rates[None]
+        if self.default_draw_rate > 0:
+            return self.default_draw_rate
+        return self.params.get("base_draw_rate", 0.0)
 
     def _calculate_draw_probability(
         self, elo_a: float, elo_b: float, target_draw_rate: float
@@ -481,6 +524,22 @@ class SportScoreSimulator:
         - sigma: Controla quão rápido a probabilidade decai (200 pontos ELO)
         - elo_diff: Diferença absoluta de ELO
         """
+        draw_model = self.params.get("draw_model")
+        if draw_model:
+            coef_linear = draw_model.get("coef_linear", 0.0)
+            coef_quadratic = draw_model.get("coef_quadratic", 0.0)
+            intercept = draw_model.get("intercept", 0.0)
+            if intercept != 0.0 or coef_linear != 0.0 or coef_quadratic != 0.0:
+                elo_diff = abs(elo_a - elo_b)
+                logit = (
+                    intercept + coef_linear * elo_diff + coef_quadratic * (elo_diff**2)
+                )
+                try:
+                    p_draw = 1.0 / (1.0 + math.exp(-logit))
+                except OverflowError:
+                    p_draw = 0.0 if logit < 0 else 1.0
+                return max(0.0, min(1.0, p_draw))
+
         if target_draw_rate <= 0:
             return 0.0
 
@@ -526,6 +585,15 @@ class SportScoreSimulator:
         """
         division_baseline = self._get_division_baseline(division)
         target_draw_rate = self._get_division_draw_rate(division)
+
+        # Se temos parâmetros calibrados, usar o base_draw_rate calibrado (não histórico)
+        has_calibrated_params = (
+            "draw_model" in self.params
+            and self.params.get("draw_model", {}).get("intercept") is not None
+        )
+        if has_calibrated_params and "base_draw_rate" in self.params:
+            # Usar a taxa calibrada ao invés da histórica
+            target_draw_rate = self.params["base_draw_rate"]
 
         if self.sport_type == "volei":
             # Voleibol nunca tem empates
@@ -577,8 +645,21 @@ class SportScoreSimulator:
                     elo_a, elo_b, target_draw_rate
                 )
 
-                # Fração de empates que são forçados (o resto vem naturalmente do Poisson)
-                forced_draw_fraction = self.params.get("forced_draw_fraction", 0.7)
+                # Se temos modelo logit calibrado, usar agressivamente sem redução
+                # Se só temos modelo gaussiano, aplicar fração forçada para evitar empates excessivos do Poisson
+                has_logit_model = (
+                    "draw_model" in self.params
+                    and self.params.get("draw_model", {}).get("intercept") != 0.0
+                )
+                # Usar multiplicador calibrado se disponível, senão usar padrão (1.4)
+                draw_multiplier = (
+                    self.params.get("draw_multiplier", 1.4) if has_logit_model else 1.0
+                )
+                forced_draw_fraction = (
+                    draw_multiplier
+                    if has_logit_model
+                    else self.params.get("forced_draw_fraction", 0.7)
+                )
 
                 # Decidir se este jogo terá empate forçado
                 if draw_probability > 0 and random.random() < (
@@ -588,17 +669,25 @@ class SportScoreSimulator:
                     goals = max(0, int(np.random.poisson(base_goals)))
                     return (goals, goals)
 
-                # Poisson normal - descartar empates se taxa histórica baixa (<20%)
-                # Isto é necessário porque o Poisson gera ~50% empates em desportos de baixo scoring
-                max_attempts = 50 if target_draw_rate < 0.20 else 1
+                # Poisson normal - com modelo calibrado, ser mais permissivo com empates naturais
+                # Sem modelo, descartar empates se taxa histórica baixa (<20%)
+                if has_logit_model:
+                    # Modelo calibrado: aceitar empates naturais até 30% de taxa histórica
+                    max_attempts = 30 if target_draw_rate < 0.30 else 1
+                else:
+                    # Sem modelo: descartar empates se taxa baixa (<20%)
+                    max_attempts = 50 if target_draw_rate < 0.20 else 1
+
                 for attempt in range(max_attempts):
                     score_a, score_b = self._simulate_poisson(
                         elo_a, elo_b, base_goals, elo_scale, dispersion_k
                     )
                     # Se não é empate OU taxa alta permite empates naturais, aceitar
-                    if score_a != score_b or target_draw_rate >= 0.20:
+                    if score_a != score_b or target_draw_rate >= (
+                        0.30 if has_logit_model else 0.20
+                    ):
                         return (score_a, score_b)
-                    # Taxa baixa (<20%): tentar novamente para evitar empate Poisson
+                    # Taxa baixa: tentar novamente para evitar empate Poisson
 
                 # Fallback após todas tentativas (improvável)
                 return (score_a, score_b)
@@ -810,6 +899,31 @@ def load_course_mapping(docs_dir: str = None) -> Tuple[Dict[str, str], Dict[str,
     except Exception as e:
         print(f"Erro ao carregar config_cursos.json: {e}")
         return {}, {}
+
+
+def load_calibrated_config(
+    docs_dir: str = None, custom_path: Optional[str] = None
+) -> Dict:
+    """Carrega configuração calibrada gerada pelo calibrator.py."""
+    if custom_path:
+        config_path = custom_path
+    elif docs_dir:
+        config_path = os.path.join(
+            docs_dir, "output", "calibration", "calibrated_simulator_config.json"
+        )
+    else:
+        config_path = "../docs/output/calibration/calibrated_simulator_config.json"
+
+    if not os.path.exists(config_path):
+        print(f"⚠️  Config calibrada não encontrada: {config_path}")
+        return {}
+
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"⚠️  Erro ao ler config calibrada: {e}")
+        return {}
 
 
 def parse_playoff_slots(csv_rows: List[Dict]) -> Tuple[Dict[Tuple[int, str], int], int]:
@@ -2845,6 +2959,8 @@ def main(
     filter_modalidade: Optional[str] = None,
     deep_simulation: bool = False,
     deeper_simulation: bool = False,
+    use_calibrated: bool = False,
+    calibrated_config_path: Optional[str] = None,
 ):
     """
     Função principal que simula futuras épocas e gera previsões.
@@ -2855,6 +2971,8 @@ def main(
         filter_modalidade: Processar apenas uma modalidade específica (opcional).
         deep_simulation: Usar 100k iterações em vez de 10k (opcional).
         deeper_simulation: Usar 1M iterações em vez de 10k (opcional).
+        use_calibrated: Usar parâmetros calibrados (opcional).
+        calibrated_config_path: Caminho customizado para config calibrada (opcional).
     """
     # Definir diretório base do projeto (baseado na localização deste script)
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -2903,6 +3021,11 @@ def main(
     score_sim_volei = SportScoreSimulator("volei")
     score_sim_futebol7 = SportScoreSimulator("futebol7")
 
+    # Sempre tentar carregar parâmetros calibrados (se existirem)
+    calibrated_config = load_calibrated_config(docs_dir, calibrated_config_path)
+    if calibrated_config:
+        print("✅ Parâmetros calibrados carregados - serão utilizados nesta simulação")
+
     # Mapear modalidades aos simuladores apropriados
     sport_simulators = {
         "FUTSAL FEMININO": score_sim_futsal,
@@ -2947,6 +3070,13 @@ def main(
         modalidade = modalidade_file.replace(
             f"_{ano_passado_1d}_{ano_atual_2d}.csv", ""
         )
+
+        # Aplicar parâmetros calibrados por modalidade (se disponível)
+        if calibrated_config and modalidade in calibrated_config:
+            score_simulator = sport_simulators.get(
+                modalidade, SportScoreSimulator("futsal")
+            )
+            score_simulator.apply_calibrated_params(calibrated_config[modalidade])
 
         # Filtrar modalidades se houver hardset ou filtro específico
         if hardset_modalidades and modalidade not in hardset_modalidades:
@@ -3551,6 +3681,18 @@ FUTSAL MASCULINO_6_Direito_Medicina,2,2
         help="Usar simulação ainda mais profunda (1 000 000 de iterações em vez de 10 000)",
     )
 
+    parser.add_argument(
+        "--use-calibrated",
+        action="store_true",
+        help="Usar parâmetros calibrados do calibrator.py",
+    )
+
+    parser.add_argument(
+        "--calibrated-config",
+        type=str,
+        help="Caminho customizado para calibrated_simulator_config.json",
+    )
+
     args = parser.parse_args()
 
     # Se --example, mostrar exemplo e sair
@@ -3585,6 +3727,8 @@ FUTSAL MASCULINO_6_Direito_Medicina,2,2
             filter_modalidade=filter_modalidade,
             deep_simulation=deep_simulation,
             deeper_simulation=deeper_simulation,
+            use_calibrated=args.use_calibrated,
+            calibrated_config_path=args.calibrated_config,
         )
 
         # Guardar resultados baseline
@@ -3597,6 +3741,8 @@ FUTSAL MASCULINO_6_Direito_Medicina,2,2
             filter_modalidade=filter_modalidade,
             deep_simulation=deep_simulation,
             deeper_simulation=deeper_simulation,
+            use_calibrated=args.use_calibrated,
+            calibrated_config_path=args.calibrated_config,
         )
     else:
         # Simulação normal (com ou sem hardset)
@@ -3606,4 +3752,6 @@ FUTSAL MASCULINO_6_Direito_Medicina,2,2
             filter_modalidade=filter_modalidade,
             deep_simulation=deep_simulation,
             deeper_simulation=deeper_simulation,
+            use_calibrated=args.use_calibrated,
+            calibrated_config_path=args.calibrated_config,
         )

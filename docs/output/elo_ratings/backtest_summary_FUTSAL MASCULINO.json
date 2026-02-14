@@ -1,0 +1,75 @@
+{
+  "modalidade": "FUTSAL MASCULINO",
+  "num_seasons": 1,
+  "avg_brier_score": 0.021578133888888892,
+  "avg_rmse_place": 14.270636756232475,
+  "avg_rmse_points": 2.0581069222776214,
+  "seasons": [
+    {
+      "season": "24_25",
+      "cutoff_jornada": 8,
+      "num_teams": 36,
+      "brier_score_champion": 0.021578133888888892,
+      "rmse_expected_place": 14.270636756232475,
+      "rmse_expected_points": 2.0581069222776214,
+      "calibration_champion": {
+        "0-10%": {
+          "predicted": 0.0126375,
+          "observed": 0.0,
+          "count": 32,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.14889999999999998,
+          "observed": 0.25,
+          "count": 4,
+          "calibrated": true
+        }
+      },
+      "calibration_playoffs": {
+        "0-10%": {
+          "predicted": 0.005756521739130435,
+          "observed": 0.0,
+          "count": 23,
+          "calibrated": true
+        },
+        "20-30%": {
+          "predicted": 0.2492,
+          "observed": 0.0,
+          "count": 3,
+          "calibrated": false
+        },
+        "90-100%": {
+          "predicted": 0.9594799999999999,
+          "observed": 1.0,
+          "count": 5,
+          "calibrated": true
+        },
+        "60-70%": {
+          "predicted": 0.6098,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "30-40%": {
+          "predicted": 0.38525,
+          "observed": 0.0,
+          "count": 2,
+          "calibrated": false
+        },
+        "40-50%": {
+          "predicted": 0.4075,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "50-60%": {
+          "predicted": 0.5348,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        }
+      }
+    }
+  ]
+}

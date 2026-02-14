@@ -285,7 +285,7 @@ body {
 
 /* Conteúdo colapsável */
 .chart-content {
-  max-height: 1200px;
+  max-height: 1100px;
   overflow: visible;
   transition:
     max-height 0.4s ease,
@@ -3339,7 +3339,7 @@ body {
     font-size: 0.85em;
     width: 140px;
     height: 3em;
-    top: -55px;
+    top: -65px;
     letter-spacing: 0.5px;
   }
 
@@ -3352,11 +3352,11 @@ body {
   }
 
   .slider-prev {
-    left: 5px;
+    left: 15px;
   }
 
   .slider-next {
-    right: 5px;
+    right: 15px;
   }
 
   .slider-arrow:hover:not(:disabled) {
@@ -3923,7 +3923,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 12px 0 20px;
+  margin: 12px 0 -5px;
 }
 
 /* Slider de Equipas */
@@ -4320,7 +4320,7 @@ body {
 
 .favorite-star-btn {
   position: absolute;
-  right: -35px;
+  right: -20px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -4660,10 +4660,10 @@ body {
 
   /* Nome da equipa */
   .team-slider-name {
-    font-size: 1em;
+    font-size: 0.95em;
     width: 180px;
     height: 3.4em;
-    top: -75px;
+    top: -95px;
   }
 
   /* Setas */
@@ -4674,11 +4674,11 @@ body {
   }
 
   .slider-prev {
-    left: calc(50% - 200px);
+    left: calc(50% - 140px);
   }
 
   .slider-next {
-    right: calc(50% - 200px);
+    right: calc(50% - 140px);
   }
 
   /* Animações ajustadas para tablet */

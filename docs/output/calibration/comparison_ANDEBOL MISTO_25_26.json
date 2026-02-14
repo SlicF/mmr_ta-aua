@@ -1,0 +1,74 @@
+{
+  "comparison": {
+    "season": "25_26",
+    "modalidade": "ANDEBOL MISTO",
+    "cutoff_jornada": 8,
+    "fixed_model": null,
+    "calibrated_model": null,
+    "calibrated_params_used": {
+      "sport_type": "andebol",
+      "base_goals": 20.594827586206897,
+      "base_goals_std": 7.003256773105182,
+      "dispersion_k": 14.908095857121586,
+      "base_draw_rate": 0.04597701149425287,
+      "draw_elo_sensitivity": 0.008968131798128437,
+      "draw_multiplier": 1.4,
+      "draw_model": {
+        "intercept": -2.31209175561292,
+        "coef_linear": -0.008968131798128437,
+        "coef_quadratic": 6.408862665296841e-06
+      },
+      "margin_elo_slope": 0.014113425173742459,
+      "margin_elo_intercept": 5.7253395781554355,
+      "division_params": {
+        "1": {
+          "base_goals": 22.644444444444446,
+          "dispersion_k": 18.001629638618972,
+          "base_draw_rate": 0.05555555555555555
+        },
+        "2": {
+          "base_goals": 18.398809523809526,
+          "dispersion_k": 17.731761636010347,
+          "base_draw_rate": 0.03571428571428571
+        }
+      }
+    },
+    "improvement": {},
+    "status": "completed"
+  },
+  "evaluation": {
+    "modalidade": "ANDEBOL MISTO",
+    "components": {
+      "draw_multiplier": {
+        "value": 1.4,
+        "base_draw_rate": 0.04597701149425287,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Ótimo para taxa de empates 4.6%"
+      },
+      "draw_model": {
+        "intercept": -2.31209175561292,
+        "coef_linear": -0.008968131798128437,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Modelo logístico calibrado"
+      },
+      "goals_distribution": {
+        "base_goals": 20.594827586206897,
+        "dispersion_k": 14.908095857121586,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Distribuição calibrada: 20.59 golos/equipa, dispersão=14.91"
+      },
+      "margin_distribution": {
+        "slope": 0.014113425173742459,
+        "intercept": 5.7253395781554355,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Margem varia com ELO: slope=0.0141"
+      }
+    },
+    "overall_score": 1.0,
+    "status": "evaluated"
+  }
+}
