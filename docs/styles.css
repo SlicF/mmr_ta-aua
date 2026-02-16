@@ -186,11 +186,6 @@ body {
   border: 1px solid #e5e7eb;
 }
 
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-
 .card-title {
   font-size: 1.3em;
   color: #333;
@@ -4546,10 +4541,17 @@ body {
 
 /* Tooltip das Previsões */
 .predictions-tooltip {
-  position: fixed;
-  z-index: 10000;
-  pointer-events: auto;
+  position: fixed !important;
+  z-index: 99999 !important;
+  pointer-events: none !important;
   animation: tooltipFadeIn 0.2s ease;
+  display: none !important;
+}
+
+.predictions-tooltip[style*="display: block"] {
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 .predictions-tooltip > div {
@@ -4992,4 +4994,21 @@ body {
   visibility: visible;
   opacity: 1;
   bottom: 50px;
+}
+
+/* Estilo para célula de golos esperados com tooltip */
+.expected-goals-cell {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: #4f46e5;
+  text-underline-offset: 4px;
+  cursor: help;
+  color: #4f46e5;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.expected-goals-cell:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+  color: #3730a3;
 }

@@ -7,6 +7,9 @@ let compactModeEnabled = false; // Modo compacto da tabela (sem emblemas e ELO T
 let predictionsTooltipFixed = false; // Estado do tooltip de previsões (fixo ou não)
 let predictionsTooltipState = { distribution: null, isTeamA: false, itemsShown: 10 }; // Estado para gestão de batches
 let predictionsTooltipCurrentDistribution = null; // Guardar o distribution atual para evitar re-render
+let predictionsTooltipTimer = null; // Timer para debounce do hover
+let predictionsTooltipLastCell = null; // Última célula onde o tooltip estava visível
+let predictionsTooltipVisible = false; // Flag para rastrear se o tooltip está visível (evita flicker)
 let favoriteTeam = localStorage.getItem('favoriteTeam'); // Equipa favorita do utilizador
 
 // Mostrar painel de debug com Ctrl+Shift+D
@@ -151,6 +154,11 @@ function initializeCollapsibles() {
 async function initApp() {
     // Carregar configuração dos cursos
     await loadCoursesConfig();
+
+    // Inicializar tooltip de previsões imediatamente
+    if (!predictionsTooltipEl) {
+        predictionsTooltipEl = createPredictionsTooltip();
+    }
 
     // Inicializar colapsáveis
     initializeCollapsibles();
@@ -5935,14 +5943,12 @@ function parseDateWithTime(dateStr, timeStr) {
         // Época 25_26 vai de setembro 2025 a junho 2026
         if (year === 2026 && month > 5) {
             // Mês > junho em 2026 é erro - deve ser 2025
-            console.warn(`[CORREÇÃO DE DATA] Jogo em ${dateStr} corrigido de 2026 para 2025`);
             year = 2025;
         }
     } else if (currentEpoca === '24_25') {
         // Época 24_25 vai de setembro 2024 a junho 2025
         if (year === 2025 && month > 5) {
             // Mês > junho em 2025 é erro - deve ser 2024
-            console.warn(`[CORREÇÃO DE DATA] Jogo em ${dateStr} corrigido de 2025 para 2024`);
             year = 2024;
         }
     }
@@ -9685,6 +9691,7 @@ function updatePredictionsTable() {
         const isTeamA = teamA === teamName;
 
         const opponent = isTeamA ? teamB : teamA;
+        const teamInfo = getCourseInfo(teamName);
         const opponentInfo = getCourseInfo(opponent);
 
         // Probabilidades do ponto de vista da equipa selecionada
@@ -9705,8 +9712,12 @@ function updatePredictionsTable() {
         const isFavoriteOpponent = isTeamFavorite(opponent);
         const favoriteClass = isFavoriteOpponent ? ' favorite-team-prediction' : '';
 
+        // Nomes curtos das equipas para o tooltip
+        const teamShortName = teamInfo.shortName || teamName;
+        const opponentShortName = opponentInfo.shortName || opponent;
+
         return `
-            <tr data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" class="${favoriteClass}">
+            <tr>
                 <td>${game.jornada || '-'}</td>
                 <td>${dateStr}</td>
                 <td>
@@ -9718,7 +9729,9 @@ function updatePredictionsTable() {
                 <td><span class="prediction-prob ${getProbClass(probWin)}">${probWin.toFixed(1)}%</span></td>
                 <td><span class="prediction-prob ${getProbClass(probDraw)}">${probDraw.toFixed(1)}%</span></td>
                 <td><span class="prediction-prob ${getProbClass(probLoss)}">${probLoss.toFixed(1)}%</span></td>
-                <td>${expectedGoals.toFixed(1)} - ${opponentExpectedGoals.toFixed(1)}</td>
+                <td class="expected-goals-cell ${favoriteClass}" data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" data-team-short="${teamShortName}" data-opponent-short="${opponentShortName}" title="Clique para fixar/desafixar o tooltip de distribuição">
+                    ${expectedGoals.toFixed(1)} - ${opponentExpectedGoals.toFixed(1)}
+                </td>
             </tr>
         `;
     }).join('');
@@ -9922,23 +9935,35 @@ function createPredictionsTooltip() {
     tooltip.id = 'predictions-tooltip';
     tooltip.className = 'predictions-tooltip';
     tooltip.style.display = 'none';
+    tooltip.style.visibility = 'hidden';
     tooltip.style.position = 'fixed';
-    tooltip.style.zIndex = '10000';
+    tooltip.style.zIndex = '99999';
+    tooltip.style.pointerEvents = 'none';
 
-    // Fechar tooltip ao clicar fora
+    // Fechar tooltip ao clicar fora (apenas se está fixo)
     document.addEventListener('click', (e) => {
-        if (predictionsTooltipFixed && !tooltip.contains(e.target) && !e.target.closest('.predictions-table tbody tr')) {
-            predictionsTooltipFixed = false;
-            tooltip.style.display = 'none';
-            // Destruir gráfico para liberar memória
-            if (predictionsTooltipChart) {
-                try { predictionsTooltipChart.destroy(); } catch (e) { }
-                predictionsTooltipChart = null;
+        if (predictionsTooltipFixed) {
+            // Verificar se clicou no tooltip ou numa célula da tabela
+            const isTooltipClick = tooltip.contains(e.target);
+            const isTableCellClick = e.target.closest('.predictions-table tbody .expected-goals-cell');
+
+            if (!isTooltipClick && !isTableCellClick) {
+                predictionsTooltipFixed = false;
+                tooltip.style.display = 'none';
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.pointerEvents = 'none';
+                // Destruir gráfico para liberar memória
+                if (predictionsTooltipChart) {
+                    try { predictionsTooltipChart.destroy(); } catch (e) { }
+                    predictionsTooltipChart = null;
+                }
+                predictionsTooltipCurrentDistribution = null;
             }
         }
     });
 
     document.body.appendChild(tooltip);
+    return tooltip;
     return tooltip;
 }
 
@@ -9957,7 +9982,7 @@ function parsePredictionsDistribution(distribution, isTeamA) {
     });
 }
 
-function renderPredictionsTooltip(distribution, isTeamA) {
+function renderPredictionsTooltip(distribution, isTeamA, teamShortName, opponentShortName) {
     if (!predictionsTooltipEl) {
         predictionsTooltipEl = createPredictionsTooltip();
     }
@@ -9983,11 +10008,15 @@ function renderPredictionsTooltip(distribution, isTeamA) {
     const visibleScores = allScores.slice(0, 5);  // Apenas primeiros 5
     const hasMore = allScores.length > 5;
 
+    // Construir título com nomes das equipas
+    const teamsText = (teamShortName && opponentShortName) ? `${teamShortName} - ${opponentShortName}` : '';
+
     const html = `
         <div>
             <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                 <div style="flex: 1; text-align: center;">
                     <div style="font-weight: 600; color: #2a5298; font-size: 0.9em;">Resultados Simulados</div>
+                    ${teamsText ? `<div style="font-size: 0.85em; color: #666; margin-top: 2px;">${teamsText}</div>` : ''}
                 </div>
                 <div style="display: flex; gap: 4px; flex-shrink: 0;">
                     ${hasMore ? `<button id="scrollLeft" style="padding: 4px 8px; background: #2a5298; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; opacity: 0.5; pointer-events: none;">‹</button>` : ''}
@@ -10011,10 +10040,8 @@ function renderPredictionsTooltip(distribution, isTeamA) {
     predictionsTooltipState.chartId = chartId;
     predictionsTooltipState.chartContainerId = chartContainerId;
 
-    // Renderizar gráfico com delay suficiente para o DOM atualizar
-    setTimeout(() => {
-        renderTooltipChart(chartId, visibleScores);
-    }, 100);
+    // Renderizar gráfico imediatamente (já está no DOM)
+    renderTooltipChart(chartId, visibleScores);
 
     // Adicionar listeners às setas
     if (hasMore) {
@@ -10064,10 +10091,8 @@ function loadMoreTooltipResults(direction) {
     const endIdx = startIdx + itemsPerPage;
     const visibleScores = predictionsTooltipState.distribution.slice(startIdx, endIdx);
 
-    // Re-renderizar gráfico com delay para garantir DOM atualizado
-    setTimeout(() => {
-        renderTooltipChart(predictionsTooltipState.chartId, visibleScores);
-    }, 100);
+    // Re-renderizar gráfico imediatamente
+    renderTooltipChart(predictionsTooltipState.chartId, visibleScores);
 
     // Atualizar paginação
     const paginationEl = document.getElementById('pagination');
@@ -10105,13 +10130,7 @@ function loadMoreTooltipResults(direction) {
 function renderTooltipChart(chartId, scores) {
     const chartEl = document.getElementById(chartId);
     if (!chartEl) {
-        // Retry uma vez se o elemento não for encontrado imediatamente
-        setTimeout(() => {
-            const retryEl = document.getElementById(chartId);
-            if (retryEl) {
-                renderTooltipChart(chartId, scores);
-            }
-        }, 50);
+        console.error('❌ Chart element not found:', chartId);
         return;
     }
 
@@ -10120,17 +10139,12 @@ function renderTooltipChart(chartId, scores) {
         return;
     }
 
-    // Verificar que o elemento ainda tem parent no DOM
-    if (!chartEl.parentElement) {
-        return;
-    }
-
     // Destruir gráfico anterior se existir
     if (predictionsTooltipChart) {
         try {
             predictionsTooltipChart.destroy();
         } catch (e) {
-            // Ignorar erros de destruição
+            // Ignorar erros
         }
         predictionsTooltipChart = null;
     }
@@ -10179,67 +10193,185 @@ function attachPredictionsTooltipHandlers() {
         predictionsTooltipEl = createPredictionsTooltip();
     }
 
-    const rows = document.querySelectorAll('.predictions-table tbody tr[data-distribution]');
+    const cells = document.querySelectorAll('.predictions-table tbody td.expected-goals-cell');
 
-    rows.forEach(row => {
-        // Remove event listeners se existirem
-        row.removeEventListener('mouseenter', handlePredictionRowHover);
-        row.removeEventListener('mousemove', handlePredictionRowMove);
-        row.removeEventListener('mouseleave', handlePredictionRowLeave);
+    cells.forEach(cell => {
+        // Remove event listeners anteriores
+        cell.removeEventListener('mouseenter', handlePredictionRowHover);
+        cell.removeEventListener('mouseleave', handlePredictionRowLeave);
+        cell.removeEventListener('click', handlePredictionRowClick);
 
         // Add new event listeners
-        row.addEventListener('mouseenter', handlePredictionRowHover);
-        row.addEventListener('mousemove', handlePredictionRowMove);
-        row.addEventListener('mouseleave', handlePredictionRowLeave);
+        cell.addEventListener('mouseenter', handlePredictionRowHover);
+        cell.addEventListener('mouseleave', handlePredictionRowLeave);
+        cell.addEventListener('click', handlePredictionRowClick);
     });
+
+    // Listeners para o tooltip próprio (para ele não desaparecer quando o rato vai para ele)
+    if (predictionsTooltipEl) {
+        predictionsTooltipEl.removeEventListener('mouseenter', handleTooltipEnter);
+        predictionsTooltipEl.removeEventListener('mouseleave', handleTooltipLeave);
+        predictionsTooltipEl.addEventListener('mouseenter', handleTooltipEnter);
+        predictionsTooltipEl.addEventListener('mouseleave', handleTooltipLeave);
+    }
 }
 
 function handlePredictionRowHover(e) {
-    const row = e.currentTarget;
-    const distribution = row.dataset.distribution;
-    const isTeamA = row.dataset.isteama === '1';
+    const cell = e.currentTarget;
+    const distribution = cell.dataset.distribution;
+    const isTeamA = cell.dataset.isteama === '1';
+    const teamShortName = cell.dataset.teamShort || '';
+    const opponentShortName = cell.dataset.opponentShort || '';
 
-    if (distribution) {
-        renderPredictionsTooltip(distribution, isTeamA);
+    if (!distribution) {
+        return;
+    }
+
+    // Se está fixo, não fazer nada
+    if (predictionsTooltipFixed) {
+        return;
+    }
+
+    // Se já temos um timer, cancelar
+    if (predictionsTooltipTimer) {
+        clearTimeout(predictionsTooltipTimer);
+        predictionsTooltipTimer = null;
+    }
+
+    // Guardar célula
+    predictionsTooltipLastCell = cell;
+
+    // Criar tooltip se necessário
+    if (!predictionsTooltipEl) {
+        predictionsTooltipEl = createPredictionsTooltip();
+    }
+
+    // Se já está visível e na mesma distribuição, apenas actualizar posição
+    if (predictionsTooltipVisible && predictionsTooltipCurrentDistribution === distribution) {
+        updateTooltipPosition({ currentTarget: cell });
+        return;
+    }
+
+    // Mostrar tooltip imediatamente
+    renderPredictionsTooltip(distribution, isTeamA, teamShortName, opponentShortName);
+
+    if (predictionsTooltipEl && predictionsTooltipLastCell === cell) {
         predictionsTooltipEl.style.display = 'block';
-        updateTooltipPosition(e);
+        predictionsTooltipEl.style.visibility = 'visible';
+        predictionsTooltipEl.style.pointerEvents = 'auto';
+        predictionsTooltipVisible = true;
+        updateTooltipPosition({ currentTarget: cell });
+    }
+}
 
-        // Adicionar listener de click para fixar o tooltip
-        if (!row.hasAttribute('data-predictions-tooltip-click')) {
-            row.setAttribute('data-predictions-tooltip-click', 'true');
-            row.addEventListener('click', (clickEvent) => {
-                clickEvent.stopPropagation();
-                predictionsTooltipFixed = !predictionsTooltipFixed;
-            });
+function handlePredictionRowClick(e) {
+    const cell = e.currentTarget;
+    const distribution = cell.dataset.distribution;
+
+    if (distribution && predictionsTooltipEl) {
+        e.stopPropagation();
+
+        // Cancelar timer pendente ao clicar
+        if (predictionsTooltipTimer) {
+            clearTimeout(predictionsTooltipTimer);
+            predictionsTooltipTimer = null;
+        }
+
+        predictionsTooltipFixed = !predictionsTooltipFixed;
+
+        if (predictionsTooltipFixed) {
+            // Tooltip fica fixo
+            predictionsTooltipEl.style.display = 'block';
+            predictionsTooltipEl.style.visibility = 'visible';
+            predictionsTooltipEl.style.pointerEvents = 'auto';
+            predictionsTooltipVisible = true;
+        } else {
+            // Desafixar e esconder
+            predictionsTooltipEl.style.display = 'none';
+            predictionsTooltipEl.style.visibility = 'hidden';
+            predictionsTooltipEl.style.pointerEvents = 'none';
+            predictionsTooltipVisible = false;
+            // Destruir gráfico para liberar memória
+            if (predictionsTooltipChart) {
+                try { predictionsTooltipChart.destroy(); } catch (e) { }
+                predictionsTooltipChart = null;
+            }
+            predictionsTooltipCurrentDistribution = null;
         }
     }
 }
 
-function handlePredictionRowMove(e) {
-    // Se o tooltip está fixo, não atualizar posição
+// Handlers para o tooltip próprio não desaparecer
+function handleTooltipEnter() {
+    if (predictionsTooltipTimer) {
+        clearTimeout(predictionsTooltipTimer);
+        predictionsTooltipTimer = null;
+    }
+}
+
+function handleTooltipLeave() {
+    // Se está fixo, ignora
     if (predictionsTooltipFixed) return;
 
-    if (predictionsTooltipEl.style.display === 'block') {
-        updateTooltipPosition(e);
+    // Esconder quando o rato sai do tooltip
+    if (predictionsTooltipEl) {
+        predictionsTooltipEl.style.display = 'none';
+        predictionsTooltipEl.style.visibility = 'hidden';
+        predictionsTooltipEl.style.pointerEvents = 'none';
+        predictionsTooltipVisible = false;
     }
 }
 
 function handlePredictionRowLeave() {
-    // Se o tooltip está fixo, não esconder
+    // Se está fixo, não fazer nada
     if (predictionsTooltipFixed) return;
 
+    // Cancelar timer anterior se existir
+    if (predictionsTooltipTimer) {
+        clearTimeout(predictionsTooltipTimer);
+        predictionsTooltipTimer = null;
+    }
+
+    // Limpar célula
+    predictionsTooltipLastCell = null;
+
+    // Usar pequeno debounce (50ms) para evitar flicker ao passar entre células próximas
+    predictionsTooltipTimer = setTimeout(() => {
+        if (predictionsTooltipEl && !predictionsTooltipFixed) {
+            predictionsTooltipEl.style.display = 'none';
+            predictionsTooltipEl.style.visibility = 'hidden';
+            predictionsTooltipEl.style.pointerEvents = 'none';
+            predictionsTooltipVisible = false;
+        }
+        predictionsTooltipTimer = null;
+    }, 50);
+}
+
+// Esconder tooltip quando rato sai da tabela completamente
+function handlePredictionTableLeave() {
+    // Se está fixo, não fazer nada
+    if (predictionsTooltipFixed) return;
+
+    // Cancelar timer pendente
+    if (predictionsTooltipTimer) {
+        clearTimeout(predictionsTooltipTimer);
+        predictionsTooltipTimer = null;
+    }
+
+    // Esconder quando sai da tabela (se não está sobre o tooltip, vai ser tratado no mouseleave do tooltip)
     if (predictionsTooltipEl) {
         predictionsTooltipEl.style.display = 'none';
-        // Destruir gráfico para liberar memória
-        if (predictionsTooltipChart) {
-            try { predictionsTooltipChart.destroy(); } catch (e) { }
-            predictionsTooltipChart = null;
-        }
+        predictionsTooltipEl.style.visibility = 'hidden';
+        predictionsTooltipEl.style.pointerEvents = 'none';
+        predictionsTooltipVisible = false;
     }
+    predictionsTooltipLastCell = null;
 }
 
 function updateTooltipPosition(e) {
-    if (!predictionsTooltipEl) return;
+    if (!predictionsTooltipEl) {
+        return;
+    }
 
     const rect = e.currentTarget.getBoundingClientRect();
     const tooltipRect = predictionsTooltipEl.getBoundingClientRect();
