@@ -160,6 +160,11 @@ async function initApp() {
         predictionsTooltipEl = createPredictionsTooltip();
     }
 
+    // Inicializar tooltip histórico
+    if (!historicalTooltipEl) {
+        historicalTooltipEl = createHistoricalTooltip();
+    }
+
     // Inicializar colapsáveis
     initializeCollapsibles();
 
@@ -949,6 +954,13 @@ function switchGroup(group) {
 
 // Inicializar gráfico ELO com ApexCharts
 function initEloChart() {
+    // Verificar se ApexCharts está carregado
+    if (typeof ApexCharts === 'undefined') {
+        console.error('ApexCharts não está carregado!');
+        setTimeout(initEloChart, 100); // Tentar novamente após 100ms
+        return;
+    }
+
     // Se já existe gráfico, destruir
     if (eloChart) {
         eloChart.destroy();
@@ -1122,6 +1134,10 @@ function initEloChart() {
             followCursor: false,
             offsetY: 100,
             offsetX: 10,
+            fixed: {
+                enabled: false,
+                position: 'topRight'
+            },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 // Se o tooltip está fixo, usar os dados do ponto fixado
                 if (window.tooltipFixed && window.tooltipFixedDataPoint) {
@@ -1287,49 +1303,57 @@ function initEloChart() {
     };
 
     eloChart = new ApexCharts(document.querySelector("#eloChart"), options);
-    eloChart.render();
 
-    // Guardar a cor original de cada marker logo após renderizar
-    const saveOriginalMarkerColors = () => {
-        document.querySelectorAll('.apexcharts-marker').forEach(marker => {
-            if (!marker.hasAttribute('data-original-fill')) {
-                const currentFill = marker.getAttribute('fill');
-                if (currentFill && currentFill !== 'none') {
-                    marker.setAttribute('data-original-fill', currentFill);
-                    // console.log('[DEBUG] Guardou cor original do marker:', currentFill);
+    // Renderizar e aguardar conclusão
+    eloChart.render().then(() => {
+        // Guardar a cor original de cada marker logo após renderizar
+        const saveOriginalMarkerColors = () => {
+            document.querySelectorAll('.apexcharts-marker').forEach(marker => {
+                if (!marker.hasAttribute('data-original-fill')) {
+                    const currentFill = marker.getAttribute('fill');
+                    if (currentFill && currentFill !== 'none') {
+                        marker.setAttribute('data-original-fill', currentFill);
+                        // console.log('[DEBUG] Guardou cor original do marker:', currentFill);
+                    }
                 }
+            });
+        };
+
+        // Guardar cores originais
+        saveOriginalMarkerColors();
+
+        // Se não conseguir na primeira vez, tentar novamente com delay (para garantir que SVG está pronto)
+        setTimeout(saveOriginalMarkerColors, 100);
+
+        // Adicionar observer para repositionar o tooltip com delay
+        setTimeout(() => {
+            const tooltipObserver = new MutationObserver(() => {
+                const tooltip = document.querySelector('.apexcharts-tooltip');
+                if (tooltip && !window.tooltipFixed) {
+                    const currentTop = parseInt(tooltip.style.top) || 0;
+                    tooltip.style.top = (currentTop + 75) + 'px';
+                    tooltip.style.pointerEvents = 'none';
+                } else if (tooltip && window.tooltipFixed) {
+                    // Manter a posição fixada e sempre visível
+                    if (window.tooltipFixedPosition) {
+                        tooltip.style.top = window.tooltipFixedPosition.top;
+                        tooltip.style.left = window.tooltipFixedPosition.left;
+                    }
+                    tooltip.style.display = 'block';
+                    tooltip.style.opacity = '1';
+                    tooltip.style.pointerEvents = 'auto';
+                }
+            });
+
+            // Garantir que o elemento existe antes de observar
+            const eloChartElement = document.querySelector("#eloChart");
+            if (eloChartElement && eloChartElement.parentElement) {
+                tooltipObserver.observe(eloChartElement.parentElement, {
+                    childList: true,
+                    subtree: true
+                });
             }
-        });
-    };
-
-    // Guardar cores originais
-    saveOriginalMarkerColors();
-
-    // Se não conseguir na primeira vez, tentar novamente com delay (para garantir que SVG está pronto)
-    setTimeout(saveOriginalMarkerColors, 100);
-
-    // Adicionar observer para repositionar o tooltip
-    const tooltipObserver = new MutationObserver(() => {
-        const tooltip = document.querySelector('.apexcharts-tooltip');
-        if (tooltip && !window.tooltipFixed) {
-            const currentTop = parseInt(tooltip.style.top) || 0;
-            tooltip.style.top = (currentTop + 75) + 'px';
-            tooltip.style.pointerEvents = 'none';
-        } else if (tooltip && window.tooltipFixed) {
-            // Manter a posição fixada e sempre visível
-            if (window.tooltipFixedPosition) {
-                tooltip.style.top = window.tooltipFixedPosition.top;
-                tooltip.style.left = window.tooltipFixedPosition.left;
-            }
-            tooltip.style.display = 'block';
-            tooltip.style.opacity = '1';
-            tooltip.style.pointerEvents = 'auto';
-        }
-    });
-
-    tooltipObserver.observe(document.querySelector("#eloChart").parentElement, {
-        childList: true,
-        subtree: true
+        }, 200);
     });
 }
 
@@ -2986,6 +3010,25 @@ function updateRankingsTable() {
                     <td class="form-column" style="display: ${compactModeEnabled ? 'none' : ''}">${formBadgesHtml}</td>
                 `;
         row.classList.add(zoneClass);
+
+        // Adicionar event listeners para tooltip histórico na célula da equipa
+        const teamCell = row.querySelector('.team-cell');
+        if (teamCell) {
+            let tooltipTimer = null;
+
+            teamCell.addEventListener('mouseenter', async () => {
+                // Delay para evitar mostrar tooltip em passagens rápidas
+                tooltipTimer = setTimeout(async () => {
+                    await showHistoricalTooltip(team.team, teamCell);
+                }, 300);
+            });
+
+            teamCell.addEventListener('mouseleave', () => {
+                clearTimeout(tooltipTimer);
+                hideHistoricalTooltip();
+            });
+        }
+
         tbody.appendChild(row);
     });
 
@@ -6088,6 +6131,8 @@ function getPreferredTeamLabel(teamName) {
          * @returns {object} Informações do curso (nome completo, núcleo, emblema, cores)
          */
 function getCourseInfo(courseName) {
+    if (!courseName) return null;
+
     let courseKey = courseName.trim();
 
     // Normalização específica para cursos com variações de grafia
@@ -6222,10 +6267,18 @@ const appState = {
         modalidade: null,
         availableEpocas: [],
         playoffSystemInfo: {}
+    },
+
+    // Dados históricos das últimas épocas
+    historical: {
+        data: {}, // {epoca: {classificacoes: [], detalhes: []}}
+        loaded: false,
+        currentModalidade: null
     }
 };
 
 let currentLoadToken = 0;
+let historicalTooltipEl = null;
 
 // ==================== COMPATIBILIDADE COM CÓDIGO LEGADO ====================
 // Proxies para sincronizar variáveis antigas com appState
@@ -6499,6 +6552,661 @@ function parseRankingKey(rankingKey) {
     return { division: rankingKey, group: null };
 }
 
+// ==================== SISTEMA DE HISTÓRICO DE CLASSIFICAÇÕES ====================
+
+/**
+ * Verifica se uma época está concluída (tem jogos de playoffs E1, E2, E3)
+ */
+function isSeasonCompleted(modalidade, epoca) {
+    const detalhes = appState.historical.data[epoca]?.detalhes || [];
+    // Procurar por jogo E3 (Final) que indica época concluída
+    return detalhes.some(jogo => jogo.Jornada === 'E3');
+}
+
+function hasUnknownResultMarker(row) {
+    if (!row) return false;
+    return Object.values(row).some(value => value && value.toString().trim() === '?');
+}
+
+function getChampionLabels(modalidade) {
+    const normalized = (modalidade || '').toUpperCase();
+    const isFeminino = normalized.includes('FEMININO');
+    return isFeminino
+        ? { 1: 'Campeãs', 2: 'Vice-Campeãs', 3: '3º Lugar', 4: '4º Lugar' }
+        : { 1: 'Campeões', 2: 'Vice-Campeões', 3: '3º Lugar', 4: '4º Lugar' };
+}
+
+function getChampionPredictionLabel(modalidade) {
+    const normalized = (modalidade || '').toUpperCase();
+    const isFeminino = normalized.includes('FEMININO');
+    return isFeminino
+        ? { label: 'Campeãs', description: 'Probabilidade de serem campeãs' }
+        : { label: 'Campeões', description: 'Probabilidade de serem campeões' };
+}
+
+/**
+ * Extrai as posições gerais (1º-4º) e resultados de quartos de final dos dados de detalhes
+ */
+function extractGeneralRankings(detalhes) {
+    const result = {
+        1: null, // Campeão
+        2: null, // Vice-campeão
+        3: null, // 3º lugar
+        4: null, // 4º lugar
+        quartos: [] // Equipas eliminadas nos quartos
+    };
+
+    if (!detalhes || detalhes.length === 0) return result;
+
+    // Procurar jogos de playoffs
+    const final = detalhes.find(j => j.Jornada === 'E3'); // Final
+    const terceiro = detalhes.find(j => j.Jornada === 'E3L'); // Jogo 3º lugar
+    const semifinais = detalhes.filter(j => j.Jornada === 'E2'); // Meias-finais
+    const quartos = detalhes.filter(j => j.Jornada === 'E1'); // Quartos
+
+    // Extrair campeão e vice (da final)
+    if (final) {
+        const gols1 = parseFloat(final['Golos 1']) || 0;
+        const gols2 = parseFloat(final['Golos 2']) || 0;
+        const equipa1 = final['Equipa 1'];
+        const equipa2 = final['Equipa 2'];
+
+        if (gols1 > gols2) {
+            result[1] = normalizeTeamName(equipa1);
+            result[2] = normalizeTeamName(equipa2);
+        } else {
+            result[1] = normalizeTeamName(equipa2);
+            result[2] = normalizeTeamName(equipa1);
+        }
+    }
+
+    // Extrair 3º e 4º lugar (do jogo do 3º lugar)
+    if (terceiro) {
+        const gols1 = parseFloat(terceiro['Golos 1']) || 0;
+        const gols2 = parseFloat(terceiro['Golos 2']) || 0;
+        const equipa1 = terceiro['Equipa 1'];
+        const equipa2 = terceiro['Equipa 2'];
+
+        if (gols1 > gols2) {
+            result[3] = normalizeTeamName(equipa1);
+            result[4] = normalizeTeamName(equipa2);
+        } else {
+            result[3] = normalizeTeamName(equipa2);
+            result[4] = normalizeTeamName(equipa1);
+        }
+    }
+
+    // Extrair resultados dos quartos de final
+    quartos.forEach(jogo => {
+        const gols1 = parseFloat(jogo['Golos 1']) || 0;
+        const gols2 = parseFloat(jogo['Golos 2']) || 0;
+        const equipa1 = jogo['Equipa 1'];
+        const equipa2 = jogo['Equipa 2'];
+        const unknownResult = hasUnknownResultMarker(jogo);
+
+        let perdedor, vencedor, resultado;
+        if (gols1 > gols2) {
+            perdedor = normalizeTeamName(equipa2);
+            vencedor = normalizeTeamName(equipa1);
+            resultado = `${gols2}-${gols1}`;
+        } else {
+            perdedor = normalizeTeamName(equipa1);
+            vencedor = normalizeTeamName(equipa2);
+            resultado = `${gols1}-${gols2}`;
+        }
+
+        result.quartos.push({
+            equipa: perdedor,
+            resultado: resultado,
+            adversario: vencedor,
+            unknownResult: unknownResult
+        });
+    });
+
+    return result;
+}
+
+/**
+ * Verifica se o ELO final de uma equipa numa época é compatível com o ELO inicial de outra equipa na época seguinte
+ * @param {string} teamEpocaAnterior - Nome da equipa na época anterior
+ * @param {string} epocaAnterior - Época anterior
+ * @param {string} teamEpocaAtual - Nome da equipa na época atual
+ * @param {string} epocaAtual - Época atual
+ * @returns {boolean} - true se os ELO batem (diferença < 5%), false caso contrário
+ */
+function validateELOContinuity(teamEpocaAnterior, epocaAnterior, teamEpocaAtual, epocaAtual) {
+    const dataAnterior = appState.historical.data[epocaAnterior];
+    const dataAtual = appState.historical.data[epocaAtual];
+
+    if (!dataAnterior?.elo || !dataAtual?.elo) {
+        return true; // Se não temos dados de ELO, aceitar baseado só no emblema
+    }
+
+    // Encontrar última linha (último jogo) da época anterior
+    const eloDataAnterior = dataAnterior.elo;
+    if (eloDataAnterior.length === 0) {
+        return true;
+    }
+
+    const ultimaLinhaAnterior = eloDataAnterior[eloDataAnterior.length - 1];
+    const eloFinalAnterior = parseFloat(ultimaLinhaAnterior[teamEpocaAnterior]);
+
+    // Encontrar primeira linha (início) da época atual
+    const eloDataAtual = dataAtual.elo;
+    if (eloDataAtual.length === 0) {
+        return true;
+    }
+
+    const primeiraLinhaAtual = eloDataAtual[0];
+    const eloInicialAtual = parseFloat(primeiraLinhaAtual[teamEpocaAtual]);
+
+    if (isNaN(eloFinalAnterior) || isNaN(eloInicialAtual)) {
+        return true; // Se não conseguimos ler os valores, aceitar
+    }
+
+    // ELO deve ser exatamente igual (ou diferença < 1 para arredondamentos)
+    const diferenca = Math.abs(eloFinalAnterior - eloInicialAtual);
+    return diferenca < 1;
+}
+
+/**
+ * Encontra equipas do mesmo núcleo (mesmo emblema) numa época específica
+ * @param {string} currentTeamName - Nome da equipa atual
+ * @param {string} epoca - Época a procurar
+ * @param {string} epocaSeguinte - Época seguinte (para validação de ELO)
+ * @returns {string|null} - Nome da equipa com mesmo emblema ou null
+ */
+function findTeamBySameCore(currentTeamName, epoca, epocaSeguinte = null) {
+    const normalizedCurrent = normalizeTeamName(currentTeamName);
+    const currentInfo = getCourseInfo(normalizedCurrent);
+
+    if (!currentInfo || !currentInfo.emblemPath) {
+        return null;
+    }
+
+    const epocaData = appState.historical.data[epoca];
+    if (!epocaData || !epocaData.classificacoes) {
+        return null;
+    }
+
+    // Procurar outra equipa com o mesmo emblema
+    for (const classificacao of epocaData.classificacoes) {
+        const teamName = normalizeTeamName(classificacao.Equipa);
+
+        // Pular se for o mesmo nome
+        if (teamName === normalizedCurrent) {
+            continue;
+        }
+
+        const teamInfo = getCourseInfo(teamName);
+        if (teamInfo && teamInfo.emblemPath === currentInfo.emblemPath) {
+            // Se temos época seguinte, validar continuidade de ELO
+            if (epocaSeguinte) {
+                const eloValido = validateELOContinuity(teamName, epoca, normalizedCurrent, epocaSeguinte);
+                if (eloValido) {
+                    return teamName;
+                } else {
+                    continue; // ELO não bate, continuar procurando
+                }
+            }
+
+            // Sem época seguinte para validar, retornar baseado só no emblema
+            return teamName;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Rastreia o histórico de uma equipa seguindo mudanças de nome (mesmo núcleo/emblema)
+ * @param {string} teamName - Nome da equipa a rastrear
+ * @param {Array<string>} epocas - Lista de épocas ordenadas (mais recente primeiro)
+ * @returns {Object} - Mapa de epoca -> nome da equipa nessa época
+ */
+function traceTeamNameChanges(teamName, epocas) {
+    const nameMap = {};
+    let currentName = normalizeTeamName(teamName);
+
+    for (let i = 0; i < epocas.length; i++) {
+        const epoca = epocas[i];
+        const epocaData = appState.historical.data[epoca];
+        if (!epocaData) continue;
+
+        // Verificar se a equipa com o nome atual existe nesta época
+        const foundDirect = epocaData.classificacoes.find(c =>
+            normalizeTeamName(c.Equipa) === currentName
+        );
+
+        if (foundDirect) {
+            nameMap[epoca] = currentName;
+        } else {
+            // Época seguinte para validação de ELO (a anterior no array, pois está em ordem decrescente)
+            const epocaSeguinte = i > 0 ? epocas[i - 1] : null;
+
+            // Procurar equipa do mesmo núcleo (emblema) com validação de ELO
+            const sameCoreName = findTeamBySameCore(currentName, epoca, epocaSeguinte);
+            if (sameCoreName) {
+                nameMap[epoca] = sameCoreName;
+                currentName = sameCoreName; // Atualizar nome atual para continuar o rastro
+            }
+        }
+    }
+
+    return nameMap;
+}
+
+/**
+ * Constrói o histórico de uma equipa nas últimas 5 épocas
+ */
+function buildTeamHistory(teamName, modalidade) {
+    const normalizedTeam = normalizeTeamName(teamName);
+    const history = [];
+    const epocas = Object.keys(appState.historical.data).sort().reverse(); // Mais recente primeiro
+    const currentSeasonEpoca = currentEpoca || appState.selection.epoca;
+
+    // Rastrear mudanças de nome ao longo das épocas
+    const nameMap = traceTeamNameChanges(teamName, epocas);
+
+    let count = 0;
+
+    for (const epoca of epocas) {
+        const epocaData = appState.historical.data[epoca];
+        if (!epocaData) continue;
+
+        // Verificar se é época atual e se está concluída
+        const isCurrentSeason = epoca === currentSeasonEpoca;
+        const isCompleted = isSeasonCompleted(modalidade, epoca);
+
+        // Usar o nome correto para esta época (pode ter mudado)
+        const teamNameInEpoca = nameMap[epoca] || normalizedTeam;
+        const isDifferentName = teamNameInEpoca !== normalizedTeam;
+
+        // Procurar equipa nas classificações (com nome que tinha nesta época)
+        const classificacao = epocaData.classificacoes.find(c =>
+            normalizeTeamName(c.Equipa) === teamNameInEpoca
+        );
+
+        if (!classificacao) {
+            // Equipa não participou nesta época - adicionar entrada indicando isso
+            history.push({
+                epoca: epoca,
+                posGrupo: null,
+                divisao: null,
+                grupo: null,
+                posGeral: null,
+                descricaoGeral: null,
+                naoParticipou: true,
+                emAndamento: isCurrentSeason && !isCompleted,
+                nomeAnterior: null
+            });
+            count++;
+            if (count >= 5) break;
+            continue;
+        }
+
+        // Extrair informações
+        const posGrupo = parseInt(classificacao.Posicao) || 0;
+        const divisao = classificacao.Divisao;
+        const grupo = classificacao.Grupo && classificacao.Grupo !== 'nan' ? classificacao.Grupo : null;
+
+        // Extrair posição geral (playoffs)
+        const generalRankings = extractGeneralRankings(epocaData.detalhes);
+        let posGeral = null;
+        let descricaoGeral = null;
+
+        // Verificar posições 1-4 (usar nome da época)
+        const labels = getChampionLabels(modalidade);
+        for (let pos = 1; pos <= 4; pos++) {
+            if (generalRankings[pos] === teamNameInEpoca) {
+                posGeral = pos;
+                descricaoGeral = labels[pos];
+                break;
+            }
+        }
+
+        // Verificar se foi eliminado nos quartos
+        if (!posGeral) {
+            const quartoInfo = generalRankings.quartos.find(q => q.equipa === teamNameInEpoca);
+            if (quartoInfo) {
+                const unknownIndicator = quartoInfo.unknownResult
+                    ? ' <span class="unknown-result-indicator" style="display: inline-block; margin-left: 6px; padding: 2px 6px;"><small style="color: #666; font-style: italic;">⚠️ Resultado Desconhecido</small></span>'
+                    : '';
+                descricaoGeral = `Quartos: ${quartoInfo.resultado} vs ${getPreferredTeamLabel(quartoInfo.adversario)}${unknownIndicator}`;
+            }
+        }
+
+        history.push({
+            epoca: epoca,
+            posGrupo: posGrupo,
+            divisao: divisao,
+            grupo: grupo,
+            posGeral: posGeral,
+            descricaoGeral: descricaoGeral,
+            naoParticipou: false,
+            emAndamento: isCurrentSeason && !isCompleted,
+            nomeAnterior: isDifferentName ? teamNameInEpoca : null
+        });
+
+        count++;
+        if (count >= 5) break; // Limitar a 5 épocas
+    }
+
+    // Reverter para ter do mais antigo para o mais recente
+    history.reverse();
+
+    // Calcular progressões (comparando cada época com a anterior)
+    for (let i = 0; i < history.length; i++) {
+        const atual = history[i];
+
+        // Não calcular progressão se a época está em andamento
+        if (atual.emAndamento) {
+            atual.progressao = 'none';
+            continue;
+        }
+
+        if (i > 0 && !atual.naoParticipou) {
+            const anterior = history[i - 1];
+
+            // Se a época anterior também não participou, não calcular progressão
+            if (anterior.naoParticipou) {
+                atual.progressao = 'none';
+            } else {
+                // Comparar posição no grupo (menor é melhor)
+                if (atual.posGrupo < anterior.posGrupo) {
+                    atual.progressao = 'up';
+                } else if (atual.posGrupo > anterior.posGrupo) {
+                    atual.progressao = 'down';
+                } else {
+                    atual.progressao = 'same';
+                }
+
+                // Se mudou de divisão, considerar isso na progressão (menor divisão é melhor)
+                // Apenas comparar se ambas as divisões existirem (algumas modalidades não têm divisões)
+                if (atual.divisao && anterior.divisao && atual.divisao !== anterior.divisao) {
+                    const divAtual = parseInt(atual.divisao) || 0;
+                    const divAnterior = parseInt(anterior.divisao) || 0;
+                    if (divAtual < divAnterior) {
+                        atual.progressao = 'up'; // Subiu de divisão
+                    } else if (divAtual > divAnterior) {
+                        atual.progressao = 'down'; // Desceu de divisão
+                    }
+                }
+            }
+        } else {
+            atual.progressao = 'none'; // Primeira época no histórico ou não participou
+        }
+    }
+
+    return history; // Já está do mais antigo para o mais recente
+}
+
+/**
+ * Carrega dados históricos de classificações e detalhes para todas as épocas disponíveis
+ */
+async function loadHistoricalData(modalidade) {
+    // Se já carregou para esta modalidade, não recarregar
+    if (appState.historical.loaded && appState.historical.currentModalidade === modalidade) {
+        return;
+    }
+
+    appState.historical.data = {};
+    appState.historical.loaded = false;
+    appState.historical.currentModalidade = modalidade;
+
+    const epocasDisponiveis = availableEpocas || ['24_25']; // Fallback
+    const promises = [];
+
+    for (const epoca of epocasDisponiveis) {
+        const classificacaoPath = `output/elo_ratings/classificacao_${modalidade.replace(/\d{2}_\d{2}/, epoca)}.csv`;
+        const detalhePath = `output/csv_modalidades/${modalidade.replace(/\d{2}_\d{2}/, epoca)}.csv`;
+        const eloPath = `output/elo_ratings/elo_${modalidade.replace(/\d{2}_\d{2}/, epoca)}.csv`;
+
+        // Carregar classificações
+        const classPromise = new Promise((resolve) => {
+            Papa.parse(classificacaoPath, {
+                download: true,
+                header: true,
+                complete: (results) => {
+                    resolve({ epoca, tipo: 'classificacoes', data: results.data });
+                },
+                error: () => {
+                    resolve({ epoca, tipo: 'classificacoes', data: [] });
+                }
+            });
+        });
+
+        // Carregar detalhes
+        const detPromise = new Promise((resolve) => {
+            Papa.parse(detalhePath, {
+                download: true,
+                header: true,
+                complete: (results) => {
+                    resolve({ epoca, tipo: 'detalhes', data: results.data });
+                },
+                error: () => {
+                    resolve({ epoca, tipo: 'detalhes', data: [] });
+                }
+            });
+        });
+
+        // Carregar ELO
+        const eloPromise = new Promise((resolve) => {
+            Papa.parse(eloPath, {
+                download: true,
+                header: true,
+                complete: (results) => {
+                    resolve({ epoca, tipo: 'elo', data: results.data });
+                },
+                error: () => {
+                    resolve({ epoca, tipo: 'elo', data: [] });
+                }
+            });
+        });
+
+        promises.push(classPromise, detPromise, eloPromise);
+    }
+
+    // Aguardar todos os carregamentos
+    const results = await Promise.all(promises);
+
+    // Organizar dados por época
+    results.forEach(result => {
+        if (!appState.historical.data[result.epoca]) {
+            appState.historical.data[result.epoca] = {
+                classificacoes: [],
+                detalhes: [],
+                elo: []
+            };
+        }
+
+        if (result.tipo === 'classificacoes') {
+            appState.historical.data[result.epoca].classificacoes = result.data;
+        } else if (result.tipo === 'detalhes') {
+            appState.historical.data[result.epoca].detalhes = result.data;
+        } else if (result.tipo === 'elo') {
+            appState.historical.data[result.epoca].elo = result.data;
+        }
+    });
+
+    appState.historical.loaded = true;
+}
+
+/**
+ * Cria o elemento HTML do tooltip histórico
+ */
+function createHistoricalTooltip() {
+    const tooltip = document.createElement('div');
+    tooltip.id = 'historical-tooltip';
+    tooltip.className = 'historical-tooltip';
+    tooltip.style.display = 'none';
+    document.body.appendChild(tooltip);
+    return tooltip;
+}
+
+/**
+ * Renderiza e mostra o tooltip histórico para uma equipa
+ */
+async function showHistoricalTooltip(teamName, anchorEl) {
+    if (!historicalTooltipEl) {
+        historicalTooltipEl = createHistoricalTooltip();
+    }
+
+    const modalidade = currentModalidade;
+    if (!modalidade) return;
+
+    // Carregar dados históricos primeiro
+    await loadHistoricalData(modalidade);
+
+    const history = buildTeamHistory(teamName, modalidade);
+
+    if (history.length === 0) {
+        // Sem histórico disponível
+        historicalTooltipEl.style.display = 'none';
+        return;
+    }
+
+    // Verificar se há pelo menos uma época onde a equipa participou
+    const participouEmAlgumaEpoca = history.some(entry => !entry.naoParticipou);
+
+    if (!participouEmAlgumaEpoca) {
+        // Equipa nunca participou em nenhuma época - não mostrar tooltip
+        historicalTooltipEl.style.display = 'none';
+        return;
+    }
+
+    const normalizedTeam = normalizeTeamName(teamName);
+    const courseInfo = getCourseInfo(normalizedTeam);
+    const displayName = courseInfo.fullName;
+    const emblemPath = courseInfo.emblemPath || 'assets/taça_ua.png';
+
+    // Construir HTML do tooltip
+    let html = `
+        <div class="historical-tooltip-header">
+            <img src="${emblemPath}" alt="${displayName}" class="historical-tooltip-emblem" onerror="this.style.display='none'">
+            <span class="historical-tooltip-title">${displayName}</span>
+        </div>
+        <div class="historical-tooltip-subtitle">Histórico de Classificações</div>
+        <table class="historical-tooltip-table">
+            <thead>
+                <tr>
+                    <th>Época</th>
+                    <th>Grupo</th>
+                    <th>Geral</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    history.forEach((entry, index) => {
+        const epocaLabel = entry.epoca.replace('_', '/');
+        const emAndamentoSuffix = entry.emAndamento ? ' <span style="color: #94a3b8; font-size: 0.85em;">(em andamento)</span>' : '';
+
+        let grupoLabel, geralLabel;
+        if (entry.naoParticipou) {
+            grupoLabel = '<span style="color: #94a3b8; font-style: italic;">Não participou</span>';
+            geralLabel = '—';
+        } else {
+            // Formato para modalidades com divisões
+            if (entry.divisao) {
+                grupoLabel = entry.grupo
+                    ? `${entry.divisao}ª Div - Grupo ${entry.grupo} (${entry.posGrupo}º)`
+                    : `${entry.divisao}ª Div (${entry.posGrupo}º)`;
+            } else {
+                // Formato para modalidades sem divisões
+                grupoLabel = entry.grupo
+                    ? `Grupo ${entry.grupo} (${entry.posGrupo}º)`
+                    : `${entry.posGrupo}º lugar`;
+            }
+
+            // Se tinha nome diferente, adicionar indicação
+            if (entry.nomeAnterior) {
+                const nomeAnteriorInfo = getCourseInfo(entry.nomeAnterior);
+                const displayNomeAnterior = nomeAnteriorInfo.fullName || entry.nomeAnterior;
+                grupoLabel += `<br><span style="color: #94a3b8; font-size: 0.85em; font-style: italic;">Como: ${displayNomeAnterior}</span>`;
+            }
+
+            geralLabel = entry.descricaoGeral || '—';
+        }
+
+        // Adicionar classe especial para épocas onde não participou
+        const rowClass = entry.naoParticipou ? ' class="no-participation"' : '';
+
+        html += `
+            <tr${rowClass}>
+                <td>${epocaLabel}${emAndamentoSuffix}</td>
+                <td>${grupoLabel}</td>
+                <td class="historical-general-col">${geralLabel}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    historicalTooltipEl.innerHTML = html;
+
+    // Posicionar tooltip
+    positionHistoricalTooltip(anchorEl);
+
+    // Mostrar tooltip
+    historicalTooltipEl.style.display = 'block';
+    historicalTooltipEl.setAttribute('data-team', teamName);
+}
+
+/**
+ * Posiciona o tooltip histórico na tela
+ */
+function positionHistoricalTooltip(anchorEl) {
+    if (!historicalTooltipEl) return;
+
+    const tooltip = historicalTooltipEl;
+    const padding = 10;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    if (!anchorEl || !anchorEl.getBoundingClientRect) {
+        return;
+    }
+
+    const anchorRect = anchorEl.getBoundingClientRect();
+
+    // Mostrar temporariamente para medir
+    tooltip.style.display = 'block';
+    const tooltipRect = tooltip.getBoundingClientRect();
+
+    let left = anchorRect.right + padding;
+    let top = anchorRect.top;
+
+    // Ajustar se sair da tela na horizontal
+    if (left + tooltipRect.width > viewportWidth - padding) {
+        left = anchorRect.left - tooltipRect.width - padding;
+    }
+
+    // Ajustar se sair da tela na vertical
+    if (top + tooltipRect.height > viewportHeight - padding) {
+        top = viewportHeight - tooltipRect.height - padding;
+    }
+
+    // Garantir que não sai pelos cantos
+    left = Math.max(padding, Math.min(left, viewportWidth - tooltipRect.width - padding));
+    top = Math.max(padding, Math.min(top, viewportHeight - tooltipRect.height - padding));
+
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+}
+
+/**
+ * Esconde o tooltip histórico
+ */
+function hideHistoricalTooltip() {
+    if (historicalTooltipEl && !historicalTooltipEl.classList.contains('fixed')) {
+        historicalTooltipEl.style.display = 'none';
+    }
+}
+
 function changeModalidade(mod) {
     if (!mod) return;
 
@@ -6607,6 +7315,11 @@ function changeModalidade(mod) {
 
                 // Disparar evento indicando que os dados foram carregados
                 document.dispatchEvent(new CustomEvent('data:loaded'));
+
+                // Carregar dados históricos em background
+                loadHistoricalData(mod).catch(err => {
+                    console.error('Erro ao carregar dados históricos:', err);
+                });
             }, 500);
         }
     }
@@ -9574,6 +10287,7 @@ function updatePredictionsStats() {
     const expectedPlaceStd = (teamData.expected_place_in_group_std || 0).toFixed(1);
 
     // Definir estatísticas a mostrar
+    const championPrediction = getChampionPredictionLabel(currentModalidade);
     const stats = [
         {
             label: 'Playoffs',
@@ -9583,17 +10297,17 @@ function updatePredictionsStats() {
         {
             label: 'Meias-Finais',
             value: `${(teamData.p_meias_finais || 0).toFixed(1)}%`,
-            description: 'Probabilidade de chegar às meias'
+            description: 'Probabilidade de chegarem às meias'
         },
         {
             label: 'Final',
             value: `${(teamData.p_finais || 0).toFixed(1)}%`,
-            description: 'Probabilidade de chegar à final'
+            description: 'Probabilidade de chegarem à final'
         },
         {
-            label: 'Campeão',
+            label: championPrediction.label,
             value: `${(teamData.p_champion || 0).toFixed(1)}%`,
-            description: 'Probabilidade de ser campeão'
+            description: championPrediction.description
         },
         {
             label: 'Pontos Esperados',

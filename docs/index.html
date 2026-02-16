@@ -11,6 +11,14 @@
     <link rel="icon" type="image/png" href="assets/taça_ua.png">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script>
+        // Verificar se ApexCharts foi carregado
+        window.addEventListener('DOMContentLoaded', function () {
+            if (typeof ApexCharts === 'undefined') {
+                console.error('ApexCharts falhou ao carregar do CDN!');
+            }
+        });
+    </script>
     <script src="debug.js"></script>
     <link rel="stylesheet" href="styles.css?v=18">
 </head>
