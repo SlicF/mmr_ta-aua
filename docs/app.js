@@ -3,6 +3,16 @@
 const DEFAULT_ELO = 750;
 const ENABLE_RANKING_SPARKLINES = true; // Mostrar micro-tendência de ELO na tabela
 const SPARKLINE_POINTS = 10; // número de pontos mais recentes
+
+/**
+ * Detecta se o dispositivo é móvel
+ * @returns {boolean} true se for dispositivo móvel
+ */
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || window.innerWidth <= 768;
+}
+
 let compactModeEnabled = false; // Modo compacto da tabela (sem emblemas e ELO Trend)
 let predictionsTooltipFixed = false; // Estado do tooltip de previsões (fixo ou não)
 let predictionsTooltipState = { distribution: null, isTeamA: false, itemsShown: 10 }; // Estado para gestão de batches
@@ -6529,12 +6539,19 @@ async function initializeSelectors() {
     const cachedModalidade = localStorage.getItem('mmr_selectedModalidade');
     const cachedCompactMode = localStorage.getItem('mmr_compactModeEnabled');
 
-    // Restaurar modo compacto se existir no cache
+    // Restaurar modo compacto
     if (cachedCompactMode !== null) {
+        // Se houver preferência salva, usar essa
         compactModeEnabled = cachedCompactMode === 'true';
-        const checkbox = document.getElementById('compactModeCheckbox');
-        if (checkbox) checkbox.checked = compactModeEnabled;
+    } else if (isMobileDevice()) {
+        // Se não houver preferência E for mobile, ativar modo compacto por padrão
+        compactModeEnabled = true;
+        localStorage.setItem('mmr_compactModeEnabled', 'true');
     }
+
+    // Atualizar checkbox
+    const checkbox = document.getElementById('compactModeCheckbox');
+    if (checkbox) checkbox.checked = compactModeEnabled;
 
     // Definir época atual - priorizar cache se válido
     if (!currentEpoca && availableEpocas.length > 0) {

@@ -96,6 +96,100 @@ const teamNamesTranslation = {
     }
 };
 
+teamNamesTranslation.en = { ...teamNamesTranslation.pt };
+teamNamesTranslation.es = {
+    'Administração Pública': 'Administración Pública',
+    'AP': 'AP',
+    'Aero': 'Aero',
+    'Automação e Sistemas de Produção': 'Automatización y Sistemas de Producción',
+    'ASP': 'ASP',
+    'Biologia': 'Biología',
+    'Biologia e Geologia': 'Biología y Geología',
+    'BG': 'BG',
+    'Bioquímica': 'Bioquímica',
+    'Biotec': 'Biotec',
+    'Biotecnologia': 'Biotecnología',
+    'Ciências Biomédicas': 'Ciencias Biomédicas',
+    'Ciências Biomédicas B': 'Ciencias Biomédicas B',
+    'Bimédica': 'Biomédica',
+    'Biomédica': 'Biomédica',
+    'CBM': 'CBM',
+    'CBM B': 'CBM B',
+    'Ciências do Mar': 'Ciencias del Mar',
+    'CM': 'CM',
+    'Contabilidade': 'Contabilidad',
+    'Contab': 'Contab',
+    'Civil': 'Civil',
+    'Computacional': 'Computacional',
+    'EAmb': 'IAmb',
+    'EB': 'EB',
+    'Design': 'Diseño',
+    'Design de Produto e Tecnologia': 'Diseño de Producto y Tecnología',
+    'DPT': 'DPT',
+    'Economia': 'Economía',
+    'Educação Básica': 'Educación Básica',
+    'Enfermagem': 'Enfermería',
+    'Eng. Aeroespacial': 'Ing. Aeroespacial',
+    'Eng. Biomédica': 'Ing. Biomédica',
+    'Eng. Civil': 'Ing. Civil',
+    'Eng. Computacional': 'Ing. Computacional',
+    'Eng. Computadores e Telemática': 'Ing. Computadores y Telemática',
+    'ECT': 'ICT',
+    'Eng. de Materiais': 'Ing. de Materiales',
+    'Materiais': 'Materiales',
+    'Eng. do Ambiente': 'Ing. del Ambiente',
+    'Eng. e Gestão Industrial': 'Ing. y Gestión Industrial',
+    'Eng. e Gestão Industrial B': 'Ing. y Gestión Industrial B',
+    'EGI': 'IGI',
+    'EGI B': 'IGI B',
+    'Eng. Eletrónica e Telecomunicações': 'Ing. Electrónica y Telecomunicaciones',
+    'Eng. Eletrónica e Telecomunicações B': 'Ing. Electrónica y Telecomunicaciones B',
+    'EET': 'IET',
+    'EET B': 'IET B',
+    'Eng. Física': 'Ing. Física',
+    'EF': 'IF',
+    'Eng. Informática': 'Ing. Informática',
+    'Eng. Informática B': 'Ing. Informática B',
+    'EI': 'II',
+    'EI B': 'II B',
+    'Eng. Mecânica': 'Ing. Mecánica',
+    'Eng. Mecânica B': 'Ing. Mecánica B',
+    'Mecânica': 'Mecánica',
+    'Mecânica B': 'Mecánica B',
+    'Eng. Química': 'Ing. Química',
+    'EQ': 'IQ',
+    'Estudos Editoriais': 'Estudios Editoriales',
+    'Finanças': 'Finanzas',
+    'Física': 'Física',
+    'Fisioterapia': 'Fisioterapia',
+    'Geologia': 'Geología',
+    'Gestão': 'Gestión',
+    'Gestão Comercial': 'Gestión Comercial',
+    'Gest. Comercial': 'Gest. Comercial',
+    'Gestão e Planeamento em Turismo': 'Gestión y Planificación en Turismo',
+    'GPT': 'GPT',
+    'Gestão Pública': 'Gestión Pública',
+    'Gest. Pública': 'Gest. Pública',
+    'Línguas e Relações Empresariais': 'Lenguas y Relaciones Empresariales',
+    'LRE': 'LRE',
+    'Línguas, Literaturas e Culturas': 'Lenguas, Literaturas y Culturas',
+    'LLC': 'LLC',
+    'Marketing': 'Marketing',
+    'Matemática': 'Matemáticas',
+    'Medicina': 'Medicina',
+    'Meteorologia, Oceanografia e Clima': 'Meteorología, Oceanografía y Clima',
+    'MOC': 'MOC',
+    'MTC': 'MTC',
+    'Música': 'Música',
+    'Multimédia e Tecnologias da Comunicação': 'Multimedia y Tecnologías de la Comunicación',
+    'Psicologia': 'Psicología',
+    'Química': 'Química',
+    'Tecnologias de Informação': 'Tecnologías de la Información',
+    'TI': 'TI',
+    'Terapia da Fala': 'Terapia del Habla',
+    'Tradução': 'Traducción'
+};
+
 const translations = {
     pt: {
         // === Página / Meta ===
@@ -744,6 +838,321 @@ const translations = {
     }
 };
 
+translations.es = {
+    // === Page / Meta ===
+    pageTitle: 'Panel Taza UA',
+    pageDescription: 'Panel interactivo de la Taza UA - Rankings, estadísticas ELO, calendario de partidos y cuadros de eliminación',
+
+    // === Header ===
+    dashboardTitle: 'Panel Taza UA',
+
+    // === Selectors ===
+    seasonLabel: 'Temporada:',
+    modalityLabel: 'Modalidad:',
+
+    // === Rankings ===
+    generalRanking: 'Clasificación general',
+    compactMode: 'Modo compacto',
+    posTitle: 'Posición en la clasificación general',
+    posAbbr: 'Pos.',
+    team: 'Equipo',
+    ptsTitle: 'Puntos acumulados',
+    ptsAbbr: 'Pts',
+    gamesTitle: 'Partidos jugados',
+    gamesAbbr: 'PJ',
+    winsTitle: 'Victorias',
+    winsAbbr: 'V',
+    drawsTitle: 'Empates',
+    drawsAbbr: 'E',
+    lossesTitle: 'Derrotas',
+    lossesAbbr: 'D',
+    noShowsTitle: 'Incomparecencias',
+    noShowsAbbr: 'FF',
+    goalDiffSymbol: '±',
+    eloTrend: 'Tendencia ELO',
+    eloTrendTitle: 'Muestra la evolución del rating ELO del equipo en los últimos 5 partidos.\nELO mínimo - ELO máximo',
+    form: 'Forma',
+    formTitle: 'Muestra los últimos 5 resultados del equipo (V=Victoria, E=Empate, D=Derrota)\nIzquierda es el más antiguo, derecha el más reciente.',
+    noDataAvailable: 'No hay datos disponibles',
+    selectModality: 'Selecciona una modalidad',
+    selectModalityData: 'Selecciona una modalidad para ver los datos',
+    selectModalityBracket: 'Selecciona una modalidad para ver el cuadro',
+    selectModalityFirst: 'Selecciona una modalidad primero',
+    removeFavorite: 'Quitar de favoritos',
+    markFavorite: 'Marcar como favorito',
+    favoriteRemoved: 'Equipo favorito eliminado',
+    favoriteSet: 'Equipo favorito:',
+    eloCurrentTitle: 'ELO actual y posición en el ranking general',
+    unknownDate: 'Fecha desconocida',
+    lastGame: 'último partido',
+    placeLabel: 'lugar',
+
+    // === Form (W/D/L) ===
+    formWin: 'Victoria',
+    formDraw: 'Empate',
+    formLoss: 'Derrota',
+    formUnknown: 'Desconocido',
+    formWinLetter: 'V',
+    formDrawLetter: 'E',
+    formLossLetter: 'D',
+
+    // === ELO Sparkline ===
+    eloEvolution: 'Evolución de ELO',
+    lastGames: 'partidos',
+    until: 'hasta',
+    eloTrendAriaLabel: 'Tendencia de ELO',
+
+    // === ELO Chart ===
+    eloChartTitle: 'Evolución de ELO de los equipos',
+    eloChartTooltip: 'ELO representa la fuerza relativa de los equipos durante la temporada. Sube con victorias, baja con derrotas.',
+    expandCollapse: 'Expandir/Colapsar',
+    previousSeason: '← Temporada anterior',
+    nextSeason: 'Temporada siguiente →',
+    teamsLabel: 'equipos',
+
+    // === Team Selector ===
+    selectAll: 'Seleccionar todas',
+    deselectAll: 'Deseleccionar todas',
+    invertSelection: 'Invertir selección',
+    selectAllAria: 'Seleccionar todos los equipos',
+    deselectAllAria: 'Deseleccionar todos los equipos',
+    invertSelectionAria: 'Invertir selección de equipos',
+    allGroups: 'Todos',
+    divisionGeneral: 'División general',
+    divisionNth: 'a División',
+    teamSingular: 'equipo',
+    teamPlural: 'equipos',
+    groupLabel: 'Grupo',
+
+    // === Quick Filters ===
+    filterTop3: 'Top 3',
+    filterTop3Aria: 'Filtrar top 3 equipos',
+    filterByLabel: 'Filtrar por',
+    filterByAllDiv2: 'Filtrar por toda la 2a División',
+    playoffsLabel: 'Playoffs',
+    playoffsCurrentRanking: 'Playoffs (Clasificación actual)',
+    filterPlayoffsAria: 'Filtrar equipos de playoffs',
+    sensationTeams: 'Equipos sorpresa',
+    sensationTeamsAria: 'Filtrar equipos sorpresa con mayor aumento de ELO',
+    resetFilter: 'Restablecer filtro',
+    resetFilterAria: 'Restablecer filtros de equipos',
+
+    // === Calendar ===
+    gameCalendar: 'Calendario de partidos',
+    matchday: 'Jornada',
+    selectMatchday: 'Selecciona una jornada para ver los partidos',
+    noGamesFound: 'No se encontraron partidos para esta jornada',
+    dateToSchedule: 'FECHA POR DEFINIR',
+    previousMatchday: 'Jornada anterior',
+    nextMatchday: 'Jornada siguiente',
+    navigatePrevious: 'Navegar a la jornada anterior',
+    navigateNext: 'Navegar a la jornada siguiente',
+
+    // === Brackets ===
+    eliminationBracket: 'Cuadro de eliminación',
+    playoffLiguilha: 'Playoff/Liguilla',
+    bracketNotAvailable: 'Cuadro no disponible para esta modalidad',
+    thirdPlace: '3er Lugar',
+    bracketLabel1stDivision: '1a División',
+    bracketLabel2ndDivision: '2a División',
+    bracketLabelLeague: 'de la Liga',
+    bracketLabelGroup: 'Grupo',
+    bracketQualificationSuffix: 'º',
+    bracketWinner: 'Ganador',
+    bracketLoser: 'Perdedor',
+    fourthPlace: '4o Lugar',
+    predictedMatch: '📅 Enfrentamiento previsto',
+    unknownResult: '⚠️ Resultado desconocido',
+    quarterFinals: 'Cuartos de final',
+    semiFinals: 'Semifinales',
+    finals: 'Final',
+    ofTheLeague: 'de la Liga',
+    div1st: '1a Div',
+    div2nd: '2a Div',
+    groupAbbr: 'Gr.',
+
+    // === Progression Legend ===
+    playoffs: 'Playoffs',
+    maintenancePlayoff: 'Playoff de mantenimiento',
+    maintenanceLeague: 'Liguilla de mantenimiento',
+    relegation: 'Descenso',
+    playoffsPromotion: 'Playoffs + Promoción',
+    promotionPlayoff: 'Playoff de promoción',
+    promotionLeague: 'Liguilla de promoción',
+    promotion: 'Ascenso',
+    safeZone: 'Zona segura',
+
+    // === Predictions ===
+    seasonPredictions: 'Predicciones de la temporada',
+    generalPredictions: 'PREDICCIONES GENERALES',
+    matchdayPredictions: 'Predicciones jornada a jornada',
+    predJornada: 'Jornada',
+    predDate: 'Fecha',
+    predOpponent: 'Rival',
+    predWinProb: 'P(V)',
+    predWinProbTitle: 'Probabilidad de victoria',
+    predDrawProb: 'P(E)',
+    predDrawProbTitle: 'Probabilidad de empate',
+    predLossProb: 'P(D)',
+    predLossProbTitle: 'Probabilidad de derrota',
+    expectedGoals: 'Goles esp.',
+    expectedGoalsAbbr: 'Goles esp.',
+    expectedGoalsTitle: 'Goles esperados',
+    basketGoalsExpected: 'Canastas esp.',
+    basketGoalsTitle: 'Canastas esperadas',
+    setsExpected: 'Sets esp.',
+    setsTitle: 'Sets esperados',
+    noStatsAvailable: 'No hay estadísticas disponibles',
+    noPredictionsData: 'No hay datos de predicciones para esta modalidad/temporada',
+    noDataAvailableShort: 'No hay datos disponibles',
+    errorLoading: 'Error al cargar',
+    loadingData: 'Cargando datos...',
+    loadingRankings: 'Cargando clasificación...',
+    noGamesForTeam: 'No hay partidos previstos para este equipo',
+    dataNotAvailable: 'Datos no disponibles',
+    simulations: 'simulaciones',
+    simulatedResults: 'Resultados simulados',
+    clickToFixTooltip: 'Haz clic para fijar/desfijar el tooltip de distribución',
+    previousTeam: 'Equipo anterior',
+    nextTeam: 'Equipo siguiente',
+
+    // Dynamic headers per sport
+    basketScored: 'Canastas anotadas',
+    basketConceded: 'Canastas recibidas',
+    basketDiff: 'Diferencia de canastas (CA - CR)',
+    setsWon: 'Sets ganados',
+    setsLost: 'Sets perdidos',
+    setsDiff: 'Diferencia de sets (SG - SP)',
+    goalsScored: 'Goles marcados',
+    goalsConceded: 'Goles recibidos',
+    goalsDiff: 'Diferencia de goles (GM - GR)',
+
+    // Prediction stats
+    predPlayoffs: 'Playoffs',
+    predSemiFinals: 'Semifinales',
+    predFinal: 'Final',
+    predChampionsMale: 'Campeones',
+    predChampionsFemale: 'Campeonas',
+    predChampionsMaleDesc: 'Probabilidad de ser campeones',
+    predChampionsFemaleDesc: 'Probabilidad de ser campeonas',
+    predQualification: 'Probabilidad de clasificación',
+    predReachSemis: 'Probabilidad de llegar a semifinales',
+    predReachFinals: 'Probabilidad de llegar a la final',
+    expectedPoints: 'Puntos esperados',
+    expectedPosition: 'Posición esperada en el grupo',
+    expectedValue: 'Valor esperado',
+    positions: 'posiciones',
+    points: 'puntos',
+    avgFinalElo: 'ELO final medio',
+    predPromotion: 'Promoción',
+    predPromotionDesc: 'Probabilidad de ascenso',
+    predRelegation: 'Descenso',
+    predRelegationDesc: 'Probabilidad de descenso',
+    unknown: 'Desconocido',
+    qualificationPlayoffs: 'Clasificación para playoffs',
+    replaces: 'sustituye',
+    ofGroup: 'del grupo',
+    teamBNoQualify: 'el equipo B no clasifica',
+    seasonStart: 'Inicio de la temporada',
+    eloFinalPreviousSeason: 'ELO final de la temporada anterior',
+    eloSeasonStart: 'ELO de inicio de temporada',
+    interGroupAdjustments: 'Ajustes intergrupos',
+    eloRatingLabel: 'Rating ELO',
+
+    // === Historical Tooltip ===
+    historicalRankings: 'Histórico de clasificaciones',
+    season: 'Temporada',
+    group: 'Grupo',
+    general: 'General',
+    inProgress: 'en curso',
+    didNotParticipate: 'No participó',
+    as: 'Como',
+
+    // === Goals/Baskets/Sets (sport-specific) ===
+    goalsExpected: 'Goles esperados',
+    goalsScoredAbbr: 'GF',
+    goalsConcededAbbr: 'GC',
+    goalsExpectedAbbr: 'Goles esp.',
+    basketsScored: 'Canastas anotadas',
+    basketsConceded: 'Canastas recibidas',
+    basketsDiff: 'Diferencia de canastas (CA - CR)',
+    basketsExpected: 'Canastas esperadas',
+    basketsScoredAbbr: 'CA',
+    basketsConcededAbbr: 'CR',
+    basketsExpectedAbbr: 'Canastas esp.',
+    setsExpected: 'Sets esperados',
+    setsWonAbbr: 'SG',
+    setsLostAbbr: 'SP',
+    setsExpectedAbbr: 'Sets esp.',
+
+    // === Champions ===
+    championsMale: 'Campeones',
+    championsViceMale: 'Subcampeones',
+    championsFemale: 'Campeonas',
+    championsViceFemale: 'Subcampeonas',
+
+    // === Debug Panel ===
+    activateDebug: 'Activar debug',
+    verboseDebug: 'Debug verbose',
+    deactivate: 'Desactivar',
+    close: 'Cerrar',
+
+    // === DivisionSelector ===
+    div1Label: '1a División',
+    div2Label: '2a División',
+
+    // === Sports/Modalities ===
+    ANDEBOL_MISTO: 'Balonmano mixto',
+    BASQUETEBOL_FEMININO: 'Baloncesto femenino',
+    BASQUETEBOL_MASCULINO: 'Baloncesto masculino',
+    FUTEBOL_DE_7_MASCULINO: 'Fútbol 7 masculino',
+    FUTSAL_FEMININO: 'Futsal femenino',
+    FUTSAL_MASCULINO: 'Futsal masculino',
+    VOLEIBOL_FEMININO: 'Voleibol femenino',
+    VOLEIBOL_MASCULINO: 'Voleibol masculino',
+
+    // === Division/Group Terms ===
+    division: 'División',
+    group: 'Grupo',
+    divisionLabel: 'a División',
+    mainDivision: '1a División',
+    secondDivision: '2a División',
+    groupA: 'Grupo A',
+    groupB: 'Grupo B',
+    groupC: 'Grupo C',
+    groupD: 'Grupo D',
+
+    // === Additional Terms ===
+    selectAllTeams: 'Seleccionar todas',
+    deselectAllTeams: 'Deseleccionar todas',
+    invertSelection: 'Invertir selección',
+    teams: 'equipos',
+    team: 'equipo',
+    fourthPlace: '4o Lugar',
+    groupPrefix: 'Grupo ',
+    divisionPrefix: 'a División',
+    noMatchesAvailable: 'No hay partidos disponibles',
+    roundOf: 'Ronda de ',
+    vs: 'vs',
+    home: 'Local',
+    away: 'Visitante',
+    draw: 'Empate',
+    matchday: 'Jornada',
+    date: 'Fecha',
+    time: 'Hora',
+    opponent: 'Rival',
+    result: 'Resultado',
+    score: 'Puntuación',
+
+    // === Round Labels (for short label use) ===
+    roundQuarters: 'Cuartos',
+    roundSemiFinals: 'Semis',
+    roundFinal: 'Final',
+    eloFinal: 'ELO final',
+    previousSeason: 'Temporada anterior',
+    nextSeason: 'Temporada siguiente'
+};
+
 // ==================== FUNÇÕES DO i18n ====================
 
 let currentLanguage = localStorage.getItem('mmr_selectedLanguage') || localStorage.getItem('dashboardLanguage') || 'pt';
@@ -761,8 +1170,9 @@ function translateTeamName(teamNamePt) {
     }
 
     // Procurar no mapeamento de tradução
-    if (teamNamesTranslation.pt && teamNamesTranslation.pt[teamNamePt]) {
-        return teamNamesTranslation.pt[teamNamePt];
+    const translationMap = teamNamesTranslation[currentLanguage] || teamNamesTranslation.pt;
+    if (translationMap && translationMap[teamNamePt]) {
+        return translationMap[teamNamePt];
     }
 
     // Fallback: retornar o nome original se não houver tradução
@@ -790,7 +1200,7 @@ function t(key) {
 
 /**
  * Define o idioma atual e persiste no localStorage
- * @param {string} lang - Código do idioma ('pt' ou 'en')
+ * @param {string} lang - Código do idioma ('pt', 'en' ou 'es')
  */
 function setLanguage(lang) {
     if (!translations[lang]) {
@@ -965,8 +1375,21 @@ function initLanguageSelector() {
         updateLanguageButtons('en');
     });
 
+    // Botão ES
+    const esBtn = document.createElement('button');
+    esBtn.className = `lang-btn ${currentLanguage === 'es' ? 'active' : ''}`;
+    esBtn.id = 'lang-es';
+    esBtn.setAttribute('aria-label', 'Español');
+    esBtn.title = 'Español';
+    esBtn.innerHTML = '🇪🇸';
+    esBtn.addEventListener('click', () => {
+        setLanguage('es');
+        updateLanguageButtons('es');
+    });
+
     selectorDiv.appendChild(ptBtn);
     selectorDiv.appendChild(enBtn);
+    selectorDiv.appendChild(esBtn);
     header.appendChild(selectorDiv);
 
     // Aplicar idioma guardado
