@@ -1369,7 +1369,7 @@ function initLanguageSelector() {
     enBtn.id = 'lang-en';
     enBtn.setAttribute('aria-label', 'English');
     enBtn.title = 'English';
-    enBtn.innerHTML = '🇪🇳';
+    enBtn.innerHTML = '🇬🇧';
     enBtn.addEventListener('click', () => {
         setLanguage('en');
         updateLanguageButtons('en');
