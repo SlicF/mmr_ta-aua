@@ -172,9 +172,9 @@ async function initApp() {
     initializeSelectors();
 
     // Não carregar dados inicialmente - aguardar seleção de modalidade
-    document.getElementById('teamSelector').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Selecione uma modalidade para ver os dados</p>';
-    document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="13" style="text-align: center; color: #666;">Selecione uma modalidade</td></tr>';
-    document.getElementById('bracketContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Selecione uma modalidade para ver o bracket</p>';
+    document.getElementById('teamSelector').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">' + t('selectModalityData') + '</p>';
+    document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="13" style="text-align: center; color: #666;">' + t('selectModality') + '</td></tr>';
+    document.getElementById('bracketContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">' + t('selectModalityBracket') + '</p>';
 
     // Inicializar gráfico vazio
     initEloChart();
@@ -194,7 +194,7 @@ function createTeamSelector() {
     selector.innerHTML = '';
 
     if (sampleData.teams.length === 0) {
-        selector.innerHTML = '<p style="color: #666; text-align: center;">Selecione uma modalidade primeiro</p>';
+        selector.innerHTML = '<p style="color: #666; text-align: center;">' + t('selectModalityFirst') + '</p>';
         return;
     }
 
@@ -278,8 +278,10 @@ function createTeamSelector() {
         divisionTitle.className = 'team-division-title';
         const groupCount = Object.keys(groups).length;
         const teamCount = Object.values(groups).flat().length;
-        const divisionLabel = division === 'geral' ? 'Divisão Geral' : `${division}ª Divisão`;
-        divisionTitle.textContent = `${divisionLabel} (${teamCount} equipa${teamCount !== 1 ? 's' : ''})`;
+        const divisionLabel = division === 'geral' ? t('divisionGeneral') : `${division}` + t('divisionNth');
+        const singular = t('teamSingular');
+        const plural = t('teamPlural');
+        divisionTitle.textContent = `${divisionLabel} (${teamCount} ${teamCount !== 1 ? plural : singular})`;
 
         divisionHeader.appendChild(chevron);
         divisionHeader.appendChild(divisionTitle);
@@ -300,7 +302,7 @@ function createTeamSelector() {
             if (groupCount > 1) {
                 const groupHeader = document.createElement('div');
                 groupHeader.className = 'team-group-header';
-                groupHeader.textContent = `Grupo ${groupName}`;
+                groupHeader.textContent = `${t('groupPrefix')}${groupName}`;
                 groupDiv.appendChild(groupHeader);
             }
 
@@ -337,8 +339,8 @@ function createTeamSelector() {
                 teamNameSpan.className = 'team-name';
                 // Gráfico sempre usa nome curto
                 const teamCourseInfo = getCourseInfo(team.name);
-                teamNameSpan.title = teamCourseInfo.fullName;
-                teamNameSpan.textContent = teamCourseInfo.shortName;
+                teamNameSpan.title = translateTeamName(teamCourseInfo.fullName);
+                teamNameSpan.textContent = translateTeamName(teamCourseInfo.shortName);
 
                 label.appendChild(checkbox);
                 if (team.emblemPath) {
@@ -521,21 +523,21 @@ function addQuickSelectionControls(selector) {
             `;
 
     const selectAllBtn = document.createElement('button');
-    selectAllBtn.textContent = 'Seleccionar Todas';
+    selectAllBtn.textContent = t('selectAllTeams');
     selectAllBtn.className = 'quick-control-btn';
-    selectAllBtn.setAttribute('aria-label', 'Selecionar todas as equipas');
+    selectAllBtn.setAttribute('aria-label', t('selectAllAria'));
     selectAllBtn.onclick = () => selectAllTeams(true);
 
     const deselectAllBtn = document.createElement('button');
-    deselectAllBtn.textContent = 'Desseleccionar Todas';
+    deselectAllBtn.textContent = t('deselectAllTeams');
     deselectAllBtn.className = 'quick-control-btn';
-    deselectAllBtn.setAttribute('aria-label', 'Desselecionar todas as equipas');
+    deselectAllBtn.setAttribute('aria-label', t('deselectAllAria'));
     deselectAllBtn.onclick = () => selectAllTeams(false);
 
     const toggleBtn = document.createElement('button');
-    toggleBtn.textContent = 'Inverter Seleção';
+    toggleBtn.textContent = t('invertSelection');
     toggleBtn.className = 'quick-control-btn';
-    toggleBtn.setAttribute('aria-label', 'Inverter seleção de equipas');
+    toggleBtn.setAttribute('aria-label', t('invertSelectionAria'));
     toggleBtn.onclick = toggleAllTeams;
 
     controlsDiv.appendChild(selectAllBtn);
@@ -726,7 +728,7 @@ function updateTeamCountIndicator() {
         }
     }
 
-    indicator.textContent = `${activeCount}/${totalCount} equipas`;
+    indicator.textContent = `${activeCount}/${totalCount} ${t('teamPlural')}`;
 
     // Mudar cor baseado na quantidade
     if (activeCount > 12) {
@@ -768,7 +770,7 @@ function updateSeasonNavigationButtons() {
     if (!prevBtn) {
         prevBtn = document.createElement('button');
         prevBtn.id = 'season-prev-btn';
-        prevBtn.innerHTML = '← Época Anterior';
+        prevBtn.innerHTML = t('previousSeason');
         prevBtn.style.cssText = `
             background: rgba(102, 126, 234, 0.9);
             color: white;
@@ -790,6 +792,7 @@ function updateSeasonNavigationButtons() {
         });
         navContainer.appendChild(prevBtn);
     }
+    prevBtn.innerHTML = t('previousSeason');
     // Remover listeners antigos e adicionar novo com currentIndex atualizado
     prevBtn.onclick = () => {
         const epochSel = document.getElementById('epoca');
@@ -808,7 +811,7 @@ function updateSeasonNavigationButtons() {
     if (!nextBtn) {
         nextBtn = document.createElement('button');
         nextBtn.id = 'season-next-btn';
-        nextBtn.innerHTML = 'Época Seguinte →';
+        nextBtn.innerHTML = t('nextSeason');
         nextBtn.style.cssText = `
             background: rgba(102, 126, 234, 0.9);
             color: white;
@@ -831,6 +834,7 @@ function updateSeasonNavigationButtons() {
         });
         navContainer.appendChild(nextBtn);
     }
+    nextBtn.innerHTML = t('nextSeason');
     // Remover listeners antigos e adicionar novo com currentIndex atualizado
     nextBtn.onclick = () => {
         const epochSel = document.getElementById('epoca');
@@ -875,7 +879,7 @@ function switchDivision(division) {
 
     // Atualizar botões do calendário
     document.querySelectorAll('#calendarDivisionSelector .division-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent === division);
+        btn.classList.toggle('active', btn.dataset.division === division);
     });
 
     // Atualizar seletor de grupo do calendário
@@ -1121,7 +1125,7 @@ function initEloChart() {
         },
         yaxis: {
             title: {
-                text: 'ELO Rating'
+                text: t('eloRatingLabel')
             }
         },
         legend: {
@@ -1158,43 +1162,45 @@ function initEloChart() {
                 }
 
                 const data = seriesData.data[dataPointIndex];
-                const teamName = normalizeTeamName(seriesData.name);
+                const teamKey = normalizeTeamName(seriesData.name);
                 const eloValue = series[seriesIndex][dataPointIndex];
                 const extraData = data.extra || {};
 
                 // Usar data completa se disponível, senão usar a categoria (label)
                 let dateDisplay = '';
+                const dateLocale = getDateLocale();
                 if (extraData.fullDate) {
-                    dateDisplay = new Date(extraData.fullDate).toLocaleDateString('pt-PT');
+                    dateDisplay = new Date(extraData.fullDate).toLocaleDateString(dateLocale);
                 } else if (w.globals.labels && w.globals.labels[dataPointIndex]) {
                     const label = w.globals.labels[dataPointIndex];
                     // Usar o label directamente, seja string ou número
                     dateDisplay = String(label);
                 } else {
-                    dateDisplay = 'Data desconhecida';
+                    dateDisplay = t('unknownDate');
                 }
 
                 // Obter logo da equipa
-                const courseInfo = getCourseInfo(teamName);
+                const courseInfo = getCourseInfo(teamKey);
+                const displayTeamName = getTranslatedTeamLabel(courseInfo, teamKey);
                 const logoPath = courseInfo.emblemPath || 'assets/taça_ua.png';
                 const teamColor = w.globals.colors[seriesIndex];
 
                 // Construir tooltip HTML (formato exemplo)
                 let html = '<div class="apexcharts-tooltip-title" style="background: #fff; color: #333; font-family: Segoe UI; display: flex; align-items: center; justify-content: space-between; padding: 0px 0px; border-bottom: none;">';
-                html += '<span style="font-weight: 600; padding: 0px 10px;">' + teamName + '</span>';
+                html += '<span style="font-weight: 600; padding: 0px 10px;">' + displayTeamName + '</span>';
 
                 // Ajustar tamanho do emblema (EGI com padding extra)
                 let emblemaStyle = 'height: 48px;';
                 if (logoPath.includes('EGI-07.png')) {
                     emblemaStyle = 'height: 48px; padding: 8px;';
                 }
-                html += '<img src="' + logoPath + '" style="' + emblemaStyle + '" alt="' + teamName + '">';
+                html += '<img src="' + logoPath + '" style="' + emblemaStyle + '" alt="' + displayTeamName + '">';
                 html += '</div>';
                 html += '<div style="height: 3px; background: ' + teamColor + ';"></div>';
                 html += '<div class="apexcharts-tooltip-body" style="font-family: Segoe UI; padding: 8px 8px;">';
 
                 // Linha de ELO
-                html += '<div><strong>ELO: ' + eloValue + '</strong>';
+                html += '<div><strong>' + t('eloCurrentTitle') + ': ' + eloValue + '</strong>';
 
                 // Delta ELO
                 if (extraData.eloDelta && Math.abs(extraData.eloDelta) > 0.01) {
@@ -1225,22 +1231,23 @@ function initEloChart() {
 
                     // Labels de jornada/fase
                     let roundLabel = gameData.round;
-                    if (roundLabel === 'E1') roundLabel = 'Quartos';
-                    else if (roundLabel === 'E2') roundLabel = 'Meias';
-                    else if (roundLabel === 'E3L') roundLabel = 'Jogo 3º Lugar';
-                    else if (roundLabel === 'E3') roundLabel = 'Final';
+                    if (roundLabel === 'E1') roundLabel = t('roundQuarters');
+                    else if (roundLabel === 'E2') roundLabel = t('roundSemiFinals');
+                    else if (roundLabel === 'E3L') roundLabel = t('thirdPlace');
+                    else if (roundLabel === 'E3') roundLabel = t('roundFinal');
                     else if (typeof roundLabel === 'string' && roundLabel.startsWith('J')) {
                         // Já está formatado
                     } else if (roundLabel && !isNaN(roundLabel)) {
-                        roundLabel = 'Jornada ' + roundLabel;
+                        roundLabel = t('matchday') + ' ' + roundLabel;
                     }
 
                     const gameDate = gameData.fullDate ? new Date(gameData.fullDate).toLocaleDateString('pt-PT') : dateDisplay;
                     if (isLastGame) {
-                        html += '<div style="color: #999; font-size: 0.85em; margin-bottom: 2px;">(último jogo)</div>';
+                        html += '<div style="color: #999; font-size: 0.85em; margin-bottom: 2px;">(' + t('lastGame') + ')</div>';
                     }
                     html += '<div style="color: #666; font-size: 0.9em;">' + (roundLabel || '') + ' • ' + gameDate + '</div>';
-                    html += '<div style="font-weight: 600; margin-top: 2px;">' + (gameData.result + ' vs ' + gameData.opponent) + '</div>';
+                    const translatedOpponent = translateTeamName(gameData.opponent);
+                    html += '<div style="font-weight: 600; margin-top: 2px;">' + (gameData.result + ' vs ' + translatedOpponent) + '</div>';
                     html += '</div>';
                 } else {
                     html += '<div style="margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; color: #666; font-size: 0.9em;">' + dateDisplay + '</div>';
@@ -1264,7 +1271,7 @@ function initEloChart() {
 
                     if (validForm.length > 0) {
                         html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
-                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">Forma:</span>';
+                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">' + t('form') + ':</span>';
                         validForm.forEach(outcome => {
                             let color = '#6c757d';
                             let letter = '-';
@@ -1282,7 +1289,7 @@ function initEloChart() {
 
                     if (validForm.length > 0) {
                         html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
-                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">Forma:</span>';
+                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">' + t('form') + ':</span>';
                         validForm.forEach(outcome => {
                             let color = '#6c757d';
                             let letter = '-';
@@ -1306,6 +1313,7 @@ function initEloChart() {
 
     // Renderizar e aguardar conclusão
     eloChart.render().then(() => {
+        removeChartAriaLabel();
         // Guardar a cor original de cada marker logo após renderizar
         const saveOriginalMarkerColors = () => {
             document.querySelectorAll('.apexcharts-marker').forEach(marker => {
@@ -1328,6 +1336,7 @@ function initEloChart() {
         // Adicionar observer para repositionar o tooltip com delay
         setTimeout(() => {
             const tooltipObserver = new MutationObserver(() => {
+                removeChartAriaLabel();
                 const tooltip = document.querySelector('.apexcharts-tooltip');
                 if (tooltip && !window.tooltipFixed) {
                     const currentTop = parseInt(tooltip.style.top) || 0;
@@ -1697,6 +1706,7 @@ function updateEloChart() {
         slotIndexByOriginalDay.set(idx, slotIndices);
     });
 
+    const dateLocale = getDateLocale();
     const timelineSlots = expandedDates.map((d, idx) => {
         const dateObj = new Date(d);
         const year = dateObj.getFullYear();
@@ -1712,17 +1722,17 @@ function updateEloChart() {
 
         let label;
         if (isPreviousSeason) {
-            label = 'Época Anterior';
+            label = t('previousSeason');
         } else if (isInitial) {
-            label = 'Início da Época';
+            label = t('seasonStart');
         } else {
             // Para múltiplos slots do mesmo dia, adicionar sub-índice
             const slotIndices = slotIndexByOriginalDay.get(originalIndex) || [];
             if (slotIndices.length > 1) {
                 const slotPosition = slotIndices.indexOf(idx) + 1;
-                label = `${dateObj.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })} (${slotPosition}/${slotIndices.length})`;
+                label = `${dateObj.toLocaleDateString(dateLocale, { day: '2-digit', month: 'short' })} (${slotPosition}/${slotIndices.length})`;
             } else {
-                label = dateObj.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' });
+                label = dateObj.toLocaleDateString(dateLocale, { day: '2-digit', month: 'short' });
             }
         }
 
@@ -1952,7 +1962,7 @@ function updateEloChart() {
 
             } else if (slot.isPreviousSeason) {
                 // Ponto da época anterior
-                extra.description = 'ELO Final Época Anterior';
+                extra.description = t('eloFinalPreviousSeason');
                 extra.fullDate = new Date(slot.timestamp).toISOString();
                 extra.form = [];  // Sem forma na época anterior
 
@@ -1961,7 +1971,7 @@ function updateEloChart() {
 
             } else if (slot.isVirtual) {
                 // Ponto do início da época (não é época anterior)
-                extra.description = 'ELO Início da Época';
+                extra.description = t('eloSeasonStart');
                 extra.fullDate = new Date(slot.timestamp).toISOString();
                 extra.form = [];  // Sem forma no início
 
@@ -2069,7 +2079,7 @@ function updateEloChart() {
                     // Adicionar dados extras
                     const extraData = window._chartExtraData[normalizedTeamName].extraData;
                     extraData.push({
-                        description: 'Ajustes Inter-Grupos',
+                        description: t('interGroupAdjustments'),
                         opponent: null,
                         result: null,
                         round: 'Inter-Group',
@@ -2145,7 +2155,7 @@ function updateEloChart() {
     // Adicionar categoria "Ajustes Inter-Grupos" se existir
     let categories = timelineSlots.map(slot => slot.label);
     if (hasInterGroupAdjustments) {
-        categories.push('Ajustes Inter-Grupos');
+        categories.push(t('interGroupAdjustments'));
     }
 
 
@@ -2282,7 +2292,7 @@ function updateEloChart() {
         },
         yaxis: {
             title: {
-                text: 'ELO Rating'
+                text: t('eloRatingLabel')
             }
         },
         legend: {
@@ -2315,33 +2325,35 @@ function updateEloChart() {
                     return '';
                 }
 
-                const teamName = normalizeTeamName(seriesData.name);
+                const teamKey = normalizeTeamName(seriesData.name);
                 // Os dados extras estão guardados separadamente em window._chartExtraData
-                const chartExtra = window._chartExtraData && window._chartExtraData[teamName];
+                const chartExtra = window._chartExtraData && window._chartExtraData[teamKey];
                 const extraData = (chartExtra && chartExtra.extraData && chartExtra.extraData[dataPointIndex]) || {};
 
 
                 let dateDisplay = '';
+                const dateLocale = getDateLocale();
                 if (extraData.fullDate) {
-                    dateDisplay = new Date(extraData.fullDate).toLocaleDateString('pt-PT');
+                    dateDisplay = new Date(extraData.fullDate).toLocaleDateString(dateLocale);
                 } else if (w.globals.labels && w.globals.labels[dataPointIndex]) {
                     dateDisplay = String(w.globals.labels[dataPointIndex]);
                 } else {
-                    dateDisplay = 'Data desconhecida';
+                    dateDisplay = t('unknownDate');
                 }
 
-                const courseInfo = getCourseInfo(teamName);
+                const courseInfo = getCourseInfo(teamKey);
+                const displayTeamName = getTranslatedTeamLabel(courseInfo, teamKey);
                 const logoPath = courseInfo.emblemPath || 'assets/taça_ua.png';
                 const teamColor = w.globals.colors[seriesIndex];
 
                 let html = '<div class="apexcharts-tooltip-title" style="background: #fff; color: #333; font-family: Segoe UI; display: flex; align-items: center; justify-content: space-between; padding: 0px 0px; border-bottom: none;">';
-                html += '<span style="font-weight: 600; padding: 0px 10px;">' + teamName + '</span>';
+                html += '<span style="font-weight: 600; padding: 0px 10px;">' + displayTeamName + '</span>';
 
                 let emblemaStyle = 'height: 48px;';
                 if (logoPath.includes('EGI-07.png')) {
                     emblemaStyle = 'height: 48px; padding: 8px;';
                 }
-                html += '<img src="' + logoPath + '" style="' + emblemaStyle + '" alt="' + teamName + '">';
+                html += '<img src="' + logoPath + '" style="' + emblemaStyle + '" alt="' + displayTeamName + '">';
                 html += '</div>';
                 html += '<div style="height: 3px; background: ' + teamColor + ';"></div>';
                 html += '<div class="apexcharts-tooltip-body" style="font-family: Segoe UI; padding: 8px 8px;">';
@@ -2374,22 +2386,23 @@ function updateEloChart() {
                     html += '<div style="padding-top: 8px;">';
 
                     let roundLabel = gameData.round;
-                    if (roundLabel === 'E1') roundLabel = 'Quartos';
-                    else if (roundLabel === 'E2') roundLabel = 'Meias';
-                    else if (roundLabel === 'E3L') roundLabel = 'Jogo 3º Lugar';
-                    else if (roundLabel === 'E3') roundLabel = 'Final';
+                    if (roundLabel === 'E1') roundLabel = t('roundQuarters');
+                    else if (roundLabel === 'E2') roundLabel = t('roundSemiFinals');
+                    else if (roundLabel === 'E3L') roundLabel = t('thirdPlace');
+                    else if (roundLabel === 'E3') roundLabel = t('roundFinal');
                     else if (typeof roundLabel === 'string' && roundLabel.startsWith('J')) {
                         // Já está formatado
                     } else if (roundLabel && !isNaN(roundLabel)) {
-                        roundLabel = 'Jornada ' + roundLabel;
+                        roundLabel = t('matchday') + ' ' + roundLabel;
                     }
 
-                    const gameDate = gameData.fullDate ? new Date(gameData.fullDate).toLocaleDateString('pt-PT') : dateDisplay;
+                    const gameDate = gameData.fullDate ? new Date(gameData.fullDate).toLocaleDateString(dateLocale) : dateDisplay;
                     if (isLastGame) {
-                        html += '<div style="color: #999; font-size: 0.85em; margin-bottom: 2px;">(último jogo)</div>';
+                        html += '<div style="color: #999; font-size: 0.85em; margin-bottom: 2px;">(' + t('lastGame') + ')</div>';
                     }
                     html += '<div style="color: #666; font-size: 0.9em;">' + (roundLabel || '') + ' • ' + gameDate + '</div>';
-                    html += '<div style="font-weight: 600; margin-top: 2px;">' + (gameData.result + ' vs ' + gameData.opponent) + '</div>';
+                    const translatedOpponentCalendar = translateTeamName(gameData.opponent);
+                    html += '<div style="font-weight: 600; margin-top: 2px;">' + (gameData.result + ' vs ' + translatedOpponentCalendar) + '</div>';
                     html += '</div>';
                 } else if (extraData.isInterGroupAdjustment) {
                     // Encontrar o ELO antes do ajuste (último ponto válido antes deste)
@@ -2407,7 +2420,7 @@ function updateEloChart() {
                         html += '<div style="font-size: 0.9em; color: #666;">';
                         html += '<div style="font-weight: 600; margin-top: 2px;">' + extraData.description + '</div>'
                     } else {
-                        html += '<div style="font-size: 0.9em; color: #666;">ELO final: <strong>' + eloValue + '</strong></div>';
+                        html += '<div style="font-size: 0.9em; color: #666;">' + t('eloFinal') + ': <strong>' + eloValue + '</strong></div>';
                     }
 
                     html += '</div>';
@@ -2423,7 +2436,7 @@ function updateEloChart() {
 
                     if (validForm.length > 0) {
                         html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
-                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">Forma:</span>';
+                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">' + t('form') + ':</span>';
                         validForm.forEach(outcome => {
                             let color = '#6c757d';
                             let letter = '-';
@@ -2441,7 +2454,7 @@ function updateEloChart() {
 
                     if (validForm.length > 0) {
                         html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
-                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">Forma:</span>';
+                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">' + t('form') + ':</span>';
                         validForm.forEach(outcome => {
                             let color = '#6c757d';
                             let letter = '-';
@@ -2462,7 +2475,7 @@ function updateEloChart() {
     };
 
     eloChart = new ApexCharts(chartContainer, options);
-    eloChart.render();
+    eloChart.render().then(removeChartAriaLabel);
 
     // Guardar a cor original de cada marker logo após renderizar
     const saveOriginalMarkerColors = () => {
@@ -2613,11 +2626,11 @@ function getGoalHeaders() {
         return {
             scored: 'CF',
             conceded: 'CS',
-            scoredTitle: 'Cestos feitos',
-            concededTitle: 'Cestos sofridos',
-            diffTitle: 'Diferença de cestos (CF - CS)',
-            expectedLabel: 'Cestos Esp.',
-            expectedTitle: 'Cestos esperados'
+            scoredTitle: t('basketScored') || 'Cestos feitos',
+            concededTitle: t('basketConceded') || 'Cestos sofridos',
+            diffTitle: t('basketDiff') || 'Diferença de cestos (CF - CS)',
+            expectedLabel: t('basketGoalsExpected') || 'Cestos Esp.',
+            expectedTitle: t('basketGoalsTitle') || 'Cestos esperados'
         };
     }
 
@@ -2626,11 +2639,11 @@ function getGoalHeaders() {
         return {
             scored: 'SG',
             conceded: 'SP',
-            scoredTitle: 'Sets ganhos',
-            concededTitle: 'Sets perdidos',
-            diffTitle: 'Diferença de sets (SG - SP)',
-            expectedLabel: 'Sets Esp.',
-            expectedTitle: 'Sets esperados'
+            scoredTitle: t('setsWon') || 'Sets ganhos',
+            concededTitle: t('setsLost') || 'Sets perdidos',
+            diffTitle: t('setsDiff') || 'Diferença de sets (SG - SP)',
+            expectedLabel: t('setsExpected') || 'Sets Esp.',
+            expectedTitle: t('setsTitle') || 'Sets esperados'
         };
     }
 
@@ -2638,11 +2651,11 @@ function getGoalHeaders() {
     return {
         scored: 'GM',
         conceded: 'GS',
-        scoredTitle: 'Golos marcados',
-        concededTitle: 'Golos sofridos',
-        diffTitle: 'Diferença de golos (GM - GS)',
-        expectedLabel: 'Golos Esp.',
-        expectedTitle: 'Golos esperados'
+        scoredTitle: t('goalsScored') || 'Golos marcados',
+        concededTitle: t('goalsConceded') || 'Golos sofridos',
+        diffTitle: t('goalsDiff') || 'Diferença de golos (GM - GS)',
+        expectedLabel: t('expectedGoals') || 'Golos Esp.',
+        expectedTitle: t('expectedGoalsTitle') || 'Golos esperados'
     };
 }
 
@@ -2833,7 +2846,7 @@ function updateRankingsTable() {
     updateRankingsTableHeaders();
 
     if (!sampleData.rankings || Object.keys(sampleData.rankings).length === 0) {
-        tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: #666;">Nenhum dado disponível</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: #666;">' + t('noDataAvailable') + '</td></tr>';
         progressionLegend.style.display = 'none';
         return;
     }
@@ -2923,7 +2936,7 @@ function updateRankingsTable() {
         const maxLabel = Math.round(max);
 
         return `
-            <svg class="sparkline" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" title="Evolução de ELO (últimos ${points.length} jogos): ${minLabel} até ${maxLabel}" aria-label="Tendência de ELO">
+            <svg class="sparkline" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" title="${t('eloEvolution')} (${t('lastGames')} ${points.length}): ${minLabel} ${t('until')} ${maxLabel}" aria-label="${t('eloTrendAriaLabel')}">
                 <path class="sparkline-area" d="${pathD} L ${width - padding},${height - padding} L ${padding},${height - padding} Z" />
                 <path class="sparkline-path" d="${pathD}" />
                 <circle class="sparkline-dot" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="2.5" />
@@ -2944,7 +2957,7 @@ function updateRankingsTable() {
         // Determinar progressão no torneio - AGORA passa o nome da equipa para verificar se é B
         const progression = showProgressionIndicators ?
             getTeamProgression(position, totalTeams, structure, team.team, currentGroup) :
-            { type: 'safe', description: 'Zona segura' };
+            { type: 'safe', description: t('safeZone') };
 
         // Determinar classe CSS para a zona da tabela
         let zoneClass = 'zone-safe';
@@ -2958,7 +2971,8 @@ function updateRankingsTable() {
         const normalizedTeamName = normalizeTeamName(team.team);
         const courseInfo = getCourseInfo(normalizedTeamName);
         // Tabela usa nome curto em modo compacto, nome completo caso contrário
-        const displayTeamName = compactModeEnabled ? courseInfo.shortName : courseInfo.fullName;
+        const baseTeamName = compactModeEnabled ? courseInfo.shortName : courseInfo.fullName;
+        const displayTeamName = translateTeamName(baseTeamName);
         const emblemHtml = (!compactModeEnabled && courseInfo.emblemPath) ?
             `<img src="${courseInfo.emblemPath}" alt="${normalizedTeamName}" class="team-emblem-table" onerror="this.style.display='none'">` :
             '';
@@ -2974,8 +2988,8 @@ function updateRankingsTable() {
         const formOutcomes = getTeamForm(team.team);
         const formBadgesHtml = formOutcomes.length
             ? `<div class="form-badges">${formOutcomes.map((outcome, idx) => {
-                const map = { 'V': { cls: 'win', letter: 'V', text: 'Vitória' }, 'E': { cls: 'draw', letter: 'E', text: 'Empate' }, 'D': { cls: 'loss', letter: 'D', text: 'Derrota' } };
-                const meta = map[outcome] || { cls: 'draw', letter: outcome || '-', text: 'Desconhecido' };
+                const map = { 'V': { cls: 'win', letter: 'V', text: t('formWin') }, 'E': { cls: 'draw', letter: 'E', text: t('formDraw') }, 'D': { cls: 'loss', letter: 'D', text: t('formLoss') } };
+                const meta = map[outcome] || { cls: 'draw', letter: outcome || '-', text: t('formUnknown') };
                 return `<span class="form-badge ${meta.cls}" title="${meta.text}">${meta.letter}</span>`;
             }).join('')}</div>`
             : '<span class="form-badges empty">—</span>';
@@ -2987,14 +3001,14 @@ function updateRankingsTable() {
                     <td class="team-cell ${isTeamFavorite(team.team) ? 'favorite-team-row' : ''}">
                         <button class="favorite-btn ${isTeamFavorite(team.team) ? 'active' : ''}" 
                                 onclick="toggleFavorite('${team.team}')" 
-                                title="${isTeamFavorite(team.team) ? 'Remover dos favoritos' : 'Marcar como favorita'}">
+                                title="${isTeamFavorite(team.team) ? t('removeFavorite') : t('markFavorite')}">
                             ${isTeamFavorite(team.team) ? '★' : '☆'}
                         </button>
                         ${emblemHtml}
                         <div class="team-color-indicator" style="background-color: ${courseInfo.primaryColor}"></div>
                         <div class="team-info-container">
                             <span class="team-name-table" title="${displayTeamName}">${displayTeamName}</span>
-                            <span class="team-elo-info" title="ELO atual e posição no ranking geral">${eloDisplay}</span>
+                            <span class="team-elo-info" title="${t('eloCurrentTitle')}">${eloDisplay}</span>
                         </div>
                     </td>
                     <td><strong>${team.points}</strong></td>
@@ -3068,7 +3082,7 @@ function updateProgressionLegend(show, structure) {
         legendItems.push({
             badge: 'P',
             cssClass: 'legend-playoffs',
-            text: 'Play-offs'
+            text: t('playoffs')
         });
 
         // Playoff/Liguilha de manutenção - SÓ mostrar se realmente existir
@@ -3076,13 +3090,13 @@ function updateProgressionLegend(show, structure) {
             legendItems.push({
                 badge: 'PM',
                 cssClass: 'legend-maintenance-playoffs',
-                text: 'Play-off de Manutenção'
+                text: t('maintenancePlayoff')
             });
         } else if (hasMaintenanceLeague) {
             legendItems.push({
                 badge: 'LM',
                 cssClass: 'legend-maintenance-league',
-                text: 'Liguilha de Manutenção'
+                text: t('maintenanceLeague')
             });
         }
 
@@ -3090,7 +3104,7 @@ function updateProgressionLegend(show, structure) {
         legendItems.push({
             badge: '↓',
             cssClass: 'legend-relegation',
-            text: 'Descida de divisão'
+            text: t('relegation')
         });
     }
     // Legendas para 2ª divisão
@@ -3099,7 +3113,7 @@ function updateProgressionLegend(show, structure) {
         legendItems.push({
             badge: 'P',
             cssClass: 'legend-playoffs',
-            text: 'Play-offs + Promoção'
+            text: t('playoffsPromotion')
         });
 
         // 2º lugar: depende se há PM/LM ou não
@@ -3107,20 +3121,20 @@ function updateProgressionLegend(show, structure) {
             legendItems.push({
                 badge: 'PP',
                 cssClass: 'legend-promotion-playoffs',
-                text: 'Play-off de Promoção'
+                text: t('promotionPlayoff')
             });
         } else if (hasMaintenanceLeague) {
             legendItems.push({
                 badge: 'LP',
                 cssClass: 'legend-promotion-league',
-                text: 'Liguilha de Promoção'
+                text: t('promotionLeague')
             });
         } else {
             // Sem PM/LM: 2º sobe direto
             legendItems.push({
                 badge: '↑',
                 cssClass: 'legend-promotion',
-                text: 'Subida de divisão'
+                text: t('promotion')
             });
         }
     }
@@ -3129,7 +3143,7 @@ function updateProgressionLegend(show, structure) {
         legendItems.push({
             badge: '↑',
             cssClass: 'legend-promotion',
-            text: 'Subida de divisão'
+            text: t('promotion')
         });
     }
 
@@ -3137,7 +3151,7 @@ function updateProgressionLegend(show, structure) {
     legendItems.push({
         badge: 'S',
         cssClass: 'legend-safe',
-        text: 'Zona segura'
+        text: t('safeZone')
     });
 
     // Gerar HTML da legenda
@@ -3584,6 +3598,9 @@ function getQualifiedTeams(forceRefresh = false) {
 
 // Função global para resolver nomes de equipas (substituir placeholders)
 function resolveTeamName(teamName) {
+    if (typeof teamName === 'string' && teamName.startsWith('Vencido ')) {
+        teamName = teamName.replace(/^Vencido\s+/, 'Perdedor ');
+    }
     // Obter mapa de substituições atual
     const qualified = getQualifiedTeams();
     const qualifiedMap = {};
@@ -4466,7 +4483,7 @@ function createBracket() {
     const container = document.getElementById('bracketContainer');
 
     if (!sampleData.bracket || Object.keys(sampleData.bracket).length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Bracket não disponível para esta modalidade</p>';
+        container.innerHTML = `<p style="text-align: center; color: #666; padding: 40px;">${t('bracketNotAvailable')}</p>`;
         return;
     }
 
@@ -4482,13 +4499,13 @@ function createBracket() {
 
     qualified.legend.forEach(item => {
         if (item.type === 'playoff') {
-            let label = `${item.position}º`;
+            let label = `${item.position}${t('bracketQualificationSuffix')}`;
             if (item.division === '2ª' && item.group) {
-                label += ` Grupo ${item.group}`;
+                label += ` ${t('groupLabel')} ${item.group}`;
             } else if (item.division === '2ª') {
-                label += ` 2ª Div`;
+                label += ` ${t('div2nd')}`;
             } else if (item.division === '1ª') {
-                label += ` 1ª Div`;
+                label += ` ${t('div1st')}`;
             }
             qualificationLabels[item.team] = label;
         }
@@ -4499,7 +4516,7 @@ function createBracket() {
         roundDiv.className = 'bracket-round';
 
         const title = document.createElement('h3');
-        title.textContent = round;
+        title.textContent = translateBracketRound(round);
         roundDiv.appendChild(title);
 
         matches.forEach((match, index) => {
@@ -4507,7 +4524,7 @@ function createBracket() {
             if (match.isThirdPlace && !document.querySelector('.third-place-header')) {
                 const thirdPlaceHeader = document.createElement('h4');
                 thirdPlaceHeader.className = 'third-place-header';
-                thirdPlaceHeader.textContent = '3º Lugar';
+                thirdPlaceHeader.textContent = t('thirdPlace');
                 thirdPlaceHeader.style.cssText = `
                             text-align: center;
                             color: rgb(102, 102, 102);
@@ -4571,8 +4588,12 @@ function createBracket() {
             const team2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
 
             // Brackets sempre usam nome curto
-            const displayTeam1 = team1Info.shortName;
-            const displayTeam2 = team2Info.shortName;
+            const displayTeam1 = isBracketPlaceholder(resolvedTeam1)
+                ? translateBracketPlaceholder(resolvedTeam1)
+                : getTranslatedTeamLabel(team1Info, resolvedTeam1);
+            const displayTeam2 = isBracketPlaceholder(resolvedTeam2)
+                ? translateBracketPlaceholder(resolvedTeam2)
+                : getTranslatedTeamLabel(team2Info, resolvedTeam2);
 
             // Usar cor da equipa ou cinza neutro como fallback
             const team1Color = team1Info.colors ? team1Info.colors[0] : '#6c757d';
@@ -4632,20 +4653,20 @@ function createBracket() {
 
                 // Liga única: mostrar apenas posição (sem mencionar divisão)
                 if (structure.type === 'single-league') {
-                    qualLabel = `${legendItem1.position}º da Liga`;
+                    qualLabel = getQualificationLabel(legendItem1.position);
                 }
                 // Grupos sem divisões: priorizar mostrar grupo
                 else if (legendItem1.group) {
-                    qualLabel = `${legendItem1.actualPosition || legendItem1.position}º Gr. ${legendItem1.group}`;
+                    qualLabel = getQualificationLabel(legendItem1.actualPosition || legendItem1.position, null, legendItem1.group);
                 }
                 // Divisões convencionais
                 else if (legendItem1.division === '1ª') {
-                    qualLabel = `${legendItem1.position}º 1ª Div`;
+                    qualLabel = getQualificationLabel(legendItem1.position, '1ª');
                 } else if (legendItem1.division === '2ª') {
                     if (legendItem1.group) {
-                        qualLabel = `${legendItem1.actualPosition || legendItem1.position}º Gr. ${legendItem1.group}`;
+                        qualLabel = getQualificationLabel(legendItem1.actualPosition || legendItem1.position, '2ª', legendItem1.group);
                     } else {
-                        qualLabel = `${legendItem1.actualPosition || legendItem1.position}º 2ª Div`;
+                        qualLabel = getQualificationLabel(legendItem1.actualPosition || legendItem1.position, '2ª');
                     }
                 } else {
                     // Fallback: só posição
@@ -4715,24 +4736,24 @@ function createBracket() {
 
                 // Liga única: mostrar apenas posição (sem mencionar divisão)
                 if (structure.type === 'single-league') {
-                    qualLabel = `${legendItem2.position}º da Liga`;
+                    qualLabel = getQualificationLabel(legendItem2.position);
                 }
                 // Grupos sem divisões: priorizar mostrar grupo
                 else if (legendItem2.group) {
-                    qualLabel = `${legendItem2.actualPosition || legendItem2.position}º Gr. ${legendItem2.group}`;
+                    qualLabel = getQualificationLabel(legendItem2.actualPosition || legendItem2.position, null, legendItem2.group);
                 }
                 // Divisões convencionais
                 else if (legendItem2.division === '1ª') {
-                    qualLabel = `${legendItem2.position}º 1ª Div`;
+                    qualLabel = getQualificationLabel(legendItem2.position, '1ª');
                 } else if (legendItem2.division === '2ª') {
                     if (legendItem2.group) {
-                        qualLabel = `${legendItem2.actualPosition || legendItem2.position}º Gr. ${legendItem2.group}`;
+                        qualLabel = getQualificationLabel(legendItem2.actualPosition || legendItem2.position, '2ª', legendItem2.group);
                     } else {
-                        qualLabel = `${legendItem2.actualPosition || legendItem2.position}º 2ª Div`;
+                        qualLabel = getQualificationLabel(legendItem2.actualPosition || legendItem2.position, '2ª');
                     }
                 } else {
                     // Fallback: só posição
-                    qualLabel = `${legendItem2.position}º`;
+                    qualLabel = getQualificationLabel(legendItem2.position);
                 }
 
                 if (qualLabel) {
@@ -4747,7 +4768,7 @@ function createBracket() {
             if (match.predicted) {
                 const predictedIndicator = document.createElement('div');
                 predictedIndicator.className = 'predicted-match-indicator';
-                predictedIndicator.innerHTML = '<small style="color: #2196F3; font-style: italic; text-align: center; margin-top: 5px;">📅 Confronto Previsto</small>';
+                predictedIndicator.innerHTML = '<small style="color: #2196F3; font-style: italic; text-align: center; margin-top: 5px;">📅 ' + t('predictedMatch') + '</small>';
                 matchDiv.appendChild(predictedIndicator);
             }
 
@@ -4755,7 +4776,7 @@ function createBracket() {
             if (match.unknownResult) {
                 const unknownIndicator = document.createElement('div');
                 unknownIndicator.className = 'unknown-result-indicator';
-                unknownIndicator.innerHTML = '<small style="color: #666; font-style: italic; text-align: center; margin-top: 5px;">⚠️ Resultado Desconhecido</small>';
+                unknownIndicator.innerHTML = '<small style="color: #666; font-style: italic; text-align: center; margin-top: 5px;">⚠️ ' + t('unknownResult') + '</small>';
                 matchDiv.appendChild(unknownIndicator);
             }
 
@@ -4789,15 +4810,15 @@ function createSecondaryBracket() {
     // Determinar título baseado no tipo de bracket secundário
     const bracketType = sampleData.secondaryBracketType || 'playoff';
     if (bracketType === 'maintenance-playoff') {
-        title.textContent = 'Playoff de Manutenção';
+        title.textContent = t('maintenancePlayoff');
     } else if (bracketType === 'maintenance-league') {
-        title.textContent = 'Liguilha de Manutenção';
+        title.textContent = t('maintenanceLeague');
     } else if (bracketType === 'promotion-playoff') {
-        title.textContent = 'Playoff de Promoção';
+        title.textContent = t('promotionPlayoff');
     } else if (bracketType === 'promotion-league') {
-        title.textContent = 'Liguilha de Promoção';
+        title.textContent = t('promotionLeague');
     } else {
-        title.textContent = 'Playoff/Liguilha';
+        title.textContent = t('playoffLiguilha');
     }
 
     card.style.display = 'block';
@@ -4918,7 +4939,7 @@ function createSecondaryBracket() {
             roundDiv.className = 'bracket-round';
 
             const roundTitle = document.createElement('h3');
-            roundTitle.textContent = round;
+            roundTitle.textContent = translateBracketRound(round);
             roundDiv.appendChild(roundTitle);
 
             matches.forEach(match => {
@@ -4934,8 +4955,12 @@ function createSecondaryBracket() {
                 const team2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
 
                 // Liguinha sempre usa nome curto
-                const displayTeam1 = team1Info.shortName;
-                const displayTeam2 = team2Info.shortName;
+                const displayTeam1 = isBracketPlaceholder(resolvedTeam1)
+                    ? translateBracketPlaceholder(resolvedTeam1)
+                    : getTranslatedTeamLabel(team1Info, resolvedTeam1);
+                const displayTeam2 = isBracketPlaceholder(resolvedTeam2)
+                    ? translateBracketPlaceholder(resolvedTeam2)
+                    : getTranslatedTeamLabel(team2Info, resolvedTeam2);
 
                 // Usar cor da equipa ou cinza neutro como fallback
                 const team1Color = team1Info.colors ? team1Info.colors[0] : '#6c757d';
@@ -5058,7 +5083,7 @@ function createSecondaryBracket() {
                 if (match.unknownResult) {
                     const unknownIndicator = document.createElement('div');
                     unknownIndicator.className = 'unknown-result-indicator';
-                    unknownIndicator.innerHTML = '<small style="color: #666; font-style: italic; text-align: center; margin-top: 5px;">⚠️ Resultado Desconhecido</small>';
+                    unknownIndicator.innerHTML = `<small style="color: #666; font-style: italic; text-align: center; margin-top: 5px;">⚠️ ${t('unknownResult')}</small>`;
                     matchDiv.appendChild(unknownIndicator);
                 }
 
@@ -5082,9 +5107,9 @@ function updateQuickFilters() {
 
     const top3Btn = document.createElement('button');
     top3Btn.className = 'filter-btn';
-    top3Btn.textContent = 'Top 3';
+    top3Btn.textContent = t('filterTop3');
     top3Btn.dataset.filter = 'top3';
-    top3Btn.setAttribute('aria-label', 'Filtrar top 3 equipas');
+    top3Btn.setAttribute('aria-label', t('filterTop3Aria'));
     top3Btn.onclick = filterTop3;
     filtersContainer.appendChild(top3Btn);
 
@@ -5099,10 +5124,10 @@ function updateQuickFilters() {
         divisions.forEach(division => {
             const btn = document.createElement('button');
             btn.className = 'filter-btn';
-            btn.textContent = division;
+            btn.textContent = translateDivisionLabel(division);
             btn.dataset.filter = 'division';
             btn.dataset.division = division;
-            btn.setAttribute('aria-label', `Filtrar por ${division}`);
+            btn.setAttribute('aria-label', `${t('filterByLabel')} ${translateDivisionLabel(division)}`);
             filtersContainer.appendChild(btn);
         });
 
@@ -5119,9 +5144,9 @@ function updateQuickFilters() {
 
             const allDiv2Btn = document.createElement('button');
             allDiv2Btn.className = 'filter-btn';
-            allDiv2Btn.textContent = '2ª Divisão';
+            allDiv2Btn.textContent = translateDivisionLabel('2ª Divisão');
             allDiv2Btn.dataset.filter = 'all-div2';
-            allDiv2Btn.setAttribute('aria-label', 'Filtrar por toda a 2ª Divisão');
+            allDiv2Btn.setAttribute('aria-label', t('filterByAllDiv2'));
             allDiv2Btn.onclick = () => selectDivision('2');
 
             if (insertAfter) {
@@ -5158,27 +5183,29 @@ function updateQuickFilters() {
     }
 
     // Mostrar "Playoffs" se há playoffs reais OU se fase de grupos está completa
-    const playoffsLabel = (hasActualPlayoffs || groupStageComplete) ? 'Playoffs' : 'Playoffs (Classificação Atual)';
+    const playoffsLabel = (hasActualPlayoffs || groupStageComplete)
+        ? t('playoffsLabel')
+        : t('playoffsCurrentRanking');
 
     // Adicionar filtros finais
     const playoffsBtn = document.createElement('button');
     playoffsBtn.className = 'filter-btn';
     playoffsBtn.textContent = playoffsLabel;
-    playoffsBtn.setAttribute('aria-label', 'Filtrar equipas dos playoffs');
+    playoffsBtn.setAttribute('aria-label', t('filterPlayoffsAria'));
     playoffsBtn.onclick = filterPlayoffs;
     filtersContainer.appendChild(playoffsBtn);
 
     const sensationBtn = document.createElement('button');
     sensationBtn.className = 'filter-btn';
-    sensationBtn.textContent = 'Equipas Sensação';
-    sensationBtn.setAttribute('aria-label', 'Filtrar equipas sensação com maior ganho de ELO');
+    sensationBtn.textContent = t('sensationTeams');
+    sensationBtn.setAttribute('aria-label', t('sensationTeamsAria'));
     sensationBtn.onclick = filterSensationTeams;
     filtersContainer.appendChild(sensationBtn);
 
     const resetBtn = document.createElement('button');
     resetBtn.className = 'filter-btn';
-    resetBtn.textContent = 'Resetar Filtro';
-    resetBtn.setAttribute('aria-label', 'Resetar filtros de equipas');
+    resetBtn.textContent = t('resetFilter');
+    resetBtn.setAttribute('aria-label', t('resetFilterAria'));
     resetBtn.onclick = resetFilter;
     filtersContainer.appendChild(resetBtn);
 }
@@ -5264,7 +5291,7 @@ const progressionStrategies = {
         if (context.position <= 8) {
             return {
                 type: 'playoffs',
-                description: 'Qualificação para play-offs'
+                description: t('qualificationPlayoffs')
             };
         }
         return null;
@@ -5276,7 +5303,7 @@ const progressionStrategies = {
         if (context.position <= 4) {
             return {
                 type: 'playoffs',
-                description: 'Qualificação para play-offs'
+                description: t('qualificationPlayoffs')
             };
         }
         return null;
@@ -5321,7 +5348,7 @@ const progressionStrategies = {
         if (position <= playoffSpots && totalTeams >= 8) {
             return {
                 type: 'playoffs',
-                description: 'Qualificação para play-offs'
+                description: t('qualificationPlayoffs')
             };
         }
 
@@ -5340,7 +5367,7 @@ const progressionStrategies = {
         if (position === 1) {
             return {
                 type: 'playoffs',
-                description: 'Play-offs + Promoção'
+                description: t('playoffsPromotion')
             };
         }
 
@@ -5364,7 +5391,7 @@ const progressionStrategies = {
         if (position <= playoffSpotsFrom1st) {
             return {
                 type: 'playoffs',
-                description: 'Qualificação para play-offs'
+                description: t('qualificationPlayoffs')
             };
         }
 
@@ -5384,7 +5411,7 @@ const progressionStrategies = {
         if (position === 1) {
             return {
                 type: 'playoffs',
-                description: 'Play-offs + Promoção'
+                description: t('playoffsPromotion')
             };
         }
 
@@ -5400,7 +5427,7 @@ const progressionStrategies = {
         if (context.position <= 2) {
             return {
                 type: 'promotion',
-                description: 'Subida de divisão'
+                description: t('promotion')
             };
         }
         return null;
@@ -5478,7 +5505,7 @@ function calculateRelegationProgression(position, totalTeams, relegationRules, h
     if (position >= directRelegationStart) {
         return {
             type: 'relegation',
-            description: 'Descida de divisão'
+            description: t('relegation')
         };
     }
 
@@ -5486,7 +5513,7 @@ function calculateRelegationProgression(position, totalTeams, relegationRules, h
         if (hasMaintenancePlayoffs || hasMaintenanceLeague) {
             return {
                 type: hasMaintenancePlayoffs ? 'maintenance-playoffs' : 'maintenance-league',
-                description: hasMaintenancePlayoffs ? 'Play-off de manutenção' : 'Liguilha de manutenção'
+                description: hasMaintenancePlayoffs ? t('maintenancePlayoff') : t('maintenanceLeague')
             };
         }
     }
@@ -5498,20 +5525,20 @@ function calculatePromotionProgression(hasMaintenancePlayoffs, hasMaintenanceLea
     if (hasMaintenancePlayoffs) {
         return {
             type: 'promotion-playoffs',
-            description: 'Play-off de Promoção'
+            description: t('promotionPlayoff')
         };
     }
 
     if (hasMaintenanceLeague) {
         return {
             type: 'promotion-league',
-            description: 'Liguilha de Promoção'
+            description: t('promotionLeague')
         };
     }
 
     return {
         type: 'promotion',
-        description: 'Subida de divisão'
+        description: t('promotion')
     };
 }
 
@@ -5529,7 +5556,7 @@ function checkTeamBQualification(teamName, position) {
         DebugUtils.debugTeamBStatus('team_b_not_qualified', { team: teamName, position });
         return {
             type: 'safe',
-            description: `Zona segura (${position}º lugar - equipa B não qualifica)`
+            description: `${t('safeZone')} (${position}${t('bracketQualificationSuffix')} ${t('placeLabel')} - ${t('teamBNoQualify')})`
         };
     }
 
@@ -5549,7 +5576,7 @@ function checkSubstituteQualification(teamName, position, isSecondDivision, hasM
         DebugUtils.debugTeamBStatus('in_playoffs_replaced', { team: teamName, position });
         return {
             type: 'playoffs',
-            description: `Play-offs + Promoção (substitui ${position}º do grupo)`
+            description: `${t('playoffsPromotion')} (${t('replaces')} ${position}${t('bracketQualificationSuffix')} ${t('ofGroup')})`
         };
     }
 
@@ -5561,20 +5588,20 @@ function checkSubstituteQualification(teamName, position, isSecondDivision, hasM
         if (hasMaintenancePlayoffs) {
             return {
                 type: 'promotion-playoffs',
-                description: `Play-off de Promoção (substitui ${position}º do grupo)`
+                description: `${t('promotionPlayoff')} (${t('replaces')} ${position}${t('bracketQualificationSuffix')} ${t('ofGroup')})`
             };
         }
 
         if (hasMaintenanceLeague) {
             return {
                 type: 'promotion-league',
-                description: `Liguilha de Promoção (substitui ${position}º do grupo)`
+                description: `${t('promotionLeague')} (${t('replaces')} ${position}${t('bracketQualificationSuffix')} ${t('ofGroup')})`
             };
         }
 
         return {
             type: 'promotion',
-            description: `Subida de divisão (substitui ${position}º do grupo)`
+            description: `${t('promotion')} (${t('replaces')} ${position}${t('bracketQualificationSuffix')} ${t('ofGroup')})`
         };
     }
 
@@ -5634,11 +5661,11 @@ function getTeamProgression(position, totalTeams, structure, teamName = null, te
     const strategy = progressionStrategies[structure.type];
     if (!strategy) {
         console.warn(`⚠️ Estratégia não encontrada para tipo: ${structure.type}`);
-        return { type: 'safe', description: 'Zona segura' };
+        return { type: 'safe', description: t('safeZone') };
     }
 
     const result = strategy(context);
-    return result || { type: 'safe', description: 'Zona segura' };
+    return result || { type: 'safe', description: t('safeZone') };
 }
 
 // ==================== FIM DO STRATEGY PATTERN ====================
@@ -6101,6 +6128,26 @@ function resolveCanonicalCourseKey(teamName) {
     return map.get(displayName) || matchedKey;
 }
 
+/**
+ * Traduz labels de qualificação em brackets
+ */
+function getQualificationLabel(position, division = null, group = null) {
+    if (division === '1ª') {
+        return `${position}${t('bracketQualificationSuffix')} ${t('bracketLabel1stDivision')}`;
+    } else if (division === '2ª') {
+        if (group) {
+            return `${position}${t('bracketQualificationSuffix')} ${t('bracketLabelGroup')} ${group}`;
+        } else {
+            return `${position}${t('bracketQualificationSuffix')} ${t('bracketLabel2ndDivision')}`;
+        }
+    } else if (group) {
+        return `${position}${t('bracketQualificationSuffix')} ${t('bracketLabelGroup')} ${group}`;
+    } else {
+        // Liga única - sem divisão mencionada
+        return `${position}${t('bracketQualificationSuffix')} ${t('bracketLabelLeague')}`;
+    }
+}
+
 function getPreferredTeamLabel(teamName) {
     const normalized = normalizeTeamName(teamName);
     if (!normalized || !coursesConfig) {
@@ -6122,6 +6169,89 @@ function getPreferredTeamLabel(teamName) {
         .sort((a, b) => a.length - b.length);
 
     return candidates.length > 0 ? candidates[0] : normalized;
+}
+
+function translateDivisionLabel(divisionLabel) {
+    if (!divisionLabel) return '';
+    if (typeof getCurrentLanguage === 'function' && getCurrentLanguage() === 'pt') {
+        return divisionLabel;
+    }
+
+    if (divisionLabel === 'Divisão Geral') {
+        return t('divisionGeneral');
+    }
+
+    const match = divisionLabel.match(/^(\d+)ª Divisão(?:\s*-\s*Grupo\s*([A-Z]))?$/);
+    if (!match) {
+        return divisionLabel;
+    }
+
+    const divisionNumber = match[1];
+    const group = match[2] || null;
+    let baseLabel = `${divisionNumber}${t('divisionLabel')}`;
+    if (divisionNumber === '1') {
+        baseLabel = t('div1Label');
+    } else if (divisionNumber === '2') {
+        baseLabel = t('div2Label');
+    }
+
+    return group ? `${baseLabel} - ${t('groupLabel')} ${group}` : baseLabel;
+}
+
+function translateBracketRound(roundLabel) {
+    switch (roundLabel) {
+        case 'Quartos de Final':
+            return t('quarterFinals');
+        case 'Meias-Finais':
+            return t('semiFinals');
+        case 'Final':
+            return t('finals');
+        case '3º Lugar':
+            return t('thirdPlace');
+        default:
+            return roundLabel;
+    }
+}
+
+function isBracketPlaceholder(teamLabel) {
+    return /^Vencedor\s+[A-Z]{1,2}\d+$/.test(teamLabel) ||
+        /^Perdedor\s+[A-Z]{1,2}\d+$/.test(teamLabel) ||
+        /^Vencido\s+[A-Z]{1,2}\d+$/.test(teamLabel);
+}
+
+function translateBracketPlaceholder(teamLabel) {
+    const match = teamLabel.match(/^(Vencedor|Perdedor|Vencido)\s+([A-Z]{1,2}\d+)$/);
+    if (!match) {
+        return teamLabel;
+    }
+
+    const prefix = match[1] === 'Vencedor' ? t('bracketWinner') : t('bracketLoser');
+    return `${prefix} ${match[2]}`;
+}
+
+function getDateLocale() {
+    const lang = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'pt';
+    return lang === 'en' ? 'en-GB' : 'pt-PT';
+}
+
+function removeChartAriaLabel() {
+    const chartRoot = document.querySelector('#eloChart');
+    if (!chartRoot) return;
+
+    chartRoot.querySelectorAll('svg[aria-label="chart"], svg[aria-label="Chart"]').forEach(svg => {
+        svg.removeAttribute('aria-label');
+    });
+
+    chartRoot.querySelectorAll('title').forEach(title => {
+        if (title.textContent && title.textContent.trim().toLowerCase() === 'chart') {
+            title.remove();
+        }
+    });
+}
+
+function getTranslatedTeamLabel(courseInfo, fallbackName) {
+    const shortName = courseInfo?.shortName || fallbackName || '';
+    return translateTeamName(shortName);
 }
 
 
@@ -6372,14 +6502,14 @@ async function detectAvailableEpocas() {
 // Função para obter modalidades disponíveis para uma época específica
 function getModalidadesForEpoca(epoca) {
     const modalidades = [
-        { value: 'ANDEBOL MISTO', label: 'Andebol Misto' },
-        { value: 'BASQUETEBOL FEMININO', label: 'Basquetebol Feminino' },
-        { value: 'BASQUETEBOL MASCULINO', label: 'Basquetebol Masculino' },
-        { value: 'FUTEBOL DE 7 MASCULINO', label: 'Futebol 7 Masculino' },
-        { value: 'FUTSAL FEMININO', label: 'Futsal Feminino' },
-        { value: 'FUTSAL MASCULINO', label: 'Futsal Masculino' },
-        { value: 'VOLEIBOL FEMININO', label: 'Voleibol Feminino' },
-        { value: 'VOLEIBOL MASCULINO', label: 'Voleibol Masculino' }
+        { value: 'ANDEBOL MISTO', label: t('ANDEBOL_MISTO') },
+        { value: 'BASQUETEBOL FEMININO', label: t('BASQUETEBOL_FEMININO') },
+        { value: 'BASQUETEBOL MASCULINO', label: t('BASQUETEBOL_MASCULINO') },
+        { value: 'FUTEBOL DE 7 MASCULINO', label: t('FUTEBOL_DE_7_MASCULINO') },
+        { value: 'FUTSAL FEMININO', label: t('FUTSAL_FEMININO') },
+        { value: 'FUTSAL MASCULINO', label: t('FUTSAL_MASCULINO') },
+        { value: 'VOLEIBOL FEMININO', label: t('VOLEIBOL_FEMININO') },
+        { value: 'VOLEIBOL MASCULINO', label: t('VOLEIBOL_MASCULINO') }
     ];
 
     // Adicionar a época ao final de cada modalidade
@@ -6489,6 +6619,28 @@ function updateModalidadeSelector() {
     if (modalidadeToLoad) {
         changeModalidade(modalidadeToLoad);
     }
+}
+
+/**
+ * Atualiza os labels dos seletores quando o idioma é mudado
+ */
+function updateSelectorLabels() {
+    const modalidadeSelect = document.getElementById('modalidade');
+    if (!modalidadeSelect) return;
+
+    const currentEpoca = document.getElementById('epoca')?.value;
+    if (!currentEpoca) return;
+
+    // Obter as modalidades com os labels atual (em novo idioma)
+    const modalidades = getModalidadesForEpoca(currentEpoca);
+
+    // Atualizar os labels das opções de modalidade
+    Array.from(modalidadeSelect.options).forEach(option => {
+        const mod = modalidades.find(m => m.value === option.value);
+        if (mod) {
+            option.textContent = mod.label;
+        }
+    });
 }
 
 // Função para trocar época
@@ -6870,7 +7022,7 @@ function buildTeamHistory(teamName, modalidade) {
             const quartoInfo = generalRankings.quartos.find(q => q.equipa === teamNameInEpoca);
             if (quartoInfo) {
                 const unknownIndicator = quartoInfo.unknownResult
-                    ? ' <span class="unknown-result-indicator" style="display: inline-block; margin-left: 6px; padding: 2px 6px;"><small style="color: #666; font-style: italic;">⚠️ Resultado Desconhecido</small></span>'
+                    ? ` <span class="unknown-result-indicator" style="display: inline-block; margin-left: 6px; padding: 2px 6px;"><small style="color: #666; font-style: italic;">⚠️ ${t('unknownResult')}</small></span>`
                     : '';
                 descricaoGeral = `Quartos: ${quartoInfo.resultado} vs ${getPreferredTeamLabel(quartoInfo.adversario)}${unknownIndicator}`;
             }
@@ -7077,7 +7229,7 @@ async function showHistoricalTooltip(teamName, anchorEl) {
 
     const normalizedTeam = normalizeTeamName(teamName);
     const courseInfo = getCourseInfo(normalizedTeam);
-    const displayName = courseInfo.fullName;
+    const displayName = translateTeamName(courseInfo.fullName || teamName);
     const emblemPath = courseInfo.emblemPath || 'assets/taça_ua.png';
 
     // Construir HTML do tooltip
@@ -7086,13 +7238,13 @@ async function showHistoricalTooltip(teamName, anchorEl) {
             <img src="${emblemPath}" alt="${displayName}" class="historical-tooltip-emblem" onerror="this.style.display='none'">
             <span class="historical-tooltip-title">${displayName}</span>
         </div>
-        <div class="historical-tooltip-subtitle">Histórico de Classificações</div>
+        <div class="historical-tooltip-subtitle">${t('historicalRankings')}</div>
         <table class="historical-tooltip-table">
             <thead>
                 <tr>
-                    <th>Época</th>
-                    <th>Grupo</th>
-                    <th>Geral</th>
+                    <th>${t('season')}</th>
+                    <th>${t('group')}</th>
+                    <th>${t('general')}</th>
                 </tr>
             </thead>
             <tbody>
@@ -7100,11 +7252,11 @@ async function showHistoricalTooltip(teamName, anchorEl) {
 
     history.forEach((entry, index) => {
         const epocaLabel = entry.epoca.replace('_', '/');
-        const emAndamentoSuffix = entry.emAndamento ? ' <span style="color: #94a3b8; font-size: 0.85em;">(em andamento)</span>' : '';
+        const emAndamentoSuffix = entry.emAndamento ? ` <span style="color: #94a3b8; font-size: 0.85em;">(${t('inProgress')})</span>` : '';
 
         let grupoLabel, geralLabel;
         if (entry.naoParticipou) {
-            grupoLabel = '<span style="color: #94a3b8; font-style: italic;">Não participou</span>';
+            grupoLabel = `<span style="color: #94a3b8; font-style: italic;">${t('didNotParticipate')}</span>`;
             geralLabel = '—';
         } else {
             // Formato para modalidades com divisões
@@ -7248,8 +7400,8 @@ function changeModalidade(mod) {
     let previousSeasonTeams = new Set();
 
     // Mostrar loading
-    document.getElementById('teamSelector').innerHTML = '<div class="loading"><div class="spinner"></div>A carregar dados...</div>';
-    document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="11" class="loading">A carregar classificação...</td></tr>';
+    document.getElementById('teamSelector').innerHTML = `<div class="loading"><div class="spinner"></div>${t('loadingData')}</div>`;
+    document.getElementById('rankingsBody').innerHTML = `<tr><td colspan="11" class="loading">${t('loadingRankings')}</td></tr>`;
 
     let loadedFiles = 0;
     const totalFiles = 4; // Agora são 4 ficheiros
@@ -7648,7 +7800,8 @@ function createCalendarDivisionSelector() {
     divisions.forEach(div => {
         const btn = document.createElement('button');
         btn.className = `division-btn ${div === currentCalendarDivision ? 'active' : ''}`;
-        btn.textContent = div; // Label já vem formatado: "1ª Divisão" ou "2ª Divisão - Grupo A"
+        btn.textContent = translateDivisionLabel(div);
+        btn.dataset.division = div;
         btn.onclick = () => switchCalendarDivision(div);
         divisionSelectorDiv.appendChild(btn);
     });
@@ -7693,7 +7846,7 @@ function createCalendarGroupSelector() {
     groups.forEach(group => {
         const btn = document.createElement('button');
         btn.className = `group-btn ${group === currentCalendarGroup ? 'active' : ''}`;
-        btn.textContent = `Grupo ${group}`;
+        btn.textContent = `${t('groupLabel')} ${group}`;
         btn.onclick = () => switchCalendarGroup(group);
         groupSelectorDiv.appendChild(btn);
     });
@@ -7982,7 +8135,7 @@ function updateCalendar() {
     });
 
     if (games.length === 0) {
-        gamesList.innerHTML = '<div class="no-games-message">Nenhum jogo encontrado para esta jornada</div>';
+        gamesList.innerHTML = '<div class="no-games-message">' + t('noGamesFound') + '</div>';
         return;
     }
 
@@ -8040,8 +8193,8 @@ function createGameItem(game) {
     const team2Info = getCourseInfo(team2);
 
     // Calendário sempre usa nome curto
-    const displayTeam1 = team1Info.shortName;
-    const displayTeam2 = team2Info.shortName;
+    const displayTeam1 = getTranslatedTeamLabel(team1Info, team1);
+    const displayTeam2 = getTranslatedTeamLabel(team2Info, team2);
 
     // Formatar data e hora
     let dateStr;
@@ -8051,7 +8204,7 @@ function createGameItem(game) {
             dateStr += ` • ${gameTime}`;
         }
     } else {
-        dateStr = 'DATA POR MARCAR';
+        dateStr = t('dateToSchedule');
     }
 
     // Resultado
@@ -9344,7 +9497,7 @@ class DivisionSelector extends SelectorComponent {
         divisions.forEach(division => {
             const btn = document.createElement('button');
             btn.className = `division-btn ${division === appState.view.division ? 'active' : ''}`;
-            btn.textContent = division;
+            btn.textContent = translateDivisionLabel(division);
             btn.dataset.division = division;
             this.element.appendChild(btn);
         });
@@ -9358,7 +9511,7 @@ class DivisionSelector extends SelectorComponent {
 
         const buttons = this.element.querySelectorAll('.division-btn');
         buttons.forEach(btn => {
-            btn.classList.toggle('active', btn.textContent === division);
+            btn.classList.toggle('active', btn.dataset.division === division);
         });
     }
 }
@@ -9403,7 +9556,7 @@ class GroupSelector extends SelectorComponent {
         // Botão "Todos"
         const allBtn = document.createElement('button');
         allBtn.className = `group-btn ${!appState.view.group ? 'active' : ''}`;
-        allBtn.textContent = 'Todos';
+        allBtn.textContent = t('allGroups');
         allBtn.dataset.group = '';
         this.element.appendChild(allBtn);
 
@@ -9411,7 +9564,7 @@ class GroupSelector extends SelectorComponent {
         groups.forEach(group => {
             const btn = document.createElement('button');
             btn.className = `group-btn ${group === appState.view.group ? 'active' : ''}`;
-            btn.textContent = `Grupo ${group}`;
+            btn.textContent = `${t('groupLabel')} ${group}`;
             btn.dataset.group = group;
             this.element.appendChild(btn);
         });
@@ -9627,7 +9780,7 @@ function updatePredictionsDivisionSelector() {
     divisions.forEach(division => {
         const btn = document.createElement('button');
         btn.className = `division-btn ${division === appState.view.division ? 'active' : ''}`;
-        btn.textContent = division;
+        btn.textContent = translateDivisionLabel(division);
         btn.dataset.division = division;
         container.appendChild(btn);
     });
@@ -9663,14 +9816,14 @@ function updatePredictionsGroupSelector() {
 
     const allBtn = document.createElement('button');
     allBtn.className = `group-btn ${!appState.view.group ? 'active' : ''}`;
-    allBtn.textContent = 'Todos';
+    allBtn.textContent = t('allGroups');
     allBtn.dataset.group = '';
     container.appendChild(allBtn);
 
     groups.forEach(group => {
         const btn = document.createElement('button');
         btn.className = `group-btn ${group === appState.view.group ? 'active' : ''}`;
-        btn.textContent = `Grupo ${group}`;
+        btn.textContent = `${t('groupLabel')} ${group}`;
         btn.dataset.group = group;
         container.appendChild(btn);
     });
@@ -9786,7 +9939,7 @@ function updatePredictionsSimulationsCount() {
     const countEl = document.getElementById('predictionsSimCount');
     if (countEl && PredictionsState.simulations) {
         const formatted = PredictionsState.simulations.toLocaleString('pt-PT');
-        countEl.textContent = `(${formatted} simulações)`;
+        countEl.textContent = `(${formatted} ${t('simulations')})`;
     }
 }
 
@@ -9794,10 +9947,10 @@ function updatePredictionsSimulationsCount() {
  * Limpa a exibição de previsões quando não há dados
  */
 function clearPredictionsDisplay() {
-    document.getElementById('selectedTeamName').textContent = 'Dados não disponíveis';
+    document.getElementById('selectedTeamName').textContent = t('dataNotAvailable');
     document.getElementById('selectedTeamEmblem').innerHTML = '';
-    document.getElementById('predictionsStatsGrid').innerHTML = '<div class="no-predictions-message">Sem dados de previsões para esta modalidade/época</div>';
-    document.getElementById('predictionsTableBody').innerHTML = '<tr><td colspan="7" class="no-predictions-message">Sem dados disponíveis</td></tr>';
+    document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${t('noPredictionsData')}</div>`;
+    document.getElementById('predictionsTableBody').innerHTML = `<tr><td colspan="7" class="no-predictions-message">${t('noDataAvailableShort')}</td></tr>`;
 
     // Desabilitar botões
     document.getElementById('prevTeamBtn').disabled = true;
@@ -9823,6 +9976,12 @@ function updatePredictionsDisplay() {
         clearPredictionsDisplay();
         return;
     }
+
+    const prevBtn = document.getElementById('prevTeamBtn');
+    const nextBtn = document.getElementById('nextTeamBtn');
+    const disableNav = PredictionsState.availableTeams.length <= 1;
+    if (prevBtn) prevBtn.disabled = disableNav;
+    if (nextBtn) nextBtn.disabled = disableNav;
 
     // Atualizar nome e emblema da equipa
     updateTeamSliderDisplay();
@@ -9859,7 +10018,8 @@ function updateTeamSliderDisplay() {
 
     // Atualizar nome
     const nameEl = document.getElementById('selectedTeamName');
-    nameEl.textContent = courseInfo.fullName || courseInfo.shortName || teamName;
+    const displayName = translateTeamName(courseInfo.fullName || courseInfo.shortName || teamName);
+    nameEl.textContent = displayName;
 
     // Remover estrela anterior se existir
     const oldStar = nameEl.querySelector('.favorite-star-btn');
@@ -10267,7 +10427,7 @@ function updatePredictionsStats() {
     );
 
     if (!teamData) {
-        document.getElementById('predictionsStatsGrid').innerHTML = '<div class="no-predictions-message">Sem estatísticas disponíveis</div>';
+        document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${t('noStatsAvailable')}</div>`;
         return;
     }
 
@@ -10391,7 +10551,7 @@ function updatePredictionsTable() {
     const tbody = document.getElementById('predictionsTableBody');
 
     if (teamGames.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="no-predictions-message">Sem jogos previstos para esta equipa</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="7" class="no-predictions-message">${t('noGamesForTeam')}</td></tr>`;
         return;
     }
 
@@ -10427,8 +10587,8 @@ function updatePredictionsTable() {
         const favoriteClass = isFavoriteOpponent ? ' favorite-team-prediction' : '';
 
         // Nomes curtos das equipas para o tooltip
-        const teamShortName = teamInfo.shortName || teamName;
-        const opponentShortName = opponentInfo.shortName || opponent;
+        const teamShortName = getTranslatedTeamLabel(teamInfo, teamName);
+        const opponentShortName = getTranslatedTeamLabel(opponentInfo, opponent);
 
         return `
             <tr>
@@ -10437,13 +10597,13 @@ function updatePredictionsTable() {
                 <td>
                     <div class="prediction-opponent">
                         ${opponentInfo.emblemPath ? `<img src="${opponentInfo.emblemPath}" alt="${opponentInfo.fullName || opponent}" class="prediction-opponent-emblem">` : ''}
-                        <span class="prediction-opponent-name">${opponentInfo.fullName || opponentInfo.shortName || opponent || 'Desconhecido'}</span>
+                        <span class="prediction-opponent-name">${translateTeamName(opponentInfo.fullName || opponentInfo.shortName || opponent || t('unknown'))}</span>
                     </div>
                 </td>
                 <td><span class="prediction-prob ${getProbClass(probWin)}">${probWin.toFixed(1)}%</span></td>
                 <td><span class="prediction-prob ${getProbClass(probDraw)}">${probDraw.toFixed(1)}%</span></td>
                 <td><span class="prediction-prob ${getProbClass(probLoss)}">${probLoss.toFixed(1)}%</span></td>
-                <td class="expected-goals-cell ${favoriteClass}" data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" data-team-short="${teamShortName}" data-opponent-short="${opponentShortName}" title="Clique para fixar/desafixar o tooltip de distribuição">
+                <td class="expected-goals-cell ${favoriteClass}" data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" data-team-short="${teamShortName}" data-opponent-short="${opponentShortName}" title="${t('clickToFixTooltip')}">
                     ${expectedGoals.toFixed(1)} - ${opponentExpectedGoals.toFixed(1)}
                 </td>
             </tr>
@@ -10491,7 +10651,7 @@ function formatPredictionDate(dateStr) {
     if (!dateStr) return '-';
     try {
         const date = new Date(dateStr);
-        return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+        return date.toLocaleDateString(getDateLocale(), { day: '2-digit', month: '2-digit' });
     } catch {
         return dateStr;
     }
@@ -10729,7 +10889,7 @@ function renderPredictionsTooltip(distribution, isTeamA, teamShortName, opponent
         <div>
             <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                 <div style="flex: 1; text-align: center;">
-                    <div style="font-weight: 600; color: #2a5298; font-size: 0.9em;">Resultados Simulados</div>
+                    <div style="font-weight: 600; color: #2a5298; font-size: 0.9em;">${t('simulatedResults')}</div>
                     ${teamsText ? `<div style="font-size: 0.85em; color: #666; margin-top: 2px;">${teamsText}</div>` : ''}
                 </div>
                 <div style="display: flex; gap: 4px; flex-shrink: 0;">
@@ -10849,7 +11009,7 @@ function renderTooltipChart(chartId, scores) {
     }
 
     if (!scores || scores.length === 0) {
-        chartEl.textContent = 'Sem dados';
+        chartEl.textContent = t('noDataAvailableShort');
         return;
     }
 
@@ -10898,7 +11058,7 @@ function renderTooltipChart(chartId, scores) {
         predictionsTooltipChart.render();
     } catch (e) {
         console.error('Error rendering chart:', e);
-        chartEl.textContent = 'Erro ao carregar';
+        chartEl.textContent = t('errorLoading');
     }
 }
 

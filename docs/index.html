@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
         content="Dashboard interativo da Taça UA - Rankings, estatísticas ELO, calendário de jogos e brackets de eliminação">
-    <title>Dashboard da Taça UA</title>
+    <title data-i18n="pageTitle">Dashboard da Taça UA</title>
     <link rel="icon" type="image/png" href="assets/taça_ua.png">
     <link rel="icon" type="image/png" href="assets/taça_ua.png">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -26,16 +26,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Dashboard da Taça UA</h1>
+            <h1 data-i18n="dashboardTitle">Dashboard da Taça UA</h1>
         </div>
 
         <div class="modalidade-selector">
-            <label for="epoca">Época:</label>
+            <label for="epoca" data-i18n="seasonLabel">Época:</label>
             <select id="epoca" name="epoca">
                 <!-- Épocas serão carregadas dinamicamente -->
             </select>
 
-            <label for="modalidade">Modalidade:</label>
+            <label for="modalidade" data-i18n="modalityLabel">Modalidade:</label>
             <select id="modalidade" name="modalidade">
                 <!-- Modalidades serão carregadas dinamicamente baseadas na época -->
             </select>
@@ -45,12 +45,12 @@
             <!-- Tabela de Classificação (PRIMEIRA SECÇÃO) -->
             <div class="card ranking-card">
                 <div class="card-title">
-                    <span>Classificação Geral</span>
+                    <span data-i18n="generalRanking">Classificação Geral</span>
                     <label class="compact-mode-toggle"
                         style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85em; font-weight: 500; color: #2a5298; margin-left: auto; padding: 4px 8px; border-radius: 4px; background: rgba(42, 82, 152, 0.05);">
                         <input type="checkbox" id="compactModeCheckbox" onchange="toggleCompactMode()"
                             style="cursor: pointer; width: 18px; height: 18px;">
-                        <span>Modo Compacto</span>
+                        <span data-i18n="compactMode">Modo Compacto</span>
                     </label>
                 </div>
                 <div class="division-selector" id="divisionSelector">
@@ -69,21 +69,27 @@
                     <table class="rankings-table" id="rankingsTable">
                         <thead>
                             <tr>
-                                <th title="Posição na classificação geral">Pos.</th>
-                                <th>Equipa</th>
-                                <th title="Pontos acumulados">Pts</th>
-                                <th title="Jogos realizados">J</th>
-                                <th title="Vitórias">V</th>
-                                <th class="draws-column" title="Empates">E</th>
-                                <th title="Derrotas">D</th>
-                                <th style="color: red;" title="Faltas de comparência">FC</th>
-                                <th title="Golos marcados">GM</th>
-                                <th title="Golos sofridos">GS</th>
-                                <th title="Diferença de golos (GM - GS)">±</th>
-                                <th title="Mostra a evolução do rating ELO da equipa nos 5 jogos mais recentes.
+                                <th data-i18n="posAbbr" data-i18n-title="posTitle"
+                                    title="Posição na classificação geral">Pos.</th>
+                                <th data-i18n="team">Equipa</th>
+                                <th data-i18n="ptsAbbr" data-i18n-title="ptsTitle" title="Pontos acumulados">Pts</th>
+                                <th data-i18n="gamesAbbr" data-i18n-title="gamesTitle" title="Jogos realizados">J</th>
+                                <th data-i18n="winsAbbr" data-i18n-title="winsTitle" title="Vitórias">V</th>
+                                <th class="draws-column" data-i18n="drawsAbbr" data-i18n-title="drawsTitle"
+                                    title="Empates">E</th>
+                                <th data-i18n="lossesAbbr" data-i18n-title="lossesTitle" title="Derrotas">D</th>
+                                <th style="color: red;" data-i18n="noShowsAbbr" data-i18n-title="noShowsTitle"
+                                    title="Faltas de comparência">FC</th>
+                                <th id="thGoalsScored" data-i18n="goalsScoredAbbr" data-i18n-title="goalsScored"
+                                    title="Golos marcados">GM</th>
+                                <th id="thGoalsConceded" data-i18n="goalsConcededAbbr" data-i18n-title="goalsConceded"
+                                    title="Golos sofridos">GS</th>
+                                <th id="thGoalsDiff" data-i18n="goalDiffSymbol" data-i18n-title="goalsDiff"
+                                    title="Diferença de golos (GM - GS)">±</th>
+                                <th data-i18n="eloTrend" data-i18n-title="eloTrendTitle" title="Mostra a evolução do rating ELO da equipa nos 5 jogos mais recentes.
                                     ELO minimo - ELO máximo">
                                     ELO Trend</th>
-                                <th title="Mostra os últimos 5 resultados da equipa (V=Vitória, E=Empate, D=Derrota)
+                                <th data-i18n="form" data-i18n-title="formTitle" title="Mostra os últimos 5 resultados da equipa (V=Vitória, E=Empate, D=Derrota)
                                     Esquerda é o jogo mais antigo, direita o mais recente.">
                                     Forma</th>
                             </tr>
@@ -100,12 +106,13 @@
                 <div class="chart-header">
                     <div class="card-title">
                         <span id="eloChartTitle">
-                            Evolução de ELO das Equipas
-                            <span class="tooltip-icon"
+                            <span data-i18n="eloChartTitle">Evolução de ELO das Equipas</span>
+                            <span class="tooltip-icon" data-i18n-title="eloChartTooltip"
                                 title="ELO representa a força relativa das equipas ao longo da época. Sobe com vitórias, desce com derrotas.">?</span>
                         </span>
                         <button class="collapse-btn" id="toggleEloChart" aria-expanded="true"
-                            aria-label="Expandir/Colapsar gráfico de ELO" title="Expandir/Colapsar">
+                            data-i18n-title="expandCollapse" aria-label="Expandir/Colapsar gráfico de ELO"
+                            title="Expandir/Colapsar">
                             <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -138,13 +145,14 @@
 
             <!-- Calendário de Jogos -->
             <div class="card calendar-card">
-                <div class="card-title">Calendário de Jogos</div>
+                <div class="card-title" data-i18n="gameCalendar">Calendário de Jogos</div>
 
                 <!-- Navegação de Jornadas -->
                 <div class="jornada-navigation">
                     <div class="jornada-arrow-container">
                         <button class="jornada-arrow" id="prevJornadaBtn" data-jornada-nav="prev"
-                            title="Jornada anterior" aria-label="Navegar para jornada anterior">
+                            data-i18n-title="previousMatchday" title="Jornada anterior"
+                            data-i18n-aria="navigatePrevious" aria-label="Navegar para jornada anterior">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                 stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="15 18 9 12 15 6"></polyline>
@@ -152,12 +160,13 @@
                         </button>
                         <div class="epoca-switch-label" id="prevEpocaLabel" style="display: none;"></div>
                     </div>
-                    <div class="jornada-title" id="jornadaTitle">
+                    <div class="jornada-title" id="jornadaTitle" data-i18n="selectModalityFirst">
                         Selecione uma modalidade
                     </div>
                     <div class="jornada-arrow-container">
                         <button class="jornada-arrow" id="nextJornadaBtn" data-jornada-nav="next"
-                            title="Jornada seguinte" aria-label="Navegar para próxima jornada">
+                            data-i18n-title="nextMatchday" title="Jornada seguinte" data-i18n-aria="navigateNext"
+                            aria-label="Navegar para próxima jornada">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                 stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -176,14 +185,15 @@
                 </div>
 
                 <div class="games-list" id="gamesList">
-                    <div class="no-games-message">Selecione uma modalidade para ver os jogos</div>
+                    <div class="no-games-message" data-i18n="selectModalityData">Selecione uma modalidade para ver os
+                        jogos</div>
                 </div>
             </div>
         </div>
 
         <!-- Bracket -->
         <div class="card">
-            <div class="card-title">Bracket de Eliminação</div>
+            <div class="card-title" data-i18n="eliminationBracket">Bracket de Eliminação</div>
             <div class="bracket-container">
                 <div class="bracket" id="bracketContainer">
                     <!-- Bracket será gerado dinamicamente -->
@@ -193,7 +203,7 @@
 
         <!-- Bracket Secundário (Manutenção/Promoção) -->
         <div class="card" id="secondaryBracketCard" style="display: none;">
-            <div class="card-title" id="secondaryBracketTitle">Playoff/Liguilha</div>
+            <div class="card-title" id="secondaryBracketTitle" data-i18n="playoffLiguilha">Playoff/Liguilha</div>
             <div class="bracket-container">
                 <div class="bracket" id="secondaryBracketContainer">
                     <!-- Bracket secundário será gerado dinamicamente -->
@@ -204,7 +214,7 @@
         <!-- Secção de Previsões -->
         <div class="card predictions-card">
             <div class="card-title predictions-title">
-                <span>Previsões da Época</span>
+                <span data-i18n="seasonPredictions">Previsões da Época</span>
                 <span class="predictions-sim-count" id="predictionsSimCount" aria-live="polite"></span>
             </div>
 
@@ -226,7 +236,8 @@
                     <div class="team-slider-ghost ghost-left-2" data-position="-2" aria-hidden="true"></div>
                     <div class="team-slider-ghost ghost-left-1" data-position="-1" aria-hidden="true"></div>
 
-                    <button class="slider-arrow slider-prev" id="prevTeamBtn" aria-label="Equipa anterior">
+                    <button class="slider-arrow slider-prev" id="prevTeamBtn" data-i18n-aria="previousTeam"
+                        aria-label="Equipa anterior">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="15 18 9 12 15 6"></polyline>
@@ -234,7 +245,7 @@
                     </button>
 
                     <div class="team-slider-main" id="teamSliderMain">
-                        <div class="team-slider-name" id="selectedTeamName">
+                        <div class="team-slider-name" id="selectedTeamName" data-i18n="selectModalityFirst">
                             Selecione uma modalidade
                         </div>
                         <div class="team-slider-emblem" id="selectedTeamEmblem">
@@ -242,7 +253,8 @@
                         </div>
                     </div>
 
-                    <button class="slider-arrow slider-next" id="nextTeamBtn" aria-label="Próxima equipa">
+                    <button class="slider-arrow slider-next" id="nextTeamBtn" data-i18n-aria="nextTeam"
+                        aria-label="Próxima equipa">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="9 18 15 12 9 6"></polyline>
@@ -258,7 +270,7 @@
 
             <!-- Previsões Gerais -->
             <div class="predictions-stats-section">
-                <h3 class="predictions-section-title">PREVISÕES GERAIS</h3>
+                <h3 class="predictions-section-title" data-i18n="generalPredictions">PREVISÕES GERAIS</h3>
                 <div class="predictions-stats-grid" id="predictionsStatsGrid">
                     <!-- Estatísticas serão geradas dinamicamente -->
                 </div>
@@ -266,18 +278,22 @@
 
             <!-- Previsões Jornada a Jornada -->
             <div class="predictions-table-section">
-                <h3 class="predictions-section-title">Previsões jornada a jornada</h3>
+                <h3 class="predictions-section-title" data-i18n="matchdayPredictions">Previsões jornada a jornada</h3>
                 <div class="predictions-table-wrapper">
                     <table class="predictions-table" id="predictionsTable">
                         <thead>
                             <tr>
-                                <th>Jornada</th>
-                                <th>Data</th>
-                                <th>Adversário</th>
-                                <th title="Probabilidade de vitória">P(V)</th>
-                                <th title="Probabilidade de empate">P(E)</th>
-                                <th title="Probabilidade de derrota">P(D)</th>
-                                <th title="Golos esperados">Golos Esp.</th>
+                                <th data-i18n="predJornada">Jornada</th>
+                                <th data-i18n="predDate">Data</th>
+                                <th data-i18n="predOpponent">Adversário</th>
+                                <th data-i18n="predWinProb" data-i18n-title="predWinProbTitle"
+                                    title="Probabilidade de vitória">P(V)</th>
+                                <th data-i18n="predDrawProb" data-i18n-title="predDrawProbTitle"
+                                    title="Probabilidade de empate">P(E)</th>
+                                <th data-i18n="predLossProb" data-i18n-title="predLossProbTitle"
+                                    title="Probabilidade de derrota">P(D)</th>
+                                <th data-i18n="expectedGoalsAbbr" data-i18n-title="expectedGoalsTitle"
+                                    title="Golos esperados">Golos Esp.</th>
                             </tr>
                         </thead>
                         <tbody id="predictionsTableBody">
@@ -292,12 +308,13 @@
     <!-- Debug Panel (oculto por padrão) -->
     <div id="debug-panel" class="debug-panel">
         <div class="debug-panel-title">🐛 Debug Panel</div>
-        <button data-debug="enable" class="debug-btn">Ativar Debug</button>
-        <button data-debug="enable-all" class="debug-btn">Debug Verbose</button>
-        <button data-debug="disable" class="debug-btn">Desativar</button>
-        <button data-debug="close" class="debug-btn">Fechar</button>
+        <button data-debug="enable" class="debug-btn" data-i18n="activateDebug">Ativar Debug</button>
+        <button data-debug="enable-all" class="debug-btn" data-i18n="verboseDebug">Debug Verbose</button>
+        <button data-debug="disable" class="debug-btn" data-i18n="deactivate">Desativar</button>
+        <button data-debug="close" class="debug-btn" data-i18n="close">Fechar</button>
     </div>
 
+    <script src="i18n.js"></script>
     <script src="app.js?v=6"></script>
 </body>
 
