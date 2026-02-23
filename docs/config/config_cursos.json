@@ -17,16 +17,16 @@
     "ASP": {
       "displayName": "Automação e Sistemas de Produção",
       "shortName": "ASP",
-      "nucleus": "NEEMec",
-      "emblem": "assets/Logos/NEEMec-07.png",
-      "colors": ["#f08344", "#6c757d"]
+      "nucleus": "NAE-ESAN",
+      "emblem": "assets/Logos/NAE_ESAN-07.png",
+      "colors": ["#14a0db", "#6c757d"]
     },
     "Automação e Sistemas de Produção": {
       "displayName": "Automação e Sistemas de Produção",
       "shortName": "ASP",
-      "nucleus": "NEEMec",
-      "emblem": "assets/Logos/NEEMec-07.png",
-      "colors": ["#f08344", "#6c757d"]
+      "nucleus": "NAE-ESAN",
+      "emblem": "assets/Logos/NAE_ESAN-07.png",
+      "colors": ["#14a0db", "#6c757d"]
     },
     "Biologia": {
       "displayName": "Biologia",
