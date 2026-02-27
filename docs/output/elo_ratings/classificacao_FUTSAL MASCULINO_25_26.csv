@@ -1,41 +1,41 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
-1,,1,Eng. Mecânica,15,5,5,0,0,22,6,16,0
-1,,2,Finanças,13,5,4,1,0,16,5,11,0
-1,,3,Contabilidade,10,4,3,1,0,10,5,5,0
-1,,4,Bioquímica,7,4,2,1,1,13,5,8,0
-1,,5,Eng. Biomédica,7,5,2,1,2,18,13,5,0
-1,,6,Gestão e Planeamento em Turismo,6,4,2,0,2,7,10,-3,0
-1,,7,Enfermagem,6,5,2,0,3,18,16,2,0
-1,,8,Eng. e Gestão Industrial,6,5,2,0,3,19,14,5,0
-1,,9,Fisioterapia,4,5,1,1,3,10,12,-2,0
-1,,10,Eng. Química,3,4,0,3,1,7,11,-4,0
-1,,11,Eng. Eletrónica e Telecomunicações,0,4,0,0,4,6,23,-17,0
-1,,12,Eng. Física,0,4,0,0,4,3,29,-26,0
-2,A,1,Economia,12,4,4,0,0,34,9,25,0
-2,A,2,Eng. de Materiais,12,4,4,0,0,29,9,20,0
-2,A,3,Eng. Informática ,6,4,2,0,2,15,9,6,0
-2,A,4,Psicologia,6,4,2,0,2,13,26,-13,0
-2,A,5,Ciências do Mar,4,3,1,1,1,11,12,-1,0
-2,A,6,Música,3,3,1,0,2,10,17,-7,0
-2,A,7,Biologia e Geologia,1,3,0,1,2,9,15,-6,0
-2,A,8,Automação e Sistemas de Produção,1,3,0,1,2,5,16,-11,0
-2,A,9,Design,1,4,0,1,3,8,21,-13,0
-2,B,1,Eng. Computacional,9,3,3,0,0,16,7,9,0
-2,B,2,Matemática,6,2,2,0,0,9,3,6,0
-2,B,3,EGI B,6,2,2,0,0,10,5,5,0
-2,B,4,Eng. Ambiente,3,2,1,0,1,8,10,-2,0
-2,B,5,Gestão,3,3,1,0,2,9,11,-2,0
-2,B,6,Línguas e Relações Empresariais,3,3,1,0,2,9,10,-1,0
-2,B,7,Biologia,3,3,1,0,2,9,10,-1,0
-2,B,8,Tradução,1,3,0,1,2,4,10,-6,0
-2,B,9,MOC,1,3,0,1,2,2,10,-8,0
-2,C,1,Gestão Pública,9,3,3,0,0,18,1,17,0
-2,C,2,Eng. Computadores e Telemática,9,3,3,0,0,12,3,9,0
-2,C,3,Ciências Biomédicas,7,3,2,1,0,14,2,12,0
-2,C,4,Marketing,7,3,2,1,0,14,5,9,0
-2,C,5,MTC,3,3,1,0,2,3,20,-17,0
-2,C,6,Eng. Aeroespacial,3,3,1,0,2,5,6,-1,0
-2,C,7,Administração Pública,2,3,0,2,1,5,10,-5,0
-2,C,8,Eng. Cívil,1,3,0,1,2,6,9,-3,0
-2,C,9,Eng. Mecânica B,1,3,0,1,2,3,6,-3,0
-2,C,10,Biotecnologia,0,3,0,0,3,1,19,-18,0
+1,,1,Eng. Mecânica,18,6,6,0,0,25,6,19,0
+1,,2,Finanças,16,6,5,1,0,20,7,13,0
+1,,3,Bioquímica,10,5,3,1,1,15,5,10,0
+1,,4,Contabilidade,10,5,3,1,1,10,8,2,0
+1,,5,Eng. e Gestão Industrial,9,6,3,0,3,23,15,8,0
+1,,6,Eng. Biomédica,8,6,2,2,2,20,15,5,0
+1,,7,Fisioterapia,7,6,2,1,3,18,13,5,0
+1,,8,Gestão e Planeamento em Turismo,7,5,2,1,2,9,12,-3,0
+1,,9,Enfermagem,6,6,2,0,4,18,18,0,0
+1,,10,Eng. Química,3,5,0,3,2,8,15,-7,0
+1,,11,Eng. Eletrónica e Telecomunicações,0,5,0,0,5,8,27,-19,0
+1,,12,Eng. Física,0,5,0,0,5,4,37,-33,0
+2,A,1,Eng. de Materiais,15,5,5,0,0,33,10,23,0
+2,A,2,Economia,12,6,4,0,2,34,12,22,0
+2,A,3,Eng. Informática ,9,5,3,0,2,30,9,21,0
+2,A,4,Música,9,5,3,0,2,16,18,-2,0
+2,A,5,Ciências do Mar,7,5,2,1,2,14,16,-2,0
+2,A,6,Psicologia,6,4,2,0,2,13,26,-13,0
+2,A,7,Design,4,5,1,1,3,11,23,-12,0
+2,A,8,Biologia e Geologia,1,5,0,1,4,12,23,-11,0
+2,A,9,Automação e Sistemas de Produção,1,4,0,1,3,5,31,-26,0
+2,B,1,EGI B,12,4,4,0,0,19,9,10,0
+2,B,2,Eng. Computacional,12,5,4,0,1,23,13,10,0
+2,B,3,Gestão,9,5,3,0,2,36,14,22,0
+2,B,4,Matemática,9,4,3,0,1,27,9,18,0
+2,B,5,Línguas e Relações Empresariais,6,4,2,0,2,14,11,3,0
+2,B,6,Eng. Ambiente,6,4,2,0,2,19,20,-1,0
+2,B,7,Biologia,3,4,1,0,3,12,16,-4,0
+2,B,8,Tradução,1,5,0,1,4,6,30,-24,0
+2,B,9,MOC,1,5,0,1,4,6,40,-34,0
+2,C,1,Eng. Computadores e Telemática,15,5,5,0,0,41,6,35,0
+2,C,2,Gestão Pública,12,5,4,0,1,25,9,16,0
+2,C,3,Marketing,10,5,3,1,1,27,13,14,0
+2,C,4,Ciências Biomédicas,10,5,3,1,1,19,6,13,0
+2,C,5,Eng. Aeroespacial,9,5,3,0,2,12,10,2,0
+2,C,6,Eng. Cívil,5,5,1,2,2,15,14,1,0
+2,C,7,MTC,3,5,1,0,4,8,35,-27,0
+2,C,8,Eng. Mecânica B,2,4,0,2,2,6,9,-3,0
+2,C,9,Administração Pública,2,4,0,2,2,9,15,-6,0
+2,C,10,Biotecnologia,0,5,0,0,5,4,49,-45,0
