@@ -1,6 +1,6 @@
 # Documentação Técnica: Sistema de ELO e Motor de Previsão
 
-Esta documentação providencia uma análise aprofundada dos algoritmos matemáticos e estatísticos utilizados no projeto `mmr_taçaua`.
+Documentação técnica dos algoritmos ELO, sistema de calibração de parâmetros e motor de simulação Monte Carlo implementados no projeto `mmr_taçaua`.
 
 ---
 
@@ -58,82 +58,172 @@ $$ M_{proporcao} = \left( \frac{\max(Golos_A, Golos_B)}{\min(Golos_A, Golos_B)} 
 
 ---
 
-## 🔮 2. Motor de Simulação (`SportScoreSimulator`)
+## 2. Sistema de Calibração Automática (`FullCalibrator`)
 
-O `preditor.py` utiliza simulação de Monte Carlo para prever o futuro. Em vez de prever apenas o vencedor, simula **resultados exatos** para cada jogo.
+O `calibrator.py` implementa aprendizagem de parâmetros a partir de dados históricos para cada modalidade. O sistema calibra separadamente por divisão e ajusta os parâmetros do simulador para refletir características reais de cada desporto.
+
+### 2.1 Pipeline de Calibração
+
+1. **Carregamento de Dados** (`HistoricalDataLoader`):
+   - Lê CSVs históricos de resultados por modalidade
+   - **Filtragem de ausências:** Remove jogos com "Falta de Comparência" (campo `has_absence`)
+   - Razão: Ausências distorcem médias de golos (resultados como 3-0 técnico inflacionam artificialmente `base_goals`)
+
+2. **Calibração de Distribuição de Golos** (`GoalsDistributionCalibrator`):
+   - Calcula `base_goals`: média de golos por equipa
+   - Calcula `dispersion_k`: parâmetro de sobredispersão Gamma-Poisson
+   - **Floor de dispersão:** `dispersion_k ≥ 3.0` (previne variância excessiva em datasets pequenos)
+   - Fórmula: $k = \frac{\mu^2}{\sigma^2 - \mu}$ onde $\mu$ = média, $\sigma^2$ = variância
+
+3. **Calibração de Probabilidade de Empate** (`DrawProbabilityCalibrator`):
+   - Ajusta regressão logística: $P(empate) = \frac{1}{1 + e^{-(a + b \times diff\_elo)}}$
+   - **Validação de suficiência:** Requer $n\_empates ≥ 5$ para evitar overfitting
+   - **Sanidade do modelo:** Rejeita se $|intercept| > 100$ ou $|coef\_linear| > 10$
+   - Caso rejeitado: retorna modelo zero (usa Gaussiana-based draw em vez de logística)
+
+### 2.2 Parâmetros Calibrados por Modalidade
+
+O sistema exporta parâmetros específicos conforme o tipo de desporto (ficheiro `calibrated_simulator_config.json`):
+
+**Parâmetros Universais:**
+- `base_goals`: Média de golos/pontos por equipa
+- `dispersion_k`: Parâmetro de forma Gamma (sobredispersão Poisson)
+- `elo_adjustment_limit`: Limite máximo de ajuste ELO por jogo (previne spread excessivo)
+- `draw_model`: Coeficientes da regressão logística (`intercept`, `coef_linear`, `coef_quadratic`)
+- `draw_multiplier`: Fator de ajuste fino para taxa de empates
+
+**Parâmetros Específicos de Basquetebol:**
+- `base_score`: Pontuação média por equipa (substitui `base_goals` para Gaussiana)
+- `sigma`: Desvio padrão da distribuição Normal de pontos
+
+**Parâmetros Específicos de Voleibol:**
+- `p_sweep_base`: Probabilidade base de vitória por 2-0 (calculada de sweeps históricos)
+- Calculado como: $p\_sweep = \frac{\text{número de 2-0}}{\text{total de jogos}}$
+
+### 2.3 Valores Típicos de `elo_adjustment_limit`
+
+### 2.4 Exemplos de Calibração Real
+
+**Basquetebol (modelo específico):**
+- **Média ($\mu$):** Usa `base_score` calibrado (não `base_goals`)
+- **Desvio Padrão ($\sigma$):** Calibrado por divisão (ex: 4.67 masculino, 6.21 feminino)
+- Ajuste ELO: $\mu_{ajustado} = base\_score + elo\_diff \times limit$
+
+**Andebol:**
+- Usa mesma fórmula Gaussiana mas com `base_goals` calibrado (~20.5)
+- `elo_adjustment_limit = 0.45` (previne spread excessivo: evita jogos 5-40)
+
+**Futsal Feminino (caso de dataset limitado):**
+- Apenas 1 empate em 66 jogos históricos
+- Sistema rejeitou `draw_model` (insuficientes empates)
+- `dispersion_k` original: 1.38 → Forçado a 3.0 (floor)
+- Resultado: Previne overfitting e variância artificial
+
+**Diferenças-chave:**
+- Andebol: Permite empates (se arredondamentos coincidem)
+- Basquetebol: Força prolongamento se scores iguais (adiciona simulação de 5min)
+
+**Voleibol (sweeps):**
+- P_sweep hardcoded antigo: 35%
+- P_sweep calibrado: 68.7% (feminino), 71.9% (masculino)
+- Melhoria: 2-0 agora é resultado dominante (realista)
+
+---
+
+## 3. Motor de Simulação (`SportScoreSimulator`)
+
+O `preditor.py` utiliza simulação Monte Carlo com parâmetros calibrados. Simula resultados exatos (não apenas vencedor) usando distribuições estatísticas apropriadas por modalidade.
 
 ### 2.1 Modelos Estatísticos por Desporto
 
-O simulador distingue entre tipos de desporto para gerar resultados realistas:
+Cada modalidade usa um modelo estatístico distinto. Parâmetros ($\lambda$, $\mu$, $\sigma$) são ajustados dinamicamente com base no ELO relativo e valores calibrados.
 
-#### Tipo A: Futebol/Futsal (Distribuição de Poisson)
+#### Tipo A: Futsal/Futebol 7 (Gamma-Poisson Overdispersion)
 
-Desportos de baixa pontuação são modelados como processos de Poisson independentes para cada equipa.
+Desportos de baixa pontuação usam Poisson com multiplicação Gamma para capturar sobredispersão.
 
-- **Lambda ($\lambda$):** A média de golos esperada para uma equipa num jogo é derivada do seu ELO relativo.
-   - Se ELO > Adversário: $\lambda$ aumenta.
-   - Se ELO < Adversário: $\lambda$ diminui.
-   - Média base: ~2.5 golos/jogo (ajustável).
+**Processo:**
+1. Calcula $\lambda_{base}$ a partir de `base_goals` calibrado
+2. Ajusta por ELO relativo: $\lambda_{ajustado} = \lambda_{base} \times (1 + elo\_diff \times limit)$
+3. Aplica multiplicação Gamma: $multiplier \sim Gamma(k, \theta)$ onde $k =$ `dispersion_k`
 
-$$ Golos \sim Poisson(\lambda_{ELO}) $$
+4. **Clip de multiplicação:** $[0.75, 1.30]$ para `base_goals > 10`, $[0.5, 1.8]$ caso contrário6. **Max lambda:** Limitado a $base \times 1.4$ (desportos alta pontuação) ou $base \times 2.0$ (baixa)
+5. $\lambda_{final} = \lambda_{ajustado} \times multiplier$
+
+$$ Golos \sim Poisson(\lambda_{final}) $$
 $$ P(k \text{ golos}) = \frac{\lambda^k e^{-\lambda}}{k!} $$
 
-> Isto permite a ocorrência natural de empates (quando Poisson(A) == Poisson(B)).
+**Vantagem:** Permite empates naturais (quando Poisson(A) == Poisson(B)) e variância realista.
 
-#### Tipo B: Basquetebol/Andebol (Distribuição Normal)
+#### Tipo B: Basquetebol/Andebol (Distribuição Gaussiana)
 
 Desportos de alta pontuação seguem uma distribuição Normal (Gaussiana).
 
-- **Média ($\mu$):** Baseada no ELO (ex: equipa forte média 60 pontos, fraca 40).
-- **Desvio Padrão ($\sigma$):** Fixo por modalidade (ex: 15 pontos no basquete), permitindo "upsets".
+Desportos de alta pontuação seguem distribuição Normal.
 
-$$ Pontos \sim \mathcal{N}(\mu_{ELO}, \sigma^2) $$
+**Basquetebol (modelo específico):**
+
+- **Média ($\mu$):** Usa `base_score` calibrado (não `base_goals`)- `elo_adjustment_limit = 0.45` (previne spread excessivo: evita jogos 5-40)
+
+- **Desvio Padrão ($\sigma$):** Calibrado por divisão (ex: 4.67 masculino, 6.21 feminino)- Usa mesma fórmula Gaussiana mas com `base_goals` calibrado (~20.5)
+
+- Ajuste ELO: $\mu_{ajustado} = base\_score + elo\_diff \times limit$**Andebol:**
 
 > **Destaque:** No basquetebol, o modelo previne empates forçando prolongamento (adiciona simulação de 5 min se Scores iguais).
 
-#### Tipo C: Voleibol (Simulação Set-a-Set)
+#### Tipo C: Voleibol (Simulação Binária por Sets)
 
-Simula cada set individualmente como uma Bernoulli Trial baseada nas probabilidades de ELO.
+Cada set é uma Bernoulli trial com probabilidade ajustada por ELO e `p_sweep_base` calibrado.
 
-- Vence o jogo quem chegar primeiro a 2 (Melhor de 3) ou 3 (Melhor de 5) sets.
-- O resultado é sempre exato (ex: 3-0, 3-2, 2-1).
+**Processo:**
+1. Calcula $P(A\_vence\_set)$ via ELO logistic function
+
+2. Ajusta por `p_sweep_base` calibrado (~69-72% histórico)**Nota:** `p_sweep_base` substituí valor hardcoded antigo (35%) por realidade histórica.
+
+3. Simula sets até vitória (Melhor de 3: primeiro a 2; Melhor de 5: primeiro a 3)
+4. Resultado sempre exato: 2-0, 2-1, 3-0, 3-1, 3-2
 
 ### 2.2 Pipeline de Monte Carlo
 
-Para prever a classificação final:
+Fluxo para gerar previsões de classificação final e probabilidades por jogo:
 
-1. **Estado Inicial:** Carrega classificação atual e ELOs atuais.
-2. **Iteração (x10.000, 100.000 ou 1.000.000 conforme o modo):**
+1. **Carregamento:** Classificação atual, ELOs atuais, parâmetros calibrados (`calibrated_simulator_config.json`)
+2. **Iteração Monte Carlo (N = 10k / 100k / 1M):**
+
    - Para cada jogo futuro no calendário:
-      a. Determina ELOs atuais das equipas.
-      b. `SportScoreSimulator` gera um resultado (ex: 3-1).
-      c. Atualiza os ELOs das equipas (o sistema aprende durante a simulação).
-      d. Atualiza a classificação virtual.
-      e. Regista o placar gerado para estatísticas de distribuição.
-   - No final da época virtual, determina o Campeão e lugares de Playoff.
+      a. Obtém ELOs atuais das equipas na simulação
+      b. `SportScoreSimulator` gera resultado usando parâmetros calibrados (ex: 3-1)
+      c. Atualiza ELOs com K-factor dinâmico
+      d. Atualiza classificação virtual (pontos, vitórias, golos)
+      e. Regista placar para estatísticas de distribuição
+   - Fim da época virtual: determina campeão e vaga playoffs
 
-3. **Agregação:**
-   - Conta quantas vezes a Equipa X foi campeã em N universos paralelos.
-   - Resultado: "Equipa X tem 24.5% de probabilidade de ser Campeã".
-   - Calcula distribuição de placares e golos esperados por jogo.
+3. **Agregação de resultados:**
+
+   - Frequentist probabilities: "Equipa X foi campeã em 2450/10000 universos → 24.5%"
+   - Distribuição de placares: probabilidade de cada score exato
+   - Expected goals: média ponderada $E[G_A] = \sum_i p_i \times g_{A,i}$
+   - Expected ELO: média de ELO no momento do jogo (reflete evolução esperada)
 
 ### 2.3 Estatísticas de Saída
 
 Para cada jogo futuro, o sistema calcula e exporta:
 
 **Probabilidades de Resultado:**
-- Probabilidade de vitória da equipa A, empate e vitória da equipa B
 
 **Golos Esperados (Expected Goals):**
+
 - Média ponderada de golos para cada equipa com base na distribuição de placares
 - Cálculo: $E[G_A] = \sum_i p_i \times g_{A,i}$ onde $p_i$ é a probabilidade do placar $i$
 - Desvio padrão: $\sigma = \sqrt{\sum_i p_i \times (g_{A,i} - E[G_A])^2}$
 
 **Distribuição Completa de Placares:**
+
 - Lista de todos os placares observados nas simulações com suas frequências
 - Permite análise detalhada de cenários mais prováveis (ex: "2-1: 15.3%, 1-1: 12.7%, 3-1: 10.2%")
 
 **ELO Esperado no Momento do Jogo:**
+
 - Média e desvio padrão do ELO de cada equipa no momento do jogo
 - Reflete a evolução esperada dos ELOs ao longo da época simulada
 
@@ -149,13 +239,17 @@ O sistema foi altamente otimizado para performance computacional (`src/preditor.
 
 Devido ao **GIL (Global Interpreter Lock)** do Python, threads normais não aceleram simulações de CPU intensivo.
 
-- O sistema usa `multiprocessing` para lançar processos operários independentes.
-- Cada processo corre uma fatia das simulações em paralelo (ex: 4 cores = 2.500 sims cada em modo padrão).
-- Modos disponíveis: 10.000 (padrão), 100.000 (deep) ou 1.000.000 (deeper) simulações.
+- Multiprocessing contorna GIL (Global Interpreter Lock)
+- Cada processo corre fração das iterações em paralelo
+- **Normal:** 10.000 sims (~30s, 4 cores = 2.500 sims/core)
 
-### Compatibilidade Windows
+- **Deep:** 100.000 sims (~5min, reduz variância estatística)- **Deeper:** 1.000.000 sims (~45min, máxima precisão)
 
-O módulo `multiprocessing` no Windows obriga a que o código principal esteja protegido por `if __name__ == "__main__":`.
+### Compatibilidade Multiplataforma
+
+**Windows:** Usa `spawn` (obriga `if __name__ == "__main__":` protection), configura UTF-8 encoding.
+
+**Linux/macOS:** Usa `fork` (mais rápido, copia memória do processo pai).
 
 - O script deteta o SO e usa `spawn` (Windows) ou `fork` (Linux).
 - Configura automaticamente o `locale` e encoding para lidar com UTF-8 no terminal Windows (powershell).
@@ -164,12 +258,14 @@ O módulo `multiprocessing` no Windows obriga a que o código principal esteja p
 
 O sistema implementa gestão automática dos ficheiros de saída para evitar acumulação de previsões desatualizadas:
 
-**Limpeza Automática (`mmr_taçaua.py`):**
+__Limpeza Automática (`mmr_taçaua.py`):__
+
 - No início da execução, apaga automaticamente todos os ficheiros CSV da pasta `/docs/output/previsoes/`
 - Garante que apenas as classificações e ELOs mais recentes são usados para gerar previsões
 - Previne confusão entre previsões de diferentes épocas ou estados do sistema
 
 **Nomenclatura com Rastreabilidade (`preditor.py`):**
+
 - Os ficheiros de saída incluem o número de simulações no nome (ex: `forecast_FUTSAL_FEMININO_2026_10000.csv`)
 - Permite comparar resultados com diferentes níveis de precisão
 - Formato: `[tipo]_[modalidade]_[ano]_[nsimulações].csv`
@@ -179,21 +275,117 @@ Esta abordagem garante que o pipeline de dados mantém consistência entre as fa
 
 ---
 
-## 4. Validação (Backtesting)
+## 4. Validação e Métricas (Backtesting)
 
-O ficheiro `src/backtest_validation.py` permite validar se o modelo é fiável.
+O `src/backtest_validation.py` testa precisão de previsões históricas (time-travel testing).
 
-### Brier Score
+### 4.1 Brier Score
 
-Mede a precisão das probabilidades probabilísticas.
-$$ BS = \frac{1}{N} \sum (ProbabilidadePrevista - ResultadoReal)^2 $$
+Mede calibração de probabilidades (penaliza confiança excessiva).
+$$ BS = \frac{1}{N} \sum_{i=1}^{N} (p_i - o_i)^2 $$
 
-- **0.0:** Pervisão perfeita.
-- **0.25:** Chute aleatório (50/50).
-- O nosso modelo visa **BS < 0.15**.
+Onde $p_i$ = probabilidade prevista, $o_i \in \{0,1\}$ = resultado real.
 
-### RMSE (Root Mean Square Error)
+**Interpretação:**
+- **0.0:** Previsão perfeita (irreal)
+- **0.25:** Baseline aleatório (50/50)
+- **< 0.15:** Modelo razoável para desportos universitários
+- **> 0.30:** Pior que chute aleatório
 
-Mede o erro médio na previsão da posição final na tabela.
+**Nota:** Dados universitários têm inerente alta variância (upsets frequentes, equipas voláteis).
 
-- Se o modelo diz que equipa fica em 2º e ela fica em 4º, erro = 2.
+### 4.2 RMSE (Root Mean Square Error)
+
+Avalia precisão de previsão de classificação final:
+$$ RMSE = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (pos_{prevista,i} - pos_{real,i})^2} $$
+
+**Exemplo:** Se modelo prevê 2º lugar mas equipa termina em 4º: erro individual = 2 posições.
+
+**Valores típicos:**
+- RMSE < 1.5: Excelente (raro em desportos amadores)
+- RMSE 1.5-2.5: Bom (captura tendências principais)
+- RMSE > 3.0: Modelo precisa recalibração
+
+### 4.3 Limitações de Validação
+
+**Dados limitados:**
+- Épocas universitárias têm ~30-80 jogos/modalidade
+- Pequenas amostras dificultam significância estatística
+
+**Alta volatilidade:**
+- Equipas amadoras têm maior variância skill que profissionais
+- Lesões, calendário académico, motivação afetam performance
+
+**Overfitting risk:**
+- Calibração em datasets pequenos pode superajustar a ruído
+- Daí validações como min 5 empates, floor dispersion_k, sanity checks
+
+---
+
+## 5. Pipeline Completo de Execução
+
+Ordem de execução e dependências entre módulos:
+
+### 5.1 Fluxo Manual
+
+```bash
+cd src
+python extrator.py      # 1. Extrai dados de Excels → CSVs normalizados
+python mmr_taçaua.py    # 2. Calcula ELOs e classificações atuais
+python calibrator.py    # 3. Aprende parâmetros de simulação (histórico)
+python preditor.py      # 4. Gera previsões (10k sims, ~30s)
+```
+
+**Detalhe de cada etapa:**
+
+1. **extrator.py:**
+   - Input: `/data/Resultados Taça UA*.xlsx`
+   - Output: `/docs/output/csv_modalidades/*.csv`
+   - Normaliza formatos (nomes de equipas, datas, códigos de modalidade)
+
+2. **mmr_taçaua.py:**
+   - Input: CSVs de modalidades
+   - Output: `/docs/output/elo_ratings/classificacao_*.csv` (ELOs atuais)
+   - **Side-effect:** Apaga `/docs/output/previsoes/*.csv` (previne previsões desatualizadas)
+   - Calcula histórico completo de ELO jogo-a-jogo
+
+3. **calibrator.py:**
+   - Input: CSVs históricos (24_25 + 25_26)
+   - Output: `/docs/output/calibration/calibrated_simulator_config.json`
+   - Filtra ausências, valida draw_models, exporta parâmetros por modalidade/divisão
+
+4. **preditor.py:**
+   - Input: ELOs atuais + config calibrado + calendário futuro
+   - Output: `/docs/output/previsoes/forecast_*.csv` + `previsoes_*.csv`
+   - Modes: `--deep-simulation` (100k), `--deeper-simulation` (1M)
+
+### 5.2 Automação (GitHub Actions)
+
+Workflow `.github/workflows/updater.yml` executa diariamente (1h UTC):
+
+```yaml
+extrator.py → mmr_taçaua.py → calibrator.py → preditor.py (normal)
+→ commit/push → preditor.py --deep-simulation → commit/push
+→ preditor.py --deeper-simulation → commit/push final
+```
+
+**Vantagens:**
+- 3 níveis de precisão disponíveis simultaneamente (10k/100k/1M)
+- Commits incrementais permitem rollback se alguma etapa falhar
+- Ficheiros nomeados com número de sims permitem comparação
+
+### 5.3 Dependências Críticas
+
+**Ordem é importante:**
+- `calibrator.py` **DEVE** rodar **APÓS** `mmr_taçaua.py` (precisa de CSVs atualizados)
+- `preditor.py` **DEVE** rodar **APÓS** `calibrator.py` (senão usa parâmetros desatualizados)
+- `preditor.py` carrega `calibrated_simulator_config.json` automaticamente (flag ignored)
+
+**Quando pular calibração:**
+- Se não houve jogos novos (dados históricos inalterados)
+- Testes rápidos com `--modalidade "FUTSAL MASCULINO"` (usa config existente)
+
+**Quando forçar recalibração:**
+- Após adicionar época nova aos CSVs
+- Após mudanças em filtros/validações (ex: alterar min_empates threshold)
+- Quando backtest mostra deterioração de métricas

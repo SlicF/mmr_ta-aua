@@ -196,6 +196,14 @@ class HistoricalDataLoader:
                             ["Falta de Comparência", "Falta", "Falta de Comparencia"],
                         )
 
+                        score_a = int(float(golos_1_raw))
+                        score_b = int(float(golos_2_raw))
+                        has_absence = falta_raw != ""
+
+                        # Filtrar faltas de comparência — distorcem médias e variâncias
+                        if has_absence:
+                            continue
+
                         game = {
                             "modalidade": (modalidade or modalidade_from_file)
                             .strip()
@@ -204,11 +212,11 @@ class HistoricalDataLoader:
                             "jornada": jornada,
                             "team_a": normalize_team_name(team_a_raw),
                             "team_b": normalize_team_name(team_b_raw),
-                            "score_a": int(float(golos_1_raw)),
-                            "score_b": int(float(golos_2_raw)),
+                            "score_a": score_a,
+                            "score_b": score_b,
                             "sets_a": int(float(sets_a_raw)) if sets_a_raw else None,
                             "sets_b": int(float(sets_b_raw)) if sets_b_raw else None,
-                            "has_absence": falta_raw != "",
+                            "has_absence": has_absence,
                         }
                         games.append(game)
                     except (ValueError, KeyError) as e:
@@ -341,6 +349,7 @@ class DrawProbabilityCalibrator:
         y = np.array([1 if g["is_draw"] else 0 for g in filtered])
 
         # Verificar se há pelo menos duas classes
+        n_draws = int(np.sum(y))
         if len(np.unique(y)) < 2:
             base_draw_rate = float(np.mean(y))
             return {
@@ -348,6 +357,21 @@ class DrawProbabilityCalibrator:
                 "elo_sensitivity": 0.0,
                 "n_games": len(filtered),
                 "status": "single_class",
+            }
+
+        # Threshold mínimo de empates para modelo logístico fiável
+        # Com < 5 empates, a regressão logística sobreajusta (overfitting)
+        if n_draws < 5:
+            base_draw_rate = float(np.mean(y))
+            print(
+                f"  ⚠️  {modalidade} div={divisao}: apenas {n_draws} empates — modelo logit ignorado (fallback gaussiano)"
+            )
+            return {
+                "base_draw_rate": base_draw_rate,
+                "elo_sensitivity": 0.001,
+                "n_games": len(filtered),
+                "n_draws": n_draws,
+                "status": "insufficient_draws",
             }
 
         # Ajustar regressão logística
@@ -523,7 +547,9 @@ class GoalsDistributionCalibrator:
         # Estimar dispersion_k (Gamma-Poisson)
         if variance > mean:
             k_estimated = (mean**2) / (variance - mean)
-            dispersion_k = float(max(1.0, k_estimated))
+            # Piso mínimo de 3.0 para evitar overdispersion excessiva
+            # (valores < 3 geram multiplicadores Gamma com variância > 33%)
+            dispersion_k = float(max(3.0, k_estimated))
         else:
             dispersion_k = 10.0
 
@@ -622,36 +648,94 @@ class FullCalibrator:
             "VOLEIBOL FEMININO": "volei",
         }
 
+        # elo_adjustment_limit calibrado por desporto
+        # Controla o spread máximo de resultados:
+        #   lambda_max = base_goals × (1 + limit), lambda_min = base_goals × (1 - limit)
+        elo_adj_limits = {
+            "futsal": 1.2,  # Permite surras grandes (poucas goleadas no futsal univ.)
+            "andebol": 0.45,  # Reduzido: base_goals ~20, 0.45 → lambdas 11-29 (não 6-35)
+            "futebol7": 1.0,  # Meio termo
+            "basquete": 0.5,  # Conservador
+            "volei": 0.5,  # N/A (usa modelo de sets)
+        }
+
         for modalidade, data in self.calibration_results.items():
             sport_key = sport_mapping.get(modalidade)
             if not sport_key:
                 continue
 
             global_params = data["global"]
+            draw_status = global_params["draw"].get("status", "unknown")
 
             # Usar multiplicador fixo 1.4 para modalidades com empates calibrados
             # Este valor foi empiricamente otimizado para aproximar taxa prevista à histórica
             base_draw_rate = global_params["draw"]["base_draw_rate"]
             draw_multiplier = 1.4 if base_draw_rate > 0.01 else 1.0
 
+            # Sanitizar draw_model: só usar se status == "calibrated" (não overfitted)
+            draw_model_intercept = 0.0
+            draw_model_linear = 0.0
+            draw_model_quadratic = 0.0
+            if draw_status == "calibrated":
+                intercept = global_params["draw"].get("model_intercept", 0.0)
+                coef_linear = global_params["draw"].get("model_coef_linear", 0.0)
+                # Sanity check: coeficientes absurdos indicam overfitting
+                if abs(intercept) < 100 and abs(coef_linear) < 10:
+                    draw_model_intercept = intercept
+                    draw_model_linear = coef_linear
+                    draw_model_quadratic = global_params["draw"].get(
+                        "model_coef_quadratic", 0.0
+                    )
+                else:
+                    print(
+                        f"  ⚠️  {modalidade}: draw_model com coeficientes absurdos (intercept={intercept:.1f}) — usando fallback gaussiano"
+                    )
+                    draw_multiplier = 1.0
+
+            base_goals = global_params["goals"]["base_goals_per_team"]
+            dispersion_k = global_params["goals"]["dispersion_k"]
+
             config[modalidade] = {
                 "sport_type": sport_key,
-                "base_goals": global_params["goals"]["base_goals_per_team"],
+                "base_goals": base_goals,
                 "base_goals_std": global_params["goals"]["base_goals_per_team_std"],
-                "dispersion_k": global_params["goals"]["dispersion_k"],
-                "base_draw_rate": global_params["draw"]["base_draw_rate"],
+                "dispersion_k": dispersion_k,
+                "base_draw_rate": base_draw_rate,
                 "draw_elo_sensitivity": global_params["draw"]["elo_sensitivity"],
-                "draw_multiplier": draw_multiplier,  # Multiplicador otimizado (1.4 para desenhos, 1.0 para não)
+                "draw_multiplier": draw_multiplier,
                 "draw_model": {
-                    "intercept": global_params["draw"].get("model_intercept", 0.0),
-                    "coef_linear": global_params["draw"].get("model_coef_linear", 0.0),
-                    "coef_quadratic": global_params["draw"].get(
-                        "model_coef_quadratic", 0.0
-                    ),
+                    "intercept": draw_model_intercept,
+                    "coef_linear": draw_model_linear,
+                    "coef_quadratic": draw_model_quadratic,
                 },
                 "margin_elo_slope": global_params["margin"]["margin_elo_slope"],
                 "margin_elo_intercept": global_params["margin"]["margin_elo_intercept"],
+                "elo_adjustment_limit": elo_adj_limits.get(sport_key, 0.6),
             }
+
+            # Parâmetros específicos para basquete (modelo Gaussiano, não Poisson)
+            if sport_key == "basquete":
+                config[modalidade][
+                    "base_score"
+                ] = base_goals  # Usado como base_score no Gaussiano
+                config[modalidade]["sigma"] = global_params["goals"][
+                    "base_goals_per_team_std"
+                ]
+
+            # Parâmetros específicos para voleibol (modelo de sets)
+            if sport_key == "volei":
+                # Calcular p_sweep histórico (percentagem de 2-0 vs 2-1)
+                # Em voleibol, score_a/score_b representam sets (2-0, 2-1, etc.)
+                volei_games = [g for g in self.games if g["modalidade"] == modalidade]
+                if volei_games:
+                    sweeps = sum(
+                        1 for g in volei_games if min(g["score_a"], g["score_b"]) == 0
+                    )
+                    p_sweep_hist = sweeps / len(volei_games) if volei_games else 0.5
+                    config[modalidade]["p_sweep_base"] = round(p_sweep_hist, 3)
+                    print(
+                        f"  📊 {modalidade}: p_sweep histórico = {p_sweep_hist:.1%} ({sweeps}/{len(volei_games)} sweeps)"
+                    )
 
             # Adicionar parâmetros por divisão
             division_params = {}

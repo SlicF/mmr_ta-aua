@@ -401,7 +401,7 @@ class SportScoreSimulator:
         # Baselines médios por modalidade (golos por equipa por jogo)
         self.baselines = {
             "futsal": {
-                "base_goals": 4.5,
+                "base_goals": 3.2,  # Calibrado: ~3.15 (universitário tem menos golos)
                 "elo_scale": 600,
                 "elo_scale_mult": 0.75,
                 "dispersion_k": 5.0,
@@ -409,12 +409,12 @@ class SportScoreSimulator:
                 "elo_adjustment_limit": 1.2,  # Permite surras bem maiores (725 ELO diff)
             },
             "andebol": {
-                "base_goals": 18.0,
+                "base_goals": 20.5,  # Calibrado: ~20.6 (histórico universitário)
                 "elo_scale": 500,
                 "elo_scale_mult": 0.75,
-                "dispersion_k": 12.0,
+                "dispersion_k": 15.0,  # Calibrado: ~14.9
                 "forced_draw_fraction": 0.55,  # 55% forçados - empates comuns (4.4% histórico)
-                "elo_adjustment_limit": 0.7,  # Mais conservador para evitar zeros
+                "elo_adjustment_limit": 0.45,  # Reduzido: evita spreads irrealistas com base_goals alto
             },
             "basquete": {
                 "max_score": 21,
@@ -426,10 +426,10 @@ class SportScoreSimulator:
             },
             "volei": {"elo_scale": 500},
             "futebol7": {
-                "base_goals": 3.0,
+                "base_goals": 2.4,  # Calibrado: ~2.41 (histórico universitário)
                 "elo_scale": 600,
                 "elo_scale_mult": 0.75,
-                "dispersion_k": 6.0,
+                "dispersion_k": 3.0,  # Calibrado: ~2.95
                 "forced_draw_fraction": 0.90,  # 90% forçados - reduzir empates Poisson (11.7% histórico)
                 "elo_adjustment_limit": 1.0,  # Um meio termo
             },
@@ -439,7 +439,7 @@ class SportScoreSimulator:
         self.division_draw_rates = {}
         self.default_draw_rate = 0.0
 
-    def apply_calibrated_params(self, calibrated_params: Dict[str, float]) -> None:
+    def apply_calibrated_params(self, calibrated_params: Dict) -> None:
         """Aplica parâmetros calibrados ao simulador."""
         if not calibrated_params:
             return
@@ -453,13 +453,30 @@ class SportScoreSimulator:
             "draw_elo_sensitivity",
             "margin_elo_slope",
             "margin_elo_intercept",
+            "elo_adjustment_limit",
+            "draw_multiplier",
         ):
             if key in calibrated_params:
                 self.params[key] = calibrated_params[key]
 
-        # Modelo de empate calibrado
+        # Parâmetros específicos de basquete (modelo Gaussiano)
+        if self.sport_type == "basquete":
+            if "base_score" in calibrated_params:
+                self.params["base_score"] = calibrated_params["base_score"]
+            if "sigma" in calibrated_params:
+                self.params["sigma"] = calibrated_params["sigma"]
+
+        # Parâmetros específicos de voleibol (modelo de sets)
+        if self.sport_type == "volei":
+            if "p_sweep_base" in calibrated_params:
+                self.params["p_sweep_base"] = calibrated_params["p_sweep_base"]
+
+        # Modelo de empate calibrado (só se tiver coeficientes válidos)
         if "draw_model" in calibrated_params:
-            self.params["draw_model"] = calibrated_params["draw_model"]
+            dm = calibrated_params["draw_model"]
+            # Não aplicar modelos com coeficientes zerados (insufficient_draws)
+            if dm.get("intercept", 0.0) != 0.0 or dm.get("coef_linear", 0.0) != 0.0:
+                self.params["draw_model"] = dm
 
         # Definir taxa base de empate como fallback
         if "base_draw_rate" in calibrated_params:
@@ -606,7 +623,7 @@ class SportScoreSimulator:
             base_score = (
                 division_baseline["mean"]
                 if division_baseline and "mean" in division_baseline
-                else 15
+                else self.params.get("base_score", self.params.get("base_goals", 15))
             )
             sigma = (
                 division_baseline.get("std")
@@ -697,7 +714,9 @@ class SportScoreSimulator:
     ) -> Tuple[int, int]:
         """Voleibol: Apenas 2-0 ou 2-1. P(2-0) aumenta com diferença de ELO."""
         elo_diff = abs(elo_a - elo_b)
-        p_sweep = 0.35 + min(elo_diff / 800, 0.4)
+        # Usar p_sweep_base calibrado se disponível, senão default 0.35
+        p_sweep_base = self.params.get("p_sweep_base", 0.35)
+        p_sweep = p_sweep_base + min(elo_diff / 800, 0.4)
 
         if random.random() < p_sweep:
             return (2, 0) if winner_is_a else (0, 2)
@@ -731,7 +750,10 @@ class SportScoreSimulator:
         elo_diff = (elo_a - elo_b) / 250
         elo_diff = max(-elo_adjustment_limit, min(elo_adjustment_limit, elo_diff))
 
-        sigma = self.params.get("sigma", 3.5)
+        # Usar sigma passado como argumento (do division_baseline) se válido,
+        # senão fallback para o parâmetro configurado
+        if sigma is None or sigma <= 0:
+            sigma = self.params.get("sigma", 3.5)
 
         base_score_a = base_score + elo_diff
         base_score_b = base_score - elo_diff
@@ -793,11 +815,22 @@ class SportScoreSimulator:
 
         # Overdispersion para resultados mais extremos
         if dispersion_k and dispersion_k > 0:
-            lambda_a *= np.random.gamma(dispersion_k, 1.0 / dispersion_k)
-            lambda_b *= np.random.gamma(dispersion_k, 1.0 / dispersion_k)
+            gamma_a = np.random.gamma(dispersion_k, 1.0 / dispersion_k)
+            gamma_b = np.random.gamma(dispersion_k, 1.0 / dispersion_k)
+            # Clipar multiplicador Gamma para evitar resultados irrealistas
+            # Para desportos de golos altos (andebol), clip mais agressivo
+            if base > 10:
+                gamma_a = np.clip(gamma_a, 0.75, 1.30)
+                gamma_b = np.clip(gamma_b, 0.75, 1.30)
+            else:
+                gamma_a = np.clip(gamma_a, 0.5, 1.8)
+                gamma_b = np.clip(gamma_b, 0.5, 1.8)
+            lambda_a *= gamma_a
+            lambda_b *= gamma_b
 
         # Garantir valores positivos e dentro de limites razoáveis
-        max_lambda = max(15.0, base * 2.0)
+        # Para desportos de golos altos, cap mais conservador (1.4x base vs 2x)
+        max_lambda = max(15.0, base * 1.4) if base > 10 else max(15.0, base * 2.0)
         lambda_a = max(0.2, min(max_lambda, lambda_a))
         lambda_b = max(0.2, min(max_lambda, lambda_b))
 
@@ -3071,13 +3104,6 @@ def main(
             f"_{ano_passado_1d}_{ano_atual_2d}.csv", ""
         )
 
-        # Aplicar parâmetros calibrados por modalidade (se disponível)
-        if calibrated_config and modalidade in calibrated_config:
-            score_simulator = sport_simulators.get(
-                modalidade, SportScoreSimulator("futsal")
-            )
-            score_simulator.apply_calibrated_params(calibrated_config[modalidade])
-
         # Filtrar modalidades se houver hardset ou filtro específico
         if hardset_modalidades and modalidade not in hardset_modalidades:
             continue
@@ -3165,6 +3191,11 @@ def main(
         )
         score_simulator.set_division_baselines(division_baselines)
         score_simulator.set_division_draw_rates(division_draw_rates)
+
+        # Aplicar parâmetros calibrados DEPOIS dos baselines históricos
+        # para que os valores calibrados tenham prioridade
+        if calibrated_config and modalidade in calibrated_config:
+            score_simulator.apply_calibrated_params(calibrated_config[modalidade])
 
         # Processar APENAS jogos futuros para as fixtures (a simulação)
         # Jogos passados são usados apenas para histórico de ELO
@@ -3319,7 +3350,7 @@ def main(
 
                 div_label = f"Div {div_key}" if div_key is not None else "Geral"
                 hist_mean = hist_base["mean"] if hist_base else 0.0
-                hist_std = hist_base["std"] if hist_base else 0.0
+                hist_std = hist_base.get("std", 0.0) if hist_base else 0.0
                 pred_mean = pred["mean"] if pred else 0.0
                 pred_draw = pred["draw_rate"] if pred else 0.0
                 pred_matches = pred["matches"] if pred else 0
