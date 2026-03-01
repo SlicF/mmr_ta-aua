@@ -111,24 +111,24 @@ def create_team_name_mapping():
     """
     mappings = {}
 
-    # Gerar mapeamentos automaticamente a partir do JSON
-    # Isto garante que todas as variantes apontam para o mesmo nome canónico
+    # Gerar mapeamentos a partir do JSON
+    # Usar displayName como forma CANÓNICA
     if COURSES_CONFIG:
-        # Agrupar cursos pelo displayName (nome canónico)
+        # Agrupar variantes pelo displayName
         canonical_names = {}
         for course_key, course_data in COURSES_CONFIG.items():
             display_name = course_data.get("displayName", course_key)
             if display_name not in canonical_names:
                 canonical_names[display_name] = []
+                # Adicionar o displayName como primeira variante (preferida)
+                if course_key != display_name:
+                    canonical_names[display_name].insert(0, display_name)
             canonical_names[display_name].append(course_key)
 
-        # Criar mapeamentos: todas as variantes apontam para a primeira entrada (nome preferido)
+        # Criar mapeamentos: todas as variantes apontam para o displayName
         for display_name, variants in canonical_names.items():
-            # Ordenar para garantir consistência (nomes completos antes de abreviaturas)
-            variants_sorted = sorted(variants, key=lambda x: (len(x), x), reverse=True)
-            canonical = variants_sorted[
-                0
-            ]  # Nome mais longo (geralmente o mais completo)
+            # displayName é a primeira variante (adicionada intencionalmente acima)
+            canonical = display_name
 
             for variant in variants:
                 if variant != canonical:
@@ -240,7 +240,7 @@ def normalize_team_name(team_name):
         if re.match(pattern, normalized):
             return None
 
-    # Aplicar mapeamentos de nomes
+    # Aplicar mapeamentos de nomes DO CONFIG (source of truth)
     team_mappings = create_team_name_mapping()
     if normalized in team_mappings:
         return team_mappings[normalized]
@@ -536,9 +536,20 @@ class StandingsCalculator:
             # Obter equipas deste grupo
             teams_grp = set()
             for col in ["Equipa 1", "Equipa 2"]:
+                # Filtrar None values que podem vir de normalize_team_name
                 teams_grp.update(
-                    normalize_team_name(team) for team in df_grp[col].dropna().unique()
+                    t
+                    for t in (
+                        normalize_team_name(team)
+                        for team in df_grp[col].dropna().unique()
+                    )
+                    if t is not None
                 )
+
+            # Pular grupos vazios (podem resultar de placeholders de playoff)
+            if not teams_grp:
+                logger.warning(f"Grupo vazio detectado: {group}. A pular.")
+                continue
 
             # Calcular classificação para este grupo
             grp_standings = self._calculate_single_standings(df_grp, teams_grp)
@@ -1327,6 +1338,8 @@ class EloRatingSystem:
         """Inicializa o sistema de ratings ELO"""
         self.k_base = 100  # Fator K base
         self.previous_ratings = {}  # ELOs da época anterior
+        self.other_sport_ratings = {}  # ELOs de outras modalidades da mesma época
+        self.enable_cross_sport_inheritance = False
 
     def load_previous_ratings(self, ratings_dict):
         """
@@ -1340,12 +1353,30 @@ class EloRatingSystem:
             f"Carregados {len(self.previous_ratings)} ratings da época anterior"
         )
 
+    def load_other_sport_ratings(self, ratings_dict):
+        """
+        Carrega ratings de OUTRAS modalidades da MESMA época
+
+        Args:
+            ratings_dict: Dict com {nome_equipa: elo_rating}
+        """
+        self.other_sport_ratings = ratings_dict.copy()
+        logger.info(
+            f"Carregados {len(self.other_sport_ratings)} ratings de outras modalidades"
+        )
+
+    def reset_rating_sources(self):
+        """Limpa fontes de ratings para evitar contaminação entre ficheiros/modalidades."""
+        self.previous_ratings = {}
+        self.other_sport_ratings = {}
+
     def get_initial_rating(self, team_name, division=None):
         """
         Obtém rating inicial para uma equipa, usando ELO da época anterior se disponível
 
         Args:
             team_name: Nome da equipa
+            division: Divisão da equipa (opcional)
 
         Returns:
             Rating inicial da equipa
@@ -1353,15 +1384,26 @@ class EloRatingSystem:
         # Normalizar nome da equipa
         normalized_name = normalize_team_name(team_name)
 
-        # Verificar se tem rating da época anterior
+        # 1. Verificar se tem rating da época anterior (MESMA modalidade)
         if normalized_name in self.previous_ratings:
             rating = self.previous_ratings[normalized_name]
             logger.info(
-                f"Usando ELO da época anterior para {normalized_name}: {rating}"
+                f"Usando ELO da época anterior (mesma modalidade) para {normalized_name}: {rating}"
             )
             return rating
 
-        # Rating padrão para equipas novas baseado na divisão (se disponível)
+        # 2. Verificar se tem rating de OUTRA modalidade da MESMA época
+        if (
+            self.enable_cross_sport_inheritance
+            and normalized_name in self.other_sport_ratings
+        ):
+            rating = self.other_sport_ratings[normalized_name]
+            logger.info(
+                f"Usando ELO de outra modalidade (mesma época) para {normalized_name}: {rating}"
+            )
+            return rating
+
+        # 3. Rating padrão para equipas novas baseado na divisão (se disponível)
         if division is not None:
             if division == 1:
                 default_rating = 1000
@@ -1498,14 +1540,67 @@ class EloRatingSystem:
             df, teams, sport, teams_from_previous_season
         )
 
+        # Adicionar equipas desistentes ao dicionário de teams (se não estão já lá)
+        withdrawn_teams = self._detect_withdrawn_teams(df)
+        for withdrawn_team in withdrawn_teams:
+            if withdrawn_team not in teams:
+                teams[withdrawn_team] = self.get_initial_rating(withdrawn_team)
+
         # Aplicar ajustes inter-grupos
         self._apply_inter_group_adjustments(
             df, teams, sport, elo_history, detailed_rows
         )
 
-        return teams, elo_history, detailed_rows, real_standings
+        return teams, elo_history, detailed_rows, real_standings, withdrawn_teams
 
-    def _initialize_team_ratings(self, df):
+    def _detect_withdrawn_teams(self, df: pd.DataFrame) -> dict:
+        """Deteta equipas desistentes (todos os jogos com resultados ausentes).
+
+        Uma equipa é considerada desistente se TODOS os seus jogos têm
+        resultados ausentes (NaN), ou seja, nunca compareceu.
+
+        Returns:
+            Dict contendo {equipa_normalizada: num_jogos} para equipas desistentes
+        """
+        # Coletar todas as equipas e contar jogos com resultado ausente
+        team_games = {}  # {equipa: {'total': count, 'absent': count}}
+
+        for _, row in df.iterrows():
+            equipa1 = normalize_team_name(row["Equipa 1"])
+            equipa2 = normalize_team_name(row["Equipa 2"])
+
+            # Verificar se resultado está ausente (NaN ou vazio)
+            resultado1_absent = pd.isna(row["Golos 1"]) or row["Golos 1"] == ""
+            resultado2_absent = pd.isna(row["Golos 2"]) or row["Golos 2"] == ""
+
+            # Registar jogo para equipa1
+            if equipa1:
+                if equipa1 not in team_games:
+                    team_games[equipa1] = {"total": 0, "absent": 0}
+                team_games[equipa1]["total"] += 1
+                if resultado1_absent:
+                    team_games[equipa1]["absent"] += 1
+
+            # Registar jogo para equipa2
+            if equipa2:
+                if equipa2 not in team_games:
+                    team_games[equipa2] = {"total": 0, "absent": 0}
+                team_games[equipa2]["total"] += 1
+                if resultado2_absent:
+                    team_games[equipa2]["absent"] += 1
+
+        # Identificar desistentes (100% de ausências)
+        withdrawn_teams = {}
+        for team, stats in team_games.items():
+            if stats["total"] > 0 and stats["absent"] == stats["total"]:
+                withdrawn_teams[team] = stats["total"]
+                logger.info(
+                    f"Equipa desistente detectada: {team} ({stats['total']} jogos com ausência)"
+                )
+
+        return withdrawn_teams
+
+    def _initialize_team_ratings(self, df: pd.DataFrame) -> dict:
         """Inicializa os ratings ELO para todas as equipas"""
         teams = {}
 
@@ -1687,6 +1782,16 @@ class EloRatingSystem:
             # Atualizar histórico
             elo_history[team1].append(teams[team1])
             elo_history[team2].append(teams[team2])
+
+        # Detetar e adicionar equipas desistentes ao histórico
+        withdrawn_teams = self._detect_withdrawn_teams(df)
+        for withdrawn_team in withdrawn_teams:
+            if withdrawn_team not in elo_history:
+                # Usar ELO da época anterior ou o inicial
+                team_elo = teams.get(
+                    withdrawn_team, self.get_initial_rating(withdrawn_team)
+                )
+                elo_history[withdrawn_team] = [team_elo]
 
         # Garantir que todas as listas tenham o mesmo tamanho
         self._equalize_history_length(elo_history)
@@ -2065,6 +2170,9 @@ class TournamentProcessor:
             logger.info(f"A processar arquivo: {filename}")
 
             try:
+                # Reset por ficheiro para evitar contaminação entre modalidades
+                self.elo_system.reset_rating_sources()
+
                 # Tentar diferentes codificações
                 encodings = ["utf-8", "latin1", "cp1252", "iso-8859-1"]
                 df = None
@@ -2109,16 +2217,27 @@ class TournamentProcessor:
                         f"Carregados ELOs da época anterior para {sport_name}: {len(adjusted_elos)} equipas"
                     )
                 else:
+                    self.elo_system.load_previous_ratings({})
                     logger.info(f"Nenhum ELO anterior encontrado para {sport_name}")
 
+                # Carregar ELOs de OUTRAS modalidades da MESMA época (para herança)
+                # NOTA: herança cross-sport está desativada por padrão para evitar
+                # ELOs arbitrários em equipas sem participação na época anterior.
+                self.elo_system.load_other_sport_ratings({})
+
                 # Processar o torneio
-                teams, elo_history, detailed_rows, real_standings = (
+                teams, elo_history, detailed_rows, real_standings, withdrawn_teams = (
                     self.elo_system.process_tournament(df, filename)
                 )
 
                 # Salvar resultados
                 self._save_tournament_results(
-                    filename, teams, elo_history, detailed_rows, real_standings
+                    filename,
+                    teams,
+                    elo_history,
+                    detailed_rows,
+                    real_standings,
+                    withdrawn_teams,
                 )
 
                 logger.info(f"Arquivo {filename} processado com sucesso")
@@ -2152,6 +2271,9 @@ class TournamentProcessor:
             logger.info(f"A processar arquivo: {filename}")
 
             try:
+                # Reset por ficheiro para evitar contaminação entre modalidades
+                self.elo_system.reset_rating_sources()
+
                 # Tentar diferentes codificações
                 encodings = ["utf-8", "latin1", "cp1252", "iso-8859-1"]
                 df = None
@@ -2180,13 +2302,18 @@ class TournamentProcessor:
                 ]
 
                 # Processar o torneio
-                teams, elo_history, detailed_rows, real_standings = (
+                teams, elo_history, detailed_rows, real_standings, withdrawn_teams = (
                     self.elo_system.process_tournament(df, filename)
                 )
 
                 # Salvar resultados
                 self._save_tournament_results(
-                    filename, teams, elo_history, detailed_rows, real_standings
+                    filename,
+                    teams,
+                    elo_history,
+                    detailed_rows,
+                    real_standings,
+                    withdrawn_teams,
                 )
 
                 logger.info(f"Arquivo {filename} processado com sucesso")
@@ -2302,6 +2429,56 @@ class TournamentProcessor:
 
         return previous_elos
 
+    def _load_current_season_elos_from_other_sports(
+        self, current_season, current_sport
+    ):
+        """
+        Carrega ELOs de OUTRAS modalidades da MESMA época para herança de ratings
+
+        Args:
+            current_season: Época atual (ex: "25_26")
+            current_sport: Modalidade atual (para excluir)
+
+        Returns:
+            Dict com {nome_equipa: elo_rating} das OUTRAS modalidades já processadas
+        """
+        logger.info(f"Procurando ELOs de outras modalidades da época {current_season}")
+
+        other_sport_elos = {}
+        elo_pattern = re.compile(rf"elo_.*_{re.escape(current_season)}\.csv$")
+
+        for filename in os.listdir(self.output_dir):
+            if elo_pattern.match(filename):
+                sport_name = self._extract_sport_from_filename(filename)
+                if sport_name.startswith("elo_"):
+                    sport_name = sport_name[4:]
+
+                # Ignorar a modalidade atual (ainda não tem ELOs finais)
+                if sport_name == current_sport:
+                    continue
+
+                try:
+                    filepath = os.path.join(self.output_dir, filename)
+                    df = pd.read_csv(filepath, index_col=0)
+
+                    # Usar a última linha (ELOs finais)
+                    if not df.empty:
+                        final_elos = df.iloc[-1].to_dict()
+
+                        # Adicionar à pool de ELOs disponíveis
+                        for team, elo in final_elos.items():
+                            if (
+                                team not in other_sport_elos
+                            ):  # Primeira modalidade encontrada
+                                logger.info(f"  > ELO de {team} de {sport_name}: {elo}")
+                                other_sport_elos[team] = elo
+
+                except Exception as e:
+                    logger.warning(f"Erro ao carregar ELOs de {filename}: {e}")
+
+        logger.info(f"Carregados {len(other_sport_elos)} ELOs de outras modalidades")
+        return other_sport_elos
+
     def _extract_sport_from_filename(self, filename):
         """
         Extrai o nome da modalidade do nome do arquivo
@@ -2320,24 +2497,156 @@ class TournamentProcessor:
         return sport_name
 
     def _save_tournament_results(
-        self, filename, teams, elo_history, detailed_rows, real_standings
+        self,
+        filename,
+        teams,
+        elo_history,
+        detailed_rows,
+        real_standings,
+        withdrawn_teams=None,
     ):
         """Salva os resultados do processamento de um torneio"""
+        if withdrawn_teams is None:
+            withdrawn_teams = {}
+
         base_name = os.path.splitext(filename)[0]
 
         try:
             # Salvar classificação real
             if isinstance(real_standings, pd.DataFrame):
+                logger.info(
+                    f"Salvando classificação para {filename}. withdrawn_teams: {withdrawn_teams}"
+                )
+
+                # Adicionar/atualizar equipas desistentes à classificação
+                for withdrawn_team, num_games in withdrawn_teams.items():
+                    # Ignorar equipas vazias/None
+                    if not withdrawn_team or pd.isna(withdrawn_team):
+                        logger.warning(
+                            f"Ignorando withdrawn_team vazio/None: {withdrawn_team}"
+                        )
+                        continue
+
+                    team_mask = real_standings["Equipa"] == withdrawn_team
+
+                    if not real_standings[team_mask].empty:
+                        # A equipa JÁ EXISTE na classificação - atualizar valores
+                        logger.info(
+                            f"  > {withdrawn_team} já existe - atualizando valores para {num_games} jogos/{num_games} faltas"
+                        )
+
+                        real_standings.loc[team_mask, "jogos"] = num_games
+                        real_standings.loc[team_mask, "faltas_comparencia"] = num_games
+                        real_standings.loc[team_mask, "vitorias"] = 0
+                        real_standings.loc[team_mask, "empates"] = 0
+                        real_standings.loc[team_mask, "derrotas"] = 0
+                        real_standings.loc[team_mask, "pontos"] = 0
+                        real_standings.loc[team_mask, "golos_marcados"] = 0
+                        real_standings.loc[team_mask, "golos_sofridos"] = 0
+                        real_standings.loc[team_mask, "diferenca_golos"] = 0
+                        continue
+
+                    # Se não existir, adicionar nova linha
+                    logger.info(
+                        f"  > Adicionando {withdrawn_team} nova com {num_games} jogos e {num_games} faltas"
+                    )
+
+                    # Criar registo fake com X jogos e X faltas de comparência
+                    withdrawn_row = {
+                        "Posicao": None,  # Será recalculado
+                        "Equipa": withdrawn_team,
+                        "pontos": 0,
+                        "jogos": num_games,
+                        "vitorias": 0,
+                        "empates": 0,
+                        "derrotas": 0,
+                        "golos_marcados": 0,
+                        "golos_sofridos": 0,
+                        "diferenca_golos": 0,
+                        "faltas_comparencia": num_games,
+                    }
+                    # Adicionar colunas extras se existirem (Divisao, Grupo, etc.)
+                    for col in real_standings.columns:
+                        if col not in withdrawn_row:
+                            withdrawn_row[col] = None
+
+                    logger.info(f"  > Linha criada: {withdrawn_row}")
+                    real_standings = pd.concat(
+                        [real_standings, pd.DataFrame([withdrawn_row])],
+                        ignore_index=True,
+                    )
+                    logger.info(
+                        f"  > Linha adicionada com sucesso. Total de equipas: {len(real_standings)}"
+                    )
+
+                # Ordenar DENTRO DE CADA GRUPO, não globalmente
+                # Isto preserva a separação entre divisões e grupos
+                if (
+                    "Divisao" in real_standings.columns
+                    and "Grupo" in real_standings.columns
+                ):
+                    # Ordena cada (Divisão, Grupo) internamente
+                    sorted_groups = []
+                    for (div, grp), group_df in real_standings.groupby(
+                        ["Divisao", "Grupo"], sort=False
+                    ):
+                        # Ordenar este grupo por pontos e faltas
+                        group_sorted = group_df.sort_values(
+                            ["pontos", "faltas_comparencia"], ascending=[False, True]
+                        ).reset_index(drop=True)
+                        # Recalcular posições dentro deste grupo
+                        group_sorted["Posicao"] = range(1, len(group_sorted) + 1)
+                        sorted_groups.append(group_sorted)
+                    real_standings = pd.concat(sorted_groups, ignore_index=True)
+                elif "Divisao" in real_standings.columns:
+                    # Ordena cada Divisão internamente
+                    sorted_divs = []
+                    for div, div_df in real_standings.groupby("Divisao", sort=False):
+                        # Ordenar esta divisão por pontos e faltas
+                        div_sorted = div_df.sort_values(
+                            ["pontos", "faltas_comparencia"], ascending=[False, True]
+                        ).reset_index(drop=True)
+                        # Recalcular posições dentro desta divisão
+                        div_sorted["Posicao"] = range(1, len(div_sorted) + 1)
+                        sorted_divs.append(div_sorted)
+                    real_standings = pd.concat(sorted_divs, ignore_index=True)
+                elif "Grupo" in real_standings.columns:
+                    # Ordena cada Grupo internamente
+                    sorted_groups = []
+                    for grp, grp_df in real_standings.groupby("Grupo", sort=False):
+                        # Ordenar este grupo por pontos e faltas
+                        grp_sorted = grp_df.sort_values(
+                            ["pontos", "faltas_comparencia"], ascending=[False, True]
+                        ).reset_index(drop=True)
+                        # Recalcular posições dentro deste grupo
+                        grp_sorted["Posicao"] = range(1, len(grp_sorted) + 1)
+                        sorted_groups.append(grp_sorted)
+                    real_standings = pd.concat(sorted_groups, ignore_index=True)
+                else:
+                    # Sem divisões nem grupos, ordenar globalmente
+                    real_standings = real_standings.sort_values(
+                        ["pontos", "faltas_comparencia"], ascending=[False, True]
+                    ).reset_index(drop=True)
+                    real_standings["Posicao"] = range(1, len(real_standings) + 1)
+
                 # Converter a coluna Divisao para inteiro quando existir
                 if "Divisao" in real_standings.columns:
-                    # Filtrar apenas linhas com divisão válida antes de converter
-                    real_standings["Divisao"] = (
-                        pd.to_numeric(real_standings["Divisao"], errors="coerce")
-                        .fillna(-1)
-                        .astype(int)
-                    )
-                    # Remover linhas com divisão inválida (-1)
-                    real_standings = real_standings[real_standings["Divisao"] != -1]
+                    # Criar uma cópia para evitar problemas com cópias de DataFrame
+                    real_standings_copy = real_standings.copy()
+
+                    # Converter Divisão, mantendo os None/NaN para equipas desistentes
+                    divisao_values = []
+                    for _, row in real_standings_copy.iterrows():
+                        if pd.isna(row["Divisao"]) or row["Divisao"] == "":
+                            # Equipas desistentes sem divisão - manter como None
+                            divisao_values.append(None)
+                        else:
+                            try:
+                                divisao_values.append(int(row["Divisao"]))
+                            except (ValueError, TypeError):
+                                divisao_values.append(None)
+
+                    real_standings["Divisao"] = divisao_values
 
                 real_standings.to_csv(
                     os.path.join(self.output_dir, f"classificacao_{filename}"),
@@ -2346,11 +2655,11 @@ class TournamentProcessor:
             else:
                 logger.warning(f"Classificação não disponível para {filename}")
 
-            # Salvar histórico de ELO
+            # Salvar histórico de ELO (sempre, não apenas quando classificação indisponível)
             elo_df = self._format_elo_history(elo_history)
             elo_df.to_csv(os.path.join(self.output_dir, f"elo_{filename}"), index=False)
 
-            # Salvar detalhes dos jogos
+            # Salvar detalhes dos jogos (sempre)
             detailed_df = pd.DataFrame(detailed_rows)
             detailed_df.to_csv(
                 os.path.join(self.output_dir, f"detalhe_{filename}"), index=False

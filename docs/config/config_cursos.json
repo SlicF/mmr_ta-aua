@@ -668,10 +668,86 @@
     "Tradução": {
       "displayName": "Tradução",
       "shortName": "Tradução",
-      "shortName": "Tradução",
       "nucleus": "NET",
       "emblem": "assets/Logos/NET-07.png",
       "colors": ["#1e4395", "#6c757d"]
+    },
+    "Engenharia de Materiais": {
+      "displayName": "Eng. de Materiais",
+      "shortName": "Materiais",
+      "nucleus": "NEM",
+      "emblem": "assets/Logos/NEM-07.png",
+      "colors": ["#e73630", "#6c757d"]
+    },
+    "Ciências Biomádicas": {
+      "displayName": "Ciências Biomédicas",
+      "shortName": "CBM",
+      "nucleus": "NECiB",
+      "emblem": "assets/Logos/NECiB-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Engenharia do Ambiente": {
+      "displayName": "Eng. do Ambiente",
+      "shortName": "EAmb",
+      "nucleus": "NEEA",
+      "emblem": "assets/Logos/NEEA-07.png",
+      "colors": ["#a05389", "#6c757d"]
+    },
+    "Eng. do Ambiente": {
+      "displayName": "Eng. do Ambiente",
+      "shortName": "EAmb",
+      "nucleus": "NEEA",
+      "emblem": "assets/Logos/NEEA-07.png",
+      "colors": ["#a05389", "#6c757d"]
+    },
+    "Engenharia Civil": {
+      "displayName": "Eng. Civil",
+      "shortName": "Civil",
+      "nucleus": "NEBEC",
+      "emblem": "assets/Logos/NEBEC-07.png",
+      "colors": ["#f08344", "#6c757d"]
+    },
+    "Engenharia Física": {
+      "displayName": "Eng. Física",
+      "shortName": "EF",
+      "nucleus": "NEEF",
+      "emblem": "assets/Logos/NEEF-07.png",
+      "colors": ["#f9dd53", "#6c757d"]
+    },
+    "Engenharia Biomédica": {
+      "displayName": "Eng. Biomédica",
+      "shortName": "Biomédica",
+      "nucleus": "NEEF",
+      "emblem": "assets/Logos/NEEF-07.png",
+      "colors": ["#f9dd53", "#6c757d"]
+    },
+    "Engenharia Computacional": {
+      "displayName": "Eng. Computacional",
+      "shortName": "Computacional",
+      "nucleus": "NEEF",
+      "emblem": "assets/Logos/NEEF-07.png",
+      "colors": ["#f9dd53", "#6c757d"]
+    },
+    "Engenharia Química": {
+      "displayName": "Eng. Química",
+      "shortName": "EQ",
+      "nucleus": "NEEQu",
+      "emblem": "assets/Logos/NEEQu-07.png",
+      "colors": ["#f08344", "#6c757d"]
+    },
+    "Engenharia Aeroespacial": {
+      "displayName": "Eng. Aeroespacial",
+      "shortName": "Aero",
+      "nucleus": "NEEETA",
+      "emblem": "assets/Logos/NEEETA-07.png",
+      "colors": ["#3362ae", "#6c757d"]
+    },
+    "Engenharia Mecânica": {
+      "displayName": "Eng. Mecânica",
+      "shortName": "Mecânica",
+      "nucleus": "NEEMec",
+      "emblem": "assets/Logos/NEEMec-07.png",
+      "colors": ["#f08344", "#6c757d"]
     }
   }
 }

@@ -1638,7 +1638,7 @@ def calculate_promotions_relegations(
                 # Escolhe vencedor por ELO (regra de desempate simplificada)
                 winner = max(
                     candidates,
-                    key=lambda t: sim_teams.get(t, Team(t, 1500)).elo,
+                    key=lambda t: sim_teams.get(t, Team(t, 750)).elo,
                 )
                 # So ha promocao se o vencedor for da 2a divisao
                 if winner != fourth_worst:
@@ -1688,7 +1688,7 @@ def calculate_promotions_relegations(
             fourth_worst = down_list[3]
             candidates = seconds + [fourth_worst]
             # Escolhe melhor por ELO
-            winner = max(candidates, key=lambda t: sim_teams.get(t, Team(t, 1500)).elo)
+            winner = max(candidates, key=lambda t: sim_teams.get(t, Team(t, 750)).elo)
             if winner != fourth_worst:
                 relegated.add(fourth_worst)
                 promoted.add(winner)
@@ -2985,7 +2985,91 @@ def example_hardset_usage():
     print(hardset.summary())
 
 
-# Carregar mapeamento de cursos
+def detect_withdrawn_teams_from_csv(
+    future_matches_rows: List[Dict],
+    course_mapping: Dict[str, str],
+) -> Set[str]:
+    """
+    Detecta equipas desistentes (100% dos jogos com Falta de Comparência preenchida).
+
+    Args:
+        future_matches_rows: Lista de dicionários com jogos futuros
+        course_mapping: Mapeamento de nomes de cursos
+
+    Returns:
+        Set com nomes normalizados de equipas desistentes
+    """
+    team_game_count = {}  # {team: {'total': count, 'withdrawn': count}}
+
+    for row in future_matches_rows:
+        team_a_raw = row.get("Equipa 1", "").strip()
+        team_b_raw = row.get("Equipa 2", "").strip()
+
+        if not team_a_raw or not team_b_raw:
+            continue
+
+        # Verificar coluna de falta de comparência
+        falta_a = str(row.get("Falta de Comparência", "")).strip()
+        falta_b = str(row.get("Falta de Comparência", "")).strip()
+
+        # Normalizar nomes
+        team_a = normalize_team_name(team_a_raw, course_mapping)
+        team_b = normalize_team_name(team_b_raw, course_mapping)
+
+        if team_a:
+            if team_a not in team_game_count:
+                team_game_count[team_a] = {"total": 0, "withdrawn": 0}
+            team_game_count[team_a]["total"] += 1
+            if falta_a and team_a_raw in falta_a:
+                team_game_count[team_a]["withdrawn"] += 1
+
+        if team_b:
+            if team_b not in team_game_count:
+                team_game_count[team_b] = {"total": 0, "withdrawn": 0}
+            team_game_count[team_b]["total"] += 1
+            if falta_b and team_b_raw in falta_b:
+                team_game_count[team_b]["withdrawn"] += 1
+
+    # Identificar desistentes (100% com falta)
+    withdrawn_teams = set()
+    for team, counts in team_game_count.items():
+        if counts["total"] > 0 and counts["withdrawn"] == counts["total"]:
+            withdrawn_teams.add(team)
+            print(f"⚠️  Equipa desistente detectada: {team} ({counts['total']} jogos)")
+
+    return withdrawn_teams
+
+
+def get_initial_rating_from_division(
+    team_name: str,
+    division: Optional[int],
+    initial_elos: Dict[str, float],
+) -> float:
+    """
+    Obtém ELO inicial da equipa, considerando ELOs da época anterior e divisão.
+
+    Args:
+        team_name: Nome normalizado da equipa
+        division: Divisão da equipa (1, 2, etc.) ou None se sem divisões
+        initial_elos: Dicionário com ELOs carregados da época anterior
+
+    Returns:
+        ELO inicial apropriado para a equipa
+    """
+    # Prioridade 1: Se tem ELO da época anterior, usar esse
+    if team_name in initial_elos:
+        return initial_elos[team_name]
+
+    # Prioridade 2: Usar ELO padrão baseado em divisão
+    if division == 1:
+        return 1000.0
+    elif division == 2:
+        return 500.0
+    else:
+        # Sem divisão ou divisão desconhecida → 750 padrão
+        return 750.0
+
+
 def main(
     hardset_args: Optional[Tuple] = None,
     hardset_csv: Optional[str] = None,
@@ -3159,7 +3243,9 @@ def main(
                                 normalized_name = normalize_team_name(
                                     team_name, course_mapping
                                 )
-                                initial_elos[normalized_name] = 1500
+                                # Ignorar valores inválidos para não introduzir ELO arbitrário
+                                # (equipas sem ELO anterior usam fallback por divisão em get_initial_rating_from_division)
+                                continue
 
         # Processar resultados de jogos (carregar TODOS os jogos)
         all_csv_rows = []
@@ -3197,6 +3283,32 @@ def main(
         if calibrated_config and modalidade in calibrated_config:
             score_simulator.apply_calibrated_params(calibrated_config[modalidade])
 
+        # ===== NOVA LÓGICA: DETECTAR DESISTÊNCIAS E MAPEAR DIVISÕES =====
+        # Detectar equipas desistentes ANTES de processar jogos
+        withdrawn_teams = detect_withdrawn_teams_from_csv(
+            future_matches_rows, course_mapping
+        )
+
+        # Mapear divisão/grupo de TODAS as equipas (futuro + passado)
+        team_division = {}
+        for row in all_csv_rows:
+            t1_raw = row.get("Equipa 1", "").strip()
+            t2_raw = row.get("Equipa 2", "").strip()
+            if not t1_raw or not t2_raw:
+                continue
+            t1 = normalize_team_name(t1_raw, course_mapping)
+            t2 = normalize_team_name(t2_raw, course_mapping)
+            div = row.get("Divisão", "") or "1"
+            grp = (row.get("Grupo", "") or "").strip().upper()
+            try:
+                div_int = int(div)
+            except ValueError:
+                div_int = 1
+            if t1 and t1 not in team_division:
+                team_division[t1] = (div_int, grp)
+            if t2 and t2 not in team_division:
+                team_division[t2] = (div_int, grp)
+
         # Processar APENAS jogos futuros para as fixtures (a simulação)
         # Jogos passados são usados apenas para histórico de ELO
         for row in future_matches_rows:
@@ -3209,14 +3321,20 @@ def main(
             team_a = normalize_team_name(team_a_raw, course_mapping)
             team_b = normalize_team_name(team_b_raw, course_mapping)
 
+            # NOVO: Descartar jogos onde alguma equipa é desistente
+            if team_a in withdrawn_teams or team_b in withdrawn_teams:
+                continue
+
             all_teams_in_epoch.add(team_a)
             all_teams_in_epoch.add(team_b)
 
             if team_a not in teams:
-                elo_a = initial_elos.get(team_a, 1500)
+                div_a = team_division.get(team_a, (None, None))[0]
+                elo_a = get_initial_rating_from_division(team_a, div_a, initial_elos)
                 teams[team_a] = Team(team_a, elo_a)
             if team_b not in teams:
-                elo_b = initial_elos.get(team_b, 1500)
+                div_b = team_division.get(team_b, (None, None))[0]
+                elo_b = get_initial_rating_from_division(team_b, div_b, initial_elos)
                 teams[team_b] = Team(team_b, elo_b)
 
             # Usar nomes curtos para match_id (compatível com CSV)
@@ -3251,14 +3369,20 @@ def main(
             team_a = normalize_team_name(team_a_raw, course_mapping)
             team_b = normalize_team_name(team_b_raw, course_mapping)
 
+            # NOVO: Descartar equipas desistentes também do histórico
+            if team_a in withdrawn_teams or team_b in withdrawn_teams:
+                continue
+
             all_teams_in_epoch.add(team_a)
             all_teams_in_epoch.add(team_b)
 
             if team_a not in teams:
-                elo_a = initial_elos.get(team_a, 1500)
+                div_a = team_division.get(team_a, (None, None))[0]
+                elo_a = get_initial_rating_from_division(team_a, div_a, initial_elos)
                 teams[team_a] = Team(team_a, elo_a)
             if team_b not in teams:
-                elo_b = initial_elos.get(team_b, 1500)
+                div_b = team_division.get(team_b, (None, None))[0]
+                elo_b = get_initial_rating_from_division(team_b, div_b, initial_elos)
                 teams[team_b] = Team(team_b, elo_b)
 
         # Simular
@@ -3269,26 +3393,7 @@ def main(
             }
 
             # Mapear divisão/grupo das equipas (default 1ª divisão quando vazio)
-            team_division = {}
-            with open(
-                os.path.join(modalidades_path, modalidade_file),
-                newline="",
-                encoding="utf-8-sig",
-            ) as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    t1 = normalize_team_name(row["Equipa 1"].strip(), course_mapping)
-                    t2 = normalize_team_name(row["Equipa 2"].strip(), course_mapping)
-                    div = row.get("Divisão", "") or "1"
-                    grp = (row.get("Grupo", "") or "").strip().upper()
-                    try:
-                        div_int = int(div)
-                    except ValueError:
-                        div_int = 1
-                    if t1 in teams_with_fixtures:
-                        team_division[t1] = (div_int, grp)
-                    if t2 in teams_with_fixtures:
-                        team_division[t2] = (div_int, grp)
+            # JÁ MAPEADO ACIMA na nova lógica de detecção
 
             # Detectar se há liguilha (LM/PM) no CSV
             has_liguilla = False
@@ -3444,7 +3549,10 @@ def main(
                         expected_points_std = 0.0
                         expected_place = len(all_teams_in_epoch)
                         expected_place_std = 0.0
-                        avg_final_elo = 1500.0
+                        team_div = team_division.get(team, (None, ""))[0]
+                        avg_final_elo = get_initial_rating_from_division(
+                            team, team_div, initial_elos
+                        )
                         avg_final_elo_std = 0.0
 
                     writer.writerow(

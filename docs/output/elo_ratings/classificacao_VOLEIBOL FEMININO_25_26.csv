@@ -6,12 +6,12 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 1,,5,Ciências Biomédicas,10,6,3,0,3,7,6,1,0,0,0,0
 1,,6,Design,9,6,3,0,3,7,7,0,0,0,0,0
 1,,7,Gestão e Planeamento em Turismo,8,6,3,0,3,6,7,-1,0,0,0,0
-1,,8,Eng. Informática ,7,6,2,0,4,6,9,-3,0,0,0,0
-1,,9,Eng. Cívil,7,6,2,0,4,5,8,-3,0,0,0,0
+1,,8,Eng. Informática,7,6,2,0,4,6,9,-3,0,0,0,0
+1,,9,Eng. Civil,7,6,2,0,4,5,8,-3,0,0,0,0
 1,,10,Geologia,5,6,2,0,4,4,9,-5,0,0,0,0
 1,,11,Eng. de Materiais,3,6,1,0,5,3,11,-8,0,0,0,0
 1,,12,Eng. Biomédica,1,6,0,0,6,1,12,-11,0,0,0,0
-2,A,1,Eng. Ambiente,16,6,6,0,0,12,2,10,0,0,0,0
+2,A,1,Eng. do Ambiente,16,6,6,0,0,12,2,10,0,0,0,0
 2,A,2,Psicologia,14,6,5,0,1,11,4,7,0,0,0,0
 2,A,3,Administração Pública,11,6,3,0,3,8,6,2,0,0,0,0
 2,A,4,Bioquímica,10,5,3,0,2,8,5,3,0,0,0,0
@@ -21,7 +21,7 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,A,8,Gestão Comercial,5,5,2,0,3,4,7,-3,0,0,0,0
 2,A,9,Tradução,5,6,2,0,4,5,10,-5,0,0,0,0
 2,A,10,Eng. Computadores e Telemática,4,6,0,0,6,4,12,-8,0,0,0,0
-2,A,11,Edcucação Básica,3,5,1,0,4,3,9,-6,0,0,0,0
+2,A,11,Educação Básica,3,5,1,0,4,3,9,-6,0,0,0,0
 2,B,1,"Línguas, Literaturas e Culturas",14,6,5,0,1,11,4,7,0,0,0,0
 2,B,2,Eng. Física,13,6,4,0,2,9,4,5,0,0,0,0
 2,B,3,Gestão,12,5,4,0,1,9,3,6,0,0,0,0

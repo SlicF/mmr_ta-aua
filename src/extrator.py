@@ -236,9 +236,19 @@ def validate_and_fix_date_for_season(date_val, season: str) -> datetime:
         if date_val.month == 1 and date_val.year == year1:
             corrected = date_val.replace(month=10)
             print(
-                f"  ⚠️  Data corrigida: {date_val.strftime('%Y-%m-%d')} → {corrected.strftime('%Y-%m-%d')} (janeiro → outubro)"
+                f"  [!] Data corrigida: {date_val.strftime('%Y-%m-%d')} -> {corrected.strftime('%Y-%m-%d')} (janeiro -> outubro)"
             )
             return corrected
+
+        # Caso 1b: mês 12 (dezembro) do year2 em vez de year1
+        # Ex: 2026-12-17 deveria ser 2025-12-17 para época 25_26
+        if date_val.month == 12 and date_val.year == year2:
+            corrected = date_val.replace(year=year1)
+            if start_date <= corrected <= end_date:
+                print(
+                    f"  [!] Data corrigida: {date_val.strftime('%Y-%m-%d')} -> {corrected.strftime('%Y-%m-%d')} (dezembro year2 -> dezembro year1)"
+                )
+                return corrected
 
         # Caso 2: mês 01 (janeiro) do year2 em vez de 10 (outubro) do year1
         # (menos provável, mas possível se o ano também estiver errado)
@@ -246,7 +256,7 @@ def validate_and_fix_date_for_season(date_val, season: str) -> datetime:
             # Trocar janeiro do year2 por outubro do year1
             corrected = date_val.replace(year=year1, month=10)
             print(
-                f"  ⚠️  Data corrigida: {date_val.strftime('%Y-%m-%d')} → {corrected.strftime('%Y-%m-%d')} (janeiro year2 → outubro year1)"
+                f"  [!] Data corrigida: {date_val.strftime('%Y-%m-%d')} -> {corrected.strftime('%Y-%m-%d')} (janeiro year2 -> outubro year1)"
             )
             return corrected
 
@@ -257,18 +267,18 @@ def validate_and_fix_date_for_season(date_val, season: str) -> datetime:
             if candidate <= end_date:
                 # Só corrige se a data resultante ainda estiver no intervalo
                 print(
-                    f"  ⚠️  Data corrigida: {date_val.strftime('%Y-%m-%d')} → {candidate.strftime('%Y-%m-%d')} (outubro year1 → janeiro year2)"
+                    f"  [!] Data corrigida: {date_val.strftime('%Y-%m-%d')} -> {candidate.strftime('%Y-%m-%d')} (outubro year1 -> janeiro year2)"
                 )
                 return candidate
 
         # Outros casos: apenas avisar mas não corrigir automaticamente
         print(
-            f"  ⚠️  Data fora do intervalo esperado ({start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}): {date_val.strftime('%Y-%m-%d')}"
+            f"  [!] Data fora do intervalo esperado ({start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}): {date_val.strftime('%Y-%m-%d')}"
         )
         return date_val
 
     except Exception as e:
-        print(f"  ⚠️  Erro ao validar data: {e}")
+        print(f"  [!] Erro ao validar data: {e}")
         return date_val
 
 
@@ -783,7 +793,13 @@ class ExcelProcessor:
         # Concatenar mantendo ordem
         combined = pd.concat([base_df, playoffs_df], ignore_index=True)
         # Evitar duplicados caso este método seja chamado várias vezes
-        combined = combined.drop_duplicates(subset=self.base_headers)
+        # Chave para duplicados: tudo exceto Data_Placeholder e Falta de Comparência
+        dup_cols = [
+            c
+            for c in self.base_headers
+            if c not in ("Data_Placeholder", "Falta de Comparência")
+        ]
+        combined = combined.drop_duplicates(subset=dup_cols)
         combined.to_csv(target_path, index=False)
         print(f"  - Playoffs adicionados ao ficheiro: {target_path}")
 
@@ -1089,13 +1105,72 @@ class ExcelProcessor:
         else:
             return (3, 0)  # Padrão para outros desportos
 
+    def _detect_withdrawn_teams(self, df: pd.DataFrame) -> set:
+        """Deteta equipas desistentes (todos os jogos com falta de comparência).
+
+        Uma equipa é considerada desistente se TODOS os seus jogos têm
+        "Falta de Comparência" registada no seu nome.
+
+        Returns:
+            Set contendo nomes das equipas desistentes
+        """
+        if "Falta de Comparência" not in df.columns:
+            return set()
+
+        # Coletar todas as equipas e seus jogos
+        team_games = {}  # {equipa: {'total': count, 'with_absence': count}}
+
+        for _, row in df.iterrows():
+            equipa1 = row["Equipa 1"]
+            equipa2 = row["Equipa 2"]
+            falta = row["Falta de Comparência"]
+
+            # Normalizar entrada de ausências
+            has_absence = pd.notna(falta) and falta != ""
+            equipas_ausentes = set()
+            if has_absence:
+                equipas_ausentes = {
+                    equipa.strip() for equipa in falta.split(",") if equipa.strip()
+                }
+
+            # Registar jogo para equipa1
+            if equipa1 not in team_games:
+                team_games[equipa1] = {"total": 0, "with_absence": 0}
+            team_games[equipa1]["total"] += 1
+            if equipa1 in equipas_ausentes:
+                team_games[equipa1]["with_absence"] += 1
+
+            # Registar jogo para equipa2
+            if equipa2 not in team_games:
+                team_games[equipa2] = {"total": 0, "with_absence": 0}
+            team_games[equipa2]["total"] += 1
+            if equipa2 in equipas_ausentes:
+                team_games[equipa2]["with_absence"] += 1
+
+        # Identificar desistentes (todos os jogos com falta de comparência)
+        withdrawn_teams = set()
+        for team, stats in team_games.items():
+            if stats["total"] > 0 and stats["with_absence"] == stats["total"]:
+                withdrawn_teams.add(team)
+                print(
+                    f"  [!] Equipa desistente detectada: {team} ({stats['total']} jogos com falta)"
+                )
+
+        return withdrawn_teams
+
     def apply_default_scores(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
-        """Aplica resultados padrão quando há falta de comparência de apenas uma equipa."""
+        """Aplica resultados padrão quando há falta de comparência de apenas uma equipa.
+
+        NÃO preenche scores para equipas desistentes (que desistiram completamente).
+        """
         if "Falta de Comparência" not in df.columns:
             return df
 
         # Obtém o resultado padrão para este desporto
         golos_vencedor, golos_perdedor = self.get_sport_default_score(sheet_name)
+
+        # Detetar equipas desistentes
+        withdrawn_teams = self._detect_withdrawn_teams(df)
 
         for idx, row in df.iterrows():
             falta = row["Falta de Comparência"]
@@ -1114,6 +1189,11 @@ class ExcelProcessor:
                     equipa2 = row["Equipa 2"]
                     # usar o índice diretamente
                     idx_i = idx
+
+                    # NÃO preencher se qualquer uma das equipas é desistente
+                    if equipa1 in withdrawn_teams or equipa2 in withdrawn_teams:
+                        # Deixar scores vazios para equipas desistentes
+                        continue
 
                     # Verifica qual equipa faltou e aplica o resultado
                     if equipa_faltou == equipa1:
@@ -1210,6 +1290,210 @@ class ExcelProcessor:
 
         return headers
 
+    def _load_existing_csv_dates(
+        self, modality: str
+    ) -> Dict[str, Tuple[str, str, bool]]:
+        """Carrega datas existentes do CSV anterior para preservar placeholders.
+
+        Returns:
+            Dict com chave (Equipa1, Equipa2, Jornada) -> (Dia, Hora, is_placeholder)
+        """
+        if self.season:
+            csv_filename = f"{modality.upper()}_{self.season}.csv"
+        else:
+            csv_filename = f"{modality.upper()}.csv"
+
+        csv_path = self.output_dir / csv_filename
+
+        if not csv_path.exists():
+            return {}
+
+        try:
+            df_old = pd.read_csv(csv_path)
+            date_map = {}
+
+            for _, row in df_old.iterrows():
+                # Criar chave única por jogo
+                key = (
+                    str(row.get("Equipa 1", "")).strip(),
+                    str(row.get("Equipa 2", "")).strip(),
+                    str(row.get("Jornada", "")).strip(),
+                )
+
+                dia = row.get("Dia", "")
+                hora = row.get("Hora", "")
+                is_placeholder = row.get("Data_Placeholder", False)
+
+                # Converter para bool se vier como string
+                if isinstance(is_placeholder, str):
+                    is_placeholder = is_placeholder.lower() in ("true", "1", "yes")
+
+                date_map[key] = (dia, hora, bool(is_placeholder))
+
+            return date_map
+
+        except Exception as e:
+            print(f"  [!] Erro ao carregar datas antigas: {e}")
+            return {}
+
+    def _assign_date_placeholders(
+        self, df: pd.DataFrame, modality: str
+    ) -> pd.DataFrame:
+        """Atribui placeholders de data para jogos sem data mas com resultado.
+
+        Regras:
+        1. Se jogo tem data real → manter e marcar Data_Placeholder=False
+        2. Se jogo não tem data mas já tinha placeholder → manter placeholder antigo
+        3. Se jogo não tem data e é novo → criar placeholder baseado em jornada
+        4. Jornadas menores recebem datas/horas mais antigas (1h de diferença)
+        """
+        # Adicionar coluna Data_Placeholder se não existir
+        if "Data_Placeholder" not in df.columns:
+            df["Data_Placeholder"] = False
+
+        # Carregar datas antigas
+        old_dates = self._load_existing_csv_dates(modality)
+
+        # Processar cada linha
+        games_without_dates = []
+
+        for idx, row in df.iterrows():
+            dia = row.get("Dia", "")
+            hora = row.get("Hora", "")
+            golos1 = row.get("Golos 1", "")
+            golos2 = row.get("Golos 2", "")
+
+            # Verificar se tem resultado
+            has_result = (
+                pd.notna(golos1)
+                and str(golos1).strip() != ""
+                and pd.notna(golos2)
+                and str(golos2).strip() != ""
+            )
+
+            # Verificar se tem data
+            has_date = (
+                pd.notna(dia)
+                and str(dia).strip() != ""
+                and pd.notna(hora)
+                and str(hora).strip() != ""
+            )
+
+            if has_date:
+                # Tem data real → marcar como não-placeholder
+                df.at[idx, "Data_Placeholder"] = False
+            elif has_result:
+                # Tem resultado mas não tem data → precisa de placeholder
+                key = (
+                    str(row.get("Equipa 1", "")).strip(),
+                    str(row.get("Equipa 2", "")).strip(),
+                    str(row.get("Jornada", "")).strip(),
+                )
+
+                # Verificar se já tinha placeholder antigo
+                if key in old_dates:
+                    old_dia, old_hora, old_is_placeholder = old_dates[key]
+                    # Se era placeholder, converter para novo formato e manter
+                    if old_is_placeholder:
+                        # Converter formato antigo para novo:
+                        # Dia: garantir que tem " 00:00:00" no final
+                        if " 00:00:00" not in str(old_dia):
+                            # Remover possíveis timestamps antigos e adicionar novo
+                            dia_clean = str(old_dia).split()[0]  # Pegar só YYYY-MM-DD
+                            old_dia = f"{dia_clean} 00:00:00"
+
+                        # Hora: converter "HH:MM" para "HHhMM"
+                        if ":" in str(old_hora) and "h" not in str(old_hora):
+                            parts = str(old_hora).split(":")
+                            if len(parts) == 2:
+                                old_hora = f"{parts[0]}h{parts[1]}"
+
+                        df.at[idx, "Dia"] = old_dia
+                        df.at[idx, "Hora"] = old_hora
+                        df.at[idx, "Data_Placeholder"] = True
+                        continue
+
+                # Novo jogo sem data → guardar para atribuir placeholder depois
+                games_without_dates.append(idx)
+            else:
+                # Sem resultado e sem data → jogos futuros, manter vazio
+                df.at[idx, "Data_Placeholder"] = False
+
+        # Atribuir placeholders para jogos novos sem data
+        if games_without_dates:
+            # Agrupar por jornada
+            jornadas_sem_data = df.loc[games_without_dates, "Jornada"].unique()
+
+            # Filtrar apenas jornadas numéricas
+            jornadas_numericas = []
+            for j in jornadas_sem_data:
+                try:
+                    jornadas_numericas.append((int(j), j))
+                except (ValueError, TypeError):
+                    # Jornadas não-numéricas (playoffs) não entram no sistema de ordenação
+                    pass
+
+            if jornadas_numericas:
+                # Ordenar jornadas (menor para maior)
+                jornadas_numericas.sort(key=lambda x: x[0])
+
+                # Data base: hoje
+                base_date = datetime.now()
+
+                # Intervalos de horas de jogo: 15h00 a 02h00 da madrugada
+                START_HOUR = 15
+                END_HOUR = 2  # 02h00 significa 02:00 do dia seguinte em termos lógicos
+
+                # Calcular o número de horas disponíveis (15h, 16h, ..., 23h, 00h, 01h)
+                # Isso é 11 horas (15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 1)
+                available_hours = list(range(START_HOUR, 24)) + list(
+                    range(0, END_HOUR + 1)
+                )
+
+                # Distribuir jornadas por essas horas
+                # Se temos mais jornadas que horas, começar a reutilizar
+                jornadas_count = len(jornadas_numericas)
+
+                jornada_dates = {}
+                for idx, (jornada_num, jornada_str) in enumerate(jornadas_numericas):
+                    # Calcular a hora para esta jornada
+                    hour_idx = idx % len(available_hours)
+                    hour = available_hours[hour_idx]
+
+                    # Calcular a data (jornadas menores são dias anteriores)
+                    days_ago = jornadas_numericas[-1][0] - jornada_num
+                    jornada_date = base_date - pd.Timedelta(days=days_ago)
+
+                    # Ajustar a hora
+                    jornada_date = jornada_date.replace(hour=hour, minute=0, second=0)
+
+                    jornada_dates[jornada_str] = jornada_date
+
+                # Atribuir datas aos jogos
+                for idx in games_without_dates:
+                    jornada = df.at[idx, "Jornada"]
+
+                    if jornada in jornada_dates:
+                        placeholder_date = jornada_dates[jornada]
+                        df.at[idx, "Dia"] = placeholder_date.strftime(
+                            "%Y-%m-%d 00:00:00"
+                        )
+                        df.at[idx, "Hora"] = placeholder_date.strftime("%Hh%M")
+                        df.at[idx, "Data_Placeholder"] = True
+                        print(
+                            f"  [*] Placeholder atribuido: Jornada {jornada} -> {placeholder_date.strftime('%Y-%m-%d %Hh%M')}"
+                        )
+                    else:
+                        # Jornada não-numérica: usar data de hoje
+                        df.at[idx, "Dia"] = base_date.strftime("%Y-%m-%d")
+                        df.at[idx, "Hora"] = base_date.strftime("%H:%M")
+                        df.at[idx, "Data_Placeholder"] = True
+                        print(
+                            f"  [*] Placeholder atribuido: Jornada {jornada} (nao-numerica) -> {base_date.strftime('%Y-%m-%d %H:%M')}"
+                        )
+
+        return df
+
     def clean_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Limpa e processa o DataFrame."""
         # Remove linhas vazias
@@ -1257,8 +1541,16 @@ class ExcelProcessor:
 
         return df
 
-    def sort_by_datetime(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Ordena por data e hora, tratando jogos da madrugada (0h-1h) como do dia seguinte."""
+    def sort_by_datetime(self, df: pd.DataFrame, modality: str = "") -> pd.DataFrame:
+        """Ordena por data e hora, tratando jogos da madrugada (0h-1h) como do dia seguinte.
+
+        Args:
+            df: DataFrame a ordenar
+            modality: Nome da modalidade para sistema de placeholders
+        """
+        # ANTES de ordenar, aplicar sistema de placeholders se fornecida modalidade
+        if modality:
+            df = self._assign_date_placeholders(df, modality)
 
         def parse_data_hora(row):
             dia, hora = row["Dia"], row["Hora"]
@@ -1392,11 +1684,21 @@ class ExcelProcessor:
         ]
         df = df.dropna(subset=colunas_principais, how="all")
 
+        # Garantir coluna "Data_Placeholder" presente
+        if "Data_Placeholder" not in df.columns:
+            df["Data_Placeholder"] = False
+
         # Garantir coluna "Falta de Comparência" presente e no fim, mesmo vazia
         if "Falta de Comparência" not in df.columns:
             df["Falta de Comparência"] = ""
 
-        colunas = [col for col in df.columns if col != "Falta de Comparência"]
+        # Reordenar colunas: principais, depois Data_Placeholder, depois Falta de Comparência
+        colunas = [
+            col
+            for col in df.columns
+            if col not in ("Data_Placeholder", "Falta de Comparência")
+        ]
+        colunas.append("Data_Placeholder")
         colunas.append("Falta de Comparência")
         df = df[colunas]
 
@@ -1463,7 +1765,7 @@ class ExcelProcessor:
         # Processa dados
         df = self.clean_dataframe(df)
         df = self.adjust_journeys(df)
-        df = self.sort_by_datetime(df)
+        df = self.sort_by_datetime(df, modality=sheet_name)
         df = self.apply_default_scores(df, sheet_name)
         df = self.filter_playoff_games(df)  # Filtrar jogos de playoffs
         df = self.finalize_dataframe(df)

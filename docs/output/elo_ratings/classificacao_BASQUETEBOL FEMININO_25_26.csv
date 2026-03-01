@@ -3,13 +3,13 @@ Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofri
 2,Fisioterapia,8,5,4,0,1,96,50,46,0
 3,Eng. e Gestão Industrial,8,5,4,0,1,74,44,30,0
 4,MTC,6,4,3,0,1,31,23,8,0
-5,Eng. Cívil,4,3,2,0,1,34,18,16,0
+5,Eng. Civil,4,3,2,0,1,34,18,16,0
 6,Eng. Eletrónica e Telecomunicações,4,4,2,0,2,45,49,-4,0
 7,Psicologia,4,5,2,0,3,34,44,-10,0
 8,Design,4,4,2,0,2,30,27,3,0
 9,Tradução,2,4,1,0,3,32,47,-15,0
 10,Eng. Física,2,4,1,0,3,14,43,-29,0
 11,Economia,2,4,1,0,3,30,58,-28,0
-12,Edcucação Básica,0,0,0,0,0,0,0,0,0
-13,Biologia,0,3,0,0,3,20,36,-16,0
-14,Eng. Computadores e Telemática,0,4,0,0,4,6,49,-43,0
+12,Biologia,0,3,0,0,3,20,36,-16,0
+13,Eng. Computadores e Telemática,0,4,0,0,4,6,49,-43,0
+14,Educação Básica,0,7,0,0,0,0,0,0,7
