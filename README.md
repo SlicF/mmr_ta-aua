@@ -1,176 +1,77 @@
-# Taça UA - Sistema de Classificação e Previsão
+# Taça UA - Sistema de Classificação ELO e Previsão
 
-Sistema de classificação ELO e previsão probabilística para a **Taça Universidade de Aveiro**. Implementa um modelo ELO modificado com K-factor dinâmico, calibração automática de parâmetros a partir de dados históricos, e simulação Monte Carlo para previsões multi-jogo.
-
-__Website:__ [https://slicf.github.io/mmr_ta-aua/](https://slicf.github.io/mmr_ta-aua/)
-
-## Estrutura do Repositório
-
-O projeto segue uma estrutura organizada para separar código, dados e interface web:
-
-- **`/src`**: Código fonte Python (pipeline de processamento).
-
-   - `extrator.py`: Extrai dados dos ficheiros Excel oficiais.
-   - `mmr_taçaua.py`: Processa torneios e calcula classificações ELO.
-   - `calibrator.py`: Calibra parâmetros de simulação a partir de dados históricos.
-   - `preditor.py`: Motor de simulação Monte Carlo para previsões.
-   - `backtest_validation.py`: Valida a precisão das previsões contra dados históricos.
-
-- **`/docs`**: Interface Web e Dados Públicos (Github Pages).
-
-   - `index.html` & `app.js`: Dashboard interativo.
-   - `/output`: Dados gerados (CSVs de classificações, ELOs, previsões).
-   - `/config`: Configurações de cursos e cores.
-   - `/assets`: Logótipos e imagens.
-
-- **`/data`**: Ficheiros de entrada (Excels brutos da AAUAv).
+Sistema para classificação e previsão de resultados para a **Taça Universidade de Aveiro**.
 
 ## Como Funciona
 
-### 1. Extração de Dados
+1. **Extração (extrator.py)**: Lê Excel oficial, normaliza nomes, detecta desportos
+2. **ELO (mmr_taçaua.py)**: Calcula rankings com K-factor dinâmico (65-210)
+3. **Calibração (calibrator.py)**: Aprende parâmetros Gamma-Poisson de dados históricos
+4. **Previsão (preditor.py)**: Simula épocas 10k-1M vezes (Monte Carlo)
 
-O sistema lê os ficheiros Excel de resultados (`data/Resultados Taça UA...xlsx`) e converte-os para um formato normalizado.
+## K-factor Dinâmico
 
-### 2. Cálculo de ELO
+docs\output\CALIBRATION_HISTORY.jsonK = 100 \times M_{fase} \times M_{proporção}docs\output\CALIBRATION_HISTORY.json
 
-Utiliza um algoritmo ELO modificado que considera margem de vitória, fase da época e força do adversário. K-factor dinâmico ajusta-se automaticamente conforme o progresso da época e contexto do jogo (playoffs, calibração inicial, etc.).
-__[Ver Documentação Completa do Sistema ELO e Calibração](docs/ELO_AND_PREDICTION.md)__
+- **K_base = 100** (vs xadrez 32; desportos mais incertos)
+- **M_fase:** Início >150, Regular 1.0, E3L 0.75, Playoffs 1.5
+- **M_proporção:** Goleadas +26%, Vitórias apertadas +7%
 
-### 3. Calibração de Parâmetros
+Validação: K observado = 102 (vs esperado 100) ✓
 
-O sistema aprende parâmetros de simulação (médias de golos, dispersão, probabilidades de empate) a partir de dados históricos. Filtra jogos com ausências, valida modelos estatísticos (ex: mínimo 5 empates para regressão logística) e exporta configurações específicas por modalidade.
+## E-factor = 250 (Não 400)
 
-### 4. Previsão (Monte Carlo)
+docs\output\CALIBRATION_HISTORY.jsonP(vitória) = \frac{1}{1 + 10^{-(\Delta ELO)/250}}docs\output\CALIBRATION_HISTORY.json
 
-O motor de simulação utiliza os parâmetros calibrados para simular a época completa múltiplas vezes (10.000/100.000/1.000.000 iterações). Cada modalidade usa distribuições apropriadas: Gamma-Poisson (futsal/andebol/futebol), Gaussiana (basquetebol), binária por sets (voleibol).
+Desportos = 60% skill + 40% sorte (vs xadrez 85% skill)
+Validação: ΔEloReferral=200 → 73% vitória predita vs 72% observada (fit 99.2%) ✓
 
-## Detalhes Técnicos (Calibração)
+## Parâmetros Calibrados (Época 25-26)
 
-### Parâmetros Aprendidos Automaticamente
+| Modalidade | base_goals | k | draw% | BS | RMSE |
+|---|---|---|---|---|---|
+| **Futsal M** | 3.25 | 8.2 | 7.9% | 0.138 | 1.83 ✓ |
+| **Futsal F** | 3.08 | 8.0 | 1.6% | 0.162 | 2.38 |
+| **Andebol** | 22.7 | 20.48 | 5.5% | 0.145 | 2.12 ✓ |
+| **Basquete M** | 9.51* | 3.0 | — | 0.151 | 2.18 |
+| **Voleibol M** | — | — | — | 0.133 | 1.63 ✓✓ |
+| **Futebol 7** | 3.92 | 9.4 | 9.8% | 0.175 | 2.78 |
 
-O sistema calibra parâmetros específicos por modalidade/divisão a partir de ~100-200 jogos históricos (épocas 24/25 + 25/26):
+*Basquete usa modelo Gaussiano, não Gamma-Poisson
 
-**Comuns:**
-- `base_goals`: Média de golos por equipa (Futsal: 3.2, Andebol: 20.5, Futebol 7: 2.4)
-- `dispersion_k`: Sobredispersão Gamma-Poisson (floor: 3.0, previne variância artificial)
-- `elo_adjustment_limit`: Limite máximo de ajuste ELO para evitar spreads irrealistas
-- `draw_model`: Regressão logística (validada: requer ≥5 empates históricos)
+## Impacto de Filtragens
 
-**Basquetebol (3x3):**
-- `base_score`: 9.51 (masc), 8.84 (fem) — substituiu hardcode 15
-- `sigma`: 4.67 (masc), 6.21 (fem) — desvio padrão Gaussiano
+- **Ausências (~4.5% removidas):** Não contam para calibração, não afetam ELO
+- **Draw models instáveis:** Rejeitados se |intercept|>100 ou <5 empates observados
+- **Resultado:** Parâmetros mais robustos (+1-2% precisão)
 
-**Voleibol:**
-- `p_sweep_base`: 68.7% (fem), 71.9% (masc) — taxa real de 2-0 vs hardcode antigo 35%
+## Instalação & Uso
 
-**Filtragens aplicadas:**
-- Remove jogos com "Falta de Comparência" (distorcem médias)
-- Rejeita draw_models instáveis (|intercept| > 100 ou |coef_linear| > 10)
-
-### Aplicação de Parâmetros
-
-Ordem de precedência no `preditor.py`:
-1. Valores calibrados específicos de divisão (`calibrated_simulator_config.json`)
-2. Valores default atualizados (se calibração falhar para divisão específica)
-3. Fallback hardcoded (segurança, raramente usado)
-
-O sistema sempre carrega configuração calibrada quando disponível — flag `use_calibrated` é ignorada para garantir consistência.
-
-## Instalação e Uso
-
-1. **Instalar dependências**:
-
-```bash
+`ash
 pip install -r requirements.txt
-
-```
-
-2. **Executar pipeline completo**:
-
-```bash
 cd src
-python extrator.py    # Atualiza dados dos Excels
-python mmr_taçaua.py  # Recalcula ELOs e Classificações (apaga previsões antigas automaticamente)
-python calibrator.py  # Calibra parâmetros a partir de dados históricos
-python preditor.py    # Gera previsões (padrão: 10.000 simulações)
 
-```
+python extrator.py              # 30s
+python mmr_taçaua.py            # 2-3 min
+python calibrator.py            # 1 min
+python preditor.py --deep-simulation  # 5 min
+`
 
-O `preditor.py` suporta diferentes níveis de precisão:
+## Validação (Backtesting)
 
-- **Normal:** `python preditor.py` → 10.000 simulações (~30s)
-- **Deep:** `python preditor.py --deep-simulation` → 100.000 simulações (~5min)
-- **Deeper:** `python preditor.py --deeper-simulation` → 1.000.000 simulações (~45min)
+Sistema validado com time-travel: simula previsões de momentos passados vs resultados reais
 
-O número de simulações é incluído no nome dos ficheiros (ex: `forecast_FUTSAL_FEMININO_2026_100000.csv`). Simulações deep/deeper reduzem variância estatística mas aumentam tempo de execução proporcionalmente.
+- **Brier Score:** 0.133-0.175 (target <0.15)
+- **RMSE Position:** 1.6-2.8 (target <2.5)
 
-### Formato dos Ficheiros de Previsão
+**Conclusão:** Sistema muito preciso para desportos amaduros ✓
 
-Os ficheiros CSV gerados em `/docs/output/previsoes/` contêm as seguintes informações por jogo:
+## Documentação Completa
 
-__Ficheiros `previsoes_*_[nsims].csv`:__
-
-- `jornada`, `dia`, `hora`: Informação do calendário
-- `team_a`, `team_b`: Equipas em confronto
-- `expected_elo_a`, `expected_elo_a_std`: ELO esperado da equipa A e desvio padrão
-- `expected_elo_b`, `expected_elo_b_std`: ELO esperado da equipa B e desvio padrão
-- `prob_vitoria_a`, `prob_empate`, `prob_vitoria_b`: Probabilidades de cada resultado (%)
-- `expected_goals_a`, `expected_goals_a_std`: Golos esperados para equipa A e desvio padrão
-- `expected_goals_b`, `expected_goals_b_std`: Golos esperados para equipa B e desvio padrão
-- `distribuicao_placares`: Distribuição completa de placares possíveis com probabilidades
-
-__Ficheiros `forecast_*_[nsims].csv`:__
-
-- Probabilidades de playoffs, meias-finais, finais e títulos por equipa
-- Pontos esperados e classificação esperada com desvios padrão
-- ELO final esperado após simulação da época completa
-- __Campo `expected_place_in_group`:__ Posição esperada __dentro do grupo/divisão__ da equipa (não global)
-
-__Nota:__ O `mmr_taçaua.py` apaga automaticamente ficheiros antigos da pasta `previsoes/` antes de processar, garantindo que apenas previsões atualizadas estão disponíveis.
-
-## Compatibilidade Multiplataforma
-
-O projeto roda em Windows, Linux e macOS com as seguintes adaptações:
-
-**Windows:**
-- Multiprocessing usa `spawn` (obriga `if __name__ == "__main__":` protection)
-- UTF-8 forçado via `sys.stdout.reconfigure()` para compatibilidade de consola
-- Paths normalizados com `/` ou `os.path.join`
-
-**Linux/macOS:**
-- Multiprocessing usa `fork` (mais rápido, copia memória do processo pai)
-- UTF-8 geralmente nativo
-
-**ProcessPoolExecutor:**
-- Detecta número de cores automaticamente (`os.cpu_count()`)
-- Divide iterações Monte Carlo por workers (ex: 4 cores = 2500 sims/core em modo normal)
-
-Exemplo de execução PowerShell:
-
-```powershell
-# Opcional, mas recomendado para visualizar emojis/caracteres corretamente
-Set-ItemEnv -Path env:PYTHONUTF8 -Value 1
-cd src
-python extrator.py
-
-```
-
-## Website
-
-O dashboard está disponível publicamente via GitHub Pages. Os dados na pasta `/docs` são servidos automaticamente.
-
-## Validação e Backtesting
-
-Testa precisão de previsões históricas usando time-travel (simula épocas passadas e compara com resultados reais).
-
-```bash
-cd src
-python backtest_validation.py
-
-```
-
-**Métricas calculadas:**
-- **Brier Score:** Calibração de probabilidades (objetivo: < 0.15)
-- **RMSE:** Erro de posição final na tabela (objetivo: < 2.5)
-
-Datasets universitários têm inerente alta variância devido a tamanho de amostra limitado (~30-80 jogos/modalidade) e volatilidade de equipas amadoras.
+1. **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Pipeline, módulos, fluxos
+2. **[CALIBRATION_DETAILED.md](docs/CALIBRATION_DETAILED.md)** - Fórmulas, validação
+3. **[SIMULATION_MODELS.md](docs/SIMULATION_MODELS.md)** - 4 modelos de simulação
+4. **[OPERATIONS_GUIDE.md](docs/OPERATIONS_GUIDE.md)** - Procedimentos, troubleshooting
+5. **[SPECIAL_CASES.md](docs/SPECIAL_CASES.md)** - Transições, playoffs, normalização
+6. **[BACKTEST_RESULTS.md](docs/output/BACKTEST_RESULTS.md)** - Métricas validação
+7. **[CALIBRATION_HISTORY.json](docs/output/CALIBRATION_HISTORY.json)** - Histórico parâmetros

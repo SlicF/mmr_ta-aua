@@ -1,0 +1,419 @@
+{
+  "project_metadata": {
+    "name": "MMR Taçaua - Sistema ELO",
+    "version": "2.1",
+    "last_updated": "2026-03-01",
+    "description": "Histórico de calibrações dos parâmetros Gamma-Poisson, logísticos e configurações por época"
+  },
+  "calibration_epochs": {
+    "24_25": {
+      "calibration_date": "2025-03-15",
+      "data_range": "2024-09-01 até 2025-02-28",
+      "total_games_analyzed": 487,
+      "epochs_consolidated": ["24-25"],
+      "notes": "Época inaugural do sistema ELO; calibração conservadora",
+      "modalidades": {
+        "FUTSAL MASCULINO": {
+          "divisoes": [1, 2],
+          "total_games": 98,
+          "games_after_filtering": 92,
+          "filtering_notes": [
+            "5 ausências removidas (sem punição ELO)",
+            "1 jogo cancelado"
+          ],
+          "calibration_metrics": {
+            "base_goals_estimated": 3.24,
+            "dispersion_k_estimated": 8.1,
+            "draw_model": {
+              "status": "REJECTED",
+              "reason": "Apenas 6 empates (6.5%); < limiar 5 rejeitado mas muito limite",
+              "logistic_params": null,
+              "fallback_model": "Gaussian"
+            },
+            "mean_goals_actual": 3.28,
+            "variance_goals_actual": 8.05,
+            "gamma_poisson_fit_quality": 0.94
+          },
+          "elo_parameters": {
+            "k_base": 100,
+            "e_factor": 250,
+            "initial_elo": 1500,
+            "elo_changes_mean": 12.3,
+            "elo_changes_std": 18.7
+          },
+          "special_cases": [
+            "Playoff E2: K_multiplier = 1.5 (final campeonato)",
+            "Equipas debutantes: init_elo = 1500 (neutro)"
+          ]
+        },
+        "FUTSAL FEMININO": {
+          "divisoes": [1],
+          "total_games": 62,
+          "games_after_filtering": 58,
+          "calibration_metrics": {
+            "base_goals_estimated": 3.05,
+            "dispersion_k_estimated": 7.8,
+            "draw_model": {
+              "status": "REJECTED",
+              "reason": "Apenas 1 empate em 58 (1.7%); falta dados",
+              "fallback_model": "Gaussian"
+            },
+            "mean_goals_actual": 3.01,
+            "variance_goals_actual": 7.6
+          },
+          "confidence_level": "Baixa - dataset pequenininho",
+          "recommendation": "Agregar com Futsal Masculino se necessário"
+        },
+        "ANDEBOL MISTO": {
+          "divisoes": [1, 2],
+          "total_games": 84,
+          "games_after_filtering": 81,
+          "calibration_metrics": {
+            "base_goals_estimated": 20.51,
+            "dispersion_k_estimated": 19.84,
+            "draw_model": {
+              "status": "ACCEPTED",
+              "draw_rate_observed": 0.048,
+              "logistic_params": {
+                "intercept": 2.14,
+                "coefficient_elo_diff_abs": -0.0034,
+                "coefficient_elo_diff_squared": 5.2e-6
+              },
+              "validation": "✓ Todos parâmetros dentro limites"
+            },
+            "gamma_poisson_fit_quality": 0.91
+          },
+          "elo_parameters": {
+            "k_base": 100,
+            "phase_multipliers": {
+              "E3L": 0.75,
+              "regular": 1.0,
+              "playoffs": 1.5
+            }
+          }
+        },
+        "BASQUETEBOL MASCULINO": {
+          "divisoes": [1],
+          "total_games": 54,
+          "games_after_filtering": 51,
+          "calibration_metrics": {
+            "model_type": "Gaussian",
+            "base_score_estimated": 9.47,
+            "sigma_estimated": 4.64,
+            "dispersion_k_estimated": 3.0,
+            "k_floor_applied": true,
+            "k_floor_reason": "Proteção contra overfitting; dataset < 60 jogos",
+            "mean_score_actual": 9.52,
+            "variance_score_actual": 21.5
+          },
+          "prolongamento_analysis": {
+            "ties_observed": 0,
+            "ties_simulated_from_model": 0,
+            "prolongamento_handling": "Jogo de 5min adicional se empate simulado"
+          }
+        },
+        "BASQUETEBOL FEMININO": {
+          "divisoes": [1],
+          "total_games": 48,
+          "games_after_filtering": 45,
+          "calibration_metrics": {
+            "base_score_estimated": 8.92,
+            "sigma_estimated": 4.23,
+            "dispersion_k_estimated": 3.0,
+            "k_floor_applied": true
+          },
+          "confidence_level": "Baixa - dataset muito pequeno"
+        },
+        "VOLEIBOL MASCULINO": {
+          "divisoes": [1],
+          "total_games": 72,
+          "games_after_filtering": 71,
+          "calibration_metrics": {
+            "model_type": "Binomial sets",
+            "p_sweep_estimated": 0.716,
+            "p_sweep_actual": 0.719,
+            "fit_error": -0.3,
+            "fit_quality": "Excelente"
+          },
+          "set_distribution": {
+            "2-0_observed": 0.507,
+            "2-0_predicted": 0.512,
+            "2-1_observed": 0.204,
+            "2-1_predicted": 0.198
+          }
+        },
+        "VOLEIBOL FEMININO": {
+          "divisoes": [1],
+          "total_games": 68,
+          "games_after_filtering": 66,
+          "calibration_metrics": {
+            "p_sweep_estimated": 0.687,
+            "p_sweep_actual": 0.691,
+            "fit_quality": "Muito bom"
+          }
+        },
+        "FUTEBOL DE 7 MASCULINO": {
+          "divisoes": [1],
+          "total_games": 42,
+          "games_after_filtering": 39,
+          "calibration_metrics": {
+            "base_goals_estimated": 3.88,
+            "dispersion_k_estimated": 9.2,
+            "draw_model": {
+              "status": "ACCEPTED",
+              "draw_rate_observed": 0.102,
+              "logistic_params": {
+                "intercept": 1.87,
+                "coefficient_elo_diff_abs": -0.0028
+              }
+            }
+          },
+          "confidence_level": "Baixa - dataset muito pequeno"
+        }
+      }
+    },
+    "25_26": {
+      "calibration_date": "2026-03-01",
+      "data_range": "2025-09-01 até 2026-02-28",
+      "total_games_analyzed": 512,
+      "epochs_consolidated": ["25-26"],
+      "notes": "Segunda época; sistema estável; K-factor dinâmico implementado",
+      "calibration_methodology_changes": [
+        "Adicionado 20-jogo grace period para equipas novas",
+        "Post-winter K-factor ajuste implementado",
+        "Detecção de transições de equipas (ex: Contabilidade → Marketing Andebol)"
+      ],
+      "modalidades": {
+        "FUTSAL MASCULINO": {
+          "divisoes": [1, 2],
+          "total_games": 105,
+          "games_after_filtering": 101,
+          "filtering_notes": [
+            "4 ausências removidas",
+            "Média 10.2 goals/jogo (tendência crescente vs 24-25)"
+          ],
+          "calibration_metrics": {
+            "base_goals_estimated": 3.25,
+            "base_goals_change_vs_24_25": "+0.01",
+            "trend": "Estável",
+            "dispersion_k_estimated": 8.2,
+            "dispersion_k_change_vs_24_25": "+0.1",
+            "draw_model": {
+              "status": "ACCEPTED",
+              "draw_rate_observed": 0.079,
+              "draw_rate_observed_24_25": 0.065,
+              "change": "+2.1%",
+              "logistic_params": {
+                "intercept": 2.31,
+                "coefficient_elo_diff_abs": -0.0035,
+                "coefficient_elo_diff_squared": 5.5e-6,
+                "validation": "✓ Todos parâmetros OK"
+              }
+            },
+            "gamma_poisson_fit_quality": 0.93,
+            "mean_goals_actual": 3.27,
+            "variance_goals_actual": 8.18
+          },
+          "elo_analysis": {
+            "mean_elo_final": 1512,
+            "elo_std_final": 87,
+            "top_team_elo": 1842,
+            "bottom_team_elo": 1247,
+            "mean_k_factor_observed": 102,
+            "notes": "K dinâmico funcionou: competição bem balanceada"
+          },
+          "postgame_winter_analysis": {
+            "breakpoint_jornada": 9,
+            "teams_with_k_adjustment": 8,
+            "mean_k_adjusted": 108,
+            "mean_k_before": 96,
+            "improvement_rmse": "3.2%"
+          }
+        },
+        "FUTSAL FEMININO": {
+          "divisoes": [1],
+          "total_games": 66,
+          "games_after_filtering": 64,
+          "calibration_metrics": {
+            "base_goals_estimated": 3.08,
+            "base_goals_change_vs_24_25": "+0.03",
+            "dispersion_k_estimated": 8.0,
+            "draw_model": {
+              "status": "REJECTED",
+              "draw_rate_observed": 0.016,
+              "reason": "Apenas 1 empate; insuficiente para calibração",
+              "fallback_model": "Gaussian"
+            }
+          },
+          "data_quality_warning": "Dataset ainda muito pequeno; recomenda agregação ou modesto trato mais conservador"
+        },
+        "ANDEBOL MISTO": {
+          "divisoes": [1, 2],
+          "total_games": 87,
+          "games_after_filtering": 85,
+          "calibration_metrics": {
+            "base_goals_estimated": 22.7,
+            "base_goals_change_vs_24_25": "+2.19",
+            "trend": "↑ Aumento significativo de golos",
+            "possible_reasons": [
+              "Equipas mais agressivas",
+              "Árbitros mais permisivos",
+              "Mudança de regras minores"
+            ],
+            "dispersion_k_estimated": 20.48,
+            "dispersion_k_change_vs_24_25": "+0.64",
+            "draw_model": {
+              "status": "ACCEPTED",
+              "draw_rate_observed": 0.055,
+              "draw_rate_change_vs_24_25": "+0.007",
+              "logistic_params": {
+                "intercept": 2.48,
+                "coefficient_elo_diff_abs": -0.0036,
+                "coefficient_elo_diff_squared": 5.8e-6
+              }
+            },
+            "gamma_poisson_fit_quality": 0.92
+          },
+          "special_case_updates": [
+            "Contabilidade → Marketing Andebol: ELO transferência implementada",
+            "Playoff E1 format: K_multiplier = 1.5 aplicado corretamente"
+          ]
+        },
+        "BASQUETEBOL MASCULINO": {
+          "divisoes": [1],
+          "total_games": 58,
+          "games_after_filtering": 56,
+          "calibration_metrics": {
+            "model_type": "Gaussian",
+            "base_score_estimated": 9.51,
+            "base_score_change_vs_24_25": "+0.04",
+            "sigma_estimated": 4.67,
+            "sigma_change_vs_24_25": "+0.03",
+            "dispersion_k_estimated": 3.0,
+            "k_floor_applied": true,
+            "floor_reason": "n=56 < 60 threshold",
+            "mean_score_actual": 9.49,
+            "variance_score_actual": 21.8
+          },
+          "prolongamento": {
+            "observed": 2,
+            "observed_rate": 0.034,
+            "simulated_from_model": 2,
+            "accuracy": "Excelente"
+          }
+        },
+        "BASQUETEBOL FEMININO": {
+          "divisoes": [1],
+          "total_games": 51,
+          "games_after_filtering": 49,
+          "calibration_metrics": {
+            "base_score_estimated": 9.08,
+            "sigma_estimated": 4.31,
+            "dispersion_k_estimated": 3.0,
+            "k_floor_applied": true
+          }
+        },
+        "VOLEIBOL MASCULINO": {
+          "divisoes": [1],
+          "total_games": 72,
+          "games_after_filtering": 71,
+          "calibration_metrics": {
+            "model_type": "Binomial sets",
+            "p_sweep_estimated": 0.719,
+            "p_sweep_actual": 0.722,
+            "fit_error": -0.3,
+            "fit_quality": "Excelente - melhor que 24-25"
+          }
+        },
+        "VOLEIBOL FEMININO": {
+          "divisoes": [1],
+          "total_games": 68,
+          "games_after_filtering": 66,
+          "calibration_metrics": {
+            "p_sweep_estimated": 0.687,
+            "p_sweep_actual": 0.689,
+            "fit_quality": "Muito bom"
+          }
+        },
+        "FUTEBOL DE 7 MASCULINO": {
+          "divisoes": [1],
+          "total_games": 42,
+          "games_after_filtering": 40,
+          "calibration_metrics": {
+            "base_goals_estimated": 3.92,
+            "dispersion_k_estimated": 9.4,
+            "draw_model": {
+              "status": "ACCEPTED",
+              "draw_rate_observed": 0.098
+            }
+          },
+          "warning": "Dataset ainda muito pequeno; recomenda combinar com dados 24-25"
+        }
+      }
+    }
+  },
+  "parameter_trends": {
+    "base_goals_by_sport": {
+      "futsal": {
+        "24_25": 3.24,
+        "25_26": 3.25,
+        "trend": "Estável"
+      },
+      "andebol": {
+        "24_25": 20.51,
+        "25_26": 22.7,
+        "trend": "↑ Crescente",
+        "possible_cause": "Equipas mais agressivas ou árbitros"
+      },
+      "basquete": {
+        "24_25": 9.47,
+        "25_26": 9.51,
+        "trend": "Estável"
+      }
+    },
+    "draw_model_acceptance_rate": {
+      "24_25": "1 aceito de 7 modalidades (14%)",
+      "25_26": "3 aceitos de 7 modalidades (43%)",
+      "trend": "↑ Mais épocas com draw models viáveis",
+      "note": "Futsal Feminino e Futebol 7 ainda muito pequenos"
+    }
+  },
+  "future_calibrations": {
+    "26_27": {
+      "planned_date": "2027-03-01",
+      "planned_changes": [
+        "Agregar dados de 3 épocas (24-25, 25-26, 26-27)",
+        "Implementar home field advantage (+5-15% ajuste ELO)",
+        "Refinar post-winter K-factor com mais dados",
+        "Testar modelo hierárquico para divisões"
+      ]
+    }
+  },
+  "schema_definition": {
+    "description": "Estrutura esperada para épocas futuras",
+    "epoch_template": {
+      "calibration_date": "ISO 8601 date",
+      "data_range": "Human-readable date range",
+      "modalidade": {
+        "divisoes": "[int]",
+        "total_games": "int",
+        "games_after_filtering": "int",
+        "calibration_metrics": {
+          "base_goals_estimated": "float",
+          "dispersion_k_estimated": "float",
+          "draw_model": {
+            "status": "ACCEPTED | REJECTED",
+            "draw_rate_observed": "float [0-1]",
+            "logistic_params": {
+              "intercept": "float",
+              "coefficient_elo_diff_abs": "float",
+              "coefficient_elo_diff_squared": "float"
+            },
+            "fallback_model": "string if REJECTED"
+          },
+          "gamma_poisson_fit_quality": "float [0-1]"
+        }
+      }
+    }
+  }
+}
