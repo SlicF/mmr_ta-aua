@@ -38,8 +38,8 @@ python extrator.py
 #   ✓ Ausências marcadas (campo "Falta de Comparência")
 
 # Verificar outputs:
-ls ..\docs\output\csv_modalidades\*_26_27.csv
-# Esperar: 8 ficheiros (ou 16 se época dupla 25_26 + 26_27)
+ls ..\docs\output\csv_modalidades\*_<época>.csv
+# Esperar: 8 ficheiros por modalidade (ou mais se múltiplas épocas)
 
 # ── PASSO 2: CÁLCULO ELO ──────────────────────────────────────────
 # Input:  CSVs normalizados + épocas anteriores (para carry-over)
@@ -129,7 +129,7 @@ python src/extrator.py --verbose 2>&1 | tee extrator.log
 python src/mmr_taçaua.py
 
 # Especificar época:
-python src/mmr_taçaua.py --season 26_27
+python src/mmr_taçaua.py --season <época>
 
 # Forçar reset de ELOs (início de competição):
 python src/mmr_taçaua.py --reset-elos
@@ -140,7 +140,7 @@ python src/mmr_taçaua.py --reset-elos
 #   --export-history: Gerar JSONs de histórico ELO completo
 
 # Backtest (validar época passada):
-python src/mmr_taçaua.py --season 25_26 --backtest
+python src/mmr_taçaua.py --season <época_anterior> --backtest
 ```
 
 #### 1.3 Calibração (calibrator.py)
@@ -278,6 +278,7 @@ git commit -m "calibration(26-27): Mid-season recalibration (Brier 0.145→0.138
 ### 3.1 Problema: Equipas Duplicadas na Classificação
 
 **Sintoma:**
+
 ```csv
 Posição,Equipa,ELO
 1,Gestão,1627
@@ -285,9 +286,10 @@ Posição,Equipa,ELO
 3,GESTÃO,1544   ← Triplicado!
 ```
 
-**Causa:** Normalização incompleta (`normalize_team_name()` falhou).
+__Causa:__ Normalização incompleta (`normalize_team_name()` falhou).
 
 **Diagnóstico:**
+
 ```bash
 # Ver mapeamentos aplicados
 python -c "from mmr_taçaua import create_team_name_mapping; \
@@ -298,6 +300,7 @@ python -c "from mmr_taçaua import create_team_name_mapping; \
 ```
 
 **Solução:**
+
 ```bash
 # 1. Adicionar mapeamento em config_cursos.json:
 {
@@ -319,6 +322,7 @@ python src/mmr_taçaua.py --reset-elos
 ### 3.2 Problema: Brier Score Anormalmente Alto (>0.20)
 
 **Sintoma:**
+
 ```json
 {
   "FUTSAL MASCULINO": {
@@ -329,11 +333,13 @@ python src/mmr_taçaua.py --reset-elos
 ```
 
 **Causa Provável:**
+
 1. Parâmetros não calibrados (usando defaults)
 2. Modelo de empates overfitted (intercept absurdo)
 3. Dataset muito pequeno (<20 jogos)
 
 **Diagnóstico:**
+
 ```bash
 # Ver parâmetros usados:
 cat docs/output/calibration/calibrated_simulator_config.json | \
@@ -350,6 +356,7 @@ cat docs/output/calibration/calibrated_simulator_config.json | \
 **Soluções:**
 
 **Caso 1: Overfitting**
+
 ```python
 # Em calibrator.py, aumentar threshold mínimo:
 min_draws = max(5, len(games) // 15)  # Era 20, relaxar para 15
@@ -359,12 +366,13 @@ python src/calibrator.py
 ```
 
 **Caso 2: Dataset Pequeno**
+
 ```bash
 # Usar fallback conservador:
 python src/preditor.py --no-calibrated  # Usa defaults
 
 # Ou calibrar com épocas combinadas:
-python src/calibrator.py --seasons "25_26,24_25,23_24"
+python src/calibrator.py --seasons "<época1>,<época2>,<época3>"
 ```
 
 ---
@@ -372,16 +380,19 @@ python src/calibrator.py --seasons "25_26,24_25,23_24"
 ### 3.3 Problema: Tempo de Simulação Excessivo (>10 min)
 
 **Sintoma:**
-```
+
+```ini
 [preditor.py] Simulação 15% (150k/1M iterações) - ETA: 45 min
 ```
 
 **Causa Provável:**
+
 1. ProcessPoolExecutor não ativado (fallback ThreadPool → GIL)
 2. Swap/memória insuficiente
 3. I/O bottleneck (disco lento)
 
 **Diagnóstico:**
+
 ```python
 # Ver quantos workers ativos:
 import multiprocessing
@@ -396,7 +407,7 @@ print(f"CPU cores: {multiprocessing.cpu_count()}")
 
 ```bash
 # 1. Reduzir workers se RAM baixa (<8GB):
-python src/preditor.py --workers 2 --season 26_27
+python src/preditor.py --workers 2
 
 # 2. Compilar numpy com OpenBLAS (speedup ~20%):
 pip uninstall numpy
@@ -411,14 +422,16 @@ python src/preditor.py --iterations 10000  # vs 1M padrão
 ### 3.4 Problema: Transição de Equipa Não Aplicada
 
 **Sintoma:**
-```
+
+```sh
 Época 25-26: Contabilidade (ELO=1623)
 Época 26-27: Marketing (ELO=1500) ← Deveria ser 1623!
 ```
 
-**Causa:** `handle_special_team_transitions()` não executou.
+__Causa:__ `handle_special_team_transitions()` não executou.
 
 **Diagnóstico:**
+
 ```bash
 # Ver log de transições:
 grep -i "transição" mmr_tacaua.log
@@ -428,13 +441,14 @@ grep -i "transição" mmr_tacaua.log
 ```
 
 **Solução:**
+
 ```python
 # 1. Verificar detecção de modalidade em mmr_taçaua.py:
 if "andebol" in sport_name.lower() and "misto" in sport_name.lower():
     # Código deve entrar aqui para andebol misto
 
 # 2. Verificar se Contabilidade existe na época anterior:
-cat docs/output/elo_ratings/classificacao_ANDEBOL_MISTO_25_26.csv | grep Contabilidade
+cat docs/output/elo_ratings/classificacao_ANDEBOL_MISTO_<época>.csv | grep Contabilidade
 
 # 3. Se ausente, adicionar manualmente:
 # Em mmr_taçaua.py, função load_previous_elos():
@@ -446,6 +460,7 @@ previous_elos["Contabilidade"] = 1623  # Hardcoded temporário
 ### 3.5 Problema: Empates em Voleibol
 
 **Sintoma:**
+
 ```csv
 Jornada,Equipa 1,Equipa 2,Sets 1,Sets 2
 8,Gestão,Economia,1,1  ← IMPOSSÍVEL! (volei é melhor de 3)
@@ -454,6 +469,7 @@ Jornada,Equipa 1,Equipa 2,Sets 1,Sets 2
 **Causa:** Dados mal inseridos no Excel (jogo interrompido?).
 
 **Diagnóstico:**
+
 ```bash
 # Encontrar jogos anómalos de voleibol:
 grep "VOLEI" docs/output/csv_modalidades/VOLEIBOL_MASCULINO_26_27.csv | \
@@ -461,6 +477,7 @@ grep "VOLEI" docs/output/csv_modalidades/VOLEIBOL_MASCULINO_26_27.csv | \
 ```
 
 **Solução:**
+
 ```bash
 # 1. Corrigir Excel manualmente (sets devem ser 2-0, 2-1, 1-2, 0-2)
 
@@ -489,7 +506,7 @@ pip install --upgrade numpy scipy scikit-learn pandas
 # 3. Testar pipeline completo:
 cd src
 python extrator.py && \
-python mmr_taçaua.py --season 25_26 && \
+python mmr_taçaua.py && \
 python calibrator.py && \
 python preditor.py --season 26_27 --iterations 1000  # Teste rápido
 
@@ -725,6 +742,7 @@ jobs:
 **Problema:** Workflow falha com "ModuleNotFoundError: numpy"
 
 **Solução:**
+
 ```yaml
 # Adicionar cache:
 - name: Cache Python deps
@@ -791,21 +809,22 @@ time python src/preditor.py        # ~5 min (1M iter)
 
 ---
 
-## Conclusão
+## Recursos e Referências
 
-**Pipeline maduro e robusto:**
-- ✓ Automação completa via GitHub Actions
-- ✓ Troubleshooting documentado (5 cenários comuns)
-- ✓ Procedimentos operacionais detalhados
-- ✓ Checklist de nova modalidade (12 passos)
+**Pipeline completo documentado:**
 
-**SLOs recomendados:**
+- Automação via GitHub Actions
+- Troubleshooting documentado (5 cenários comuns)
+- Procedimentos operacionais detalhados
+- Checklist de nova modalidade (12 passos)
+
+**Parâmetros de qualidade:**
+
 - Atualização semanal: <10 min (manual) | <5 min (automática)
-- Disponibilidade site: >99.5% uptime
-- Precisão (Brier Score): <0.15 para modalidades principais
+- Brier Score target: <0.15 para modalidades principais
+- RMSE Position target: <2.5
 
 ---
 
 **Última atualização:** 2026-03-02  
-**Autor:** Sistema Taça UA  
-**Próxima revisão:** 2026-09-01 (início época 26-27)
+**Autor:** Sistema Taça UA

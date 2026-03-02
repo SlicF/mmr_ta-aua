@@ -42,7 +42,8 @@ RMSE = √[(1/N) Σ(pos_prevista - pos_real)²]
 Inadequado para desportos onde **variância > média** (overdispersion).
 
 **Exemplo empírico (Futsal Masculino 25-26):**
-```
+
+```ini
 μ = 3.25 golos/equipa
 σ² = 11.89
 σ²/μ = 3.66 > 1  ← OVERDISPERSION!
@@ -53,31 +54,37 @@ Inadequado para desportos onde **variância > média** (overdispersion).
 ### Modelo Matemático
 
 Modelo hierárquico:
+
 1. **Taxa λ varia por jogo** segundo distribuição Gamma:
-   ```
-   λ ~ Gamma(k, θ)  onde θ = μ/k
-   ```
+
+```sh
+λ ~ Gamma(k, θ)  onde θ = μ/k
+```
 
 2. **Golos dado λ** segue Poisson:
-   ```
-   Y | λ ~ Poisson(λ)
-   ```
+
+```sh
+Y | λ ~ Poisson(λ)
+```
 
 3. **Marginalização** resulta em Negative Binomial:
-   ```
-   Y ~ NegBinom(k, p)  onde p = k/(k+μ)
-   ```
+
+```sh
+Y ~ NegBinom(k, p)  onde p = k/(k+μ)
+```
 
 ### Derivação de k (Parâmetro de Dispersão)
 
 **Propriedades da Gamma-Poisson:**
-```
+
+```sh
 E[Y] = μ
 Var[Y] = μ + μ²/k
 ```
 
 **Resolver para k:**
-```
+
+```ini
 σ² = μ + μ²/k
 σ² - μ = μ²/k
 k = μ² / (σ² - μ)
@@ -88,7 +95,8 @@ k = μ² / (σ² - μ)
 **Problema:** k pequeno → overdispersion extrema → overfitting
 
 Análise de variância do multiplicador Gamma:
-```
+
+```ini
 Gamma(k, θ) tem variance = k×θ² = μ²/k
 
 Coeficiente de variação: CV = √(Var)/E = 1/√k
@@ -100,10 +108,12 @@ k=10 → CV=32%  (bom)
 ```
 
 **Empiricamente:**
+
 - Datasets com k<3 tendem a gerar previsões com Brier Score pior (~+2-4%)
 - k≥3 protege contra outliers em datasets pequenos (<50 jogos)
 
 **Implementação:**
+
 ```python
 def fit_gamma_poisson(scores: List[int]) -> float:
     """
@@ -153,10 +163,11 @@ k_final = max(3.0, 1.222) = 3.0  ← FLOOR ATIVADO!
 ```
 
 **Interpretação:**
+
 - k=3.0 permite que alguns jogos tenham λ muito acima de 3.25 (goleadas)
 - Outros jogos têm λ abaixo (defesas fortes)
 - Variância modelada: μ + μ²/k = 3.25 + 10.56/3 = 6.77 (vs 11.89 obs)
-  - Nota: k=3.0 ainda subestima variância, mas é conservador (evita overfitting)
+   - Nota: k=3.0 ainda subestima variância, mas é conservador (evita overfitting)
 
 ---
 
@@ -167,7 +178,8 @@ k_final = max(3.0, 1.222) = 3.0  ← FLOOR ATIVADO!
 **Empates não são aleatórios:** Equipas com ELO similar empatam mais.
 
 **Evidência empírica (Futsal Masculino):**
-```
+
+```ini
 |ΔElo| < 50:   12.3% empates
 |ΔElo| 50-150:  8.1% empates
 |ΔElo| > 150:   2.7% empates
@@ -176,7 +188,8 @@ k_final = max(3.0, 1.222) = 3.0  ← FLOOR ATIVADO!
 ### Modelo Logit
 
 **Fórmula:**
-```
+
+```ini
 P(empate | ΔElo) = 1 / (1 + exp(-z))
 
 Onde:
@@ -284,6 +297,7 @@ P(empate | ΔElo=500) = 1/(1 + exp(1.82 + 2.55 - 0.325)) = 0.012 (1.2%)
 ```
 
 **Interpretação:**
+
 - Equipas com ELO idêntico: ~14% chance de empate
 - Diferença de 100 ELO: ~8% (metade da probabilidade)
 - Diferença de 500 ELO: ~1% (quase impossível)
@@ -333,7 +347,7 @@ Calibrar **margem de vitória** condicional a resultado (≠ empate).
 
 ### Modelo Linear
 
-```
+```ini
 Margem_esperada = β₀ + β₁ × |ΔElo|
 
 Onde:
@@ -385,6 +399,7 @@ margem_esperada(ΔElo=0)   = 4.12 golos
 ```
 
 **Interpretação:**
+
 - R²=0.34 é **moderado** (esperado: muito ruído em desportos)
 - Equipas com +200 ELO vencem por ~10 golos a mais que equipas equilibradas
 - Baseline (ΔElo=0): Vencedor típico ganha por ~4 golos em andebol
@@ -395,13 +410,13 @@ margem_esperada(ΔElo=0)   = 4.12 golos
 
 ### Pipeline Completo
 
-```
+```ini
 ┌──────────────────────────────────────────────────────────────┐
 │  run_full_calibration_pipeline()                             │
 └──────────────────────────────────────────────────────────────┘
     │
     ├─► [1/5] HistoricalDataLoader
-    │         • Carrega CSVs (épocas 24_25, 25_26)
+    │         • Carrega CSVs (épocas históricas)
     │         • Filtra ausências (~4.5% removidos)
     │         • Normaliza team names
     │         Output: games[] (N~300-500 jogos)
@@ -504,10 +519,10 @@ def calibrate_draw_model(games: List[Dict]):
 
 | Parâmetro | Método | Critério de Aceitação |
 |-----------|--------|----------------------|
-| **k (dispersion)** | Método dos momentos | k ∈ [3.0, 50.0], σ²/μ > 1.1 |
-| **draw_model** | R² do logit | R² > 0.15 OU n_draws < min_threshold |
-| **margin_model** | R² linear | R² > 0.10 (aceitável: muito ruído) |
-| **draw_multiplier** | Error minimization | \|pred_rate - hist_rate\| < 1% |
+| __k (dispersion)__ | Método dos momentos | k ∈ [3.0, 50.0], σ²/μ > 1.1 |
+| __draw_model__ | R² do logit | R² > 0.15 OU n_draws < min_threshold |
+| __margin_model__ | R² linear | R² > 0.10 (aceitável: muito ruído) |
+| __draw_multiplier__ | Error minimization | \|pred_rate - hist_rate\| < 1% |
 
 ### Testes Estatísticos Aplicados
 
@@ -602,10 +617,11 @@ def brier_score_decomposition(predictions, outcomes):
 ```
 
 **Interpretação:**
-- **base_goals=3.25:** Média histórica de golos por equipa
+
+- __base_goals=3.25:__ Média histórica de golos por equipa
 - **k=8.2:** Overdispersion moderada (σ²/μ=3.66)
-- **draw_rate=7.9%:** Taxa histórica de empates (baixa)
-- **draw_multiplier=1.4:** Amplifica probabilidades logísticas
+- __draw_rate=7.9%:__ Taxa histórica de empates (baixa)
+- __draw_multiplier=1.4:__ Amplifica probabilidades logísticas
 
 ### Andebol Misto
 
@@ -625,9 +641,10 @@ def brier_score_decomposition(predictions, outcomes):
 ```
 
 **Interpretação:**
-- **base_goals=22.7:** Muito maior que futsal (desporto de alta pontuação)
+
+- __base_goals=22.7:__ Muito maior que futsal (desporto de alta pontuação)
 - **k=20.48:** Overdispersion baixa (σ²/μ ≈ 2.0)
-- **elo_adjustment_limit=0.45:** Limita spreads extremos (evita lambdas 6-35)
+- __elo_adjustment_limit=0.45:__ Limita spreads extremos (evita lambdas 6-35)
 
 ### Voleibol Masculino
 
@@ -647,7 +664,8 @@ def brier_score_decomposition(predictions, outcomes):
 ```
 
 **Interpretação:**
-- **p_sweep_base=0.512:** ~51% jogos terminam 2-0 (não 2-1)
+
+- __p_sweep_base=0.512:__ ~51% jogos terminam 2-0 (não 2-1)
 - **Melhor Brier Score (0.133):** Modelo de sets mais previsível
 
 ### Basquetebol Masculino (Gaussiano)
@@ -666,7 +684,8 @@ def brier_score_decomposition(predictions, outcomes):
 ```
 
 **Interpretação:**
-- **base_score=9.51:** Pontuação média (3x3, até 21 pts)
+
+- __base_score=9.51:__ Pontuação média (3x3, até 21 pts)
 - **sigma=5.2:** Alta variância (desporto volátil)
 - **Modelo Gaussiano:** Não usa Gamma-Poisson (pontos contínuos)
 

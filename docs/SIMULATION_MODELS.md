@@ -7,7 +7,7 @@
 3. [MODELO B: Gamma-Poisson com Empates Forçados (Andebol)](#model-b)
 4. [MODELO C: Gaussiano Truncado (Basquete 3x3)](#model-c)
 5. [MODELO D: Sets Estocásticos (Voleibol)](#model-d)
-6. [Sistema de Empates Dinâmicos](#draw-system  )
+6. [Sistema de Empates Dinâmicos](#draw-system)
 7. [Validação e Métricas](#validation)
 8. [Trade-offs de Design](#tradeoffs)
 
@@ -41,6 +41,7 @@
 - **Futebol de 7 Masculino**
 
 Características:
+
 - Baixa pontuação (μ ≈ 2-4 golos/equipa)
 - Empates naturais raros (<10%) mas existem
 - Overdispersion: σ²/μ ≈ 3-4
@@ -127,8 +128,8 @@ def simulate_poisson_with_dynamic_draws(
 
 ### Exemplo Numérico Detalhado
 
-**Cenário:** Eng. Informática (ELO=1580) vs Tradução (ELO=1420)  
-**Parâmetros:** base_goals=3.25, k=8.2, draw_rate=7.9%, multiplier=1.4
+__Cenário:__ Eng. Informática (ELO=1580) vs Tradução (ELO=1420)  
+__Parâmetros:__ base_goals=3.25, k=8.2, draw_rate=7.9%, multiplier=1.4
 
 ```python
 # ── ITERAÇÃO 1 ────────────────────────────────────────────────────────
@@ -166,11 +167,13 @@ score_Tradução = np.random.poisson(2.15) = 2 golos
 ```
 
 **Análise probabilística:**
+
 - P(EI vence) segundo ELO: 1/(1 + 10^(-160/250)) = 70.8%
 - P(empate) segundo modelo: 9.7%
 - P(Tradução vence): 19.5%
 
 Após 10.000 simulações:
+
 - EI vence: 71.2% (vs 70.8% esperado) ✓
 - Empates: 9.4% (vs 9.7% esperado) ✓
 - Tradução vence: 19.4% (vs 19.5% esperado) ✓
@@ -181,15 +184,16 @@ Após 10.000 simulações:
 
 ### Diferenças vs Modelo A
 
-1. **Alta pontuação:** base_goals ≈ 20-23 (não 3)
+1. __Alta pontuação:__ base_goals ≈ 20-23 (não 3)
 2. **Empates mais comuns:** ~5.5% (vs 1-2% futsal feminino)
 3. **Forced draw fraction:** 55% (conservador, evita empates Poisson excessivos)
-4. **elo_adjustment_limit:** 0.45 (baixo! evita spreads irrealistas tipo 6-35 golos)
+4. __elo_adjustment_limit:__ 0.45 (baixo! evita spreads irrealistas tipo 6-35 golos)
 
 ### Justificação Técnica: Limite de Ajuste ELO
 
-**Problema:** Com base_goals=22.7 e limit=1.2 (padrão futsal):
-```
+__Problema:__ Com base_goals=22.7 e limit=1.2 (padrão futsal):
+
+```ini
 lambda_max = 22.7 × (1 + 1.2) = 49.9 golos  ← Absurdo!
 lambda_min = 22.7 × (1 - 1.2) = 0 golos     ← Impossível!
 
@@ -197,7 +201,8 @@ Delta máximo = 49.9 - 0 = 49.9 golos → Irrealista
 ```
 
 **Solução:** limit=0.45
-```
+
+```ini
 lambda_max = 22.7 × (1 + 0.45) = 32.9 golos  ← Plausível
 lambda_min = 22.7 × (1 - 0.45) = 12.5 golos
 
@@ -328,6 +333,7 @@ score_gestão = int(N(10.01, 5.2)) = 12 pts
 ```
 
 **Caso com prolongamento:**
+
 ```python
 # Se tempo regulamentar terminar 10-10:
 score_a, score_b = 10, 10
@@ -388,7 +394,8 @@ def simulate_voleibol(
 ### Análise Probabilística
 
 **Calibração histórica (Voleibol Masculino 25-26):**
-```
+
+```sh
 N_jogos = 38
 N_sweeps_2-0 = 19
 N_tight_2-1 = 19
@@ -397,6 +404,7 @@ p_sweep_obs = 19/38 = 0.500 (50%)
 ```
 
 **Predições do modelo:**
+
 ```python
 # ELOs iguais (ΔElo=0):
 p_sweep = 0.512 + 0 = 0.512 (51.2%)
@@ -414,7 +422,8 @@ p_sweep = 0.512 + 0.4 = 0.912
 **Exemplo numérico:**
 
 Tradução (ELO=1550) vs Economia (ELO=1450):
-```
+
+```ini
 elo_diff = 100
 p_Tradução_wins = 1/(1 + 10^(-100/500)) = 0.614 (61.4%)
 
@@ -436,8 +445,9 @@ RESULTADO: Tradução 2-1 Economia ✓
 **Problema observado:** Poisson puro gera empates ~1.1% (Futsal), mas histórico é ~7.9%.
 
 **Soluções tentadas:**
-1. ✗ **Aumentar forced_draw_fraction:** Funciona mas ignora ELO (equipas muito díspares empatam)
-2. ✗ **Reduzir base_goals:** Diminui golos totais (não apenas empates)
+
+1. ✗ __Aumentar forced_draw_fraction:__ Funciona mas ignora ELO (equipas muito díspares empatam)
+2. ✗ __Reduzir base_goals:__ Diminui golos totais (não apenas empates)
 3. ✓ **Modelo logístico calibrado:** Empates mais prováveis quando ELOs similares
 
 ### Implementação Hierárquica
@@ -487,7 +497,7 @@ def calculate_draw_probability(elo_a, elo_b, params):
 
 ### Comparação Numérica
 
-**Cenário:** base_draw_rate=7.9% (Futsal Masculino)
+__Cenário:__ base_draw_rate=7.9% (Futsal Masculino)
 
 | ΔElo | Logit (calibrado) | Gaussiano (fallback) | Diferença |
 |------|-------------------|----------------------|-----------|
@@ -497,7 +507,7 @@ def calculate_draw_probability(elo_a, elo_b, params):
 | 200 | 5.7% × 1.4 = 8.0% | 7.9% | +0.1pp |
 | 400 | 1.4% × 1.4 = 2.0% | 1.6% | +0.4pp |
 
-**Conclusão:** Logit mais realista (considera quadrático), Gaussiano aceitável se n_draws<5.
+__Conclusão:__ Logit mais realista (considera quadrático), Gaussiano aceitável se n_draws<5.
 
 ---
 
@@ -515,7 +525,7 @@ def calculate_draw_probability(elo_a, elo_b, params):
 
 ### RMSE de Posição Final
 
-```
+```ini
 RMSE = √[(1/N) Σ(pos_prevista - pos_real)²]
 
 Resultados (época 25-26):
@@ -599,9 +609,9 @@ validate_model_consistency(futsal_model, n_simulations=10000)
 
 | Abordagem | Vantagens | Desvantagens | Quando Usar |
 |-----------|-----------|--------------|-------------|
-| **Forçados (fração fixa)** | Simples, calibrável | Ignora ELO | n_draws < 5 |
-| **Gaussiano (ΔElo)** | Dinâmico, sem overfitting | Menos preciso | 5 ≤ n_draws < 10 |
-| **Logit (calibrado)** | Máxima precisão | Requer ≥10 empates | n_draws ≥ 10 ✓ |
+| __Forçados (fração fixa)__ | Simples, calibrável | Ignora ELO | n_draws < 5 |
+| __Gaussiano (ΔElo)__ | Dinâmico, sem overfitting | Menos preciso | 5 ≤ n_draws < 10 |
+| __Logit (calibrado)__ | Máxima precisão | Requer ≥10 empates | n_draws ≥ 10 ✓ |
 
 **Decisão:** Hierarquia adaptativa (logit → gaussiano → forçado).
 
@@ -618,15 +628,18 @@ validate_model_consistency(futsal_model, n_simulations=10000)
 ### 4. Floor k≥3.0: Custo vs Benefício
 
 **Custo:**
+
 - Pode subestimar variância em modalidades naturalmente muito voláteis
 - k_estimated=1.2 → k_floored=3.0 é grande ajuste (+150%)
 
 **Benefício:**
+
 - Proteção robusta contra overfitting (Brier melhora ~2-4% out-of-sample)
 - Datasets universitários pequenos (~30-120 jogos) beneficiam
 
 **Validação empírica:**
-```
+
+```ini
 Com k=1.2 (sem floor): BS=0.156, RMSE=2.45
 Com k=3.0 (floored):    BS=0.138, RMSE=1.83
 
@@ -637,18 +650,21 @@ Com k=3.0 (floored):    BS=0.138, RMSE=1.83
 
 ---
 
-## Conclusão
+## Resumo dos Modelos
 
-**Modelos validados e em produção:**
-- ✓ Gamma-Poisson com empates dinâmicos (Futsal, Futebol 7, Andebol)
-- ✓ Gaussiano truncado com prolongamento (Basquete 3x3)
-- ✓ Sets estocásticos (Voleibol)
+**Modelos implementados:**
 
-**Métricas atingidas:**
-- Brier Score: 0.133-0.151 (target <0.15) ✓
-- RMSE Position: 1.63-2.18 (target <2.5) ✓
+- Gamma-Poisson com empates dinâmicos (Futsal, Futebol 7, Andebol)
+- Gaussiano truncado com prolongamento (Basquete 3x3)
+- Sets estocásticos (Voleibol)
+
+**Métricas dos modelos:**
+
+- Brier Score: 0.133-0.151 (target <0.15)
+- RMSE Position: 1.63-2.18 (target <2.5)
 
 **Próximos passos:**
+
 1. Testar Negative Binomial direta (scipy.nbinom) vs Gamma-Poisson hierárquica
 2. Incorporar home advantage (~5-10% boost histórico)
 3. Modelar correlação inter-sets em voleibol (atualmente independentes)

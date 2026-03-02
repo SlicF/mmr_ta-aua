@@ -6,7 +6,6 @@ Sistema de **ranking ELO adaptativo** e **simulação Monte Carlo** para competi
 Combina modelo ELO modificado (K-factor dinâmico) com calibração estatística Gamma-Poisson e simulação estocástica.
 
 **Versão:** 2.1  
-**Época atual:** 25-26  
 **Linguagem:** Python 3.8+  
 **Dependências críticas:** numpy, scipy, sklearn, pandas
 
@@ -14,7 +13,7 @@ Combina modelo ELO modificado (K-factor dinâmico) com calibração estatística
 
 ## Pipeline Completo de Dados
 
-```
+```ini
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    FASE 1: EXTRAÇÃO DE DADOS                            │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -31,9 +30,8 @@ Combina modelo ELO modificado (K-factor dinâmico) com calibração estatística
               │  CSV files/modalidade ◀┘
               ▼
      docs/output/csv_modalidades/
-     ├── FUTSAL MASCULINO_25_26.csv
-     ├── ANDEBOL MISTO_25_26.csv
-     └── ... (16 ficheiros)
+     ├── <modalidade>_<época>.csv
+     └── (múltiplos ficheiros por modalidade/época)
 
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                  FASE 2: CÁLCULO DE ELO RATINGS                         │
@@ -64,9 +62,9 @@ Combina modelo ELO modificado (K-factor dinâmico) com calibração estatística
               ▼
      docs/output/elo_ratings/
      ├── classificacao_FUTSAL MASCULINO_25_26.csv
-     ├── elo_history_FUTSAL MASCULINO_25_26.json
-     └── backtest_summary_FUTSAL MASCULINO.json
-
+     ├── classificacao_<modalidade>_<época>.csv
+     ├── elo_history_<modalidade>_<época>.json
+     └── backtest_summary_<modalidade>.json
 ┌─────────────────────────────────────────────────────────────────────────┐
 │              FASE 3: CALIBRAÇÃO DE PARÂMETROS                           │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -147,7 +145,7 @@ Combina modelo ELO modificado (K-factor dinâmico) com calibração estatística
               ▼
      docs/output/previsoes/
      ├── forecast_FUTSAL MASCULINO_2026.csv
-     └── previsoes_FUTSAL MASCULINO_2026_hardset.csv
+     ├── forecast_<modalidade>_<ano>.csv
 ```
 
 ---
@@ -157,7 +155,8 @@ Combina modelo ELO modificado (K-factor dinâmico) com calibração estatística
 ### 1. Sistema ELO Modificado
 
 #### Fórmula Base
-```
+
+```ini
 ΔElo_A = K_factor × (S_real - S_expected)
 
 Onde:
@@ -167,9 +166,10 @@ Onde:
 ```
 
 **Justificação E=250:**
-- Xadrez: 85% skill, 15% sorte → E=400
-- Desportos universitários: 60% skill, 40% sorte → E=250
-- Validação: ΔElo=200 → P(vitória)=73% vs 72% observado (fit R²=0.992)
+
+- E-factor reduzido (vs xadrez E=400) para aumentar variância do sistema
+- Valor calibrado para relação com ELOs iniciais: 1000 (padrão), 500 (equipas novas), 750 (promoções)
+- Validação empírica: ΔElo=200 → P(vitória)=73% vs 72% observado (fit R²=0.992)
 
 #### K-factor Dinâmico
 
@@ -206,6 +206,7 @@ def calculate_score_proportion(score1, score2):
 ```
 
 **Impacto observado:**
+
 - K médio observado = 102 (vs esperado 100) ✓ Validado
 - Range: ~65 (empates late-season) até ~210 (goleadas início época)
 
@@ -241,8 +242,10 @@ normalize_team_name("Traduçao") → "Tradução"
 ```
 
 **Casos especiais:**
+
 - **Transições entre épocas:** Contabilidade → Marketing (andebol 24-25 → 25-26)
-  - ELO transferido automaticamente via `handle_special_team_transitions()`
+   - ELO transferido automaticamente via `handle_special_team_transitions()`
+
 - **Siglas:** "Engenharia Informática" → "EI"
 - **Erros conhecidos:** "EGO" → "EGI"
 
@@ -300,6 +303,7 @@ class StandingsCalculator:
 ```
 
 **Critérios de desempate (hierárquicos):**
+
 1. Pontos totais
 2. Diferença de golos (total)
 3. Confronto direto (se 2 equipas empatadas)
@@ -311,21 +315,23 @@ class StandingsCalculator:
 ### 5. Filtragem de Jogos
 
 **Jogos removidos do cálculo ELO:**
+
 - ✗ Placeholders de playoffs: "1º Class.", "Vencedor QF1"
 - ✗ Faltas de comparência (~4.5% dos jogos)
-  - Razão: Distorcem médias (resultado típico 3-0 WO não reflete ELO)
-  - Impacto: +1-2% precisão (Brier Score melhora ~0.002-0.004)
+   - Razão: Distorcem médias (resultado típico 3-0 WO não reflete ELO)
+   - Impacto: +1-2% precisão (Brier Score melhora ~0.002-0.004)
 
 **Jogos removidos da calibração (mas mantidos no ELO):**
+
 - ✗ Jogos com ausência (campo "Falta de Comparência" ≠ vazio)
 - ✗ Modelos de empate instáveis (<5 empates observados em divisão)
-  - Fallback: Usar modelo gaussiano com `base_draw_rate` histórico
+   - Fallback: Usar modelo gaussiano com `base_draw_rate` histórico
 
 ---
 
 ## Estrutura de Outputs
 
-```
+```ini
 docs/output/
 ├── csv_modalidades/         # Fase 1: Extração
 │   └── {MODALIDADE}_{ÉPOCA}.csv
@@ -348,13 +354,14 @@ docs/output/
 
 | Módulo | Operação Crítica | Complexidade | Runtime Típico |
 |--------|------------------|--------------|----------------|
-| **extrator.py** | Normalização nomes | O(N×M) N=jogos, M=mappings | ~30s |
-| **mmr_taçaua.py** | Cálculo ELO iterativo | O(N) N=jogos | ~2-3 min |
-| **calibrator.py** | Logistic Regression | O(N log N) sklearn solver | ~1 min |
-| **preditor.py** | Monte Carlo (10k iter) | O(I×T×G) I=iter, T=equipas, G=jogos | ~30s |
-| **preditor.py** | Deep (1M iter) | O(I×T×G) com I=1M | ~5 min |
+| __extrator.py__ | Normalização nomes | O(N×M) N=jogos, M=mappings | ~30s |
+| __mmr_taçaua.py__ | Cálculo ELO iterativo | O(N) N=jogos | ~2-3 min |
+| __calibrator.py__ | Logistic Regression | O(N log N) sklearn solver | ~1 min |
+| __preditor.py__ | Monte Carlo (10k iter) | O(I×T×G) I=iter, T=equipas, G=jogos | ~30s |
+| __preditor.py__ | Deep (1M iter) | O(I×T×G) com I=1M | ~5 min |
 
 **Otimização implementada:**
+
 - ProcessPoolExecutor: Paraleliza simulações (~5-10x speedup)
 - numpy vetorizado: Substitui loops Python nativos
 - Caching de ELOs: Evita recálculo em cada iteração
@@ -379,10 +386,10 @@ multiprocessing        # Stdlib, paralelização
 
 ## Próximos Passos
 
-1. **[CALIBRATION_DETAILED.md](CALIBRATION_DETAILED.md)** - Derivações matemáticas completas
-2. **[SIMULATION_MODELS.md](SIMULATION_MODELS.md)** - Pseudo-código dos 4 modelos
-3. **[OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md)** - Procedimentos operacionais
-4. **[SPECIAL_CASES.md](SPECIAL_CASES.md)** - Edge cases e hardcoded logic
+1. __[CALIBRATION_DETAILED.md](CALIBRATION_DETAILED.md)__ - Derivações matemáticas completas
+2. __[SIMULATION_MODELS.md](SIMULATION_MODELS.md)__ - Pseudo-código dos 4 modelos
+3. __[OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md)__ - Procedimentos operacionais
+4. __[SPECIAL_CASES.md](SPECIAL_CASES.md)__ - Edge cases e hardcoded logic
 
 ---
 

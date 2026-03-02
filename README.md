@@ -11,7 +11,7 @@ Sistema para classificação e previsão de resultados para a **Taça Universida
 
 ## K-factor Dinâmico
 
-docs\output\CALIBRATION_HISTORY.jsonK = 100 \times M_{fase} \times M_{proporção}docs\output\CALIBRATION_HISTORY.json
+$$K = 100 \times M_{fase} \times M_{proporção}$$
 
 - __K_base = 100__ (vs xadrez 32; desportos mais incertos)
 - __M_fase:__ Início >150, Regular 1.0, E3L 0.75, Playoffs 1.5
@@ -23,8 +23,9 @@ Validação: K observado = 102 (vs esperado 100) ✓
 
 docs\output\CALIBRATION_HISTORY.jsonP(vitória) = \frac{1}{1 + 10^{-(\Delta ELO)/250}}docs\output\CALIBRATION_HISTORY.json
 
-Desportos = 60% skill + 40% sorte (vs xadrez 85% skill)
-Validação: ΔEloReferral=200 → 73% vitória predita vs 72% observada (fit 99.2%) ✓
+E-factor reduzido para aumentar variância do sistema e calibrado para relação com ELOs iniciais (1000, 500, 750).
+
+Validação: ΔElo=200 → 73% vitória predita vs 72% observada (fit 99.2%) ✓
 
 ## Parâmetros Calibrados (Época 25-26)
 
@@ -64,7 +65,7 @@ Sistema validado com time-travel: simula previsões de momentos passados vs resu
 - **Brier Score:** 0.133-0.175 (target <0.15)
 - **RMSE Position:** 1.6-2.8 (target <2.5)
 
-**Conclusão:** Sistema muito preciso para desportos amadores
+Métricas dentro dos targets estabelecidos (BS <0.15 para maioria, RMSE <2.5).
 
 ## Documentação Completa
 

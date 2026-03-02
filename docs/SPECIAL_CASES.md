@@ -187,7 +187,8 @@ adjusted = handle_course_merger(
 
 **Problema:**  
 Excel oficial contém jogos futuros com placeholders:
-```
+
+```ini
 Equipa 1         | Equipa 2         | Golos 1 | Golos 2
 1º Class. 1ª Div | 2º Class. 2ª Div |         |
 Vencedor QF1     | Vencedor QF2     |         |
@@ -196,7 +197,7 @@ Vencedor QF1     | Vencedor QF2     |         |
 **Impacto:**  
 Normalização falha → "1º Class." tratado como equipa real → rankings corrompidos.
 
-**Solução:** Filtrar via regex em `normalize_team_name()`.
+__Solução:__ Filtrar via regex em `normalize_team_name()`.
 
 ```python
 # Ficheiro: src/mmr_taçaua.py
@@ -318,8 +319,8 @@ K_playoff = 100 × 1.5 × 1.047 = 157
 
 ### Caso 2.3: Formato Knockout vs Round-Robin
 
-**Problema:**  
-Algumas modalidades têm **apenas playoffs** (sem fase de grupos).  
+__Problema:__  
+Algumas modalidades têm __apenas playoffs__ (sem fase de grupos).  
 Divisão não existe → `self.div_col = None`.
 
 **Solução:** Inferir "grupo único" se ausência de colunas.
@@ -375,6 +376,7 @@ Equipa não comparece → resultado automático 3-0 (ou 2-0 sets em voleibol).
 Campo "Falta de Comparência" ≠ vazio.
 
 **Problemas:**
+
 1. **Distorção de médias:** WO 3-0 não reflete habilidade ELO real.
 2. **Calibração enviesada:** Golos inflacionados artificialmente.
 
@@ -410,7 +412,7 @@ def _load_single_csv(self, csv_path: Path) -> List[Dict]:
     return games
 ```
 
-**Mas no ELO (mmr_taçaua.py), ausências SÃO processadas:**
+__Mas no ELO (mmr_taçaua.py), ausências SÃO processadas:__
 
 ```python
 # Ficheiro: src/mmr_taçaua.py
@@ -485,6 +487,7 @@ Resultado parcial no Excel (ex: 1-0 aos 20 min).
 
 **Problema:**  
 Mesmo curso aparece como:
+
 - "Tradução" (correto)
 - "Traduçao" (sem til)
 - "TRADUÇÃO" (uppercase)
@@ -695,7 +698,7 @@ def _infer_groups_from_games(self, df_div):
 
 **Exemplo:**
 
-```
+```ini
 Jogos:
   EI vs Gestão
   EI vs Economia
@@ -714,7 +717,7 @@ Componentes:
 
 ### Caso 6.1: Ambiguidade Futebol vs Futsal
 
-**Problema:**  
+__Problema:__  
 Ficheiro "FUTEBOL_DE_7_MASCULINO_25_26.csv" pode ser confundido com futsal.
 
 **Solução:** Prioridade de keywords.
@@ -867,10 +870,10 @@ for csv_file in glob("docs/output/csv_modalidades/*.csv"):
 
 ---
 
-## Conclusão
+## Resumo e Manutenção
 
-**Edge cases documentados:** 15+ cenários críticos  
-**Cobertura:**
+**Edge cases documentados:** 15+ cenários críticos
+
 - ✓ Transições de equipas (renomeações, fusões)
 - ✓ Formatos de playoff variáveis (E3L, knockout)
 - ✓ Gestão de ausências (~4.5% jogos filtrados)
@@ -879,6 +882,7 @@ for csv_file in glob("docs/output/csv_modalidades/*.csv"):
 - ✓ Validação de dados (pre-checks)
 
 **Maintenance plan:**
+
 - Adicionar novos casos em KNOWN_TYPOS conforme aparecem
 - Atualizar config_cursos.json semestralmente
 - Revisar handle_special_team_transitions() no início de cada época
@@ -887,7 +891,8 @@ for csv_file in glob("docs/output/csv_modalidades/*.csv"):
 
 **Última atualização:** 2026-03-02  
 **Autor:** Sistema Taça UA  
-**Ficheiros relacionados:**  
-- `src/mmr_taçaua.py` (normalização, transições)  
-- `src/calibrator.py` (filtro de ausências)  
+**Ficheiros relacionados:**
+
+- `src/mmr_taçaua.py` (normalização, transições)
+- `src/calibrator.py` (filtro de ausências)
 - `docs/config/config_cursos.json` (mapeamentos)
