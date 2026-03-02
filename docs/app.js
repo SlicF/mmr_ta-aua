@@ -8250,7 +8250,7 @@ function createGameItem(game) {
         }
         // Adicionar badge de placeholder se aplicável
         if (isPlaceholder) {
-            dateStr += ' <span class="placeholder-badge" title="Data provisional - aguarda confirmação oficial">*</span>';
+            dateStr += ` <span class="placeholder-badge" title="${t('provisionalDatePlaceholder')}">*</span>`;
         }
     } else {
         dateStr = t('dateToSchedule');

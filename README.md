@@ -5,7 +5,7 @@ Sistema para classificação e previsão de resultados para a **Taça Universida
 ## Como Funciona
 
 1. **Extração (extrator.py)**: Lê Excel oficial, normaliza nomes, detecta desportos
-2. **ELO (mmr_taçaua.py)**: Calcula rankings com K-factor dinâmico (65-210)
+2. __ELO (mmr_taçaua.py)__: Calcula rankings com K-factor dinâmico (65-210)
 3. **Calibração (calibrator.py)**: Aprende parâmetros Gamma-Poisson de dados históricos
 4. **Previsão (preditor.py)**: Simula épocas 10k-1M vezes (Monte Carlo)
 
@@ -13,9 +13,9 @@ Sistema para classificação e previsão de resultados para a **Taça Universida
 
 docs\output\CALIBRATION_HISTORY.jsonK = 100 \times M_{fase} \times M_{proporção}docs\output\CALIBRATION_HISTORY.json
 
-- **K_base = 100** (vs xadrez 32; desportos mais incertos)
-- **M_fase:** Início >150, Regular 1.0, E3L 0.75, Playoffs 1.5
-- **M_proporção:** Goleadas +26%, Vitórias apertadas +7%
+- __K_base = 100__ (vs xadrez 32; desportos mais incertos)
+- __M_fase:__ Início >150, Regular 1.0, E3L 0.75, Playoffs 1.5
+- __M_proporção:__ Goleadas +26%, Vitórias apertadas +7%
 
 Validação: K observado = 102 (vs esperado 100) ✓
 
@@ -30,12 +30,12 @@ Validação: ΔEloReferral=200 → 73% vitória predita vs 72% observada (fit 99
 
 | Modalidade | base_goals | k | draw% | BS | RMSE |
 |---|---|---|---|---|---|
-| **Futsal M** | 3.25 | 8.2 | 7.9% | 0.138 | 1.83 ✓ |
-| **Futsal F** | 3.08 | 8.0 | 1.6% | 0.162 | 2.38 |
-| **Andebol** | 22.7 | 20.48 | 5.5% | 0.145 | 2.12 ✓ |
-| **Basquete M** | 9.51* | 3.0 | — | 0.151 | 2.18 |
-| **Voleibol M** | — | — | — | 0.133 | 1.63 ✓✓ |
-| **Futebol 7** | 3.92 | 9.4 | 9.8% | 0.175 | 2.78 |
+| __Futsal M__ | 3.25 | 8.2 | 7.9% | 0.138 | 1.83 ✓ |
+| __Futsal F__ | 3.08 | 8.0 | 1.6% | 0.162 | 2.38 |
+| __Andebol__ | 22.7 | 20.48 | 5.5% | 0.145 | 2.12 ✓ |
+| __Basquete M__ | 9.51* | 3.0 | — | 0.151 | 2.18 |
+| __Voleibol M__ | — | — | — | 0.133 | 1.63 ✓✓ |
+| __Futebol 7__ | 3.92 | 9.4 | 9.8% | 0.175 | 2.78 |
 
 *Basquete usa modelo Gaussiano, não Gamma-Poisson
 
@@ -64,14 +64,14 @@ Sistema validado com time-travel: simula previsões de momentos passados vs resu
 - **Brier Score:** 0.133-0.175 (target <0.15)
 - **RMSE Position:** 1.6-2.8 (target <2.5)
 
-**Conclusão:** Sistema muito preciso para desportos amaduros ✓
+**Conclusão:** Sistema muito preciso para desportos amadores
 
 ## Documentação Completa
 
 1. **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Pipeline, módulos, fluxos
-2. **[CALIBRATION_DETAILED.md](docs/CALIBRATION_DETAILED.md)** - Fórmulas, validação
-3. **[SIMULATION_MODELS.md](docs/SIMULATION_MODELS.md)** - 4 modelos de simulação
-4. **[OPERATIONS_GUIDE.md](docs/OPERATIONS_GUIDE.md)** - Procedimentos, troubleshooting
-5. **[SPECIAL_CASES.md](docs/SPECIAL_CASES.md)** - Transições, playoffs, normalização
-6. **[BACKTEST_RESULTS.md](docs/output/BACKTEST_RESULTS.md)** - Métricas validação
-7. **[CALIBRATION_HISTORY.json](docs/output/CALIBRATION_HISTORY.json)** - Histórico parâmetros
+2. __[CALIBRATION_DETAILED.md](docs/CALIBRATION_DETAILED.md)__ - Fórmulas, validação
+3. __[SIMULATION_MODELS.md](docs/SIMULATION_MODELS.md)__ - 4 modelos de simulação
+4. __[OPERATIONS_GUIDE.md](docs/OPERATIONS_GUIDE.md)__ - Procedimentos, troubleshooting
+5. __[SPECIAL_CASES.md](docs/SPECIAL_CASES.md)__ - Transições, playoffs, normalização
+6. __[BACKTEST_RESULTS.md](docs/output/BACKTEST_RESULTS.md)__ - Métricas validação
+7. __[CALIBRATION_HISTORY.json](docs/output/CALIBRATION_HISTORY.json)__ - Histórico parâmetros
