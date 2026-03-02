@@ -118,69 +118,6 @@ if "futsal" in sport_name.lower() or \
 
 ---
 
-### Caso 1.2: Fusão de Cursos (Gestão + Economia → Gestão Pública)
-
-**Contexto:**  
-Dois cursos distintos fundiram-se num curso novo.  
-Equipas separadas na época N, equipa combinada na época N+1.
-
-**Estratégia de ELO:**
-
-```python
-def handle_course_merger(old_teams, merging_names, new_name):
-    """
-    Funde ELOs de múltiplas equipas numa nova.
-    
-    Estratégia:
-        ELO_novo = média ponderada por jogos disputados
-        
-        Se não houver contagem de jogos:
-            ELO_novo = max(ELOs)  # Preservar o melhor
-    """
-    if new_name in old_teams:
-        # Novo nome já existe (não é fusão, é coexistência)
-        logger.warning(f"{new_name} já existe! Fusão ignorada")
-        return old_teams
-    
-    elos_to_merge = []
-    games_counts = []
-    
-    for name in merging_names:
-        if name in old_teams:
-            elos_to_merge.append(old_teams[name])
-            # Assumir contagem de jogos se disponível:
-            games_counts.append(old_teams.get(f"{name}_games", 10))
-            del old_teams[name]
-    
-    if not elos_to_merge:
-        logger.warning(f"Nenhuma equipa encontrada para fusão em {merging_names}")
-        return old_teams
-    
-    # Média ponderada
-    total_games = sum(games_counts)
-    weighted_elo = sum(
-        elo * (games / total_games)
-        for elo, games in zip(elos_to_merge, games_counts)
-    )
-    
-    old_teams[new_name] = round(weighted_elo)
-    logger.info(
-        f"✓ Fusão: {merging_names} → {new_name} "
-        f"(ELO={weighted_elo:.0f}, jogos={total_games})"
-    )
-    
-    return old_teams
-
-# Uso:
-adjusted = handle_course_merger(
-    old_teams,
-    merging_names=["Gestão", "Economia"],
-    new_name="Gestão Pública"
-)
-```
-
----
-
 ## <a name="playoff-formats"></a> 2. Formatos de Playoff Variáveis
 
 ### Caso 2.1: Placeholders de Playoff
@@ -611,7 +548,7 @@ if normalized in team_mappings:
 # Ficheiro: src/mmr_taçaua.py
 
 KNOWN_TYPOS = {
-    "EGO": "EGI",  # Erro comum: Gestão de Operações vs Informática
+    "EGO": "EGI", 
     "Eng. Compotacional": "Eng. Computacional",
     "Adminstração Pública": "Administração Pública",
     "Edcucação Básica": "Educação Básica",

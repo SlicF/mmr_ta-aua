@@ -21,7 +21,7 @@ Validação: K observado = 102 (vs esperado 100) ✓
 
 ## E-factor = 250 (Não 400)
 
-docs\output\CALIBRATION_HISTORY.jsonP(vitória) = \frac{1}{1 + 10^{-(\Delta ELO)/250}}docs\output\CALIBRATION_HISTORY.json
+$$P(vitória) = \frac{1}{1 + 10^{-(\Delta ELO)/250}}$$
 
 E-factor reduzido para aumentar variância do sistema e calibrado para relação com ELOs iniciais (1000, 500, 750).
 
@@ -48,7 +48,7 @@ Validação: ΔElo=200 → 73% vitória predita vs 72% observada (fit 99.2%) ✓
 
 ## Instalação & Uso
 
-`ash
+bash
 pip install -r requirements.txt
 cd src
 

@@ -207,7 +207,7 @@ def calculate_score_proportion(score1, score2):
 
 **Impacto observado:**
 
-- K médio observado = 102 (vs esperado 100) ✓ Validado
+- K médio observado = 102 (vs esperado 100)
 - Range: ~65 (empates late-season) até ~210 (goleadas início época)
 
 ---
