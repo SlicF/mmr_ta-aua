@@ -2770,6 +2770,13 @@ function isVolleyballModality() {
     return modalityName.includes('VOLEIBOL');
 }
 
+// Verificar se a modalidade permite empates (basket e volei não permitem)
+function modalityAllowsDraws() {
+    if (!currentModalidade) return true;
+    const modalityName = currentModalidade.replace(/_\d{2}_\d{2}$/, '').toUpperCase();
+    return !modalityName.includes('BASQUETEBOL') && !modalityName.includes('VOLEIBOL');
+}
+
 // Obter informações de ELO de uma equipa (para exibição na tabela de classificação)
 function getTeamEloInfo(teamName) {
     // Normalizar nome da equipa
@@ -10058,11 +10065,12 @@ function handleMissingPredictionsFiles() {
  */
 function clearPredictionsDisplay(customMessage = null) {
     const message = customMessage || t('noPredictionsData');
+    const colspan = modalityAllowsDraws() ? 7 : 6; // 6 colunas se não houver empates
 
     document.getElementById('selectedTeamName').textContent = t('dataNotAvailable');
     document.getElementById('selectedTeamEmblem').innerHTML = '';
     document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${message}</div>`;
-    document.getElementById('predictionsTableBody').innerHTML = `<tr><td colspan="7" class="no-predictions-message">${message}</td></tr>`;
+    document.getElementById('predictionsTableBody').innerHTML = `<tr><td colspan="${colspan}" class="no-predictions-message">${message}</td></tr>`;
 
     document.getElementById('prevTeamBtn').disabled = true;
     document.getElementById('nextTeamBtn').disabled = true;
@@ -10647,6 +10655,30 @@ function updatePredictionsTableHeaders() {
         thElements[expectedGoalsIndex].textContent = headers.expectedLabel;
         thElements[expectedGoalsIndex].title = headers.expectedTitle;
     }
+
+    // Atualizar visibilidade da coluna de empates
+    updatePredictionsDrawsColumnVisibility();
+}
+
+// Atualizar visibilidade da coluna de empates na tabela de previsões
+function updatePredictionsDrawsColumnVisibility() {
+    const allowsDraws = modalityAllowsDraws();
+    const predictionsTable = document.getElementById('predictionsTable');
+
+    if (!predictionsTable) return;
+
+    // Selecionar coluna de empates no cabeçalho
+    const drawsHeader = predictionsTable.querySelector('thead th.draws-column');
+
+    if (drawsHeader) {
+        drawsHeader.style.display = allowsDraws ? '' : 'none';
+    }
+
+    // Selecionar todas as células de empates no corpo da tabela
+    const drawsCells = predictionsTable.querySelectorAll('tbody td.draws-column');
+    drawsCells.forEach(cell => {
+        cell.style.display = allowsDraws ? '' : 'none';
+    });
 }
 
 /**
@@ -10665,7 +10697,8 @@ function updatePredictionsTable() {
     const tbody = document.getElementById('predictionsTableBody');
 
     if (teamGames.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="no-predictions-message">${t('noGamesForTeam')}</td></tr>`;
+        const colspan = modalityAllowsDraws() ? 7 : 6; // 6 colunas se não houver empates
+        tbody.innerHTML = `<tr><td colspan="${colspan}" class="no-predictions-message">${t('noGamesForTeam')}</td></tr>`;
         return;
     }
 
@@ -10715,7 +10748,7 @@ function updatePredictionsTable() {
                     </div>
                 </td>
                 <td><span class="prediction-prob ${getProbClass(probWin)}">${probWin.toFixed(1)}%</span></td>
-                <td><span class="prediction-prob ${getProbClass(probDraw)}">${probDraw.toFixed(1)}%</span></td>
+                <td class="draws-column"><span class="prediction-prob ${getProbClass(probDraw)}">${probDraw.toFixed(1)}%</span></td>
                 <td><span class="prediction-prob ${getProbClass(probLoss)}">${probLoss.toFixed(1)}%</span></td>
                 <td class="expected-goals-cell ${favoriteClass}" data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" data-team-short="${teamShortName}" data-opponent-short="${opponentShortName}" title="${t('clickToFixTooltip')}">
                     ${expectedGoals.toFixed(1)} - ${opponentExpectedGoals.toFixed(1)}
@@ -10725,6 +10758,7 @@ function updatePredictionsTable() {
     }).join('');
 
     attachPredictionsTooltipHandlers();
+    updatePredictionsDrawsColumnVisibility();
 }
 
 /**

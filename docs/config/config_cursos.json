@@ -59,15 +59,15 @@
     "Biotec": {
       "displayName": "Biotecnologia",
       "shortName": "Biotec",
-      "nucleus": "NECiB",
-      "emblem": "assets/Logos/NECiB-07.png",
+      "nucleus": "NEQ",
+      "emblem": "assets/Logos/NEQ-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "Biotecnologia": {
       "displayName": "Biotecnologia",
       "shortName": "Biotec",
-      "nucleus": "NECiB",
-      "emblem": "assets/Logos/NECiB-07.png",
+      "nucleus": "NEQ",
+      "emblem": "assets/Logos/NEQ-07.png",
       "colors": ["#14a0db", "#6c757d"]
     },
     "CBM": {
@@ -128,6 +128,13 @@
     },
     "DPT": {
       "displayName": "DPT",
+      "shortName": "DPT",
+      "nucleus": "NAE-ESAN",
+      "emblem": "assets/Logos/NAE_ESAN-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Design de Produto e Tecnologia": {
+      "displayName": "Design de Produto e Tecnologia",
       "shortName": "DPT",
       "nucleus": "NAE-ESAN",
       "emblem": "assets/Logos/NAE_ESAN-07.png",
@@ -602,8 +609,22 @@
       "emblem": "assets/Logos/NEMTC-07.png",
       "colors": ["#209548", "#6c757d"]
     },
+    "Multimédia e Tecnologias da Comunicação": {
+      "displayName": "Multimédia e Tecnologias da Comunicação",
+      "shortName": "MTC",
+      "nucleus": "NEMTC",
+      "emblem": "assets/Logos/NEMTC-07.png",
+      "colors": ["#209548", "#6c757d"]
+    },
     "MOC": {
       "displayName": "MOC",
+      "shortName": "MOC",
+      "nucleus": "NEMOC",
+      "emblem": "assets/Logos/NEMOC-07.png",
+      "colors": ["#209548", "#6c757d"]
+    },
+    "Meteorologia, Oceanografia e Clima": {
+      "displayName": "Meteorologia, Oceanografia e Clima",
       "shortName": "MOC",
       "nucleus": "NEMOC",
       "emblem": "assets/Logos/NEMOC-07.png",
@@ -741,6 +762,97 @@
       "nucleus": "NEEETA",
       "emblem": "assets/Logos/NEEETA-07.png",
       "colors": ["#3362ae", "#6c757d"]
+    },
+    "Tecnologia e Sistemas de Produção": {
+      "displayName": "Tecnologia e Sistemas de Produção",
+      "shortName": "ASP",
+      "nucleus": "NAE-ESAN",
+      "emblem": "assets/Logos/NAE_ESAN-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Engenharia de Automação Industrial": {
+      "displayName": "Engenharia de Automação Industrial",
+      "shortName": "EAI",
+      "nucleus": "NEEMec",
+      "emblem": "assets/Logos/NEEMec-07.png",
+      "colors": ["#f08344", "#6c757d"]
+    },
+    "Engenharia de Computadores e Informática": {
+      "displayName": "Engenharia de Computadores e Informática",
+      "shortName": "ECT",
+      "nucleus": "NEECT",
+      "emblem": "assets/Logos/NEECT-07.png",
+      "colors": ["#4c65a4", "#6c757d"]
+    },
+    "Engenharia Eletrotécnica e de Computadores": {
+      "displayName": "Engenharia Eletrotécnica e de Computadores",
+      "shortName": "EEC",
+      "nucleus": "NEEETA",
+      "emblem": "assets/Logos/NEEETA-07.png",
+      "colors": ["#3362ae", "#6c757d"]
+    },
+    "Engenharia Informática": {
+      "displayName": "Engenharia Informática",
+      "shortName": "EI",
+      "nucleus": "NEI",
+      "emblem": "assets/Logos/NEI-07.png",
+      "colors": ["#178d4a", "#6c757d"]
+    },
+    "Línguas e Estudos Editoriais": {
+      "displayName": "Línguas e Estudos Editoriais",
+      "shortName": "LEE",
+      "nucleus": "NEEE",
+      "emblem": "assets/Logos/NEEE-07.png",
+      "colors": ["#1e4395", "#6c757d"]
+    },
+    "Imagem Médica e Radioterapia": {
+      "displayName": "Imagem Médica e Radioterapia",
+      "shortName": "IMR",
+      "nucleus": "NAE-ESSUA",
+      "emblem": "assets/Logos/NAE_ESSUA-07.png",
+      "colors": ["#1ca152", "#6c757d"]
+    },
+    "Gestão da Qualidade": {
+      "displayName": "Gestão da Qualidade",
+      "shortName": "Gestão da Qualidade",
+      "nucleus": "NAE-ESTGA",
+      "emblem": "assets/Logos/NAE_ESTGA-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Secretariado e Comunicação Empresarial": {
+      "displayName": "Secretariado e Comunicação Empresarial",
+      "shortName": "SCE",
+      "nucleus": "NAE-ESTGA",
+      "emblem": "assets/Logos/NAE_ESTGA-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Eletrónica e Mecânica Industrial": {
+      "displayName": "Eletrónica e Mecânica Industrial",
+      "shortName": "EMI",
+      "nucleus": "NAE-ESTGA",
+      "emblem": "assets/Logos/NAE_ESTGA-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Engenharia Eletrotécnica": {
+      "displayName": "Engenharia Eletrotécnica",
+      "shortName": "Engenharia Eletrotécnica",
+      "nucleus": "NAE-ESTGA",
+      "emblem": "assets/Logos/NAE_ESTGA-07.png",
+      "colors": ["#14a0db", "#6c757d"]
+    },
+    "Meteorologia, Oceanografia e Geofísica": {
+      "displayName": "Meteorologia, Oceanografia e Geofísica",
+      "shortName": "MOC",
+      "nucleus": "NEMOC",
+      "emblem": "assets/Logos/NEMOC-07.png",
+      "colors": ["#209548", "#6c757d"]
+    },
+    "Tecnologias da Informação": {
+      "displayName": "Tecnologias da Informação",
+      "shortName": "TI",
+      "nucleus": "NAE-ESTGA",
+      "emblem": "assets/Logos/NAE_ESTGA-07.png",
+      "colors": ["#14a0db", "#6c757d"]
     },
     "Engenharia Mecânica": {
       "displayName": "Eng. Mecânica",
