@@ -1379,13 +1379,24 @@ function refreshAllContent() {
  * Inicializa o seletor de idioma na UI
  */
 function initLanguageSelector() {
-    const header = document.querySelector('.header');
-    if (!header) return;
+    // Procurar primeiro no navbar
+    let container = document.querySelector('#navbarLanguageSelector');
+    // Fallback para header antigo
+    if (!container) {
+        const header = document.querySelector('.header');
+        if (header) {
+            const selectorDiv = document.createElement('div');
+            selectorDiv.className = 'language-selector';
+            selectorDiv.id = 'languageSelector';
+            container = selectorDiv;
+            header.appendChild(container);
+        } else {
+            return;
+        }
+    }
 
-    // Criar container do seletor
-    const selectorDiv = document.createElement('div');
-    selectorDiv.className = 'language-selector';
-    selectorDiv.id = 'languageSelector';
+    // Limpar container se tiver conteúdo anterior
+    container.innerHTML = '';
 
     // Botão PT
     const ptBtn = document.createElement('button');
@@ -1423,10 +1434,9 @@ function initLanguageSelector() {
         updateLanguageButtons('es');
     });
 
-    selectorDiv.appendChild(ptBtn);
-    selectorDiv.appendChild(enBtn);
-    selectorDiv.appendChild(esBtn);
-    header.appendChild(selectorDiv);
+    container.appendChild(ptBtn);
+    container.appendChild(enBtn);
+    container.appendChild(esBtn);
 
     // Aplicar idioma guardado
     if (currentLanguage !== 'pt') {
