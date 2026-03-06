@@ -1339,29 +1339,67 @@ class ExcelProcessor:
     def _assign_date_placeholders(
         self, df: pd.DataFrame, modality: str
     ) -> pd.DataFrame:
-        """Atribui placeholders de data para jogos sem data mas com resultado.
+        """Atribui datas de calendário PDF e placeholders para jogos sem data.
 
-        Regras:
-        1. Se jogo tem data real → manter e marcar Data_Placeholder=False
-        2. Se jogo não tem data mas já tinha placeholder → manter placeholder antigo
-        3. Se jogo não tem data e é novo → criar placeholder baseado em jornada
-        4. Jornadas menores recebem datas/horas mais antigas (1h de diferença)
+        Regras (em ordem de prioridade):
+        1. Se jogo tem data Excel real → usar e marcar Data_Placeholder=False
+        2. Se jogo não tem data Excel, procurar em calendário PDF
+        3. Se encontrado em PDF → usar e marcar Fonte_Data='Calendário PDF'
+        4. Se não encontrado mas tem resultado → atribuir placeholder baseado em jornada
+        5. Se não tem resultado e não tem data → manter vazio
         """
-        # Adicionar coluna Data_Placeholder se não existir
+        import sys
+        repo_root = Path(__file__).resolve().parents[1]
+        if str(repo_root / "src") not in sys.path:
+            sys.path.insert(0, str(repo_root / "src"))
+        
+        from calendario_parser import (
+            carregar_calendario_epoca,
+            carregar_config_cursos,
+            normalizar_nome_equipa,
+        )
+
+        # Adicionar colunas se não existirem
         if "Data_Placeholder" not in df.columns:
             df["Data_Placeholder"] = False
+        if "Fonte_Data" not in df.columns:
+            df["Fonte_Data"] = ""
 
-        # Carregar datas antigas
+        # Carregar calendário PDF
+        try:
+            repo_root = Path(__file__).resolve().parents[1]
+            calendario = carregar_calendario_epoca("25_26", repo_root=repo_root)
+            config_cursos = carregar_config_cursos(repo_root)
+            print(f"[INFO] Calendário PDF carregado para {modality}")
+        except Exception as e:
+            print(f"[WARN] Falha ao carregar calendário: {e}")
+            calendario = {}
+            config_cursos = {}
+
+        # Carregar datas antigas (para manter placeholders antigos)
         old_dates = self._load_existing_csv_dates(modality)
 
-        # Processar cada linha
-        games_without_dates = []
+        # Mapear nomes de modalidade (Excel → Calendário PDF)
+        modality_map = {
+            "ANDEBOL MISTO": "ANDEBOL",
+            "FUTEBOL DE 7 MASCULINO": "FUTEBOL 7",
+        }
 
+        pdf_modality = modality_map.get(modality, modality)
+
+        # Games que precisam de placeholder (sem data em nenhuma fonte)
+        games_for_placeholder = []
+
+        print(f"[DEBUG] Processando {len(df)} jogos para {modality}")
+        print(f"[DEBUG] Calendário PDF tem modalidades: {list(calendario.keys())}")
+
+        # SINGLE LOOP: processar cada jogo uma vez
         for idx, row in df.iterrows():
             dia = row.get("Dia", "")
             hora = row.get("Hora", "")
             golos1 = row.get("Golos 1", "")
             golos2 = row.get("Golos 2", "")
+            desistencia = str(row.get("Desistência", "")).strip().upper()
 
             # Verificar se tem resultado
             has_result = (
@@ -1371,58 +1409,84 @@ class ExcelProcessor:
                 and str(golos2).strip() != ""
             )
 
-            # Verificar se tem data
-            has_date = (
+            # Verificar se tem data Excel
+            has_excel_date = (
                 pd.notna(dia)
                 and str(dia).strip() != ""
                 and pd.notna(hora)
                 and str(hora).strip() != ""
             )
 
-            if has_date:
-                # Tem data real → marcar como não-placeholder
+            # PRIORIDADE 1: Data Excel existente
+            if has_excel_date:
+                print(f"[INFO] {idx}: Data Excel encontrada")
                 df.at[idx, "Data_Placeholder"] = False
-            elif has_result:
-                # Tem resultado mas não tem data → precisa de placeholder
-                key = (
-                    str(row.get("Equipa 1", "")).strip(),
-                    str(row.get("Equipa 2", "")).strip(),
-                    str(row.get("Jornada", "")).strip(),
+                if not df.at[idx, "Fonte_Data"]:
+                    df.at[idx, "Fonte_Data"] = "Excel"
+                continue
+
+            # PRIORIDADE 2: Procurar em calendário PDF
+            # Skip desistências
+            if desistencia == "SIM":
+                print(f"[INFO] {idx}: Desistência detectada, skip PDF lookup")
+                df.at[idx, "Data_Placeholder"] = False
+                df.at[idx, "Fonte_Data"] = ""
+                continue
+
+            equipa1 = str(row.get("Equipa 1", "")).strip()
+            equipa2 = str(row.get("Equipa 2", "")).strip()
+            jornada = str(row.get("Jornada", "")).strip()
+
+            # Normalizar nomes para procurar em PDF
+            equipa1_normalized = normalizar_nome_equipa(equipa1, config_cursos)
+            equipa2_normalized = normalizar_nome_equipa(equipa2, config_cursos)
+
+            # Procurar no calendário PDF
+            pdf_date_found = False
+            if pdf_modality in calendario:
+                games_dict = calendario[pdf_modality]
+                print(
+                    f"[DEBUG] Procurando {equipa1_normalized} vs {equipa2_normalized} em PDF"
                 )
 
-                # Verificar se já tinha placeholder antigo
-                if key in old_dates:
-                    old_dia, old_hora, old_is_placeholder = old_dates[key]
-                    # Se era placeholder, converter para novo formato e manter
-                    if old_is_placeholder:
-                        # Converter formato antigo para novo:
-                        # Dia: garantir que tem " 00:00:00" no final
-                        if " 00:00:00" not in str(old_dia):
-                            # Remover possíveis timestamps antigos e adicionar novo
-                            dia_clean = str(old_dia).split()[0]  # Pegar só YYYY-MM-DD
-                            old_dia = f"{dia_clean} 00:00:00"
+                # Construir chaves bidirecionais
+                chave_direta = (equipa1_normalized, equipa2_normalized)
+                chave_invertida = (equipa2_normalized, equipa1_normalized)
 
-                        # Hora: converter "HH:MM" para "HHhMM"
-                        if ":" in str(old_hora) and "h" not in str(old_hora):
-                            parts = str(old_hora).split(":")
-                            if len(parts) == 2:
-                                old_hora = f"{parts[0]}h{parts[1]}"
+                # Procurar com ambas as direções
+                pdf_data = None
+                pdf_hora = None
+                if chave_direta in games_dict:
+                    pdf_data, pdf_hora = games_dict[chave_direta]
+                elif chave_invertida in games_dict:
+                    pdf_data, pdf_hora = games_dict[chave_invertida]
 
-                        df.at[idx, "Dia"] = old_dia
-                        df.at[idx, "Hora"] = old_hora
-                        df.at[idx, "Data_Placeholder"] = True
-                        continue
+                if pdf_data:
+                    print(f"[PDF] Data de calendário: {equipa1} vs {equipa2} -> {pdf_data}")
+                    df.at[idx, "Dia"] = pdf_data
+                    df.at[idx, "Hora"] = pdf_hora
+                    df.at[idx, "Fonte_Data"] = "Calendário PDF"
+                    df.at[idx, "Data_Placeholder"] = False
+                    pdf_date_found = True
 
-                # Novo jogo sem data → guardar para atribuir placeholder depois
-                games_without_dates.append(idx)
+            if pdf_date_found:
+                continue
+
+            # PRIORIDADE 3: Criar placeholder se tem resultado
+            if has_result:
+                print(f"[INFO] {idx}: Sem data mas com resultado, agendando placeholder")
+                games_for_placeholder.append(idx)
             else:
-                # Sem resultado e sem data → jogos futuros, manter vazio
+                # PRIORIDADE 4: Sem resultado e sem data → manter vazio
+                print(f"[INFO] {idx}: Sem data, sem resultado, mantendo vazio")
                 df.at[idx, "Data_Placeholder"] = False
+                df.at[idx, "Fonte_Data"] = ""
 
-        # Atribuir placeholders para jogos novos sem data
-        if games_without_dates:
+        # Segunda fase: atribuir placeholders para jogos que precisam
+        if games_for_placeholder:
+            print(f"\n[INFO] Atribuindo placeholders para {len(games_for_placeholder)} jogos")
             # Agrupar por jornada
-            jornadas_sem_data = df.loc[games_without_dates, "Jornada"].unique()
+            jornadas_sem_data = df.loc[games_for_placeholder, "Jornada"].unique()
 
             # Filtrar apenas jornadas numéricas
             jornadas_numericas = []
@@ -1470,7 +1534,7 @@ class ExcelProcessor:
                     jornada_dates[jornada_str] = jornada_date
 
                 # Atribuir datas aos jogos
-                for idx in games_without_dates:
+                for idx in games_for_placeholder:
                     jornada = df.at[idx, "Jornada"]
 
                     if jornada in jornada_dates:
@@ -1480,19 +1544,22 @@ class ExcelProcessor:
                         )
                         df.at[idx, "Hora"] = placeholder_date.strftime("%Hh%M")
                         df.at[idx, "Data_Placeholder"] = True
+                        df.at[idx, "Fonte_Data"] = ""  # Placeholder não tem fonte definida
                         print(
                             f"  [*] Placeholder atribuido: Jornada {jornada} -> {placeholder_date.strftime('%Y-%m-%d %Hh%M')}"
                         )
                     else:
                         # Jornada não-numérica: usar data de hoje
-                        df.at[idx, "Dia"] = base_date.strftime("%Y-%m-%d")
-                        df.at[idx, "Hora"] = base_date.strftime("%H:%M")
+                        df.at[idx, "Dia"] = base_date.strftime("%Y-%m-%d 00:00:00")
+                        df.at[idx, "Hora"] = base_date.strftime("%Hh%M")
                         df.at[idx, "Data_Placeholder"] = True
+                        df.at[idx, "Fonte_Data"] = ""  # Placeholder não tem fonte definida
                         print(
-                            f"  [*] Placeholder atribuido: Jornada {jornada} (nao-numerica) -> {base_date.strftime('%Y-%m-%d %H:%M')}"
+                            f"  [*] Placeholder atribuido: Jornada {jornada} (nao-numerica) -> {base_date.strftime('%Y-%m-%d %Hh%M')}"
                         )
 
         return df
+
 
     def clean_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Limpa e processa o DataFrame."""
