@@ -11437,3 +11437,92 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+// ==================== NAVBAR NAVIGATION ====================
+
+/**
+ * Inicializa a funcionalidade da navbar
+ */
+function initializeNavbar() {
+    const navbarToggle = document.getElementById('navbarToggle');
+    const navbarMenu = document.getElementById('navbarMenu');
+    const navLinks = document.querySelectorAll('.navbar-menu a');
+
+    // Toggle menu mobile
+    if (navbarToggle) {
+        navbarToggle.addEventListener('click', () => {
+            navbarToggle.classList.toggle('active');
+            navbarMenu.classList.toggle('active');
+        });
+    }
+
+    // Fechar menu ao clicar num link (mobile)
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            // Smooth scroll já é gerido pelo CSS (scroll-behavior: smooth)
+            // Fechar menu mobile
+            if (navbarToggle && navbarMenu) {
+                navbarToggle.classList.remove('active');
+                navbarMenu.classList.remove('active');
+            }
+        });
+    });
+
+    // Atualizar link ativo baseado no scroll
+    let isScrolling = false;
+    window.addEventListener('scroll', () => {
+        if (!isScrolling) {
+            window.requestAnimationFrame(() => {
+                updateActiveNavLink();
+                isScrolling = false;
+            });
+            isScrolling = true;
+        }
+    });
+
+    // Fechar menu ao clicar fora (mobile)
+    document.addEventListener('click', (e) => {
+        if (navbarToggle && navbarMenu) {
+            const isClickInsideNav = e.target.closest('.navbar');
+            if (!isClickInsideNav && navbarMenu.classList.contains('active')) {
+                navbarToggle.classList.remove('active');
+                navbarMenu.classList.remove('active');
+            }
+        }
+    });
+}
+
+/**
+ * Atualiza o link ativo da navbar baseado na posição do scroll
+ */
+function updateActiveNavLink() {
+    const sections = document.querySelectorAll('#rankings, #elo, #calendar, #bracket, #predictions');
+    const navLinks = document.querySelectorAll('.navbar-menu a');
+
+    let currentSection = '';
+    const scrollPosition = window.scrollY + 100; // Offset para compensar navbar
+
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+            currentSection = section.getAttribute('id');
+        }
+    });
+
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('active');
+        }
+    });
+}
+
+// Inicializar navbar quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeNavbar);
+} else {
+    // DOM já está pronto
+    initializeNavbar();
+}
+

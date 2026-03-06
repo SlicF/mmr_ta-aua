@@ -1349,10 +1349,11 @@ class ExcelProcessor:
         5. Se não tem resultado e não tem data → manter vazio
         """
         import sys
+
         repo_root = Path(__file__).resolve().parents[1]
         if str(repo_root / "src") not in sys.path:
             sys.path.insert(0, str(repo_root / "src"))
-        
+
         from calendario_parser import (
             carregar_calendario_epoca,
             carregar_config_cursos,
@@ -1387,6 +1388,56 @@ class ExcelProcessor:
 
         pdf_modality = modality_map.get(modality, modality)
 
+        def _lookup_pdf_date(equipa1: str, equipa2: str):
+            """Retorna (data, hora) do calendário PDF para o jogo, se existir."""
+            if pdf_modality not in calendario:
+                return (None, None)
+
+            equipa1_normalized = normalizar_nome_equipa(equipa1, config_cursos)
+            equipa2_normalized = normalizar_nome_equipa(equipa2, config_cursos)
+            games_dict = calendario[pdf_modality]
+
+            chave_direta = (equipa1_normalized, equipa2_normalized)
+            chave_invertida = (equipa2_normalized, equipa1_normalized)
+
+            if chave_direta in games_dict:
+                return games_dict[chave_direta]
+            if chave_invertida in games_dict:
+                return games_dict[chave_invertida]
+            return (None, None)
+
+        def _parse_date_only(value) -> Optional[datetime.date]:
+            if pd.isna(value):
+                return None
+            dt = pd.to_datetime(str(value), errors="coerce")
+            if pd.isna(dt):
+                return None
+            return dt.date()
+
+        def _is_day_month_swap(excel_date, pdf_date) -> bool:
+            """Deteta caso clássico de dia/mês trocado: 2026-04-03 vs 2026-03-04."""
+            if not excel_date or not pdf_date:
+                return False
+            if excel_date.year != pdf_date.year:
+                return False
+            return (
+                excel_date.day == pdf_date.month
+                and excel_date.month == pdf_date.day
+                and excel_date.day <= 12
+                and excel_date.month <= 12
+            )
+
+        def _swap_day_month(date_value):
+            """Troca dia/mês se ambos <= 12, mantendo o ano."""
+            if not date_value:
+                return None
+            if date_value.day > 12 or date_value.month > 12:
+                return None
+            try:
+                return date_value.replace(day=date_value.month, month=date_value.day)
+            except ValueError:
+                return None
+
         # Games que precisam de placeholder (sem data em nenhuma fonte)
         games_for_placeholder = []
 
@@ -1409,6 +1460,10 @@ class ExcelProcessor:
                 and str(golos2).strip() != ""
             )
 
+            equipa1 = str(row.get("Equipa 1", "")).strip()
+            equipa2 = str(row.get("Equipa 2", "")).strip()
+            jornada = str(row.get("Jornada", "")).strip()
+
             # Verificar se tem data Excel
             has_excel_date = (
                 pd.notna(dia)
@@ -1423,6 +1478,42 @@ class ExcelProcessor:
                 df.at[idx, "Data_Placeholder"] = False
                 if not df.at[idx, "Fonte_Data"]:
                     df.at[idx, "Fonte_Data"] = "Excel"
+
+                corrected_from_pdf = False
+
+                # Validar incoerência típica de dia/mês trocado contra calendário PDF
+                if desistencia != "SIM":
+                    pdf_data, pdf_hora = _lookup_pdf_date(equipa1, equipa2)
+                    if pdf_data:
+                        excel_date = _parse_date_only(dia)
+                        pdf_date = _parse_date_only(pdf_data)
+                        if _is_day_month_swap(excel_date, pdf_date):
+                            print(
+                                f"[CORRECAO] {idx}: Excel {dia} vs PDF {pdf_data} (dia/mês trocado). A usar PDF."
+                            )
+                            df.at[idx, "Dia"] = pdf_data
+                            df.at[idx, "Hora"] = pdf_hora if pdf_hora else hora
+                            df.at[idx, "Fonte_Data"] = "Calendário PDF (corrigido)"
+                            df.at[idx, "Data_Placeholder"] = False
+                            corrected_from_pdf = True
+
+                # Fallback: se não houve match exato no PDF mas a data Excel está no futuro
+                # e o jogo já tem resultado, corrigir possível dia/mês invertido.
+                if not corrected_from_pdf and has_result:
+                    excel_date = _parse_date_only(dia)
+                    if excel_date:
+                        today = datetime.now().date()
+                        if excel_date > today:
+                            swapped = _swap_day_month(excel_date)
+                            if swapped and swapped <= today:
+                                print(
+                                    f"[CORRECAO-FALLBACK] {idx}: Excel {dia} -> {swapped.strftime('%Y-%m-%d 00:00:00')} (dia/mês invertido provável)."
+                                )
+                                df.at[idx, "Dia"] = swapped.strftime(
+                                    "%Y-%m-%d 00:00:00"
+                                )
+                                df.at[idx, "Fonte_Data"] = "Excel (dia/mês corrigido)"
+                                df.at[idx, "Data_Placeholder"] = False
                 continue
 
             # PRIORIDADE 2: Procurar em calendário PDF
@@ -1433,48 +1524,25 @@ class ExcelProcessor:
                 df.at[idx, "Fonte_Data"] = ""
                 continue
 
-            equipa1 = str(row.get("Equipa 1", "")).strip()
-            equipa2 = str(row.get("Equipa 2", "")).strip()
-            jornada = str(row.get("Jornada", "")).strip()
-
-            # Normalizar nomes para procurar em PDF
-            equipa1_normalized = normalizar_nome_equipa(equipa1, config_cursos)
-            equipa2_normalized = normalizar_nome_equipa(equipa2, config_cursos)
-
             # Procurar no calendário PDF
             pdf_date_found = False
-            if pdf_modality in calendario:
-                games_dict = calendario[pdf_modality]
-                print(
-                    f"[DEBUG] Procurando {equipa1_normalized} vs {equipa2_normalized} em PDF"
-                )
-
-                # Construir chaves bidirecionais
-                chave_direta = (equipa1_normalized, equipa2_normalized)
-                chave_invertida = (equipa2_normalized, equipa1_normalized)
-
-                # Procurar com ambas as direções
-                pdf_data = None
-                pdf_hora = None
-                if chave_direta in games_dict:
-                    pdf_data, pdf_hora = games_dict[chave_direta]
-                elif chave_invertida in games_dict:
-                    pdf_data, pdf_hora = games_dict[chave_invertida]
-
-                if pdf_data:
-                    print(f"[PDF] Data de calendário: {equipa1} vs {equipa2} -> {pdf_data}")
-                    df.at[idx, "Dia"] = pdf_data
-                    df.at[idx, "Hora"] = pdf_hora
-                    df.at[idx, "Fonte_Data"] = "Calendário PDF"
-                    df.at[idx, "Data_Placeholder"] = False
-                    pdf_date_found = True
+            pdf_data, pdf_hora = _lookup_pdf_date(equipa1, equipa2)
+            if pdf_data:
+                print(f"[PDF] Data de calendário: {equipa1} vs {equipa2} -> {pdf_data}")
+                df.at[idx, "Dia"] = pdf_data
+                df.at[idx, "Hora"] = pdf_hora
+                df.at[idx, "Fonte_Data"] = "Calendário PDF"
+                df.at[idx, "Data_Placeholder"] = False
+                pdf_date_found = True
 
             if pdf_date_found:
                 continue
 
             # PRIORIDADE 3: Criar placeholder se tem resultado
             if has_result:
-                print(f"[INFO] {idx}: Sem data mas com resultado, agendando placeholder")
+                print(
+                    f"[INFO] {idx}: Sem data mas com resultado, agendando placeholder"
+                )
                 games_for_placeholder.append(idx)
             else:
                 # PRIORIDADE 4: Sem resultado e sem data → manter vazio
@@ -1484,7 +1552,9 @@ class ExcelProcessor:
 
         # Segunda fase: atribuir placeholders para jogos que precisam
         if games_for_placeholder:
-            print(f"\n[INFO] Atribuindo placeholders para {len(games_for_placeholder)} jogos")
+            print(
+                f"\n[INFO] Atribuindo placeholders para {len(games_for_placeholder)} jogos"
+            )
             # Agrupar por jornada
             jornadas_sem_data = df.loc[games_for_placeholder, "Jornada"].unique()
 
@@ -1544,7 +1614,9 @@ class ExcelProcessor:
                         )
                         df.at[idx, "Hora"] = placeholder_date.strftime("%Hh%M")
                         df.at[idx, "Data_Placeholder"] = True
-                        df.at[idx, "Fonte_Data"] = ""  # Placeholder não tem fonte definida
+                        df.at[idx, "Fonte_Data"] = (
+                            ""  # Placeholder não tem fonte definida
+                        )
                         print(
                             f"  [*] Placeholder atribuido: Jornada {jornada} -> {placeholder_date.strftime('%Y-%m-%d %Hh%M')}"
                         )
@@ -1553,13 +1625,14 @@ class ExcelProcessor:
                         df.at[idx, "Dia"] = base_date.strftime("%Y-%m-%d 00:00:00")
                         df.at[idx, "Hora"] = base_date.strftime("%Hh%M")
                         df.at[idx, "Data_Placeholder"] = True
-                        df.at[idx, "Fonte_Data"] = ""  # Placeholder não tem fonte definida
+                        df.at[idx, "Fonte_Data"] = (
+                            ""  # Placeholder não tem fonte definida
+                        )
                         print(
                             f"  [*] Placeholder atribuido: Jornada {jornada} (nao-numerica) -> {base_date.strftime('%Y-%m-%d %Hh%M')}"
                         )
 
         return df
-
 
     def clean_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Limpa e processa o DataFrame."""

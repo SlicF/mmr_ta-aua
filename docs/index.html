@@ -24,11 +24,29 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="header">
-            <h1 data-i18n="dashboardTitle">Dashboard da Taça UA</h1>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="assets/taça_ua.png" alt="Taça UA Logo">
+                <span data-i18n="dashboardTitle">Dashboard da Taça UA</span>
+            </div>
+            <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="navbar-menu" id="navbarMenu">
+                <li><a href="#rankings" data-i18n="navRankings">Classificação</a></li>
+                <li><a href="#elo" data-i18n="navElo">ELO</a></li>
+                <li><a href="#calendar" data-i18n="navCalendar">Calendário</a></li>
+                <li><a href="#bracket" data-i18n="navBracket">Bracket</a></li>
+                <li><a href="#predictions" data-i18n="navPredictions">Previsões</a></li>
+            </ul>
         </div>
+    </nav>
 
+    <div class="container">
         <div class="modalidade-selector">
             <label for="epoca" data-i18n="seasonLabel">Época:</label>
             <select id="epoca" name="epoca">
@@ -43,7 +61,7 @@
 
         <div class="dashboard-grid">
             <!-- Tabela de Classificação (PRIMEIRA SECÇÃO) -->
-            <div class="card ranking-card">
+            <div class="card ranking-card" id="rankings">
                 <div class="card-title">
                     <span data-i18n="generalRanking">Classificação Geral</span>
                     <label class="compact-mode-toggle"
@@ -102,7 +120,7 @@
             </div>
 
             <!-- Gráfico de ELO (SECÇÃO COLAPSÁVEL) -->
-            <div class="card chart-card" id="eloChartCard">
+            <div class="card chart-card" id="elo">
                 <div class="chart-header">
                     <div class="card-title">
                         <span id="eloChartTitle">
@@ -144,7 +162,7 @@
             </div>
 
             <!-- Calendário de Jogos -->
-            <div class="card calendar-card">
+            <div class="card calendar-card" id="calendar">
                 <div class="card-title" data-i18n="gameCalendar">Calendário de Jogos</div>
 
                 <!-- Navegação de Jornadas -->
@@ -192,7 +210,7 @@
         </div>
 
         <!-- Bracket -->
-        <div class="card">
+        <div class="card" id="bracket">
             <div class="card-title" data-i18n="eliminationBracket">Bracket de Eliminação</div>
             <div class="bracket-container">
                 <div class="bracket" id="bracketContainer">
@@ -212,7 +230,7 @@
         </div>
 
         <!-- Secção de Previsões -->
-        <div class="card predictions-card">
+        <div class="card predictions-card" id="predictions">
             <div class="card-title predictions-title">
                 <span data-i18n="seasonPredictions">Previsões da Época</span>
                 <span class="predictions-sim-count" id="predictionsSimCount" aria-live="polite"></span>
@@ -313,6 +331,16 @@
         <button data-debug="disable" class="debug-btn" data-i18n="deactivate">Desativar</button>
         <button data-debug="close" class="debug-btn" data-i18n="close">Fechar</button>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <span data-i18n="footerMadeBy">Projeto criado por Fábio Matias</span>
+            <span class="footer-separator">|</span>
+            <span data-i18n="footerDisclaimer">Este projeto não está oficialmente associado à AAUAv e pode conter
+                imprecisões</span>
+        </div>
+    </footer>
 
     <script src="i18n.js"></script>
     <script src="app.js?v=6"></script>

@@ -210,6 +210,13 @@
       "emblem": "assets/Logos/EGI-07.png",
       "colors": ["#ff6d10", "#6c757d"]
     },
+    "Eng. e Gestão Industrial B": {
+      "displayName": "Eng. e Gestão Industrial B",
+      "shortName": "EGI B",
+      "nucleus": "AEGIA",
+      "emblem": "assets/Logos/EGI-07.png",
+      "colors": ["#ff6d10", "#6c757d"]
+    },
     "EI": {
       "displayName": "Eng. Informática",
       "shortName": "EI",

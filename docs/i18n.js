@@ -513,6 +513,17 @@ const translations = {
         eloFinal: 'ELO final',
         previousSeason: 'Época Anterior',
         nextSeason: 'Época Seguinte',
+
+        // === Navbar ===
+        navRankings: 'Rankings',
+        navElo: 'ELO',
+        navCalendar: 'Calendário',
+        navBracket: 'Bracket',
+        navPredictions: 'Previsões',
+
+        // === Footer ===
+        footerMadeBy: 'Projeto criado por Fábio Matias',
+        footerDisclaimer: 'Este projeto não está oficialmente associado à AAUAv e pode conter imprecisões',
     },
 
     en: {
@@ -837,6 +848,17 @@ const translations = {
         eloFinal: 'Final ELO',
         previousSeason: 'Previous Season',
         nextSeason: 'Next Season',
+
+        // === Navbar ===
+        navRankings: 'Rankings',
+        navElo: 'ELO',
+        navCalendar: 'Calendar',
+        navBracket: 'Bracket',
+        navPredictions: 'Predictions',
+
+        // === Footer ===
+        footerMadeBy: 'Project created by Fábio Matias',
+        footerDisclaimer: 'This project is not officially associated with AAUAv and may contain inaccuracies',
     }
 };
 
@@ -1153,7 +1175,18 @@ translations.es = {
     roundFinal: 'Final',
     eloFinal: 'ELO final',
     previousSeason: 'Temporada anterior',
-    nextSeason: 'Temporada siguiente'
+    nextSeason: 'Temporada siguiente',
+
+    // === Navbar ===
+    navRankings: 'Rankings',
+    navElo: 'ELO',
+    navCalendar: 'Calendario',
+    navBracket: 'Bracket',
+    navPredictions: 'Predicciones',
+
+    // === Footer ===
+    footerMadeBy: 'Proyecto creado por Fábio Matias',
+    footerDisclaimer: 'Este proyecto no está oficialmente asociado con AAUAv y puede contener imprecisiones'
 };
 
 // ==================== FUNÇÕES DO i18n ====================
