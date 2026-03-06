@@ -10750,7 +10750,7 @@ function updatePredictionsTable() {
                 <td><span class="prediction-prob ${getProbClass(probWin)}">${probWin.toFixed(1)}%</span></td>
                 <td class="draws-column"><span class="prediction-prob ${getProbClass(probDraw)}">${probDraw.toFixed(1)}%</span></td>
                 <td><span class="prediction-prob ${getProbClass(probLoss)}">${probLoss.toFixed(1)}%</span></td>
-                <td class="expected-goals-cell ${favoriteClass}" data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" data-team-short="${teamShortName}" data-opponent-short="${opponentShortName}" title="${t('clickToFixTooltip')}">
+                <td class="expected-goals-cell ${favoriteClass}" data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" data-team-short="${teamShortName}" data-opponent-short="${opponentShortName}">
                     ${expectedGoals.toFixed(1)} - ${opponentExpectedGoals.toFixed(1)}
                 </td>
             </tr>
@@ -11035,10 +11035,10 @@ function renderPredictionsTooltip(distribution, isTeamA, teamShortName, opponent
 
     const html = `
         <div>
-            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
                 <div style="flex: 1; text-align: center;">
                     <div style="font-weight: 600; color: #2a5298; font-size: 0.9em;">${t('simulatedResults')}</div>
-                    ${teamsText ? `<div style="font-size: 0.85em; color: #666; margin-top: 2px;">${teamsText}</div>` : ''}
+                    ${teamsText ? `<div style="font-size: 0.85em; color: #666;">${teamsText}</div>` : ''}
                 </div>
                 <div style="display: flex; gap: 4px; flex-shrink: 0;">
                     ${hasMore ? `<button id="scrollLeft" style="padding: 4px 8px; background: #2a5298; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; opacity: 0.5; pointer-events: none;">‹</button>` : ''}
@@ -11050,7 +11050,7 @@ function renderPredictionsTooltip(distribution, isTeamA, teamShortName, opponent
                     <div id="${chartId}" style="min-height: 280px;"></div>
                 </div>
             </div>
-            <div style="text-align: center; font-size: 0.8em; color: #666; margin-top: 8px;">
+            <div style="text-align: center; font-size: 0.8em; color: #666;">
                 <span id="pagination">${visibleScores.length}/${allScores.length}</span>
             </div>
         </div>
@@ -11397,16 +11397,31 @@ function updateTooltipPosition(e) {
 
     const rect = e.currentTarget.getBoundingClientRect();
     const tooltipRect = predictionsTooltipEl.getBoundingClientRect();
+    const tooltipWidth = 300;
+    const padding = 10; // Espaço mínimo da borda da viewport
 
-    let left = rect.left + (rect.width - 300) / 2;
-    let top = rect.top - 230;
+    // Encontra a tabela de previsões para alinhar a direita
+    const table = document.querySelector('.predictions-table');
+    let left;
 
-    if (left < 10) {
-        left = 10;
+    if (table) {
+        const tableRect = table.getBoundingClientRect();
+        // Alinha a direita do tooltip com a direita da tabela
+        left = tableRect.right - tooltipWidth;
+    } else {
+        // Fallback: centra na viewport
+        left = (window.innerWidth - tooltipWidth) / 2;
     }
 
-    if (left + 300 > window.innerWidth) {
-        left = window.innerWidth - 310;
+    let top = rect.top - 350;
+
+    // Garante margens mínimas na horizontal
+    if (left < padding) {
+        left = padding;
+    }
+
+    if (left + tooltipWidth > window.innerWidth - padding) {
+        left = window.innerWidth - tooltipWidth - padding;
     }
 
     if (top < 10) {

@@ -1308,14 +1308,14 @@ body {
   background: linear-gradient(135deg, #fefce8, #fff);
   border: 2px solid #f59e0b;
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
-  padding: 16px;
+  padding: 5px;
 }
 
 .bracket-round:last-of-type .bracket-match .bracket-team {
   background: #fffbeb;
   border-left-color: #f59e0b;
-  min-height: 50px;
-  padding: 12px 14px;
+  min-height: 40px;
+  padding: 4px 4px;
 }
 
 .bracket-team-content {
@@ -1724,9 +1724,9 @@ body {
 
   /* Ajustes para o bracket dos playoffs */
   .bracket-team {
-    padding: 6px 8px;
+    padding: 4px 4px;
     flex-wrap: nowrap;
-    gap: 6px;
+    gap: 0px;
     min-height: 36px;
   }
 
@@ -1760,7 +1760,7 @@ body {
     font-size: 0.8em;
     flex-shrink: 0;
     margin-left: auto;
-    min-width: 28px;
+    min-width: 20px;
     text-align: right;
   }
 
@@ -4558,8 +4558,8 @@ body {
 .predictions-tooltip > div {
   background: white;
   border-radius: 8px;
-  padding: 12px;
-  width: 350px;
+  padding: 10px;
+  width: 300px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   border: 1px solid #e2e8f0;
   max-height: 600px;
@@ -5535,4 +5535,31 @@ html {
   .footer-separator {
     display: none;
   }
+}
+
+/* ==================== MOBILE TOOLTIPS (Alt-texts ao clicar) ==================== */
+.mobile-tooltip {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10001;
+  max-width: 280px;
+  word-wrap: break-word;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  white-space: pre-wrap;
+  text-align: center;
+  line-height: 1.4;
+  margin-top: -8px;
+}
+
+.mobile-tooltip.show {
+  opacity: 1;
 }
