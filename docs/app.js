@@ -349,7 +349,6 @@ function createTeamSelector() {
                 teamNameSpan.className = 'team-name';
                 // Gráfico sempre usa nome curto
                 const teamCourseInfo = getCourseInfo(team.name);
-                teamNameSpan.title = translateTeamName(teamCourseInfo.fullName);
                 teamNameSpan.textContent = translateTeamName(teamCourseInfo.shortName);
 
                 label.appendChild(checkbox);
@@ -364,8 +363,6 @@ function createTeamSelector() {
                 }
                 label.appendChild(teamDot);
                 label.appendChild(teamNameSpan);
-
-                label.title = teamCourseInfo.fullName;
                 teamsInGroupDiv.appendChild(label);
             });
 
