@@ -1,7 +1,7 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
 1,,1,Gestão e Planeamento em Turismo,13,5,4,1,0,21,5,16,0
-1,,2,Eng. e Gestão Industrial,13,5,4,1,0,13,5,8,0
-1,,3,Fisioterapia,13,5,4,1,0,11,4,7,0
+1,,2,Fisioterapia,13,5,4,1,0,13,4,9,0
+1,,3,Eng. e Gestão Industrial,13,5,4,1,0,13,5,8,0
 1,,4,Biotecnologia,10,5,3,1,1,12,7,5,0
 1,,5,Eng. Mecânica,9,5,3,0,2,13,7,6,0
 1,,6,Economia,9,5,3,0,2,11,14,-3,0
@@ -10,7 +10,7 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 1,,9,Eng. Computadores e Telemática,3,5,1,0,4,5,11,-6,0
 1,,10,Eng. Eletrónica e Telecomunicações,3,5,1,0,4,5,15,-10,0
 1,,11,Administração Pública,0,5,0,0,5,5,14,-9,0
-1,,12,Eng. Biomédica,0,5,0,0,5,6,23,-17,0
+1,,12,Eng. Biomédica,0,5,0,0,5,6,25,-19,0
 2,A,1,Eng. de Materiais,12,4,4,0,0,23,3,20,0
 2,A,2,Geologia,7,4,2,1,1,13,19,-6,0
 2,A,3,Tecnologias de Informação,7,4,2,1,1,13,7,6,0

@@ -46,6 +46,7 @@ import io
 import locale
 import re
 import multiprocessing
+import gc
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import threading
 
@@ -1776,6 +1777,19 @@ def get_num_workers() -> int:
 
 # Variável global para rastreamento de progresso (process-safe)
 _progress_tracker: Optional[ProgressTracker] = None
+_csv_rows_cache: Dict[str, List[Dict[str, str]]] = {}
+
+
+def _load_csv_rows_cached(csv_file: str) -> List[Dict[str, str]]:
+    """Carrega e cacheia linhas de CSV para evitar parse repetido na mesma execução."""
+    if csv_file in _csv_rows_cache:
+        return _csv_rows_cache[csv_file]
+
+    with open(csv_file, newline="", encoding="utf-8-sig") as csvfile:
+        rows = list(csv.DictReader(csvfile))
+
+    _csv_rows_cache[csv_file] = rows
+    return rows
 
 
 def _run_single_simulation_worker(args_tuple):
@@ -1821,7 +1835,9 @@ def _run_single_simulation_worker(args_tuple):
 
     # Acumular estatísticas de jogos futuros
     match_stats_sim = defaultdict(lambda: {"1": 0, "X": 0, "2": 0, "total": 0})
-    match_elo_stats_sim = defaultdict(lambda: {"team_a_elos": [], "team_b_elos": []})
+    match_elo_sum_sim = defaultdict(
+        lambda: {"a_sum": 0.0, "a_sq": 0.0, "b_sum": 0.0, "b_sq": 0.0, "count": 0}
+    )
     match_score_stats_sim = defaultdict(
         lambda: defaultdict(int)
     )  # {match_id: {"3-2": count, ...}}
@@ -1840,8 +1856,13 @@ def _run_single_simulation_worker(args_tuple):
                     match_stats_sim[mid]["X"] += 1
                 match_stats_sim[mid]["total"] += 1
 
-                match_elo_stats_sim[mid]["team_a_elos"].append(res["elo_a_before"])
-                match_elo_stats_sim[mid]["team_b_elos"].append(res["elo_b_before"])
+                elo_a = res["elo_a_before"]
+                elo_b = res["elo_b_before"]
+                match_elo_sum_sim[mid]["a_sum"] += elo_a
+                match_elo_sum_sim[mid]["a_sq"] += elo_a * elo_a
+                match_elo_sum_sim[mid]["b_sum"] += elo_b
+                match_elo_sum_sim[mid]["b_sq"] += elo_b * elo_b
+                match_elo_sum_sim[mid]["count"] += 1
 
                 # Adicionar distribuição de placares
                 score_key = f"{res['score_a']}-{res['score_b']}"
@@ -1934,13 +1955,7 @@ def _run_single_simulation_worker(args_tuple):
         "promotion_count": promotion_count_sim,
         "relegation_count": relegation_count_sim,
         "match_stats": dict(match_stats_sim),
-        "match_elo_stats": {
-            k: {
-                "team_a_elos": list(v["team_a_elos"]),
-                "team_b_elos": list(v["team_b_elos"]),
-            }
-            for k, v in match_elo_stats_sim.items()
-        },
+        "match_elo_sum": {k: dict(v) for k, v in match_elo_sum_sim.items()},
         "match_score_stats": {k: dict(v) for k, v in match_score_stats_sim.items()},
     }
 
@@ -1992,7 +2007,9 @@ def _run_single_simulation_with_hardset_worker(args_tuple):
 
     # Acumular estatísticas de jogos futuros
     match_stats_sim = defaultdict(lambda: {"1": 0, "X": 0, "2": 0, "total": 0})
-    match_elo_stats_sim = defaultdict(lambda: {"team_a_elos": [], "team_b_elos": []})
+    match_elo_sum_sim = defaultdict(
+        lambda: {"a_sum": 0.0, "a_sq": 0.0, "b_sum": 0.0, "b_sq": 0.0, "count": 0}
+    )
     match_score_stats_sim = defaultdict(
         lambda: defaultdict(int)
     )  # {match_id: {"3-2": count, ...}}
@@ -2011,8 +2028,13 @@ def _run_single_simulation_with_hardset_worker(args_tuple):
                     match_stats_sim[mid]["X"] += 1
                 match_stats_sim[mid]["total"] += 1
 
-                match_elo_stats_sim[mid]["team_a_elos"].append(res["elo_a_before"])
-                match_elo_stats_sim[mid]["team_b_elos"].append(res["elo_b_before"])
+                elo_a = res["elo_a_before"]
+                elo_b = res["elo_b_before"]
+                match_elo_sum_sim[mid]["a_sum"] += elo_a
+                match_elo_sum_sim[mid]["a_sq"] += elo_a * elo_a
+                match_elo_sum_sim[mid]["b_sum"] += elo_b
+                match_elo_sum_sim[mid]["b_sq"] += elo_b * elo_b
+                match_elo_sum_sim[mid]["count"] += 1
 
                 # Adicionar distribuição de placares
                 score_key = f"{res['score_a']}-{res['score_b']}"
@@ -2105,13 +2127,7 @@ def _run_single_simulation_with_hardset_worker(args_tuple):
         "promotion_count": promotion_count_sim,
         "relegation_count": relegation_count_sim,
         "match_stats": dict(match_stats_sim),
-        "match_elo_stats": {
-            k: {
-                "team_a_elos": list(v["team_a_elos"]),
-                "team_b_elos": list(v["team_b_elos"]),
-            }
-            for k, v in match_elo_stats_sim.items()
-        },
+        "match_elo_sum": {k: dict(v) for k, v in match_elo_sum_sim.items()},
         "match_score_stats": {k: dict(v) for k, v in match_score_stats_sim.items()},
     }
 
@@ -2179,30 +2195,30 @@ def monte_carlo_forecast(
     global _progress_tracker
     _progress_tracker = ProgressTracker(num_workers, n_simulations)
 
-    for batch_num in range(num_batches):
-        batch_start = batch_num * batch_size
-        batch_end = min(batch_start + batch_size, n_simulations)
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        for batch_num in range(num_batches):
+            batch_start = batch_num * batch_size
+            batch_end = min(batch_start + batch_size, n_simulations)
 
-        simulation_args = []
-        for sim_idx in range(batch_start, batch_end):
-            worker_id = sim_idx % num_workers
-            args_tuple = (
-                sim_idx,
-                worker_id,
-                teams,
-                fixtures,
-                elo_system,
-                score_simulator,
-                n_simulations,
-                team_division,
-                has_liguilla,
-                real_points,
-                playoff_slots,
-                total_playoff_slots,
-            )
-            simulation_args.append(args_tuple)
+            simulation_args = []
+            for sim_idx in range(batch_start, batch_end):
+                worker_id = sim_idx % num_workers
+                args_tuple = (
+                    sim_idx,
+                    worker_id,
+                    teams,
+                    fixtures,
+                    elo_system,
+                    score_simulator,
+                    n_simulations,
+                    team_division,
+                    has_liguilla,
+                    real_points,
+                    playoff_slots,
+                    total_playoff_slots,
+                )
+                simulation_args.append(args_tuple)
 
-        with ProcessPoolExecutor(max_workers=num_workers) as executor:
             for sim_result in executor.map(
                 _run_single_simulation_worker, simulation_args, chunksize=chunksize
             ):
@@ -2239,20 +2255,16 @@ def monte_carlo_forecast(
                     for key in ["1", "X", "2", "total"]:
                         match_stats[mid][key] += stats[key]
 
-                for mid, elo_data in sim_result["match_elo_stats"].items():
-                    for elo_a in elo_data["team_a_elos"]:
-                        match_elo_sum[mid]["a_sum"] += elo_a
-                        match_elo_sum[mid]["a_sq"] += elo_a * elo_a
-                        match_elo_sum[mid]["count"] += 1
-                    for elo_b in elo_data["team_b_elos"]:
-                        match_elo_sum[mid]["b_sum"] += elo_b
-                        match_elo_sum[mid]["b_sq"] += elo_b * elo_b
+                for mid, elo_sums in sim_result["match_elo_sum"].items():
+                    match_elo_sum[mid]["a_sum"] += elo_sums["a_sum"]
+                    match_elo_sum[mid]["a_sq"] += elo_sums["a_sq"]
+                    match_elo_sum[mid]["b_sum"] += elo_sums["b_sum"]
+                    match_elo_sum[mid]["b_sq"] += elo_sums["b_sq"]
+                    match_elo_sum[mid]["count"] += elo_sums["count"]
 
                 for mid, score_data in sim_result["match_score_stats"].items():
                     for score_key, count in score_data.items():
                         match_score_stats[mid][score_key] += count
-
-        import gc
 
         gc.collect()
 
@@ -2410,31 +2422,31 @@ def monte_carlo_forecast_with_hardset(
     global _progress_tracker
     _progress_tracker = ProgressTracker(num_workers, n_simulations)
 
-    for batch_num in range(num_batches):
-        batch_start = batch_num * batch_size
-        batch_end = min(batch_start + batch_size, n_simulations)
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        for batch_num in range(num_batches):
+            batch_start = batch_num * batch_size
+            batch_end = min(batch_start + batch_size, n_simulations)
 
-        simulation_args = []
-        for sim_idx in range(batch_start, batch_end):
-            worker_id = sim_idx % num_workers
-            args_tuple = (
-                sim_idx,
-                worker_id,
-                teams,
-                fixtures,
-                elo_system,
-                score_simulator,
-                n_simulations,
-                team_division,
-                has_liguilla,
-                real_points,
-                playoff_slots,
-                total_playoff_slots,
-                hardset_manager,
-            )
-            simulation_args.append(args_tuple)
+            simulation_args = []
+            for sim_idx in range(batch_start, batch_end):
+                worker_id = sim_idx % num_workers
+                args_tuple = (
+                    sim_idx,
+                    worker_id,
+                    teams,
+                    fixtures,
+                    elo_system,
+                    score_simulator,
+                    n_simulations,
+                    team_division,
+                    has_liguilla,
+                    real_points,
+                    playoff_slots,
+                    total_playoff_slots,
+                    hardset_manager,
+                )
+                simulation_args.append(args_tuple)
 
-        with ProcessPoolExecutor(max_workers=num_workers) as executor:
             for sim_result in executor.map(
                 _run_single_simulation_with_hardset_worker,
                 simulation_args,
@@ -2473,20 +2485,16 @@ def monte_carlo_forecast_with_hardset(
                     for key in ["1", "X", "2", "total"]:
                         match_stats[mid][key] += stats[key]
 
-                for mid, elo_data in sim_result["match_elo_stats"].items():
-                    for elo_a in elo_data["team_a_elos"]:
-                        match_elo_sum[mid]["a_sum"] += elo_a
-                        match_elo_sum[mid]["a_sq"] += elo_a * elo_a
-                        match_elo_sum[mid]["count"] += 1
-                    for elo_b in elo_data["team_b_elos"]:
-                        match_elo_sum[mid]["b_sum"] += elo_b
-                        match_elo_sum[mid]["b_sq"] += elo_b * elo_b
+                for mid, elo_sums in sim_result["match_elo_sum"].items():
+                    match_elo_sum[mid]["a_sum"] += elo_sums["a_sum"]
+                    match_elo_sum[mid]["a_sq"] += elo_sums["a_sq"]
+                    match_elo_sum[mid]["b_sum"] += elo_sums["b_sum"]
+                    match_elo_sum[mid]["b_sq"] += elo_sums["b_sq"]
+                    match_elo_sum[mid]["count"] += elo_sums["count"]
 
                 for mid, score_data in sim_result["match_score_stats"].items():
                     for score_key, count in score_data.items():
                         match_score_stats[mid][score_key] += count
-
-        import gc
 
         gc.collect()
 
@@ -2611,25 +2619,25 @@ def calculate_historical_draw_rate(
             continue
 
         try:
-            with open(csv_file, newline="", encoding="utf-8-sig") as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    golos_1_str = row.get("Golos 1", "").strip()
-                    golos_2_str = row.get("Golos 2", "").strip()
-
-                    if not golos_1_str or not golos_2_str:
-                        continue
-
-                    try:
-                        golos_1 = int(float(golos_1_str))
-                        golos_2 = int(float(golos_2_str))
-                        total_games += 1
-                        if golos_1 == golos_2:
-                            total_draws += 1
-                    except ValueError:
-                        continue
+            rows = _load_csv_rows_cached(csv_file)
         except FileNotFoundError:
             continue
+
+        for row in rows:
+            golos_1_str = row.get("Golos 1", "").strip()
+            golos_2_str = row.get("Golos 2", "").strip()
+
+            if not golos_1_str or not golos_2_str:
+                continue
+
+            try:
+                golos_1 = int(float(golos_1_str))
+                golos_2 = int(float(golos_2_str))
+                total_games += 1
+                if golos_1 == golos_2:
+                    total_draws += 1
+            except ValueError:
+                continue
 
     if total_games == 0:
         return 0.0
@@ -2689,12 +2697,12 @@ def calculate_division_baselines(
             continue
 
         try:
-            with open(csv_file, newline="", encoding="utf-8-sig") as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    add_row(row)
+            rows = _load_csv_rows_cached(csv_file)
         except FileNotFoundError:
             continue
+
+        for row in rows:
+            add_row(row)
 
     for row in current_rows:
         add_row(row)
@@ -2766,12 +2774,12 @@ def calculate_division_draw_rates(
             continue
 
         try:
-            with open(csv_file, newline="", encoding="utf-8-sig") as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    add_row(row)
+            rows = _load_csv_rows_cached(csv_file)
         except FileNotFoundError:
             continue
+
+        for row in rows:
+            add_row(row)
 
     for row in current_rows:
         add_row(row)
@@ -3249,13 +3257,9 @@ def main(
 
         # Processar resultados de jogos (carregar TODOS os jogos)
         all_csv_rows = []
-        with open(
-            os.path.join(modalidades_path, modalidade_file),
-            newline="",
-            encoding="utf-8-sig",
-        ) as csvfile:
-            reader = csv.DictReader(csvfile)
-            all_csv_rows = list(reader)
+        all_csv_rows = _load_csv_rows_cached(
+            os.path.join(modalidades_path, modalidade_file)
+        )
 
         # Separar jogos passados de futuros
         past_matches_rows, future_matches_rows = separate_past_and_future_matches(
@@ -3395,19 +3399,13 @@ def main(
             # Mapear divisão/grupo das equipas (default 1ª divisão quando vazio)
             # JÁ MAPEADO ACIMA na nova lógica de detecção
 
-            # Detectar se há liguilha (LM/PM) no CSV
+            # Detectar se há liguilha (LM/PM) no CSV já carregado
             has_liguilla = False
-            with open(
-                os.path.join(modalidades_path, modalidade_file),
-                newline="",
-                encoding="utf-8-sig",
-            ) as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    jornada_val = str(row.get("Jornada", "")).upper()
-                    if jornada_val.startswith("LM") or jornada_val.startswith("PM"):
-                        has_liguilla = True
-                        break
+            for row in all_csv_rows:
+                jornada_val = str(row.get("Jornada", "")).upper()
+                if jornada_val.startswith("LM") or jornada_val.startswith("PM"):
+                    has_liguilla = True
+                    break
 
             # Inferir slots de playoffs por divisão/grupo a partir dos placeholders das eliminatórias
             playoff_slots, total_playoff_slots = parse_playoff_slots(all_csv_rows)
