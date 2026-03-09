@@ -998,7 +998,7 @@ function initEloChart() {
                     pan: true,
                     reset: false
                 },
-                autoSelected: 'zoom'
+                autoSelected: 'pan'
             },
             animations: {
                 enabled: false // Desativar animações para performance
@@ -2204,7 +2204,7 @@ function updateEloChart() {
                     pan: true,
                     reset: false
                 },
-                autoSelected: 'zoom'
+                autoSelected: 'pan'
             },
             animations: {
                 enabled: false
@@ -3041,7 +3041,7 @@ function updateRankingsTable() {
                         ${emblemHtml}
                         <div class="team-color-indicator" style="background-color: ${courseInfo.primaryColor}"></div>
                         <div class="team-info-container">
-                            <span class="team-name-table" title="${displayTeamName}">${displayTeamName}</span>
+                            <span class="team-name-table">${displayTeamName}</span>
                             <span class="team-elo-info" title="${t('eloCurrentTitle')}">${eloDisplay}</span>
                         </div>
                     </td>
@@ -6280,6 +6280,11 @@ function removeChartAriaLabel() {
         if (title.textContent && title.textContent.trim().toLowerCase() === 'chart') {
             title.remove();
         }
+    });
+
+    // Remover tooltips nativos do toolbar do ApexCharts (Zoom In/Out/Pan/etc.)
+    chartRoot.querySelectorAll('.apexcharts-toolbar [title]').forEach(el => {
+        el.removeAttribute('title');
     });
 }
 
@@ -10152,7 +10157,6 @@ function updateTeamSliderDisplay() {
     starBtn.className = 'favorite-star-btn';
     starBtn.style.color = isFav ? '#fbbf24' : '#ccc';
     starBtn.innerHTML = isFav ? '★' : '☆';
-    starBtn.title = isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
 
     starBtn.onclick = (e) => {
         e.stopPropagation();
