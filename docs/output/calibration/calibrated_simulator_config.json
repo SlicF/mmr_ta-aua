@@ -1,19 +1,19 @@
 {
   "ANDEBOL MISTO": {
     "sport_type": "andebol",
-    "base_goals": 20.521164021164022,
-    "base_goals_std": 6.944666159222065,
-    "dispersion_k": 15.19885832470935,
-    "base_draw_rate": 0.042328042328042326,
-    "draw_elo_sensitivity": 0.010428055461576113,
+    "base_goals": 20.49738219895288,
+    "base_goals_std": 6.929619517330738,
+    "dispersion_k": 15.265567373378923,
+    "base_draw_rate": 0.041884816753926704,
+    "draw_elo_sensitivity": 0.010220556785974142,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.3411463592032193,
-      "coef_linear": -0.010428055461576113,
-      "coef_quadratic": 1.0948513481904338e-05
+      "intercept": -2.3688234307826135,
+      "coef_linear": -0.010220556785974142,
+      "coef_quadratic": 1.0606626419348435e-05
     },
-    "margin_elo_slope": 0.0112212840250787,
-    "margin_elo_intercept": 5.9053822769479485,
+    "margin_elo_slope": 0.010931438325941761,
+    "margin_elo_intercept": 5.976578076990369,
     "elo_adjustment_limit": 0.45,
     "division_params": {
       "1": {
@@ -22,9 +22,9 @@
         "base_draw_rate": 0.05434782608695652
       },
       "2": {
-        "base_goals": 18.443298969072163,
-        "dispersion_k": 15.645343579365194,
-        "base_draw_rate": 0.030927835051546393
+        "base_goals": 18.439393939393938,
+        "dispersion_k": 15.886228829466582,
+        "base_draw_rate": 0.030303030303030304
       }
     }
   },
@@ -87,19 +87,19 @@
   },
   "FUTEBOL DE 7 MASCULINO": {
     "sport_type": "futebol7",
-    "base_goals": 2.424170616113744,
-    "base_goals_std": 2.077339633264815,
-    "dispersion_k": 3.10739131854852,
-    "base_draw_rate": 0.11848341232227488,
-    "draw_elo_sensitivity": 0.00480095168461325,
+    "base_goals": 2.4493087557603688,
+    "base_goals_std": 2.0853807533006297,
+    "dispersion_k": 3.158252348490565,
+    "base_draw_rate": 0.11981566820276497,
+    "draw_elo_sensitivity": 0.0022043556675060546,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.043483144847958,
-      "coef_linear": 0.00480095168461325,
-      "coef_quadratic": -2.421328316681407e-05
+      "intercept": -1.926400509529264,
+      "coef_linear": 0.0022043556675060546,
+      "coef_quadratic": -1.5018603566353536e-05
     },
-    "margin_elo_slope": 0.00339667249045318,
-    "margin_elo_intercept": 2.518477879497036,
+    "margin_elo_slope": 0.0032197638289594463,
+    "margin_elo_intercept": 2.5471403017128225,
     "elo_adjustment_limit": 1.0,
     "division_params": {
       "1": {
@@ -108,9 +108,9 @@
         "base_draw_rate": 0.12745098039215685
       },
       "2": {
-        "base_goals": 2.463302752293578,
-        "dispersion_k": 3.330242172974099,
-        "base_draw_rate": 0.11009174311926606
+        "base_goals": 2.508695652173913,
+        "dispersion_k": 3.4262176986961115,
+        "base_draw_rate": 0.11304347826086956
       }
     }
   },
@@ -140,19 +140,19 @@
   },
   "FUTSAL MASCULINO": {
     "sport_type": "futsal",
-    "base_goals": 3.25,
-    "base_goals_std": 2.7352886131939265,
+    "base_goals": 3.2445141065830723,
+    "base_goals_std": 2.7245130706919976,
     "dispersion_k": 3.0,
-    "base_draw_rate": 0.11075949367088607,
-    "draw_elo_sensitivity": 0.0014839768571370637,
+    "base_draw_rate": 0.11285266457680251,
+    "draw_elo_sensitivity": 0.0015341031080192548,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.7655843308208732,
-      "coef_linear": -0.0014839768571370637,
-      "coef_quadratic": -1.0396934070425096e-05
+      "intercept": -1.7441018477182766,
+      "coef_linear": -0.0015341031080192548,
+      "coef_quadratic": -1.0424372077648676e-05
     },
-    "margin_elo_slope": 0.003431510567614509,
-    "margin_elo_intercept": 3.17949014061018,
+    "margin_elo_slope": 0.003696451984860154,
+    "margin_elo_intercept": 3.1420615763624182,
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
@@ -161,9 +161,9 @@
         "base_draw_rate": 0.09649122807017543
       },
       "2": {
-        "base_goals": 3.3564356435643563,
+        "base_goals": 3.346341463414634,
         "dispersion_k": 3.0,
-        "base_draw_rate": 0.1188118811881188
+        "base_draw_rate": 0.12195121951219512
       }
     }
   },
