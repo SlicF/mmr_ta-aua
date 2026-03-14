@@ -6,3 +6,6 @@ __pycache__/
 
 #pasta cenarios
 cenarios/
+
+# backups de reprocessamento
+docs/output/backups/

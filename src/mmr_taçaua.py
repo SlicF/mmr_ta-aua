@@ -1,4 +1,5 @@
 import math
+import argparse
 import pandas as pd
 import os
 import re
@@ -425,7 +426,7 @@ class PointsCalculator:
 class StandingsCalculator:
     """Calcula tabelas de classificação para competições esportivas"""
 
-    def __init__(self, df, sport, teams):
+    def __init__(self, df, sport, teams, withdrawn_teams=None):
         """
         Inicializa o calculador de classificação
 
@@ -433,10 +434,13 @@ class StandingsCalculator:
             df: DataFrame com os jogos
             sport: Desporto da competição (enum Sport)
             teams: Dicionário com as equipas e seus ratings
+            withdrawn_teams: Dict de equipas desistentes {equipa: num_jogos}
         """
         self.df = df.copy()
         self.sport = sport
         self.teams = teams
+        self.withdrawn_teams = set((withdrawn_teams or {}).keys())
+        self.absence_teams = self._collect_absence_teams(df)
 
         # Identificar colunas de divisão e grupo - corrigido para ser mais robusto
         self.div_col = next(
@@ -452,6 +456,21 @@ class StandingsCalculator:
         logger.info(
             f"Colunas detectadas - Divisão: {self.div_col}, Grupo: {self.group_col}"
         )
+
+    def _collect_absence_teams(self, df):
+        """Coleta equipas que aparecem na coluna de falta de comparência."""
+        if "Falta de Comparência" not in df.columns:
+            return set()
+
+        absence_teams = set()
+        for value in df["Falta de Comparência"].dropna():
+            value_str = str(value).strip()
+            if not value_str:
+                continue
+            team_name = normalize_team_name(value_str)
+            if team_name:
+                absence_teams.add(team_name)
+        return absence_teams
 
     def calculate_standings(self):
         """Calcula classificação considerando divisões e grupos"""
@@ -736,6 +755,8 @@ class StandingsCalculator:
                 sets1 = int(row.get("Sets 1")) if pd.notna(row.get("Sets 1")) else None
                 sets2 = int(row.get("Sets 2")) if pd.notna(row.get("Sets 2")) else None
             except (ValueError, TypeError):
+                if self._apply_withdrawn_forfeit_if_needed(row, team1, team2, stats):
+                    continue
                 logger.warning(
                     f"Dados inválidos: {row.get('Golos 1')}-{row.get('Golos 2')}"
                 )
@@ -771,6 +792,58 @@ class StandingsCalculator:
 
             # Atualizar vitórias/empates/derrotas
             self._update_win_draw_loss(stats, team1, team2, score1, score2)
+
+    def _apply_withdrawn_forfeit_if_needed(self, row, team1, team2, stats):
+        """Aplica falta administrativa para jogos sem resultado contra equipas desistentes.
+
+        Regra aplicada apenas no voleibol para preservar o comportamento atual
+        das restantes modalidades.
+        """
+        if self.sport != Sport.VOLEI:
+            return False
+
+        if team1 not in stats or team2 not in stats:
+            return False
+
+        score1_raw = row.get("Golos 1")
+        score2_raw = row.get("Golos 2")
+        score1_missing = pd.isna(score1_raw) or str(score1_raw).strip() == ""
+        score2_missing = pd.isna(score2_raw) or str(score2_raw).strip() == ""
+
+        # Só trata jogos sem resultado registado nos dois lados.
+        if not (score1_missing and score2_missing):
+            return False
+
+        team1_withdrawn = team1 in self.withdrawn_teams or team1 in self.absence_teams
+        team2_withdrawn = team2 in self.withdrawn_teams or team2 in self.absence_teams
+
+        # Precisa de exatamente uma equipa desistente.
+        if team1_withdrawn == team2_withdrawn:
+            return False
+
+        if team1_withdrawn:
+            score1, score2 = 0, 2
+            absent_team = team1
+        else:
+            score1, score2 = 2, 0
+            absent_team = team2
+
+        points1, points2 = PointsCalculator.calculate(
+            self.sport, score1, score2, score1, score2
+        )
+
+        self._update_basic_stats(stats, team1, team2, points1, points2, score1, score2)
+        stats[team1]["sets_ganhos"] += score1
+        stats[team1]["sets_perdidos"] += score2
+        stats[team2]["sets_ganhos"] += score2
+        stats[team2]["sets_perdidos"] += score1
+        self._update_win_draw_loss(stats, team1, team2, score1, score2)
+        stats[absent_team]["faltas_comparencia"] += 1
+
+        logger.info(
+            f"Aplicada falta administrativa (voleibol): {team1} {score1}-{score2} {team2}; ausente={absent_team}"
+        )
+        return True
 
     def _update_basic_stats(
         self, stats, team1, team2, points1, points2, score1, score2
@@ -1525,6 +1598,9 @@ class EloRatingSystem:
         # Determinar o desporto
         sport = SportDetector.detect_from_filename(filename)
 
+        # Identificar desistentes cedo para suportar faltas administrativas na classificação
+        withdrawn_teams = self._detect_withdrawn_teams(df)
+
         # Inicializar ratings das equipas
         teams = self._initialize_team_ratings(df)
 
@@ -1532,7 +1608,9 @@ class EloRatingSystem:
         teams_from_previous_season = set(self.previous_ratings.keys())
 
         # Calcular classificação real
-        standings_calculator = StandingsCalculator(df, sport, teams)
+        standings_calculator = StandingsCalculator(
+            df, sport, teams, withdrawn_teams=withdrawn_teams
+        )
         real_standings = standings_calculator.calculate_standings()
 
         # Processar jogos e calcular ELO
@@ -1541,7 +1619,6 @@ class EloRatingSystem:
         )
 
         # Adicionar equipas desistentes ao dicionário de teams (se não estão já lá)
-        withdrawn_teams = self._detect_withdrawn_teams(df)
         for withdrawn_team in withdrawn_teams:
             if withdrawn_team not in teams:
                 teams[withdrawn_team] = self.get_initial_rating(withdrawn_team)
@@ -2133,18 +2210,20 @@ class TournamentProcessor:
         # Criar diretório de saída se não existir
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def process_all_tournaments(self):
-        """Processa todos os arquivos CSV da época mais recente"""
-        # Detectar época mais recente
-        latest_season = detect_latest_season_from_csv_files(self.input_dir)
-        if not latest_season:
+    def process_all_tournaments(self, season: str = None):
+        """Processa todos os arquivos CSV da época indicada ou da mais recente."""
+        target_season = season
+        if target_season is None:
+            target_season = detect_latest_season_from_csv_files(self.input_dir)
+
+        if not target_season:
             logger.error("Nenhuma época detectada. Processando todos os arquivos.")
             return self._process_all_files()
 
-        logger.info(f"Processando apenas arquivos da época {latest_season}")
+        logger.info(f"Processando apenas arquivos da época {target_season}")
 
         # Filtrar apenas arquivos da época mais recente
-        season_pattern = re.compile(rf".*_{re.escape(latest_season)}\.csv$")
+        season_pattern = re.compile(rf".*_{re.escape(target_season)}\.csv$")
         current_season_files = []
 
         for filename in sorted(os.listdir(self.input_dir)):
@@ -2152,15 +2231,15 @@ class TournamentProcessor:
                 current_season_files.append(filename)
 
         if not current_season_files:
-            logger.warning(f"Nenhum arquivo encontrado para a época {latest_season}")
+            logger.warning(f"Nenhum arquivo encontrado para a época {target_season}")
             return [], []
 
         logger.info(
-            f"Encontrados {len(current_season_files)} arquivos para a época {latest_season}"
+            f"Encontrados {len(current_season_files)} arquivos para a época {target_season}"
         )
 
         # Carregar ELOs da época anterior se existirem
-        previous_season_elos = self._load_previous_season_elos(latest_season)
+        previous_season_elos = self._load_previous_season_elos(target_season)
 
         processed_files = []
         failed_files = []
@@ -2249,7 +2328,7 @@ class TournamentProcessor:
 
         # Resumo final
         logger.info(
-            f"Processamento da época {latest_season} concluído. Arquivos processados: {len(processed_files)}"
+            f"Processamento da época {target_season} concluído. Arquivos processados: {len(processed_files)}"
         )
         if failed_files:
             logger.warning(f"Arquivos com falha: {len(failed_files)}")
@@ -2689,6 +2768,18 @@ class TournamentProcessor:
 def main():
     """Função principal do programa"""
     try:
+        parser = argparse.ArgumentParser(description="Processador de ratings ELO")
+        parser.add_argument(
+            "--season",
+            type=str,
+            default=None,
+            help="Época alvo no formato YY_YY (ex: 24_25). Se omitido, usa a mais recente.",
+        )
+        args = parser.parse_args()
+
+        if args.season and not re.match(r"^\d{2}_\d{2}$", args.season):
+            raise ValueError("Formato inválido para --season. Use YY_YY, ex: 24_25")
+
         # Apagar CSVs antigos da pasta de previsões
         previsoes_dir = REPO_ROOT / "docs" / "output" / "previsoes"
         if previsoes_dir.exists():
@@ -2701,7 +2792,7 @@ def main():
 
         logger.info("A iniciar processamento de torneios")
         processor = TournamentProcessor()
-        processor.process_all_tournaments()
+        processor.process_all_tournaments(season=args.season)
         logger.info("Processamento concluído com sucesso")
     except Exception as e:
         logger.error(f"Erro no processamento: {str(e)}", exc_info=True)

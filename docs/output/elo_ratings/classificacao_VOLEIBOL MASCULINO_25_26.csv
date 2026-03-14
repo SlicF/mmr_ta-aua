@@ -11,17 +11,17 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 1,,10,Eng. Computadores e Telemática,3,8,0,0,8,3,16,-13,0,0,0,0
 1,,11,Gestão e Planeamento em Turismo,1,6,0,0,6,1,12,-11,0,0,0,0
 1,,12,Música,0,7,0,0,7,0,14,-14,0,0,0,0
-2,A,1,Ciências Biomédicas,18,8,6,0,2,13,5,8,0,0,0,0
-2,A,2,Administração Pública,16,6,6,0,0,12,2,10,0,0,0,0
-2,A,3,Bioquímica,16,7,5,0,2,11,4,7,0,0,0,0
+2,A,1,Administração Pública,19,7,7,0,0,14,2,12,0,2,0,2
+2,A,2,Bioquímica,19,8,6,0,2,13,4,9,0,2,0,2
+2,A,3,Ciências Biomédicas,18,8,6,0,2,13,5,8,0,0,0,0
 2,A,4,Fisioterapia,15,6,6,0,0,12,3,9,0,0,0,0
 2,A,5,Eng. do Ambiente,14,6,5,0,1,10,3,7,0,0,0,0
 2,A,6,Medicina,12,8,3,0,5,9,10,-1,0,0,0,0
-2,A,7,Geologia,7,6,2,0,4,5,8,-3,0,0,0,0
-2,A,8,Biologia,6,7,2,0,5,5,11,-6,0,0,0,0
-2,A,9,Eng. de Materiais,4,7,1,0,6,3,12,-9,0,0,0,0
-2,A,10,Biotecnologia,3,7,1,0,6,2,12,-10,0,0,0,0
-2,A,11,Economia,0,6,0,0,6,0,12,-12,1,0,0,0
+2,A,7,Geologia,10,7,3,0,4,7,8,-1,0,2,0,2
+2,A,8,Biotecnologia,6,8,2,0,6,4,12,-8,0,2,0,2
+2,A,9,Biologia,6,7,2,0,5,5,11,-6,0,0,0,0
+2,A,10,Eng. de Materiais,4,7,1,0,6,3,12,-9,0,0,0,0
+2,A,11,Economia,0,10,0,0,10,0,20,-20,5,0,8,-8
 2,B,1,Contabilidade,19,7,7,0,0,14,2,12,0,0,0,0
 2,B,2,Física,19,7,6,0,1,13,2,11,0,0,0,0
 2,B,3,Eng. Física,13,6,5,0,1,10,4,6,0,0,0,0
