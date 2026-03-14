@@ -1,24 +1,24 @@
 Divisao,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
 1,1,Gestão Comercial,15,5,5,0,0,118,88,30,0
-1,2,Marketing,13,5,4,0,1,130,119,11,0
+1,2,Marketing,14,6,4,0,2,152,142,10,0
 1,3,Eng. Informática,10,4,3,0,1,87,87,0,0
 1,4,Eng. Eletrónica e Telecomunicações,10,5,2,1,2,101,104,-3,0
 1,5,Eng. Civil,9,5,2,0,3,100,96,4,0
 1,6,Eng. Mecânica,8,3,2,1,0,62,45,17,0
-1,7,Eng. Computadores e Telemática,6,4,1,0,3,86,89,-3,0
-1,8,Eng. e Gestão Industrial,5,3,1,0,2,71,73,-2,0
-1,9,Eng. Física,4,4,0,0,4,71,95,-24,0
-1,10,Eng. de Materiais,4,4,0,0,4,79,109,-30,0
+1,7,Eng. de Materiais,7,5,1,0,4,102,131,-29,0
+1,8,Eng. Computadores e Telemática,6,4,1,0,3,86,89,-3,0
+1,9,Eng. e Gestão Industrial,5,3,1,0,2,71,73,-2,0
+1,10,Eng. Física,4,4,0,0,4,71,95,-24,0
 1,11,Fisioterapia,0,10,0,0,0,0,0,0,10
 2,1,Economia,24,8,8,0,0,176,123,53,0
-2,2,Biologia e Geologia,18,6,6,0,0,145,90,55,0
-2,3,Matemática,17,8,4,1,3,171,139,32,0
-2,4,Eng. Biomédica,16,6,5,0,1,107,86,21,0
-2,5,DPT,15,7,4,0,3,153,141,12,0
-2,6,Gestão,13,7,3,0,4,148,154,-6,0
-2,7,Administração Pública,12,5,3,1,1,91,83,8,0
-2,8,Ciências do Mar,12,6,3,0,3,114,121,-7,0
+2,2,Biologia e Geologia,21,7,7,0,0,169,109,60,0
+2,3,Eng. Biomédica,17,7,5,0,2,120,108,12,0
+2,4,Matemática,17,8,4,1,3,171,139,32,0
+2,5,Administração Pública,15,6,4,1,1,113,96,17,0
+2,6,DPT,15,7,4,0,3,153,141,12,0
+2,7,Ciências do Mar,13,7,3,0,4,133,145,-12,0
+2,8,Gestão,13,7,3,0,4,148,154,-6,0
 2,9,MTC,11,7,2,0,5,127,139,-12,0
-2,10,Educação Básica,10,8,1,0,7,101,163,-62,0
-2,11,Biologia,9,7,1,0,6,104,137,-33,0
-2,12,Psicologia,7,7,0,0,7,101,162,-61,0
+2,10,Educação Básica,11,9,1,0,8,101,178,-77,0
+2,11,Psicologia,10,8,1,0,7,116,162,-46,0
+2,12,Biologia,9,7,1,0,6,104,137,-33,0
