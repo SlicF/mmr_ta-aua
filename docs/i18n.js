@@ -293,9 +293,17 @@ const translations = {
 
         // === Calendário ===
         gameCalendar: 'Calendário de Jogos',
+        calendarSortAria: 'Ordenação do calendário',
+        calendarSortDateTime: 'Por Data/Hora',
+        calendarSortMatchday: 'Por Jornada',
         matchday: 'Jornada',
+        calendarDateLabel: 'Data',
         selectMatchday: 'Selecione uma jornada para ver os jogos',
         noGamesFound: 'Nenhum jogo encontrado para esta jornada',
+        noGamesFoundDateMode: 'Nenhum jogo encontrado para esta data',
+        noGamesAvailable: 'Sem jogos disponíveis',
+        noMatchdaysAvailable: 'Sem jornadas disponíveis',
+        calendarNoDatePage: 'Sem data marcada',
         dateToSchedule: 'DATA POR MARCAR',
         previousMatchday: 'Jornada anterior',
         nextMatchday: 'Jornada seguinte',
@@ -501,7 +509,10 @@ const translations = {
         matchday: 'Jornada',
         date: 'Data',
         time: 'Hora',
+        location: 'Local',
+        locationToSchedule: 'LOCAL POR MARCAR',
         provisionalDatePlaceholder: 'Data provisória - aguarda confirmação',
+        provisionalLocationPlaceholder: 'Local provisório - aguarda confirmação',
         opponent: 'Adversário',
         result: 'Resultado',
         score: 'Pontuação',
@@ -628,9 +639,17 @@ const translations = {
 
         // === Calendar ===
         gameCalendar: 'Match Schedule',
+        calendarSortAria: 'Calendar sorting',
+        calendarSortDateTime: 'By Date/Time',
+        calendarSortMatchday: 'By Matchday',
         matchday: 'Matchday',
+        calendarDateLabel: 'Date',
         selectMatchday: 'Select a matchday to see the games',
         noGamesFound: 'No games found for this matchday',
+        noGamesFoundDateMode: 'No games found for this date',
+        noGamesAvailable: 'No games available',
+        noMatchdaysAvailable: 'No matchdays available',
+        calendarNoDatePage: 'No scheduled date',
         dateToSchedule: 'DATE TBD',
         previousMatchday: 'Previous matchday',
         nextMatchday: 'Next matchday',
@@ -836,7 +855,10 @@ const translations = {
         matchday: 'Matchday',
         date: 'Date',
         time: 'Time',
+        location: 'Venue',
+        locationToSchedule: 'VENUE TBD',
         provisionalDatePlaceholder: 'Provisional date - awaiting confirmation',
+        provisionalLocationPlaceholder: 'Provisional venue - awaiting confirmation',
         opponent: 'Opponent',
         result: 'Result',
         score: 'Score',
@@ -963,9 +985,17 @@ translations.es = {
 
     // === Calendar ===
     gameCalendar: 'Calendario de partidos',
+    calendarSortAria: 'Ordenación del calendario',
+    calendarSortDateTime: 'Por Fecha/Hora',
+    calendarSortMatchday: 'Por Jornada',
     matchday: 'Jornada',
+    calendarDateLabel: 'Fecha',
     selectMatchday: 'Selecciona una jornada para ver los partidos',
     noGamesFound: 'No se encontraron partidos para esta jornada',
+    noGamesFoundDateMode: 'No se encontraron partidos para esta fecha',
+    noGamesAvailable: 'No hay partidos disponibles',
+    noMatchdaysAvailable: 'No hay jornadas disponibles',
+    calendarNoDatePage: 'Sin fecha definida',
     dateToSchedule: 'FECHA POR DEFINIR',
     previousMatchday: 'Jornada anterior',
     nextMatchday: 'Jornada siguiente',
@@ -1164,7 +1194,10 @@ translations.es = {
     matchday: 'Jornada',
     date: 'Fecha',
     time: 'Hora',
+    location: 'Lugar',
+    locationToSchedule: 'LUGAR POR DEFINIR',
     provisionalDatePlaceholder: 'Fecha provisional - esperando confirmación',
+    provisionalLocationPlaceholder: 'Lugar provisional - esperando confirmación',
     opponent: 'Rival',
     result: 'Resultado',
     score: 'Puntuación',
@@ -1340,6 +1373,9 @@ function refreshAllContent() {
             }
             if (typeof createCalendarGroupSelector === 'function') {
                 createCalendarGroupSelector();
+            }
+            if (typeof updateCalendarSortControls === 'function') {
+                updateCalendarSortControls();
             }
             updateJornadaDisplay();
             updateCalendar();

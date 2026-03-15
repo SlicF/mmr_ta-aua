@@ -338,7 +338,7 @@ def extrair_jogos_pdf(
 
 def carregar_calendario_epoca(
     epoca: str, calendarios_dir: Optional[Path] = None, repo_root: Optional[Path] = None
-) -> Dict[str, Dict[Tuple[str, str], Tuple[str, str]]]:
+) -> Dict[str, Dict[Tuple[str, str], Tuple[str, str, str]]]:
     """Carrega calendários de todos os PDFs de uma época.
 
     Args:
@@ -350,8 +350,8 @@ def carregar_calendario_epoca(
         Dicionário estruturado:
         {
             'MODALIDADE': {
-                ('EQUIPA1', 'EQUIPA2'): ('YYYY-MM-DD HH:MM:SS', 'HHhMM'),
-                ('EQUIPA2', 'EQUIPA1'): ('YYYY-MM-DD HH:MM:SS', 'HHhMM'),
+                ('EQUIPA1', 'EQUIPA2'): ('YYYY-MM-DD HH:MM:SS', 'HHhMM', 'LOCAL'),
+                ('EQUIPA2', 'EQUIPA1'): ('YYYY-MM-DD HH:MM:SS', 'HHhMM', 'LOCAL'),
                 ...
             },
             ...
@@ -391,7 +391,7 @@ def carregar_calendario_epoca(
     print(f"  [INFO] Encontrados {len(pdfs)} PDF(s) de calendário para época {epoca}")
 
     # Estrutura para consolidar jogos de todos os PDFs
-    calendario_consolidado: Dict[str, Dict[Tuple[str, str], Tuple[str, str]]] = (
+    calendario_consolidado: Dict[str, Dict[Tuple[str, str], Tuple[str, str, str]]] = (
         defaultdict(lambda: {})
     )
 
@@ -419,6 +419,7 @@ def carregar_calendario_epoca(
             equipa2 = jogo["equipa2"]
             data = jogo["data"]
             hora = jogo["hora"]
+            local = str(jogo.get("local", "")).strip()
 
             # Formatar data no padrão do CSV (YYYY-MM-DD HH:MM:SS)
             data_formatada = data.strftime("%Y-%m-%d 00:00:00")
@@ -433,10 +434,14 @@ def carregar_calendario_epoca(
 
             # Verificar conflitos (mesmo jogo em múltiplos PDFs com datas diferentes)
             if chave_direta in calendario_consolidado[modalidade]:
-                data_existente, hora_existente = calendario_consolidado[modalidade][
-                    chave_direta
-                ]
-                if data_existente != data_formatada or hora_existente != hora:
+                data_existente, hora_existente, local_existente = (
+                    calendario_consolidado[modalidade][chave_direta]
+                )
+                if (
+                    data_existente != data_formatada
+                    or hora_existente != hora
+                    or local_existente != local
+                ):
                     print(f"      [!] Conflito: {equipa1} vs {equipa2} em {modalidade}")
                     print(f"          Anterior: {data_existente} {hora_existente}")
                     print(f"          Nova: {data_formatada} {hora}")
@@ -445,20 +450,24 @@ def carregar_calendario_epoca(
                     calendario_consolidado[modalidade][chave_direta] = (
                         data_formatada,
                         hora,
+                        local,
                     )
                     calendario_consolidado[modalidade][chave_invertida] = (
                         data_formatada,
                         hora,
+                        local,
                     )
             else:
                 # Jogo não existe ainda, adicionar
                 calendario_consolidado[modalidade][chave_direta] = (
                     data_formatada,
                     hora,
+                    local,
                 )
                 calendario_consolidado[modalidade][chave_invertida] = (
                     data_formatada,
                     hora,
+                    local,
                 )
 
     # Resultado já é dict normal
@@ -507,13 +516,16 @@ if __name__ == "__main__":
         print(f"\n{modalidade}:")
         # Mostrar apenas primeiros 5 jogos (chaves únicas)
         jogos_unicos = {}
-        for (eq1, eq2), (data, hora) in jogos.items():
+        for (eq1, eq2), (data, hora, local) in jogos.items():
             chave_ordenada = tuple(sorted([eq1, eq2]))
             if chave_ordenada not in jogos_unicos:
-                jogos_unicos[chave_ordenada] = (eq1, eq2, data, hora)
+                jogos_unicos[chave_ordenada] = (eq1, eq2, data, hora, local)
 
-        for i, (eq1, eq2, data, hora) in enumerate(list(jogos_unicos.values())[:5]):
-            print(f"  {data} {hora} - {eq1} vs {eq2}")
+        for i, (eq1, eq2, data, hora, local) in enumerate(
+            list(jogos_unicos.values())[:5]
+        ):
+            local_str = f" @ {local}" if local else ""
+            print(f"  {data} {hora}{local_str} - {eq1} vs {eq2}")
 
         if len(jogos_unicos) > 5:
             print(f"  ... e mais {len(jogos_unicos) - 5} jogos")

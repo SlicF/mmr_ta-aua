@@ -1401,9 +1401,15 @@ class ExcelProcessor:
             chave_invertida = (equipa2_normalized, equipa1_normalized)
 
             if chave_direta in games_dict:
-                return games_dict[chave_direta]
+                value = games_dict[chave_direta]
+                if isinstance(value, (tuple, list)) and len(value) >= 2:
+                    return (value[0], value[1])
+                return (None, None)
             if chave_invertida in games_dict:
-                return games_dict[chave_invertida]
+                value = games_dict[chave_invertida]
+                if isinstance(value, (tuple, list)) and len(value) >= 2:
+                    return (value[0], value[1])
+                return (None, None)
             return (None, None)
 
         def _parse_date_only(value) -> Optional[datetime.date]:
@@ -1634,6 +1640,163 @@ class ExcelProcessor:
 
         return df
 
+    def _assign_venue_placeholders(
+        self, df: pd.DataFrame, modality: str
+    ) -> pd.DataFrame:
+        """Atribui locais com prioridade: Excel -> Calendário PDF -> Placeholder.
+
+        Também marca a origem em Fonte_Local e indica placeholder em Local_Placeholder.
+        """
+        import sys
+
+        repo_root = Path(__file__).resolve().parents[1]
+        if str(repo_root / "src") not in sys.path:
+            sys.path.insert(0, str(repo_root / "src"))
+
+        from calendario_parser import (
+            carregar_calendario_epoca,
+            carregar_config_cursos,
+            normalizar_nome_equipa,
+        )
+
+        if "Fonte_Local" not in df.columns:
+            df["Fonte_Local"] = ""
+        if "Local_Placeholder" not in df.columns:
+            df["Local_Placeholder"] = False
+        if "Local" not in df.columns:
+            df["Local"] = ""
+
+        try:
+            calendario = carregar_calendario_epoca("25_26", repo_root=repo_root)
+            config_cursos = carregar_config_cursos(repo_root)
+        except Exception as e:
+            print(f"[WARN] Falha ao carregar calendário para locais: {e}")
+            calendario = {}
+            config_cursos = {}
+
+        modality_map = {
+            "ANDEBOL MISTO": "ANDEBOL",
+            "FUTEBOL DE 7 MASCULINO": "FUTEBOL 7",
+        }
+        pdf_modality = modality_map.get(modality, modality)
+
+        def _normalize_modality(text: str) -> str:
+            return " ".join(str(text or "").upper().split())
+
+        def _extract_division_number(value) -> Optional[int]:
+            if pd.isna(value):
+                return None
+            raw = str(value).strip()
+            if not raw:
+                return None
+            m = re.search(r"(\d+)", raw)
+            if not m:
+                return None
+            try:
+                return int(m.group(1))
+            except ValueError:
+                return None
+
+        def _venue_placeholder(modality_name: str, division_value) -> str:
+            norm = _normalize_modality(modality_name)
+            div_num = _extract_division_number(division_value)
+
+            if "FUTEBOL DE 7" in norm:
+                return "Sintético"
+
+            if "FUTSAL FEMININO" in norm:
+                return "Caixa UA"
+
+            if "FUTSAL MASCULINO" in norm:
+                if div_num == 2:
+                    return "PAH (Aristides Hall)"
+                # 1ª divisão e fallback sem divisão -> Caixa UA
+                return "Caixa UA"
+
+            if "BASQUETEBOL" in norm or "VOLEIBOL" in norm or "ANDEBOL" in norm:
+                return "PAH (Aristides Hall)"
+
+            return ""
+
+        def _clean_text(value) -> str:
+            if pd.isna(value):
+                return ""
+            text = str(value).strip()
+            if not text:
+                return ""
+            if text.lower() in ("nan", "none", "null"):
+                return ""
+            return text
+
+        def _lookup_pdf_venue(equipa1: str, equipa2: str) -> Optional[str]:
+            if pdf_modality not in calendario:
+                return None
+
+            equipa1_normalized = normalizar_nome_equipa(equipa1, config_cursos)
+            equipa2_normalized = normalizar_nome_equipa(equipa2, config_cursos)
+            games_dict = calendario[pdf_modality]
+
+            chave_direta = (equipa1_normalized, equipa2_normalized)
+            chave_invertida = (equipa2_normalized, equipa1_normalized)
+
+            for key in (chave_direta, chave_invertida):
+                if key not in games_dict:
+                    continue
+                value = games_dict[key]
+                if isinstance(value, (tuple, list)) and len(value) >= 3:
+                    local = str(value[2]).strip()
+                    if local:
+                        return local
+            return None
+
+        for idx, row in df.iterrows():
+            local_excel = _clean_text(row.get("Local", ""))
+            golos1 = row.get("Golos 1", "")
+            golos2 = row.get("Golos 2", "")
+            has_result = (
+                pd.notna(golos1)
+                and str(golos1).strip() != ""
+                and pd.notna(golos2)
+                and str(golos2).strip() != ""
+            )
+            has_date = _clean_text(row.get("Dia", "")) != ""
+
+            equipa1 = str(row.get("Equipa 1", "")).strip()
+            equipa2 = str(row.get("Equipa 2", "")).strip()
+            divisao = row.get("Divisão", row.get("Divisao", ""))
+
+            # Prioridade 1: Local vindo da folha de resultados
+            if local_excel:
+                df.at[idx, "Local"] = local_excel
+                df.at[idx, "Fonte_Local"] = "Excel"
+                df.at[idx, "Local_Placeholder"] = False
+                continue
+
+            # Prioridade 2: Local vindo do calendário PDF
+            pdf_local = _lookup_pdf_venue(equipa1, equipa2)
+            if pdf_local:
+                df.at[idx, "Local"] = pdf_local
+                df.at[idx, "Fonte_Local"] = "Calendário PDF"
+                df.at[idx, "Local_Placeholder"] = False
+                continue
+
+            # Prioridade 3: Placeholder quando há resultado OU data agendada
+            if has_result or has_date:
+                placeholder_local = _venue_placeholder(modality, divisao)
+                if placeholder_local:
+                    df.at[idx, "Local"] = placeholder_local
+                    df.at[idx, "Fonte_Local"] = "Placeholder"
+                    df.at[idx, "Local_Placeholder"] = True
+                else:
+                    df.at[idx, "Fonte_Local"] = ""
+                    df.at[idx, "Local_Placeholder"] = False
+            else:
+                # Sem resultado mantém vazio e sem marcador
+                df.at[idx, "Fonte_Local"] = ""
+                df.at[idx, "Local_Placeholder"] = False
+
+        return df
+
     def clean_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Limpa e processa o DataFrame."""
         # Remove linhas vazias
@@ -1691,6 +1854,7 @@ class ExcelProcessor:
         # ANTES de ordenar, aplicar sistema de placeholders se fornecida modalidade
         if modality:
             df = self._assign_date_placeholders(df, modality)
+            df = self._assign_venue_placeholders(df, modality)
 
         def parse_data_hora(row):
             dia, hora = row["Dia"], row["Hora"]
@@ -1827,18 +1991,33 @@ class ExcelProcessor:
         # Garantir coluna "Data_Placeholder" presente
         if "Data_Placeholder" not in df.columns:
             df["Data_Placeholder"] = False
+        if "Local_Placeholder" not in df.columns:
+            df["Local_Placeholder"] = False
+        if "Fonte_Local" not in df.columns:
+            df["Fonte_Local"] = ""
 
         # Garantir coluna "Falta de Comparência" presente e no fim, mesmo vazia
         if "Falta de Comparência" not in df.columns:
             df["Falta de Comparência"] = ""
 
-        # Reordenar colunas: principais, depois Data_Placeholder, depois Falta de Comparência
+        # Reordenar colunas: principais, depois marcadores/fontes e por fim Falta de Comparência
         colunas = [
             col
             for col in df.columns
-            if col not in ("Data_Placeholder", "Falta de Comparência")
+            if col
+            not in (
+                "Data_Placeholder",
+                "Local_Placeholder",
+                "Fonte_Data",
+                "Fonte_Local",
+                "Falta de Comparência",
+            )
         ]
+        if "Fonte_Data" in df.columns:
+            colunas.append("Fonte_Data")
+        colunas.append("Fonte_Local")
         colunas.append("Data_Placeholder")
+        colunas.append("Local_Placeholder")
         colunas.append("Falta de Comparência")
         df = df[colunas]
 

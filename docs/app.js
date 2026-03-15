@@ -21,6 +21,18 @@ let predictionsTooltipTimer = null; // Timer para debounce do hover
 let predictionsTooltipLastCell = null; // Última célula onde o tooltip estava visível
 let predictionsTooltipVisible = false; // Flag para rastrear se o tooltip está visível (evita flicker)
 let favoriteTeam = localStorage.getItem('favoriteTeam'); // Equipa favorita do utilizador
+const CALENDAR_SORT_MODE_KEY = 'mmr_calendarSortMode';
+const CALENDAR_SORT_MODE_MATCHDAY = 'matchday';
+const CALENDAR_SORT_MODE_DATE_TIME = 'date_time';
+
+function getSavedCalendarSortMode() {
+    const savedMode = localStorage.getItem(CALENDAR_SORT_MODE_KEY);
+    return savedMode === CALENDAR_SORT_MODE_MATCHDAY ? CALENDAR_SORT_MODE_MATCHDAY : CALENDAR_SORT_MODE_DATE_TIME;
+}
+
+let calendarSortMode = getSavedCalendarSortMode();
+let availableCalendarDatePages = [];
+let currentCalendarDatePageIndex = 0;
 
 // Mostrar painel de debug com Ctrl+Shift+D
 document.addEventListener('keydown', function (e) {
@@ -160,8 +172,75 @@ function initializeCollapsibles() {
     });
 }
 
+function initializeCalendarSortControls() {
+    const dateTimeBtn = document.getElementById('calendarSortDateTimeBtn');
+    const matchdayBtn = document.getElementById('calendarSortMatchdayBtn');
+
+    if (!dateTimeBtn || !matchdayBtn) return;
+
+    if (!dateTimeBtn.dataset.bound) {
+        dateTimeBtn.addEventListener('click', () => setCalendarSortMode(CALENDAR_SORT_MODE_DATE_TIME));
+        dateTimeBtn.dataset.bound = 'true';
+    }
+
+    if (!matchdayBtn.dataset.bound) {
+        matchdayBtn.addEventListener('click', () => setCalendarSortMode(CALENDAR_SORT_MODE_MATCHDAY));
+        matchdayBtn.dataset.bound = 'true';
+    }
+
+    updateCalendarSortControls();
+}
+
+function updateCalendarSortControls() {
+    const dateTimeBtn = document.getElementById('calendarSortDateTimeBtn');
+    const matchdayBtn = document.getElementById('calendarSortMatchdayBtn');
+
+    if (!dateTimeBtn || !matchdayBtn) return;
+
+    const isDateTime = calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME;
+
+    dateTimeBtn.classList.toggle('active', isDateTime);
+    matchdayBtn.classList.toggle('active', !isDateTime);
+    dateTimeBtn.setAttribute('aria-pressed', isDateTime ? 'true' : 'false');
+    matchdayBtn.setAttribute('aria-pressed', !isDateTime ? 'true' : 'false');
+}
+
+function setCalendarSortMode(mode) {
+    const normalizedMode = mode === CALENDAR_SORT_MODE_MATCHDAY
+        ? CALENDAR_SORT_MODE_MATCHDAY
+        : CALENDAR_SORT_MODE_DATE_TIME;
+
+    const changed = normalizedMode !== calendarSortMode;
+    calendarSortMode = normalizedMode;
+    localStorage.setItem(CALENDAR_SORT_MODE_KEY, calendarSortMode);
+
+    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+        updateAvailableJornadas({ anchorLatestResults: true, preserveCurrentPage: false });
+    } else {
+        updateAvailableJornadas({ preserveCurrentPage: true });
+    }
+
+    updateCalendarSortControls();
+
+    if (!changed) {
+        updateJornadaDisplay();
+        updateCalendar();
+        return;
+    }
+
+    if (calendarSortMode === CALENDAR_SORT_MODE_MATCHDAY && !availableJornadas.includes(currentCalendarJornada)) {
+        currentCalendarJornada = getCurrentJornada();
+    }
+
+    updateJornadaDisplay();
+    updateCalendar();
+}
+
 // Inicializar aplicação
 async function initApp() {
+    calendarSortMode = getSavedCalendarSortMode();
+    localStorage.setItem(CALENDAR_SORT_MODE_KEY, calendarSortMode);
+
     // Carregar configuração dos cursos
     await loadCoursesConfig();
 
@@ -177,6 +256,9 @@ async function initApp() {
 
     // Inicializar colapsáveis
     initializeCollapsibles();
+
+    // Inicializar toggle da ordenação do calendário
+    initializeCalendarSortControls();
 
     // Inicializar seletores de época e modalidade
     initializeSelectors();
@@ -893,10 +975,14 @@ function switchDivision(division) {
     createCalendarGroupSelector();
 
     // Atualizar jornadas disponíveis
-    updateAvailableJornadas();
+    updateAvailableJornadas({
+        anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+        preserveCurrentPage: false
+    });
 
     // Atualizar calendário se houver jornada selecionada
-    if (currentCalendarJornada) {
+    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME || currentCalendarJornada) {
+        updateJornadaDisplay();
         updateCalendar();
     }
 
@@ -939,10 +1025,14 @@ function switchGroup(group) {
     });
 
     // Atualizar jornadas disponíveis
-    updateAvailableJornadas();
+    updateAvailableJornadas({
+        anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+        preserveCurrentPage: false
+    });
 
     // Atualizar calendário se houver jornada selecionada
-    if (currentCalendarJornada) {
+    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME || currentCalendarJornada) {
+        updateJornadaDisplay();
         updateCalendar();
     }
 
@@ -7655,14 +7745,263 @@ function changeModalidade(mod) {
 // Variáveis globais para controle do calendário
 let availableJornadas = [];
 
+function getCalendarDivisionGroupFilter() {
+    let targetDivision = null;
+    let targetGroup = null;
+
+    if (currentCalendarDivision) {
+        const divMatch = currentCalendarDivision.match(/^(\d+)ª Divisão(?:\s*-\s*Grupo\s*([A-Z]))?$/);
+        if (divMatch) {
+            targetDivision = divMatch[1];
+            targetGroup = divMatch[2] || null;
+        }
+    }
+
+    return { targetDivision, targetGroup };
+}
+
+function matchesCalendarDivisionGroup(match, targetDivision, targetGroup) {
+    if (!targetDivision) return true;
+
+    const matchDiv = match.division ? match.division.toString() : null;
+    const matchGroup = match.grupo || null;
+
+    const divMatch = matchDiv && (matchDiv == targetDivision ||
+        parseFloat(matchDiv) == parseFloat(targetDivision));
+    if (!divMatch) return false;
+
+    if (targetGroup && matchGroup !== targetGroup) return false;
+
+    return true;
+}
+
+function parseCalendarTimeToMinutes(timeStr) {
+    if (!timeStr || typeof timeStr !== 'string') return Infinity;
+
+    const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return Infinity;
+
+    const hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return Infinity;
+    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return Infinity;
+
+    return hours * 60 + minutes;
+}
+
+function parseCalendarDateToTimestamp(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return Infinity;
+
+    const trimmed = dateStr.trim();
+    const dateMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+    if (dateMatch) {
+        const year = parseInt(dateMatch[1], 10);
+        const month = parseInt(dateMatch[2], 10);
+        const day = parseInt(dateMatch[3], 10);
+        return Date.UTC(year, month - 1, day);
+    }
+
+    const parsed = new Date(trimmed);
+    return Number.isNaN(parsed.getTime()) ? Infinity : parsed.getTime();
+}
+
+function extractCalendarDateKey(match) {
+    const rawDate = (match.date || match.Data || match.Dia || '').toString().trim();
+    return rawDate.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || null;
+}
+
+function getCalendarPageLabel(startDateKey, endDateKey, hasUndated) {
+    if (hasUndated && !startDateKey && !endDateKey) {
+        return t('calendarNoDatePage');
+    }
+
+    if (!startDateKey && endDateKey) {
+        return formatGameDate(endDateKey);
+    }
+
+    if (startDateKey && !endDateKey) {
+        return formatGameDate(startDateKey);
+    }
+
+    if (startDateKey && endDateKey && startDateKey !== endDateKey) {
+        return `${formatGameDate(startDateKey)} - ${formatGameDate(endDateKey)}`;
+    }
+
+    if (startDateKey && endDateKey) {
+        return formatGameDate(startDateKey);
+    }
+
+    return t('calendarNoDatePage');
+}
+
+function hasMatchResult(match) {
+    const result1 = match.score1 !== undefined && match.score1 !== null ? match.score1 :
+        (match['Resultado 1'] || match['Golos 1'] || match['Golos Equipa 1'] || null);
+    const result2 = match.score2 !== undefined && match.score2 !== null ? match.score2 :
+        (match['Resultado 2'] || match['Golos 2'] || match['Golos Equipa 2'] || null);
+
+    return (result1 !== null && result1 !== undefined && result1 !== '') &&
+        (result2 !== null && result2 !== undefined && result2 !== '');
+}
+
+function buildCalendarDatePages(filteredMatches, options = {}) {
+    const {
+        anchorLatestResults = false,
+        preserveCurrentPage = true
+    } = options;
+
+    const sortedMatches = [...filteredMatches].sort((a, b) => {
+        const dateA = parseCalendarDateToTimestamp(a.date || a.Data || a.Dia || '');
+        const dateB = parseCalendarDateToTimestamp(b.date || b.Data || b.Dia || '');
+        if (dateA !== dateB) return dateA - dateB;
+
+        const timeA = parseCalendarTimeToMinutes(a.time || a.Hora || '');
+        const timeB = parseCalendarTimeToMinutes(b.time || b.Hora || '');
+        if (timeA !== timeB) return timeA - timeB;
+
+        const jornadaA = parseInt(a.jornada, 10);
+        const jornadaB = parseInt(b.jornada, 10);
+        if (!Number.isNaN(jornadaA) && !Number.isNaN(jornadaB) && jornadaA !== jornadaB) {
+            return jornadaA - jornadaB;
+        }
+
+        const teamA = `${a.team1 || ''}-${a.team2 || ''}`;
+        const teamB = `${b.team1 || ''}-${b.team2 || ''}`;
+        return teamA.localeCompare(teamB);
+    });
+
+    // Separar jogos com e sem data
+    const datedMatches = sortedMatches.filter(m => extractCalendarDateKey(m));
+    const undatedMatches = sortedMatches.filter(m => !extractCalendarDateKey(m));
+
+    const pages = [];
+    let currentPage = null;
+
+    const pushCurrentPage = () => {
+        if (!currentPage || currentPage.games.length === 0) return;
+        currentPage.label = getCalendarPageLabel(
+            currentPage.startDateKey,
+            currentPage.endDateKey,
+            currentPage.hasUndated
+        );
+        pages.push(currentPage);
+    };
+
+    // Páginas de jogos COM data: paginação gulosa sem repetição de equipa
+    datedMatches.forEach(match => {
+        const team1 = resolveCanonicalCourseKey(normalizeTeamName(match.team1 || match['Equipa 1'] || ''));
+        const team2 = resolveCanonicalCourseKey(normalizeTeamName(match.team2 || match['Equipa 2'] || ''));
+        const dateKey = extractCalendarDateKey(match);
+
+        if (!currentPage) {
+            currentPage = {
+                startDateKey: dateKey,
+                endDateKey: dateKey,
+                hasUndated: false,
+                games: [],
+                teamsInPage: new Set()
+            };
+        }
+
+        const teamAlreadyInPage = (team1 && currentPage.teamsInPage.has(team1)) ||
+            (team2 && currentPage.teamsInPage.has(team2));
+
+        if (teamAlreadyInPage) {
+            pushCurrentPage();
+            currentPage = {
+                startDateKey: dateKey,
+                endDateKey: dateKey,
+                hasUndated: false,
+                games: [],
+                teamsInPage: new Set()
+            };
+        }
+
+        currentPage.games.push(match);
+        if (team1) currentPage.teamsInPage.add(team1);
+        if (team2) currentPage.teamsInPage.add(team2);
+        currentPage.endDateKey = dateKey;
+    });
+
+    pushCurrentPage();
+    currentPage = null;
+
+    // Páginas de jogos SEM data: uma página por jornada
+    const undatedByJornada = new Map();
+    undatedMatches.forEach(match => {
+        const jornada = parseInt(match.jornada, 10);
+        const key = Number.isNaN(jornada) ? '__NO_JORNADA__' : jornada;
+        if (!undatedByJornada.has(key)) undatedByJornada.set(key, []);
+        undatedByJornada.get(key).push(match);
+    });
+
+    const undatedJornadaKeys = [...undatedByJornada.keys()].sort((a, b) => {
+        if (a === '__NO_JORNADA__') return 1;
+        if (b === '__NO_JORNADA__') return -1;
+        return a - b;
+    });
+
+    undatedJornadaKeys.forEach(key => {
+        const games = undatedByJornada.get(key);
+        const label = key === '__NO_JORNADA__'
+            ? t('calendarNoDatePage')
+            : `${t('matchday')} ${key}`;
+        pages.push({ label, startDateKey: null, endDateKey: null, hasUndated: true, games });
+    });
+
+    pages.forEach(page => { delete page.teamsInPage; });
+
+    availableCalendarDatePages = pages;
+
+    if (availableCalendarDatePages.length === 0) {
+        currentCalendarDatePageIndex = 0;
+        return;
+    }
+
+    if (anchorLatestResults) {
+        let targetPageIndex = -1;
+
+        for (let pageIndex = availableCalendarDatePages.length - 1; pageIndex >= 0; pageIndex--) {
+            const page = availableCalendarDatePages[pageIndex];
+            if (page.games.some(hasMatchResult)) {
+                targetPageIndex = pageIndex;
+                break;
+            }
+        }
+
+        if (targetPageIndex === -1) {
+            targetPageIndex = Math.max(availableCalendarDatePages.length - 1, 0);
+        }
+
+        currentCalendarDatePageIndex = targetPageIndex;
+        return;
+    }
+
+    if (!preserveCurrentPage) {
+        currentCalendarDatePageIndex = 0;
+        return;
+    }
+
+    if (currentCalendarDatePageIndex < 0) {
+        currentCalendarDatePageIndex = 0;
+    }
+
+    if (currentCalendarDatePageIndex >= availableCalendarDatePages.length) {
+        currentCalendarDatePageIndex = availableCalendarDatePages.length - 1;
+    }
+}
+
 // Inicializar seletores do calendário
 function initializeCalendarSelectors() {
     const jornadaTitle = document.getElementById('jornadaTitle');
     const prevBtn = document.getElementById('prevJornadaBtn');
     const nextBtn = document.getElementById('nextJornadaBtn');
     const divisionSelectorDiv = document.getElementById('calendarDivisionSelector');
-    const groupSelectorDiv = document.getElementById('calendarGroupSelector');            // Guardar jornada atual antes de limpar
-    const previousJornada = currentCalendarJornada;
+    const groupSelectorDiv = document.getElementById('calendarGroupSelector');
+
+    updateCalendarSortControls();
 
     // Limpar seletores
     divisionSelectorDiv.innerHTML = '';
@@ -7670,11 +8009,13 @@ function initializeCalendarSelectors() {
 
     // Verificar se há jogos disponíveis (usar matches, não rawEloData)
     if (!sampleData.matches || sampleData.matches.length === 0) {
-        jornadaTitle.textContent = 'Sem jogos disponíveis';
+        jornadaTitle.textContent = t('noGamesAvailable');
         prevBtn.disabled = true;
         nextBtn.disabled = true;
         divisionSelectorDiv.style.display = 'none';
         groupSelectorDiv.style.display = 'none';
+        availableCalendarDatePages = [];
+        currentCalendarDatePageIndex = 0;
         return;
     }
 
@@ -7695,14 +8036,17 @@ function initializeCalendarSelectors() {
     currentCalendarGroup = null;
 
     // Atualizar jornadas disponíveis para a divisão/grupo atual
-    updateAvailableJornadas();
+    updateAvailableJornadas({
+        anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+        preserveCurrentPage: false
+    });
 
     // Selecionar a jornada mais recente com jogos realizados
     if (availableJornadas.length > 0) {
         currentCalendarJornada = getCurrentJornada();
         updateJornadaDisplay();
     } else {
-        jornadaTitle.textContent = 'Sem jornadas disponíveis';
+        jornadaTitle.textContent = t('noMatchdaysAvailable');
         prevBtn.disabled = true;
         nextBtn.disabled = true;
     }
@@ -7718,45 +8062,25 @@ function initializeCalendarSelectors() {
 }
 
 // Atualizar jornadas disponíveis para divisão/grupo atual
-function updateAvailableJornadas() {
-    // Extrair divisão numérica e grupo do label formatado
-    let targetDivision = null;
-    let targetGroup = null;
-
-    if (currentCalendarDivision) {
-        const divMatch = currentCalendarDivision.match(/^(\d+)ª Divisão(?:\s*-\s*Grupo\s*([A-Z]))?$/);
-        if (divMatch) {
-            targetDivision = divMatch[1]; // "1" ou "2"
-            targetGroup = divMatch[2] || null; // "A", "B", "C" ou null
-        }
-    }
+function updateAvailableJornadas(options = {}) {
+    const { targetDivision, targetGroup } = getCalendarDivisionGroupFilter();
 
     // Filtrar jornadas para a divisão/grupo atual
-    let filteredMatches = sampleData.matches.filter(match => {
+    const filteredMatches = sampleData.matches.filter(match => {
         if (!match.jornada || isNaN(parseInt(match.jornada))) return false;
 
-        // Se há divisão selecionada, filtrar por ela
-        if (targetDivision) {
-            const matchDiv = match.division ? match.division.toString() : null;
-            const matchGroup = match.grupo || null;
-
-            // Comparar divisão
-            const divMatch = matchDiv && (matchDiv == targetDivision ||
-                parseFloat(matchDiv) == parseFloat(targetDivision));
-            if (!divMatch) return false;
-
-            // Se tem grupo no label, filtrar por grupo também
-            if (targetGroup && matchGroup !== targetGroup) return false;
-        }
-
-        return true;
+        return matchesCalendarDivisionGroup(match, targetDivision, targetGroup);
     });
 
     // Obter jornadas únicas e ordenadas
     availableJornadas = [...new Set(
         filteredMatches.map(match => parseInt(match.jornada))
     )].sort((a, b) => a - b);
-}        // Encontrar a jornada mais recente com pelo menos um jogo realizado
+
+    buildCalendarDatePages(filteredMatches, options);
+}
+
+// Encontrar a jornada mais recente com pelo menos um jogo realizado
 function getCurrentJornada() {
     if (availableJornadas.length === 0) return null;
 
@@ -7930,7 +8254,10 @@ function switchCalendarDivision(division) {
     createCalendarGroupSelector();
 
     // Atualizar jornadas disponíveis para nova divisão/grupo
-    updateAvailableJornadas();
+    updateAvailableJornadas({
+        anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+        preserveCurrentPage: false
+    });
 
     // Selecionar a jornada mais recente com jogos realizados
     if (availableJornadas.length > 0) {
@@ -7974,7 +8301,10 @@ function switchCalendarGroup(group) {
     updateRankingsTable();
 
     // Atualizar jornadas disponíveis para novo grupo
-    updateAvailableJornadas();
+    updateAvailableJornadas({
+        anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+        preserveCurrentPage: false
+    });
 
     // Selecionar a jornada mais recente com jogos realizados
     if (availableJornadas.length > 0) {
@@ -7999,8 +8329,24 @@ function switchCalendarGroup(group) {
     updatePredictionsSelectors();
     refreshPredictionsTeamsForSelection();
     updatePredictionsDisplay();
-}        // Mudar jornada (navegação com setas)
+}
+
+// Mudar jornada (navegação com setas)
 function changeJornada(direction) {
+    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+        if (availableCalendarDatePages.length === 0) return;
+
+        const newIndex = currentCalendarDatePageIndex + direction;
+        if (newIndex < 0 || newIndex >= availableCalendarDatePages.length) {
+            return;
+        }
+
+        currentCalendarDatePageIndex = newIndex;
+        updateJornadaDisplay();
+        updateCalendar();
+        return;
+    }
+
     if (availableJornadas.length === 0) return;
 
     const currentIndex = availableJornadas.indexOf(currentCalendarJornada);
@@ -8090,7 +8436,32 @@ function updateJornadaDisplay() {
     const prevEpocaLabel = document.getElementById('prevEpocaLabel');
     const nextEpocaLabel = document.getElementById('nextEpocaLabel');
 
-    jornadaTitle.textContent = `Jornada ${currentCalendarJornada}`;
+    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+        const totalPages = availableCalendarDatePages.length;
+
+        if (totalPages === 0) {
+            jornadaTitle.textContent = t('noGamesFoundDateMode');
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            prevEpocaLabel.style.display = 'none';
+            nextEpocaLabel.style.display = 'none';
+            return;
+        }
+
+        const safeIndex = Math.max(0, Math.min(currentCalendarDatePageIndex, totalPages - 1));
+        currentCalendarDatePageIndex = safeIndex;
+
+        const page = availableCalendarDatePages[safeIndex];
+        jornadaTitle.textContent = `${page.label} (${safeIndex + 1}/${totalPages})`;
+
+        prevBtn.disabled = safeIndex <= 0;
+        nextBtn.disabled = safeIndex >= totalPages - 1;
+        prevEpocaLabel.style.display = 'none';
+        nextEpocaLabel.style.display = 'none';
+        return;
+    }
+
+    jornadaTitle.textContent = `${t('matchday')} ${currentCalendarJornada}`;
 
     const currentIndex = availableJornadas.indexOf(currentCalendarJornada);
     const isFirstJornada = currentIndex <= 0;
@@ -8143,52 +8514,42 @@ function updateJornadaDisplay() {
 function updateCalendar() {
     const gamesList = document.getElementById('gamesList');
 
-    if (!currentCalendarJornada) {
-        gamesList.innerHTML = '<div class="no-games-message">Selecione uma jornada para ver os jogos</div>';
+    if (calendarSortMode === CALENDAR_SORT_MODE_MATCHDAY && !currentCalendarJornada) {
+        gamesList.innerHTML = '<div class="no-games-message">' + t('selectMatchday') + '</div>';
         return;
     }
 
-    // Extrair divisão numérica e grupo do label formatado
-    // Ex: "1ª Divisão" -> div=1, group=null
-    // Ex: "2ª Divisão - Grupo A" -> div=2, group="A"
-    let targetDivision = null;
-    let targetGroup = null;
-
-    if (currentCalendarDivision) {
-        const divMatch = currentCalendarDivision.match(/^(\d+)ª Divisão(?:\s*-\s*Grupo\s*([A-Z]))?$/);
-        if (divMatch) {
-            targetDivision = divMatch[1]; // "1" ou "2"
-            targetGroup = divMatch[2] || null; // "A", "B", "C" ou null
-        }
-    }
+    const { targetDivision, targetGroup } = getCalendarDivisionGroupFilter();
 
     // Usar dados do calendário (csv_modalidades) que tem TODOS os jogos (realizados e futuros)
     let games = sampleData.matches.filter(match => {
-        const jornada = parseInt(match.jornada);
-        const matchDiv = match.division ? match.division.toString() : null;
-        const matchGroup = match.grupo || null;
+        if (!matchesCalendarDivisionGroup(match, targetDivision, targetGroup)) {
+            return false;
+        }
+
+        if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+            return true;
+        }
+
+        const jornada = parseInt(match.jornada, 10);
 
         // Filtrar por jornada
         if (jornada !== currentCalendarJornada) return false;
 
-        // Filtrar por divisão e grupo se selecionados
-        if (targetDivision) {
-            // Comparar divisão (pode ser "2" ou "2.0")
-            const divMatch = matchDiv && (matchDiv == targetDivision ||
-                parseFloat(matchDiv) == parseFloat(targetDivision));
-            if (!divMatch) return false;
-
-            // Se tem grupo no label, filtrar por grupo também
-            if (targetGroup) {
-                if (matchGroup !== targetGroup) return false;
-            }
-        }
-
         return true;
     });
 
+    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+        buildCalendarDatePages(games, { preserveCurrentPage: true });
+        const currentPage = availableCalendarDatePages[currentCalendarDatePageIndex];
+        games = currentPage ? [...currentPage.games] : [];
+    }
+
     if (games.length === 0) {
-        gamesList.innerHTML = '<div class="no-games-message">' + t('noGamesFound') + '</div>';
+        const emptyKey = calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME
+            ? 'noGamesFoundDateMode'
+            : 'noGamesFound';
+        gamesList.innerHTML = '<div class="no-games-message">' + t(emptyKey) + '</div>';
         return;
     }
 
@@ -8237,8 +8598,10 @@ function createGameItem(game) {
     // Data e hora do jogo
     const gameDate = game.date || game.Data || game.Dia || '';
     const gameTime = game.time || game.Hora || '';
+    const gameLocation = (game.location || game.Local || '').toString().trim();
     const hasDate = gameDate && gameDate !== '';
     const isPlaceholder = game.isPlaceholder === true;
+    const isLocationPlaceholder = game.isLocationPlaceholder === true;
 
     div.className = `game-item ${hasResult ? 'played' : 'not-played'} ${isTeamFavorite(team1) || isTeamFavorite(team2) ? 'favorite-team-game' : ''}`;
 
@@ -8263,6 +8626,11 @@ function createGameItem(game) {
         }
     } else {
         dateStr = t('dateToSchedule');
+    }
+
+    let locationStr = gameLocation || t('locationToSchedule');
+    if (isLocationPlaceholder) {
+        locationStr += ` <span class="placeholder-badge" title="${t('provisionalLocationPlaceholder')}">*</span>`;
     }
 
     // Resultado
@@ -8291,7 +8659,10 @@ function createGameItem(game) {
         `<img src="${team2Info.emblemPath}" class="game-team-emblem" alt="${displayTeam2}" onerror="this.style.display='none'">` : '';
 
     div.innerHTML = `
-                <div class="game-date">${dateStr}</div>
+                <div class="game-meta">
+                    <div class="game-date">${dateStr}</div>
+                    <div class="game-location">${locationStr}</div>
+                </div>
                 <div class="game-teams">
                     <div class="game-team home">
                         ${elo1Html}
@@ -8355,7 +8726,10 @@ function syncCalendarWithRankings() {
             createCalendarGroupSelector();
 
             // Atualizar jornadas disponíveis
-            updateAvailableJornadas();
+            updateAvailableJornadas({
+                anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+                preserveCurrentPage: false
+            });
         }
     }
 
@@ -8375,11 +8749,15 @@ function syncCalendarWithRankings() {
         });
 
         // Atualizar jornadas disponíveis
-        updateAvailableJornadas();
+        updateAvailableJornadas({
+            anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+            preserveCurrentPage: false
+        });
     }
 
     // Atualizar calendário sempre que houver mudança ou se já houver jornada selecionada
-    if (divisionChanged || groupChanged || currentCalendarJornada) {
+    if (divisionChanged || groupChanged || currentCalendarJornada || calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+        updateJornadaDisplay();
         updateCalendar();
     }
 }
@@ -8585,6 +8963,13 @@ function processMatches(data) {
 
     const deduped = dedupeMatchRows(data);
 
+    const parseCsvBoolean = value => {
+        if (value === true || value === false) return value;
+        if (value === undefined || value === null) return false;
+        const normalized = String(value).trim().toLowerCase();
+        return normalized === 'true' || normalized === '1' || normalized === 'yes';
+    };
+
     deduped.forEach(row => {
         if (!row["Equipa 1"] || !row["Equipa 2"]) return;
 
@@ -8596,6 +8981,7 @@ function processMatches(data) {
         const team2 = normalizeTeamName(row["Equipa 2"].trim());
         const date = row.Dia || row.Data || '';
         const time = row.Hora || '';
+        const location = row.Local || '';
         const division = row['Divisão'] || row.Divisao || '';
         const grupo = row.Grupo || '';
 
@@ -8607,9 +8993,12 @@ function processMatches(data) {
             score2: golos2 !== '' && golos2 !== undefined ? parseInt(golos2) : null,
             date: date,
             time: time,
+            location: location,
             division: division || null,
             grupo: grupo || null,
-            isPlaceholder: row['Data_Placeholder'] === 'True' || row['Data_Placeholder'] === true
+            isPlaceholder: parseCsvBoolean(row['Data_Placeholder']),
+            isLocationPlaceholder: parseCsvBoolean(row['Local_Placeholder']),
+            locationSource: row['Fonte_Local'] || ''
         });
     });
 }

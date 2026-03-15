@@ -490,7 +490,19 @@ class SportScoreSimulator:
                 # Atualizar baselines por divisão (se houver)
                 base_goals = div_cfg.get("base_goals")
                 if base_goals is not None:
-                    self.division_baselines[int(div)] = {"mean": base_goals}
+                    # Preservar std histórico se já existe, e adicionar dispersion_k calibrado
+                    existing = self.division_baselines.get(int(div), {})
+                    updated = dict(existing)
+                    updated["mean"] = base_goals
+                    if "dispersion_k" in div_cfg:
+                        updated["dispersion_k"] = div_cfg["dispersion_k"]
+                    self.division_baselines[int(div)] = updated
+                elif "dispersion_k" in div_cfg:
+                    # Sem base_goals mas com dispersion_k — atualizar só o dispersion_k
+                    existing = self.division_baselines.get(int(div), {})
+                    updated = dict(existing)
+                    updated["dispersion_k"] = div_cfg["dispersion_k"]
+                    self.division_baselines[int(div)] = updated
                 # Atualizar taxa de empate por divisão (se houver)
                 if "base_draw_rate" in div_cfg:
                     self.division_draw_rates[int(div)] = div_cfg["base_draw_rate"]
@@ -498,7 +510,9 @@ class SportScoreSimulator:
     def set_division_baselines(
         self, baselines: Dict[Optional[int], Dict[str, float]]
     ) -> None:
-        self.division_baselines = baselines or {}
+        # Cópia rasa para evitar aliasing com o dict original (apply_calibrated_params
+        # adiciona novas entradas, não muta os sub-dicts existentes)
+        self.division_baselines = dict(baselines) if baselines else {}
 
     def set_division_draw_rates(self, draw_rates: Dict[Optional[int], float]) -> None:
         self.division_draw_rates = draw_rates or {}
@@ -645,7 +659,12 @@ class SportScoreSimulator:
             elo_scale = self.params.get("elo_scale", 600) * self.params.get(
                 "elo_scale_mult", 1.0
             )
-            dispersion_k = self.params.get("dispersion_k", 6.0)
+            # Usar dispersion_k por divisão (calibrado) se disponível, senão fallback global
+            dispersion_k = (
+                division_baseline.get("dispersion_k")
+                if division_baseline and "dispersion_k" in division_baseline
+                else None
+            ) or self.params.get("dispersion_k", 6.0)
             forced_draw_fraction = self.params.get("forced_draw_fraction", 0.7)
 
             if force_winner:

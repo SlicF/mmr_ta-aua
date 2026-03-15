@@ -2413,6 +2413,43 @@ body {
   align-items: center;
 }
 
+.calendar-sort-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.calendar-sort-btn {
+  padding: 8px 14px;
+  border: 2px solid #2a5298;
+  background: white;
+  color: #2a5298;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.calendar-sort-btn:hover {
+  background: rgba(42, 82, 152, 0.08);
+  transform: translateY(-1px);
+}
+
+.calendar-sort-btn.active {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(42, 82, 152, 0.25);
+}
+
+.calendar-sort-btn:focus-visible {
+  outline: 3px solid #2a5298;
+  outline-offset: 2px;
+}
+
 .jornada-navigation {
   display: flex;
   align-items: center;
@@ -2549,6 +2586,43 @@ body {
   align-items: center;
   justify-content: center;
   text-transform: uppercase;
+}
+
+.game-meta {
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.game-location {
+  font-size: 0.8em;
+  color: #4b5563;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.game-location-label {
+  color: #111827;
+}
+
+.placeholder-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  border-radius: 50%;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: #ffffff;
+  background: #d97706;
+  vertical-align: middle;
 }
 
 .game-teams {
@@ -4591,6 +4665,15 @@ body {
     --gap1: 70px;
     --gap2: 125px;
     --gap3: 165px;
+  }
+
+  .calendar-sort-toggle {
+    gap: 8px;
+  }
+
+  .calendar-sort-btn {
+    width: calc(50% - 6px);
+    min-width: 150px;
   }
 
   .team-slider-display {
