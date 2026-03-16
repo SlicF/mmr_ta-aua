@@ -350,8 +350,11 @@ const translations = {
 
         // === Previsões ===
         seasonPredictions: 'Previsões da Época',
+        teamDetailsTitle: 'Detalhes das Equipas',
         generalPredictions: 'PREVISÕES GERAIS',
+        teamSeasonOverview: 'Previsões da Época',
         matchdayPredictions: 'Previsões jornada a jornada',
+        teamMatchHistory: 'Histórico de Jogos',
         predJornada: 'Jornada',
         predDate: 'Data',
         predOpponent: 'Adversário',
@@ -375,9 +378,11 @@ const translations = {
         loadingData: 'A carregar dados...',
         loadingRankings: 'A carregar classificação...',
         noGamesForTeam: 'Sem jogos previstos para esta equipa',
+        noHistoryForTeam: 'Sem jogos disponíveis para esta equipa',
         dataNotAvailable: 'Dados não disponíveis',
         simulations: 'simulações',
         simulatedResults: 'Resultados Simulados',
+        eloDeltaLabel: 'Delta ELO',
         clickToFixTooltip: 'Clique para fixar/desafixar o tooltip de distribuição',
         previousTeam: 'Equipa anterior',
         nextTeam: 'Próxima equipa',
@@ -530,7 +535,7 @@ const translations = {
         navElo: 'ELO',
         navCalendar: 'Calendário',
         navBracket: 'Bracket',
-        navPredictions: 'Previsões',
+        navPredictions: 'Detalhes',
 
         // === Footer ===
         footerMadeBy: 'Projeto criado por Fábio Matias',
@@ -696,8 +701,11 @@ const translations = {
 
         // === Predictions ===
         seasonPredictions: 'Season Predictions',
+        teamDetailsTitle: 'Team Details',
         generalPredictions: 'GENERAL PREDICTIONS',
+        teamSeasonOverview: 'Season Predictions',
         matchdayPredictions: 'Matchday-by-matchday Predictions',
+        teamMatchHistory: 'Match History',
         predJornada: 'Matchday',
         predDate: 'Date',
         predOpponent: 'Opponent',
@@ -721,8 +729,10 @@ const translations = {
         loadingData: 'Loading data...',
         loadingRankings: 'Loading rankings...',
         noGamesForTeam: 'No predicted games for this team',
+        noHistoryForTeam: 'No games available for this team',
         dataNotAvailable: 'Data not available',
         simulations: 'Simulations',
+        eloDeltaLabel: 'ELO Delta',
         simulatedResults: 'Simulated Results',
         clickToFixTooltip: 'Click to pin/unpin distribution tooltip',
         previousTeam: 'Previous team',
@@ -876,7 +886,7 @@ const translations = {
         navElo: 'ELO',
         navCalendar: 'Calendar',
         navBracket: 'Bracket',
-        navPredictions: 'Predictions',
+        navPredictions: 'Details',
 
         // === Footer ===
         footerMadeBy: 'Project created by Fábio Matias',
@@ -1038,8 +1048,11 @@ translations.es = {
 
     // === Predictions ===
     seasonPredictions: 'Predicciones de la temporada',
+    teamDetailsTitle: 'Detalles de los equipos',
     generalPredictions: 'PREDICCIONES GENERALES',
+    teamSeasonOverview: 'Predicciones de la temporada',
     matchdayPredictions: 'Predicciones jornada a jornada',
+    teamMatchHistory: 'Historial de partidos',
     predJornada: 'Jornada',
     predDate: 'Fecha',
     predOpponent: 'Rival',
@@ -1063,9 +1076,11 @@ translations.es = {
     loadingData: 'Cargando datos...',
     loadingRankings: 'Cargando clasificación...',
     noGamesForTeam: 'No hay partidos previstos para este equipo',
+    noHistoryForTeam: 'No hay partidos disponibles para este equipo',
     dataNotAvailable: 'Datos no disponibles',
     simulations: 'simulaciones',
     simulatedResults: 'Resultados simulados',
+    eloDeltaLabel: 'Delta ELO',
     clickToFixTooltip: 'Haz clic para fijar/desfijar el tooltip de distribución',
     previousTeam: 'Equipo anterior',
     nextTeam: 'Equipo siguiente',
@@ -1215,7 +1230,7 @@ translations.es = {
     navElo: 'ELO',
     navCalendar: 'Calendario',
     navBracket: 'Bracket',
-    navPredictions: 'Predicciones',
+    navPredictions: 'Detalles',
 
     // === Footer ===
     footerMadeBy: 'Proyecto creado por Fábio Matias',

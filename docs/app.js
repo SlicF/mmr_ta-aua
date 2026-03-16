@@ -21,13 +21,22 @@ let predictionsTooltipTimer = null; // Timer para debounce do hover
 let predictionsTooltipLastCell = null; // Última célula onde o tooltip estava visível
 let predictionsTooltipVisible = false; // Flag para rastrear se o tooltip está visível (evita flicker)
 let favoriteTeam = localStorage.getItem('favoriteTeam'); // Equipa favorita do utilizador
+
+function applyCompactModeClass() {
+    if (!document.body) return;
+    document.body.classList.toggle('compact-mode', compactModeEnabled);
+}
+
 const CALENDAR_SORT_MODE_KEY = 'mmr_calendarSortMode';
 const CALENDAR_SORT_MODE_MATCHDAY = 'matchday';
 const CALENDAR_SORT_MODE_DATE_TIME = 'date_time';
 
 function getSavedCalendarSortMode() {
     const savedMode = localStorage.getItem(CALENDAR_SORT_MODE_KEY);
-    return savedMode === CALENDAR_SORT_MODE_MATCHDAY ? CALENDAR_SORT_MODE_MATCHDAY : CALENDAR_SORT_MODE_DATE_TIME;
+    if (savedMode === CALENDAR_SORT_MODE_MATCHDAY || savedMode === CALENDAR_SORT_MODE_DATE_TIME) {
+        return savedMode;
+    }
+    return CALENDAR_SORT_MODE_MATCHDAY;
 }
 
 let calendarSortMode = getSavedCalendarSortMode();
@@ -1053,6 +1062,39 @@ function switchGroup(group) {
     }
 }
 
+function getEloChartContainerHeight() {
+    const chartContainer = document.getElementById('chartContainer');
+    if (!chartContainer) {
+        return null;
+    }
+
+    const computedHeight = parseFloat(window.getComputedStyle(chartContainer).height);
+    const containerHeight = chartContainer.clientHeight || computedHeight;
+
+    if (!Number.isFinite(containerHeight) || containerHeight <= 0) {
+        return null;
+    }
+
+    return Math.round(containerHeight);
+}
+
+function syncEloChartHeightWithContainer() {
+    if (!eloChart) {
+        return;
+    }
+
+    const containerHeight = getEloChartContainerHeight();
+    if (!containerHeight) {
+        return;
+    }
+
+    eloChart.updateOptions({
+        chart: {
+            height: containerHeight
+        }
+    });
+}
+
 // Inicializar gráfico ELO com ApexCharts
 function initEloChart() {
     // Verificar se ApexCharts está carregado
@@ -1066,10 +1108,6 @@ function initEloChart() {
     if (eloChart) {
         eloChart.destroy();
     }
-
-    // Calcular altura do gráfico baseado em orientação e viewport
-    const isLandscapeMobile = window.matchMedia('(max-width: 932px) and (orientation: landscape)').matches;
-    const chartHeight = isLandscapeMobile ? Math.min(Math.max(window.innerHeight * 0.5, 300), 500) : 700;
 
     const options = {
         series: [], // Preenchido em updateEloChart
@@ -1410,6 +1448,7 @@ function initEloChart() {
 
     // Renderizar e aguardar conclusão
     eloChart.render().then(() => {
+        syncEloChartHeightWithContainer();
         removeChartAriaLabel();
         // Guardar a cor original de cada marker logo após renderizar
         const saveOriginalMarkerColors = () => {
@@ -2574,7 +2613,10 @@ function updateEloChart() {
     };
 
     eloChart = new ApexCharts(chartContainer, options);
-    eloChart.render().then(removeChartAriaLabel);
+    eloChart.render().then(() => {
+        syncEloChartHeightWithContainer();
+        removeChartAriaLabel();
+    });
 
     // Guardar a cor original de cada marker logo após renderizar
     const saveOriginalMarkerColors = () => {
@@ -2919,6 +2961,7 @@ function toggleCompactMode() {
     const checkbox = document.getElementById('compactModeCheckbox');
     compactModeEnabled = checkbox ? checkbox.checked : !compactModeEnabled;
     localStorage.setItem('mmr_compactModeEnabled', compactModeEnabled);
+    applyCompactModeClass();
     updateRankingsTable();
 }
 
@@ -6671,6 +6714,7 @@ async function initializeSelectors() {
     // Atualizar checkbox
     const checkbox = document.getElementById('compactModeCheckbox');
     if (checkbox) checkbox.checked = compactModeEnabled;
+    applyCompactModeClass();
 
     // Definir época atual - priorizar cache se válido
     if (!currentEpoca && availableEpocas.length > 0) {
@@ -10098,17 +10142,7 @@ let resizeTimeout;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-        if (eloChart) {
-            const isLandscapeMobile = window.matchMedia('(max-width: 932px) and (orientation: landscape)').matches;
-            const newHeight = isLandscapeMobile
-                ? Math.min(Math.max(window.innerHeight * 0.5, 300), 520)
-                : Math.min(Math.max(window.innerHeight * 0.65, 380), 640);
-            eloChart.updateOptions({
-                chart: {
-                    height: newHeight
-                }
-            });
-        }
+        syncEloChartHeightWithContainer();
     }, 250);
 });
 
@@ -10160,15 +10194,42 @@ function getForecastDataForCurrentGroup() {
     );
 }
 
-function refreshPredictionsTeamsForSelection() {
-    const forecastSubset = getForecastDataForCurrentGroup();
+function getRankingsTeamsForCurrentGroup() {
+    const divisionKey = appState.view.division;
+    const groupKey = appState.view.group;
 
+    if (divisionKey && sampleData.rankings && sampleData.rankings[divisionKey]) {
+        const divisionTeams = sampleData.rankings[divisionKey];
+        const filteredTeams = groupKey
+            ? divisionTeams.filter(team => team.group === groupKey)
+            : divisionTeams;
 
-    PredictionsState.availableTeams = forecastSubset
-        .map(row => row.team)
-        .filter(team => team && team.trim() !== '')
+        return [...new Set(filteredTeams
+            .map(team => normalizeTeamName(team.team))
+            .filter(team => team && team.trim() !== ''))]
+            .sort((a, b) => a.localeCompare(b, 'pt-PT'));
+    }
+
+    return [...new Set((sampleData.teams || [])
+        .map(team => normalizeTeamName(team.name))
+        .filter(team => team && team.trim() !== ''))]
         .sort((a, b) => a.localeCompare(b, 'pt-PT'));
+}
 
+function getAvailableTeamsForCurrentGroup() {
+    const forecastTeams = getForecastDataForCurrentGroup()
+        .map(row => row.team)
+        .filter(team => team && team.trim() !== '');
+
+    if (forecastTeams.length > 0) {
+        return [...new Set(forecastTeams)].sort((a, b) => a.localeCompare(b, 'pt-PT'));
+    }
+
+    return getRankingsTeamsForCurrentGroup();
+}
+
+function refreshPredictionsTeamsForSelection() {
+    PredictionsState.availableTeams = getAvailableTeamsForCurrentGroup();
 
     if (PredictionsState.availableTeams.length === 0) {
         PredictionsState.selectedTeam = null;
@@ -10387,6 +10448,8 @@ function updatePredictionsSimulationsCount() {
     if (countEl && PredictionsState.simulations) {
         const formatted = PredictionsState.simulations.toLocaleString('pt-PT');
         countEl.textContent = `(${formatted} ${t('simulations')})`;
+    } else if (countEl) {
+        countEl.textContent = '';
     }
 }
 
@@ -10426,11 +10489,15 @@ function handleMissingPredictionsFiles() {
                 (anoAtual === anoCompletoFinal && mesAtual >= 7);
 
             if (epocaTerminou) {
-                setPredictionsCardVisible(false);
                 PredictionsState.forecastData = null;
                 PredictionsState.predictionsData = null;
                 PredictionsState.availableTeams = [];
                 PredictionsState.simulations = null;
+                setPredictionsCardVisible(true);
+                updatePredictionsSimulationsCount();
+                updatePredictionsSelectors();
+                refreshPredictionsTeamsForSelection();
+                updatePredictionsDisplay();
                 return;
             }
         }
@@ -10439,16 +10506,26 @@ function handleMissingPredictionsFiles() {
     const hasPendingMatches = hasPendingMatchesToSimulate();
 
     if (!hasPendingMatches) {
-        setPredictionsCardVisible(false);
         PredictionsState.forecastData = null;
         PredictionsState.predictionsData = null;
         PredictionsState.availableTeams = [];
         PredictionsState.simulations = null;
+        setPredictionsCardVisible(true);
+        updatePredictionsSimulationsCount();
+        updatePredictionsSelectors();
+        refreshPredictionsTeamsForSelection();
+        updatePredictionsDisplay();
         return;
     }
 
     setPredictionsCardVisible(true);
-    clearPredictionsDisplay('simulações ainda não executadas');
+    PredictionsState.forecastData = null;
+    PredictionsState.predictionsData = null;
+    PredictionsState.simulations = null;
+    updatePredictionsSimulationsCount();
+    updatePredictionsSelectors();
+    refreshPredictionsTeamsForSelection();
+    updatePredictionsDisplay();
 }
 
 /**
@@ -10462,6 +10539,7 @@ function clearPredictionsDisplay(customMessage = null) {
     document.getElementById('selectedTeamEmblem').innerHTML = '';
     document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${message}</div>`;
     document.getElementById('predictionsTableBody').innerHTML = `<tr><td colspan="${colspan}" class="no-predictions-message">${message}</td></tr>`;
+    document.getElementById('teamHistoryTableBody').innerHTML = `<tr><td colspan="6" class="no-predictions-message">${message}</td></tr>`;
 
     document.getElementById('prevTeamBtn').disabled = true;
     document.getElementById('nextTeamBtn').disabled = true;
@@ -10479,14 +10557,9 @@ function clearPredictionsDisplay(customMessage = null) {
  * Atualiza a exibição com os dados da equipa selecionada
  */
 function updatePredictionsDisplay() {
-    if (!PredictionsState.forecastData) {
-        clearPredictionsDisplay();
-        return;
-    }
-
     refreshPredictionsTeamsForSelection();
     if (!PredictionsState.selectedTeam) {
-        clearPredictionsDisplay();
+        clearPredictionsDisplay(t('selectModalityFirst'));
         return;
     }
 
@@ -10507,6 +10580,9 @@ function updatePredictionsDisplay() {
 
     // Atualizar tabela de previsões
     updatePredictionsTable();
+
+    // Atualizar histórico real de jogos
+    updateTeamHistoryTable();
 }
 
 /**
@@ -10933,6 +11009,11 @@ function animateTeamSlider(direction) {
  * Atualiza as estatísticas gerais da equipa
  */
 function updatePredictionsStats() {
+    if (!PredictionsState.forecastData) {
+        document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${t('noPredictionsData')}</div>`;
+        return;
+    }
+
     const teamName = PredictionsState.selectedTeam;
     const teamData = PredictionsState.forecastData.find(row =>
         row.team === teamName
@@ -11077,6 +11158,12 @@ function updatePredictionsDrawsColumnVisibility() {
 function updatePredictionsTable() {
     const teamName = PredictionsState.selectedTeam;
 
+    if (!PredictionsState.predictionsData || !teamName) {
+        const colspan = modalityAllowsDraws() ? 7 : 6;
+        document.getElementById('predictionsTableBody').innerHTML = `<tr><td colspan="${colspan}" class="no-predictions-message">${t('noPredictionsData')}</td></tr>`;
+        return;
+    }
+
     // Filtrar jogos onde a equipa participa
     const teamGames = PredictionsState.predictionsData.filter(row => {
         const teamA = row.team_a || '';
@@ -11149,6 +11236,140 @@ function updatePredictionsTable() {
 
     attachPredictionsTooltipHandlers();
     updatePredictionsDrawsColumnVisibility();
+}
+
+function getRoundSortValue(roundLabel) {
+    if (roundLabel === undefined || roundLabel === null) return Number.POSITIVE_INFINITY;
+
+    const roundStr = String(roundLabel).trim().toUpperCase();
+    const numericRound = parseInt(roundStr, 10);
+    if (!Number.isNaN(numericRound) && String(numericRound) === roundStr) {
+        return numericRound;
+    }
+    if (/^E\d+/.test(roundStr)) return 1000 + (parseInt(roundStr.slice(1), 10) || 0);
+    if (/^PM\d+/.test(roundStr)) return 2000 + (parseInt(roundStr.slice(2), 10) || 0);
+    if (/^LM\d+/.test(roundStr)) return 3000 + (parseInt(roundStr.slice(2), 10) || 0);
+    return 4000;
+}
+
+function formatTeamHistoryDate(game) {
+    if (game.date instanceof Date && !Number.isNaN(game.date.getTime())) {
+        return game.date.toLocaleDateString(getDateLocale(), {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
+
+    if (game.isDatePlaceholder) {
+        return t('dateToSchedule');
+    }
+
+    if (game.rawDate) {
+        return formatGameDate(game.rawDate);
+    }
+
+    return '-';
+}
+
+function getTeamHistoryRows(teamName) {
+    if (!Array.isArray(sampleData.matches) || !teamName) return [];
+
+    const normalizedTeamName = normalizeTeamName(teamName);
+    const teamGameDetails = sampleData.gameDetails?.[normalizedTeamName] || {};
+
+    return sampleData.matches
+        .filter(match => match.team1 === normalizedTeamName || match.team2 === normalizedTeamName)
+        .map(match => {
+            const isHomeTeam = match.team1 === normalizedTeamName;
+            const opponent = isHomeTeam ? match.team2 : match.team1;
+            const detail = teamGameDetails[match.jornada] || null;
+            const fallbackResult = match.score1 !== null && match.score2 !== null
+                ? `${isHomeTeam ? match.score1 : match.score2}-${isHomeTeam ? match.score2 : match.score1}`
+                : null;
+            const parsedMatchDate = parseDateWithTime(match.date, match.time);
+            const hasPlayedByDetail = !!detail?.result;
+            const hasPlayedByScore = match.score1 !== null && match.score2 !== null;
+            const isPlayed = hasPlayedByDetail || hasPlayedByScore;
+
+            return {
+                jornada: match.jornada || '-',
+                opponent,
+                location: match.location || '',
+                isLocationPlaceholder: !!match.isLocationPlaceholder,
+                isDatePlaceholder: !!match.isPlaceholder,
+                date: detail?.date || parsedMatchDate || null,
+                rawDate: match.date || '',
+                result: detail?.result || fallbackResult || null,
+                unknownResult: !!detail?.unknownResult,
+                eloDelta: typeof detail?.eloDelta === 'number' ? detail.eloDelta : null,
+                isPlayed
+            };
+        })
+        .filter(game => game.isPlayed)
+        .sort((a, b) => {
+            const aTime = a.date instanceof Date && !Number.isNaN(a.date.getTime()) ? a.date.getTime() : Number.POSITIVE_INFINITY;
+            const bTime = b.date instanceof Date && !Number.isNaN(b.date.getTime()) ? b.date.getTime() : Number.POSITIVE_INFINITY;
+
+            if (aTime !== bTime) return aTime - bTime;
+
+            const roundDiff = getRoundSortValue(a.jornada) - getRoundSortValue(b.jornada);
+            if (roundDiff !== 0) return roundDiff;
+
+            return String(a.opponent).localeCompare(String(b.opponent), 'pt-PT');
+        });
+}
+
+function updateTeamHistoryTable() {
+    const tbody = document.getElementById('teamHistoryTableBody');
+    const teamName = PredictionsState.selectedTeam;
+
+    if (!tbody || !teamName) {
+        return;
+    }
+
+    const historyRows = getTeamHistoryRows(teamName);
+    if (historyRows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="no-predictions-message">${t('noHistoryForTeam')}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = historyRows.map(game => {
+        const opponentInfo = getCourseInfo(game.opponent);
+        const translatedOpponent = translateTeamName(opponentInfo.fullName || opponentInfo.shortName || game.opponent || t('unknown'));
+        const locationLabel = game.location
+            ? game.location
+            : (game.isLocationPlaceholder ? t('locationToSchedule') : '-');
+        const resultLabel = game.result || '-';
+        const resultClass = game.unknownResult ? ' team-history-result-unknown' : '';
+        const eloDeltaValue = typeof game.eloDelta === 'number' ? game.eloDelta : null;
+        const eloDeltaClass = eloDeltaValue === null
+            ? 'neutral'
+            : (eloDeltaValue > 0 ? 'positive' : (eloDeltaValue < 0 ? 'negative' : 'neutral'));
+        const eloDeltaLabel = eloDeltaValue === null
+            ? '—'
+            : `${eloDeltaValue > 0 ? '+' : ''}${eloDeltaValue}`;
+
+        return `
+            <tr>
+                <td>${formatTeamHistoryDate(game)}</td>
+                <td>${game.jornada}</td>
+                <td class="team-history-location">${locationLabel}</td>
+                <td>
+                    <div class="prediction-opponent">
+                        ${opponentInfo.emblemPath ? `<img src="${opponentInfo.emblemPath}" alt="${opponentInfo.fullName || game.opponent}" class="prediction-opponent-emblem">` : ''}
+                        <span class="prediction-opponent-name">${translatedOpponent}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="team-history-result-badge${resultClass}"${game.unknownResult ? ` title="${t('unknownResult')}"` : ''}>${resultLabel}</span>
+                </td>
+                <td>
+                    <span class="team-history-elo-delta ${eloDeltaClass}">${eloDeltaLabel}</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 /**
@@ -11248,6 +11469,7 @@ async function navigateToPreviousTeam() {
     updatePredictionsStats();
     updatePredictionsTableHeaders();
     updatePredictionsTable();
+    updateTeamHistoryTable();
 }
 
 /**
@@ -11303,6 +11525,7 @@ async function navigateToNextTeam() {
     updatePredictionsStats();
     updatePredictionsTableHeaders();
     updatePredictionsTable();
+    updateTeamHistoryTable();
 }
 // Event listeners para os botões do slider
 document.getElementById('prevTeamBtn')?.addEventListener('click', navigateToPreviousTeam);

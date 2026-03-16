@@ -38,10 +38,10 @@
             </button>
             <ul class="navbar-menu" id="navbarMenu">
                 <li><a href="#rankings" data-i18n="navRankings">Classificação</a></li>
-                <li><a href="#elo" data-i18n="navElo">ELO</a></li>
+                <li><a href="#predictions" data-i18n="navPredictions">Detalhes</a></li>
                 <li><a href="#calendar" data-i18n="navCalendar">Calendário</a></li>
                 <li><a href="#bracket" data-i18n="navBracket">Bracket</a></li>
-                <li><a href="#predictions" data-i18n="navPredictions">Previsões</a></li>
+                <li><a href="#elo" data-i18n="navElo">ELO</a></li>
             </ul>
             <div class="navbar-language-selector" id="navbarLanguageSelector">
                 <!-- Botões de idioma serão inseridos aqui via JavaScript -->
@@ -122,42 +122,117 @@
                 </div>
             </div>
 
-            <!-- Gráfico de ELO (SECÇÃO COLAPSÁVEL) -->
-            <div class="card chart-card" id="elo">
-                <div class="chart-header">
-                    <div class="card-title">
-                        <span id="eloChartTitle">
-                            <span data-i18n="eloChartTitle">Evolução de ELO das Equipas</span>
-                            <span class="tooltip-icon">?</span>
-                        </span>
-                        <button class="collapse-btn" id="toggleEloChart" aria-expanded="true"
-                            aria-label="Expandir/Colapsar gráfico de ELO">
-                            <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="6 9 12 15 18 9"></polyline>
-                            </svg>
-                        </button>
+            <!-- Secção de Detalhes das Equipas -->
+            <div class="card predictions-card" id="predictions">
+                <div class="card-title predictions-title">
+                    <span data-i18n="teamDetailsTitle">Detalhes das Equipas</span>
+                    <span class="predictions-sim-count" id="predictionsSimCount" aria-live="polite"></span>
+                </div>
+
+                <!-- Seletores de Divisão e Grupo (interligados com a classificação) -->
+                <div class="predictions-filters">
+                    <div class="division-selector" id="predictionsDivisionSelector" style="display: none;">
+                        <!-- Botões de divisão serão gerados dinamicamente -->
+                    </div>
+                    <div class="group-selector" id="predictionsGroupSelector" style="display: none;">
+                        <!-- Botões de grupo serão gerados dinamicamente -->
                     </div>
                 </div>
-                <div class="chart-content" id="eloChartContent">
-                    <div class="chart-wrapper">
-                        <div class="team-selector" id="teamSelector">
-                            <!-- Checkboxes serão gerados dinamicamente -->
-                        </div>
-                        <!-- Filtros rápidos -->
-                        <div class="quick-filters" id="quickFilters">
-                            <!-- Filtros serão gerados dinamicamente baseados na modalidade -->
-                        </div>
-                        <div class="season-navigation" id="seasonNavigation"
-                            style="display: flex; justify-content: space-between; padding: 8px 10px; gap: 8px;">
-                            <!-- Botões de navegação entre épocas serão inseridos aqui -->
-                        </div>
-                        <div class="chart-container" id="chartContainer">
-                            <div id="eloChart"></div>
-                            <div class="team-end-labels" id="teamEndLabels">
-                                <!-- Labels dinâmicos serão gerados aqui -->
+
+                <!-- Seletor de Equipa estilo Slider -->
+                <div class="team-slider-container">
+                    <div class="team-slider-display" id="teamSliderDisplay">
+                        <!-- Ghosts à esquerda -->
+                        <div class="team-slider-ghost ghost-left-3" data-position="-3" aria-hidden="true"></div>
+                        <div class="team-slider-ghost ghost-left-2" data-position="-2" aria-hidden="true"></div>
+                        <div class="team-slider-ghost ghost-left-1" data-position="-1" aria-hidden="true"></div>
+
+                        <button class="slider-arrow slider-prev" id="prevTeamBtn" data-i18n-aria="previousTeam"
+                            aria-label="Equipa anterior">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+
+                        <div class="team-slider-main" id="teamSliderMain">
+                            <div class="team-slider-name" id="selectedTeamName" data-i18n="selectModalityFirst">
+                                Selecione uma modalidade
+                            </div>
+                            <div class="team-slider-emblem" id="selectedTeamEmblem">
+                                <!-- Emblema será inserido aqui -->
                             </div>
                         </div>
+
+                        <button class="slider-arrow slider-next" id="nextTeamBtn" data-i18n-aria="nextTeam"
+                            aria-label="Próxima equipa">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+
+                        <!-- Ghosts à direita -->
+                        <div class="team-slider-ghost ghost-right-1" data-position="1" aria-hidden="true"></div>
+                        <div class="team-slider-ghost ghost-right-2" data-position="2" aria-hidden="true"></div>
+                        <div class="team-slider-ghost ghost-right-3" data-position="3" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Previsões da Época -->
+                <div class="predictions-stats-section">
+                    <h3 class="predictions-section-title" data-i18n="teamSeasonOverview">Previsões da Época</h3>
+                    <div class="predictions-stats-grid" id="predictionsStatsGrid">
+                        <!-- Estatísticas serão geradas dinamicamente -->
+                    </div>
+                </div>
+
+                <div class="predictions-table-section team-history-section">
+                    <h3 class="predictions-section-title" data-i18n="teamMatchHistory">Histórico de Jogos</h3>
+                    <div class="predictions-table-wrapper">
+                        <table class="predictions-table team-history-table" id="teamHistoryTable">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="predDate">Data</th>
+                                    <th data-i18n="predJornada">Jornada</th>
+                                    <th data-i18n="location">Local</th>
+                                    <th data-i18n="predOpponent">Adversário</th>
+                                    <th data-i18n="result">Resultado</th>
+                                    <th data-i18n="eloDeltaLabel">Delta ELO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teamHistoryTableBody">
+                                <!-- Histórico será preenchido dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Previsões Jornada a Jornada -->
+                <div class="predictions-table-section">
+                    <h3 class="predictions-section-title" data-i18n="matchdayPredictions">Previsões jornada a jornada
+                    </h3>
+                    <div class="predictions-table-wrapper">
+                        <table class="predictions-table" id="predictionsTable">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="predJornada">Jornada</th>
+                                    <th data-i18n="predDate">Data</th>
+                                    <th data-i18n="predOpponent">Adversário</th>
+                                    <th data-i18n="predWinProb" data-i18n-title="predWinProbTitle"
+                                        title="Probabilidade de vitória">P(V)</th>
+                                    <th class="draws-column" data-i18n="predDrawProb"
+                                        data-i18n-title="predDrawProbTitle" title="Probabilidade de empate">P(E)</th>
+                                    <th data-i18n="predLossProb" data-i18n-title="predLossProbTitle"
+                                        title="Probabilidade de derrota">P(D)</th>
+                                    <th data-i18n="expectedGoalsAbbr" data-i18n-title="expectedGoalsTitle"
+                                        title="Golos esperados">Golos Esp.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="predictionsTableBody">
+                                <!-- Previsões serão preenchidas dinamicamente -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -236,95 +311,42 @@
             </div>
         </div>
 
-        <!-- Secção de Previsões -->
-        <div class="card predictions-card" id="predictions">
-            <div class="card-title predictions-title">
-                <span data-i18n="seasonPredictions">Previsões da Época</span>
-                <span class="predictions-sim-count" id="predictionsSimCount" aria-live="polite"></span>
-            </div>
-
-            <!-- Seletores de Divisão e Grupo (interligados com a classificação) -->
-            <div class="predictions-filters">
-                <div class="division-selector" id="predictionsDivisionSelector" style="display: none;">
-                    <!-- Botões de divisão serão gerados dinamicamente -->
-                </div>
-                <div class="group-selector" id="predictionsGroupSelector" style="display: none;">
-                    <!-- Botões de grupo serão gerados dinamicamente -->
-                </div>
-            </div>
-
-            <!-- Seletor de Equipa estilo Slider -->
-            <div class="team-slider-container">
-                <div class="team-slider-display" id="teamSliderDisplay">
-                    <!-- Ghosts à esquerda -->
-                    <div class="team-slider-ghost ghost-left-3" data-position="-3" aria-hidden="true"></div>
-                    <div class="team-slider-ghost ghost-left-2" data-position="-2" aria-hidden="true"></div>
-                    <div class="team-slider-ghost ghost-left-1" data-position="-1" aria-hidden="true"></div>
-
-                    <button class="slider-arrow slider-prev" id="prevTeamBtn" data-i18n-aria="previousTeam"
-                        aria-label="Equipa anterior">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="15 18 9 12 15 6"></polyline>
+        <!-- Gráfico de ELO (SECÇÃO COLAPSÁVEL) -->
+        <div class="card chart-card" id="elo">
+            <div class="chart-header">
+                <div class="card-title">
+                    <span id="eloChartTitle">
+                        <span data-i18n="eloChartTitle">Evolução de ELO das Equipas</span>
+                        <span class="tooltip-icon">?</span>
+                    </span>
+                    <button class="collapse-btn" id="toggleEloChart" aria-expanded="true"
+                        aria-label="Expandir/Colapsar gráfico de ELO">
+                        <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>
-
-                    <div class="team-slider-main" id="teamSliderMain">
-                        <div class="team-slider-name" id="selectedTeamName" data-i18n="selectModalityFirst">
-                            Selecione uma modalidade
-                        </div>
-                        <div class="team-slider-emblem" id="selectedTeamEmblem">
-                            <!-- Emblema será inserido aqui -->
+                </div>
+            </div>
+            <div class="chart-content" id="eloChartContent">
+                <div class="chart-wrapper">
+                    <div class="team-selector" id="teamSelector">
+                        <!-- Checkboxes serão gerados dinamicamente -->
+                    </div>
+                    <!-- Filtros rápidos -->
+                    <div class="quick-filters" id="quickFilters">
+                        <!-- Filtros serão gerados dinamicamente baseados na modalidade -->
+                    </div>
+                    <div class="season-navigation" id="seasonNavigation"
+                        style="display: flex; justify-content: space-between; padding: 8px 10px; gap: 8px;">
+                        <!-- Botões de navegação entre épocas serão inseridos aqui -->
+                    </div>
+                    <div class="chart-container" id="chartContainer">
+                        <div id="eloChart"></div>
+                        <div class="team-end-labels" id="teamEndLabels">
+                            <!-- Labels dinâmicos serão gerados aqui -->
                         </div>
                     </div>
-
-                    <button class="slider-arrow slider-next" id="nextTeamBtn" data-i18n-aria="nextTeam"
-                        aria-label="Próxima equipa">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </button>
-
-                    <!-- Ghosts à direita -->
-                    <div class="team-slider-ghost ghost-right-1" data-position="1" aria-hidden="true"></div>
-                    <div class="team-slider-ghost ghost-right-2" data-position="2" aria-hidden="true"></div>
-                    <div class="team-slider-ghost ghost-right-3" data-position="3" aria-hidden="true"></div>
-                </div>
-            </div>
-
-            <!-- Previsões Gerais -->
-            <div class="predictions-stats-section">
-                <h3 class="predictions-section-title" data-i18n="generalPredictions">PREVISÕES GERAIS</h3>
-                <div class="predictions-stats-grid" id="predictionsStatsGrid">
-                    <!-- Estatísticas serão geradas dinamicamente -->
-                </div>
-            </div>
-
-            <!-- Previsões Jornada a Jornada -->
-            <div class="predictions-table-section">
-                <h3 class="predictions-section-title" data-i18n="matchdayPredictions">Previsões jornada a jornada</h3>
-                <div class="predictions-table-wrapper">
-                    <table class="predictions-table" id="predictionsTable">
-                        <thead>
-                            <tr>
-                                <th data-i18n="predJornada">Jornada</th>
-                                <th data-i18n="predDate">Data</th>
-                                <th data-i18n="predOpponent">Adversário</th>
-                                <th data-i18n="predWinProb" data-i18n-title="predWinProbTitle"
-                                    title="Probabilidade de vitória">P(V)</th>
-                                <th class="draws-column" data-i18n="predDrawProb" data-i18n-title="predDrawProbTitle"
-                                    title="Probabilidade de empate">P(E)</th>
-                                <th data-i18n="predLossProb" data-i18n-title="predLossProbTitle"
-                                    title="Probabilidade de derrota">P(D)</th>
-                                <th data-i18n="expectedGoalsAbbr" data-i18n-title="expectedGoalsTitle"
-                                    title="Golos esperados">Golos Esp.</th>
-                            </tr>
-                        </thead>
-                        <tbody id="predictionsTableBody">
-                            <!-- Previsões serão preenchidas dinamicamente -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
