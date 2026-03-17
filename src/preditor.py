@@ -34,6 +34,7 @@ MELHORIAS FUTURAS SUGERIDAS:
 import math
 import random
 import json
+import functools
 import numpy as np
 from dataclasses import dataclass
 from collections import defaultdict
@@ -63,11 +64,51 @@ if sys.platform == "win32":
     # Tentar configurar locale para português
     try:
         locale.setlocale(locale.LC_ALL, "pt_PT.UTF-8")
-    except:
+    except Exception:
         try:
             locale.setlocale(locale.LC_ALL, "pt_PT")
-        except:
+        except Exception:
             pass
+
+
+# ============================================================================
+# CONSTANTES GLOBAIS
+# ============================================================================
+
+# --- Sistema ELO ---
+ELO_DIVISOR: float = 250.0          # Denominador da fórmula logística ELO
+ELO_K_BASE: float = 100.0           # K-factor base padrão
+ELO_SCALE_NORMALIZED: float = 8.0   # Escala normalizada para número de jogos
+
+# Multiplicadores de fase de época
+PHASE_MULT_E3L: float = 0.75        # Jogo do 3.º lugar (E3L)
+PHASE_MULT_PLAYOFFS: float = 1.5    # Playoffs / eliminatórias
+PHASE_EARLY_THRESHOLD: float = 1 / 3  # Primeiros 1/3 da época = fase inicial
+
+# --- ELOs iniciais por divisão (fallback quando não há época anterior) ---
+ELO_DEFAULT_DIV1: float = 1000.0
+ELO_DEFAULT_DIV2: float = 500.0
+ELO_DEFAULT_UNKNOWN: float = 750.0  # Sem divisão ou divisão desconhecida
+
+# --- Número de simulações Monte Carlo ---
+N_SIMULATIONS_DEFAULT: int = 10_000
+N_SIMULATIONS_DEEP: int = 100_000
+N_SIMULATIONS_DEEPER: int = 1_000_000
+
+# Slots de playoffs padrão quando nenhum placeholder é encontrado no CSV
+PLAYOFF_SLOTS_DEFAULT: int = 8
+
+# --- Modelo de empate (curva gaussiana) ---
+DRAW_GAUSSIAN_SIGMA: float = 180.0  # Largura da curva: ~180 ELO → queda significativa
+DRAW_GAUSSIAN_PEAK_FACTOR: float = 2.5  # Pico ≈ 2.5 × taxa histórica de empates
+
+# --- Basquete 3×3 ---
+BASQUETE_MAX_SCORE: int = 21
+BASQUETE_OT_WIN_2PT_PROB: float = 0.30   # P(vencer prolongamento com cesto de 2 pts)
+BASQUETE_OT_LOSE_1PT_PROB: float = 0.40  # P(adversário marcar 1 pt antes do 2.º cesto)
+
+# --- Proporção de golos (cálculo K-factor) ---
+SCORE_PROPORTION_EXPONENT: float = 1 / 10  # Expoente da proporção de golos
 
 
 @dataclass
@@ -99,8 +140,8 @@ class CompleteTacauaEloSystem:
         self.k_base = k_base
 
     def elo_win_probability(self, elo_a: float, elo_b: float) -> float:
-        """P(A vence) = 1 / (1 + 10^((ELO_B - ELO_A) / 250))"""
-        return 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / 250))
+        """P(A vence) = 1 / (1 + 10^((ELO_B - ELO_A) / ELO_DIVISOR))"""
+        return 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / ELO_DIVISOR))
 
     def calculate_season_phase_multiplier(
         self,
@@ -120,23 +161,23 @@ class CompleteTacauaEloSystem:
         - Resto: 1.0
         """
         if jornada and str(jornada).upper() == "E3L":
-            return 0.75
+            return PHASE_MULT_E3L
 
-        game_number_scaled = (game_number / total_group_games) * 8
+        game_number_scaled = (game_number / total_group_games) * ELO_SCALE_NORMALIZED
 
-        if game_number_scaled > 8:
-            return 1.5
+        if game_number_scaled > ELO_SCALE_NORMALIZED:
+            return PHASE_MULT_PLAYOFFS
         elif game_number_before_winter is not None:
             game_number_after = game_number - game_number_before_winter
             game_number_after_scaled = (
-                5 + (game_number_after - 1) / total_group_games * 8
+                5 + (game_number_after - 1) / total_group_games * ELO_SCALE_NORMALIZED
             )
 
-            if game_number_after_scaled < 8 * (1 / 3) + 5:
+            if game_number_after_scaled < ELO_SCALE_NORMALIZED * PHASE_EARLY_THRESHOLD + 5:
                 return (1 / math.log(4 * (game_number_after_scaled - 4), 16)) ** (1 / 2)
             return 1.0
-        elif game_number_scaled < 8 * (1 / 3):
-            game_number_start_scaled = 1 + (game_number - 1) / total_group_games * 8
+        elif game_number_scaled < ELO_SCALE_NORMALIZED * PHASE_EARLY_THRESHOLD:
+            game_number_start_scaled = 1 + (game_number - 1) / total_group_games * ELO_SCALE_NORMALIZED
             return 1 / math.log(4 * game_number_start_scaled, 16)
         else:
             return 1.0
@@ -151,7 +192,7 @@ class CompleteTacauaEloSystem:
         if score1 == 0:
             score1 = 0.5
 
-        return max((score1 / score2), (score2 / score1)) ** (1 / 10)
+        return max((score1 / score2), (score2 / score1)) ** SCORE_PROPORTION_EXPONENT
 
     def calculate_elo_change(
         self,
@@ -170,44 +211,60 @@ class CompleteTacauaEloSystem:
     ) -> Tuple[float, float]:
         """
         Calcula mudança de ELO com sistema completo.
+
+        Fast-path: quando não há E3L, sem pausa de inverno e ambas as equipas
+        estão na fase média da época (phase_mult == 1.0), evita dois math.log
+        e três chamadas de método — que seriam o caso em ~60-70% dos jogos
+        de simulação futura.
         """
         expected1 = self.elo_win_probability(team1_elo, team2_elo)
-        expected2 = 1 - expected1
 
         if score1 > score2:
-            score_real_1, score_real_2 = 1.0, 0.0
+            score_real_1 = 1.0
         elif score1 < score2:
-            score_real_1, score_real_2 = 0.0, 1.0
+            score_real_1 = 0.0
         else:
-            score_real_1, score_real_2 = 0.5, 0.5
-
-        phase_mult_1 = self.calculate_season_phase_multiplier(
-            game_number_team1,
-            total_group_games_team1,
-            games_before_winter_team1,
-            jornada,
-        )
-        phase_mult_2 = self.calculate_season_phase_multiplier(
-            game_number_team2,
-            total_group_games_team2,
-            games_before_winter_team2,
-            jornada,
-        )
+            score_real_1 = 0.5
 
         proportion_mult = self.calculate_score_proportion(score1, score2)
+
+        # Fast-path: sem E3L, sem pausa de inverno, e na fase média → phase_mult = 1.0
+        if (
+            not jornada
+            and games_before_winter_team1 is None
+            and games_before_winter_team2 is None
+            and not has_absence
+        ):
+            scaled1 = (game_number_team1 / total_group_games_team1) * ELO_SCALE_NORMALIZED
+            scaled2 = (game_number_team2 / total_group_games_team2) * ELO_SCALE_NORMALIZED
+            early_threshold = ELO_SCALE_NORMALIZED * PHASE_EARLY_THRESHOLD
+            if (early_threshold <= scaled1 <= ELO_SCALE_NORMALIZED
+                    and early_threshold <= scaled2 <= ELO_SCALE_NORMALIZED):
+                k = self.k_base * proportion_mult
+                expected2 = 1.0 - expected1
+                score_real_2 = 1.0 - score_real_1
+                return round(k * (score_real_1 - expected1)), round(k * (score_real_2 - expected2))
+
+        phase_mult_1 = self.calculate_season_phase_multiplier(
+            game_number_team1, total_group_games_team1,
+            games_before_winter_team1, jornada,
+        )
+        phase_mult_2 = self.calculate_season_phase_multiplier(
+            game_number_team2, total_group_games_team2,
+            games_before_winter_team2, jornada,
+        )
 
         k_factor_1 = self.k_base * phase_mult_1 * proportion_mult
         k_factor_2 = self.k_base * phase_mult_2 * proportion_mult
 
-        elo_change_1 = k_factor_1 * (score_real_1 - expected1)
-        elo_change_2 = k_factor_2 * (score_real_2 - expected2)
+        score_real_2 = 1.0 - score_real_1
+        expected2 = 1.0 - expected1
 
-        elo_delta_1 = round(elo_change_1)
-        elo_delta_2 = round(elo_change_2)
+        elo_delta_1 = round(k_factor_1 * (score_real_1 - expected1))
+        elo_delta_2 = round(k_factor_2 * (score_real_2 - expected2))
 
         if has_absence:
-            elo_delta_1 = 0
-            elo_delta_2 = 0
+            return 0, 0
 
         return elo_delta_1, elo_delta_2
 
@@ -439,6 +496,23 @@ class SportScoreSimulator:
         self.division_baselines = {}
         self.division_draw_rates = {}
         self.default_draw_rate = 0.0
+        # Atributos cacheados derivados de self.params — evitam dict lookups por simulação
+        self._has_logit_model: bool = False
+        self._forced_draw_fraction: float = self.params.get("forced_draw_fraction", 0.7)
+        self._draw_multiplier: float = 1.0
+
+    def _refresh_draw_cache(self) -> None:
+        """Recalcula os atributos cacheados de empate após qualquer alteração a self.params."""
+        dm = self.params.get("draw_model", {})
+        self._has_logit_model = bool(
+            dm.get("intercept", 0.0) != 0.0 or dm.get("coef_linear", 0.0) != 0.0
+        )
+        if self._has_logit_model:
+            self._draw_multiplier = self.params.get("draw_multiplier", 1.4)
+            self._forced_draw_fraction = self._draw_multiplier
+        else:
+            self._draw_multiplier = 1.0
+            self._forced_draw_fraction = self.params.get("forced_draw_fraction", 0.7)
 
     def apply_calibrated_params(self, calibrated_params: Dict) -> None:
         """Aplica parâmetros calibrados ao simulador."""
@@ -506,6 +580,9 @@ class SportScoreSimulator:
                 # Atualizar taxa de empate por divisão (se houver)
                 if "base_draw_rate" in div_cfg:
                     self.division_draw_rates[int(div)] = div_cfg["base_draw_rate"]
+
+        # Actualizar cache de atributos derivados
+        self._refresh_draw_cache()
 
     def set_division_baselines(
         self, baselines: Dict[Optional[int], Dict[str, float]]
@@ -578,14 +655,8 @@ class SportScoreSimulator:
         elo_diff = abs(elo_a - elo_b)
 
         # Parâmetros da curva gaussiana
-        # sigma controla a largura da curva (quão sensível é à diferença de ELO)
-        # Valor de 180 significa que uma diferença de ~180 ELO reduz significativamente a prob de empate
-        sigma = 180.0
-
-        # peak_rate é calibrado para que a média overall seja próxima do target_draw_rate
-        # Usando factor ~2.5 para elevar o pico da curva gaussiana significativamente
-        # Este factor foi ajustado para obter picos mais pronunciados de empate
-        peak_rate = target_draw_rate * 2.5
+        sigma = DRAW_GAUSSIAN_SIGMA
+        peak_rate = target_draw_rate * DRAW_GAUSSIAN_PEAK_FACTOR
 
         # Curva gaussiana: máxima no centro (elo_diff=0), decai para as caudas
         draw_probability = peak_rate * np.exp(-(elo_diff**2) / (2 * sigma**2))
@@ -629,7 +700,7 @@ class SportScoreSimulator:
 
         if self.sport_type == "volei":
             # Voleibol nunca tem empates
-            p_a = 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / 250))
+            p_a = 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / ELO_DIVISOR))
             winner_is_a = random.random() < p_a
             return self._simulate_volei(elo_a, elo_b, winner_is_a)
 
@@ -682,21 +753,9 @@ class SportScoreSimulator:
                     elo_a, elo_b, target_draw_rate
                 )
 
-                # Se temos modelo logit calibrado, usar agressivamente sem redução
-                # Se só temos modelo gaussiano, aplicar fração forçada para evitar empates excessivos do Poisson
-                has_logit_model = (
-                    "draw_model" in self.params
-                    and self.params.get("draw_model", {}).get("intercept") != 0.0
-                )
-                # Usar multiplicador calibrado se disponível, senão usar padrão (1.4)
-                draw_multiplier = (
-                    self.params.get("draw_multiplier", 1.4) if has_logit_model else 1.0
-                )
-                forced_draw_fraction = (
-                    draw_multiplier
-                    if has_logit_model
-                    else self.params.get("forced_draw_fraction", 0.7)
-                )
+                # Usar atributos cacheados (calculados uma vez em apply_calibrated_params)
+                has_logit_model = self._has_logit_model
+                forced_draw_fraction = self._forced_draw_fraction
 
                 # Decidir se este jogo terá empate forçado
                 if draw_probability > 0 and random.random() < (
@@ -778,8 +837,8 @@ class SportScoreSimulator:
         base_score_a = base_score + elo_diff
         base_score_b = base_score - elo_diff
 
-        score_a = min(21, max(0, int(np.random.normal(base_score_a, sigma))))
-        score_b = min(21, max(0, int(np.random.normal(base_score_b, sigma))))
+        score_a = min(BASQUETE_MAX_SCORE, max(0, int(np.random.normal(base_score_a, sigma))))
+        score_b = min(BASQUETE_MAX_SCORE, max(0, int(np.random.normal(base_score_b, sigma))))
 
         # Se não há empate ou não força vencedor, retornar
         if score_a != score_b or not force_winner:
@@ -787,26 +846,24 @@ class SportScoreSimulator:
 
         # PROLONGAMENTO: Sudden death até 2 pontos
         # Primeira equipa a marcar 2 pontos vence
-        p_a = 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / 250))
+        p_a = 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / ELO_DIVISOR))
 
         if random.random() < p_a:
             # Equipa A vence prolongamento
-            # 30% chance de vencer com cesto de 2 pontos direto
-            # 70% chance de vencer com 2 cestos de 1 ponto
-            if random.random() < 0.30:
+            if random.random() < BASQUETE_OT_WIN_2PT_PROB:
                 # Cesto de 2 pontos: jogo acaba imediatamente
                 return (score_a + 2, score_b + 0)
             else:
                 # Dois cestos de 1 ponto: B pode marcar 0 ou 1
-                b_scored = 1 if random.random() < 0.4 else 0
+                b_scored = 1 if random.random() < BASQUETE_OT_LOSE_1PT_PROB else 0
                 return (score_a + 2, score_b + b_scored)
         else:
             # Equipa B vence prolongamento
-            if random.random() < 0.30:
+            if random.random() < BASQUETE_OT_WIN_2PT_PROB:
                 return (score_a + 0, score_b + 2)
             else:
                 # Dois cestos de 1 ponto: A pode marcar 0 ou 1
-                a_scored = 1 if random.random() < 0.4 else 0
+                a_scored = 1 if random.random() < BASQUETE_OT_LOSE_1PT_PROB else 0
                 return (score_a + a_scored, score_b + 2)
 
     def _simulate_poisson(
@@ -1062,7 +1119,7 @@ def is_valid_team(team_name: str) -> bool:
 
 def is_b_team(name: str) -> bool:
     """Verifica se uma equipa é equipa B."""
-    return name.strip().endswith(" B") or name.strip().endswith("B")
+    return name.strip().endswith(" B")
 
 
 def base_team(name: str) -> str:
@@ -1149,9 +1206,14 @@ def simulate_match(
     total_group_games: int = 10,
     is_playoff: bool = False,
     division: Optional[int] = None,
+    hardset_manager: Optional["HardsetManager"] = None,
+    match_id: Optional[str] = None,
 ) -> Tuple[str, int, int, int]:
     """
     Simula um jogo com sistema ELO completo.
+
+    Quando hardset_manager e match_id são fornecidos e o jogo tiver resultado
+    fixado, usa esse resultado em vez de simular aleatoriamente.
 
     Args:
         team_a, team_b: Equipas
@@ -1159,21 +1221,27 @@ def simulate_match(
         score_simulator: Simulador de resultados
         total_group_games: Total de jogos para cálculo de K_factor
         is_playoff: Se True, força vencedor (sem empates em desportos que suportam prolongamento)
+        division: Divisão do jogo (para baselines por divisão)
+        hardset_manager: Gestor de resultados fixados (opcional)
+        match_id: ID do jogo para lookup no hardset_manager (opcional)
 
-    Retorna (vencedor, margem, score_a, score_b)
+    Retorna (vencedor, margem, score_a, score_b).
     Atualiza ELOs das equipas.
     """
+    # Verificar se há resultado fixado
+    if hardset_manager and match_id and hardset_manager.has_fixed_result(match_id):
+        fixed = hardset_manager.get_fixed_result(match_id)
+        score1, score2 = fixed.score_a, fixed.score_b
+    else:
+        score1, score2 = score_simulator.simulate_score(
+            team_a.elo,
+            team_b.elo,
+            force_winner=is_playoff,
+            division=division,
+        )
 
-    # Simular resultado
-    score1, score2 = score_simulator.simulate_score(
-        team_a.elo,
-        team_b.elo,
-        force_winner=is_playoff,  # Força vencedor em playoffs
-        division=division,
-    )
     margin = abs(score1 - score2)
 
-    # Determinar vencedor real
     if score1 > score2:
         winner_name = team_a.name
     elif score2 > score1:
@@ -1181,7 +1249,6 @@ def simulate_match(
     else:
         winner_name = "Draw"
 
-    # Calcular mudança com sistema completo
     delta_a, delta_b = elo_system.calculate_elo_change(
         team_a.elo,
         team_b.elo,
@@ -1208,246 +1275,176 @@ def simulate_match_with_hardset(
     score_simulator: SportScoreSimulator,
     total_group_games: int = 10,
     is_playoff: bool = False,
-    hardset_manager: Optional[HardsetManager] = None,
+    hardset_manager: Optional["HardsetManager"] = None,
     match_id: Optional[str] = None,
     division: Optional[int] = None,
 ) -> Tuple[str, int, int, int]:
     """
-    Simula um jogo COM suporte para resultados fixados.
+    Alias de compatibilidade para simulate_match com suporte a hardset.
 
-    Se o jogo tiver resultado fixado no hardset_manager:
-    - Usa o resultado fixado em vez de simular
-    - Atualiza ELOs baseado no resultado fixado
-    - Retorna vencedor, margem e placares do resultado fixado
-
-    Caso contrário, comportamento normal.
+    .. deprecated::
+        Use simulate_match(..., hardset_manager=..., match_id=...) diretamente.
     """
-
-    # Verificar se há resultado fixado
-    if hardset_manager and match_id and hardset_manager.has_fixed_result(match_id):
-        fixed = hardset_manager.get_fixed_result(match_id)
-        score1, score2 = fixed.score_a, fixed.score_b
-        margin = abs(score1 - score2)
-
-        # Determinar vencedor do resultado fixado
-        if score1 > score2:
-            winner_name = team_a.name
-        elif score2 > score1:
-            winner_name = team_b.name
-        else:
-            winner_name = "Draw"
-    else:
-        # Comportamento normal: simular resultado
-        score1, score2 = score_simulator.simulate_score(
-            team_a.elo,
-            team_b.elo,
-            force_winner=is_playoff,
-            division=division,
-        )
-        margin = abs(score1 - score2)
-
-        if score1 > score2:
-            winner_name = team_a.name
-        elif score2 > score1:
-            winner_name = team_b.name
-        else:
-            winner_name = "Draw"
-
-    # Calcular mudança de ELO (igual para ambos os casos)
-    delta_a, delta_b = elo_system.calculate_elo_change(
-        team_a.elo,
-        team_b.elo,
-        score1,
-        score2,
-        team_a.games_played + 1,
-        team_b.games_played + 1,
-        total_group_games,
-        total_group_games,
+    return simulate_match(
+        team_a,
+        team_b,
+        elo_system,
+        score_simulator,
+        total_group_games=total_group_games,
+        is_playoff=is_playoff,
+        division=division,
+        hardset_manager=hardset_manager,
+        match_id=match_id,
     )
 
-    team_a.elo += delta_a
-    team_b.elo += delta_b
-    team_a.games_played += 1
-    team_b.games_played += 1
 
-    return winner_name, margin, score1, score2
-
-
-def simulate_season(
-    teams: Dict[str, Team],
+def _preprocess_fixtures(
     fixtures: List[Dict],
-    elo_system: CompleteTacauaEloSystem,
-    score_simulator: SportScoreSimulator,
-) -> Tuple[Dict[str, int], Dict[str, float], Dict[str, float], Dict[str, str]]:
-    """Simula uma época completa com sistema ELO completo.
-    Retorna (points, expected_points, final_elos, season_results).
+    teams: Dict[str, "Team"],
+) -> List[Tuple]:
+    """Pré-processa fixtures uma vez por execução de main(), não por simulação.
 
+    Converte cada fixture num named-tuple leve:
+        (a, b, match_id, division, is_future, total_games_a)
+
+    Ao pré-computar total_games e division aqui, eliminamos O(N_teams × N_fixtures)
+    trabalho que antes se repetia em cada uma das 10 000+ simulações.
+
+    Deve ser chamado ANTES de monte_carlo_forecast, com as fixtures já filtradas.
+    O resultado é passado ao worker em vez da lista de dicts original.
     """
-    points = defaultdict(int)
-    expected_points = defaultdict(float)
-    season_results = {}
-
-    # Calcular total de jogos por equipa (apenas para cálculo de K_factor)
-    total_games = {}
+    # total_games por equipa (para K-factor do ELO)
+    total_games: Dict[str, int] = {}
     for team_name in teams:
-        count = sum(1 for match in fixtures if team_name in (match["a"], match["b"]))
+        count = sum(1 for m in fixtures if team_name in (m["a"], m["b"]))
         total_games[team_name] = count if count > 0 else 1
 
+    processed = []
     for match in fixtures:
-        a = match["a"]
-        b = match["b"]
-        match_id = match.get("id")
-        division = None
         div_raw = str(match.get("divisao", "")).strip()
+        division = None
         if div_raw:
             try:
                 division = int(div_raw)
             except ValueError:
-                division = None
+                pass
 
-        # Guardar ELOs ANTES do jogo
+        processed.append((
+            match["a"],
+            match["b"],
+            match.get("id"),
+            division,
+            bool(match.get("is_future")),
+            total_games.get(match["a"], 1),
+            # preservar campos de output para o CSV de previsões
+            match.get("jornada", ""),
+            match.get("dia", ""),
+            match.get("hora", ""),
+            match.get("grupo", ""),
+        ))
+    return processed
+
+
+def simulate_season(
+    teams: Dict[str, "Team"],
+    preprocessed_fixtures: List[Tuple],
+    elo_system: "CompleteTacauaEloSystem",
+    score_simulator: "SportScoreSimulator",
+    hardset_manager: Optional["HardsetManager"] = None,
+) -> Tuple[Dict[str, int], Dict[str, float], Dict[str, float], Dict]:
+    """Simula uma época completa com sistema ELO completo.
+
+    Recebe `preprocessed_fixtures` (saída de `_preprocess_fixtures`) em vez
+    da lista de dicts raw. Isto elimina a reanálise de strings e o cálculo
+    de total_games em cada uma das 10k+ simulações.
+
+    Quando hardset_manager é fornecido, expected_points é calculado com base
+    no resultado real (hardsets ficam visíveis nos expected_points).
+
+    Retorna (points, expected_points, final_elos, season_results).
+    season_results só inclui jogos futuros (is_future=True), que são os únicos
+    consultados pelo worker — jogos passados eram overhead desnecessário.
+    """
+    use_hardset = hardset_manager is not None
+
+    points: Dict[str, int] = defaultdict(int)
+    expected_points: Dict[str, float] = defaultdict(float)
+    # Apenas jogos futuros entram em season_results (reduz alocações ~50%)
+    season_results: Dict[str, Dict] = {}
+
+    for (a, b, match_id, division, is_future, total_games_a,
+         _jornada, _dia, _hora, _grupo) in preprocessed_fixtures:
+
         elo_a_before = teams[a].elo
         elo_b_before = teams[b].elo
 
-        # Calcular expected points considerando probabilidade de empate dinâmica baseada em ELO
-        p_a = elo_system.elo_win_probability(teams[a].elo, teams[b].elo)
-        p_b = 1 - p_a
+        if not use_hardset:
+            p_a = elo_system.elo_win_probability(elo_a_before, elo_b_before)
+            target_draw_rate = score_simulator._get_division_draw_rate(division)
+            p_draw = score_simulator._calculate_draw_probability(
+                elo_a_before, elo_b_before, target_draw_rate
+            )
+            p_a_adj = p_a * (1 - p_draw)
+            p_b_adj = (1 - p_a) * (1 - p_draw)
+            expected_points[a] += p_a_adj * 3 + p_draw
+            expected_points[b] += p_b_adj * 3 + p_draw
 
-        # Usar probabilidade de empate dinâmica que considera a diferença de ELO
-        target_draw_rate = score_simulator._get_division_draw_rate(division)
-        p_draw = score_simulator._calculate_draw_probability(
-            teams[a].elo, teams[b].elo, target_draw_rate
-        )
-
-        # Ajustar probabilidades de vitória para considerar empates
-        p_a = p_a * (1 - p_draw)
-        p_b = p_b * (1 - p_draw)
-
-        # Expected points: vitória=3, empate=1, derrota=0
-        expected_points[a] += p_a * 3 + p_draw * 1
-        expected_points[b] += p_b * 3 + p_draw * 1
-
-        # Simular o jogo
         winner, margin, score_a, score_b = simulate_match(
             teams[a],
             teams[b],
             elo_system,
             score_simulator,
-            total_games[a],
+            total_games_a,
             division=division,
+            hardset_manager=hardset_manager,
+            match_id=match_id,
         )
 
-        if match_id:
-            season_results[match_id] = {
-                "winner": winner,
-                "margin": margin,
-                "score_a": score_a,
-                "score_b": score_b,
-                "elo_a_before": elo_a_before,
-                "elo_b_before": elo_b_before,
-                "elo_a_after": teams[a].elo,
-                "elo_b_after": teams[b].elo,
-            }
+        # Guardar resultado apenas para jogos futuros (worker só consulta esses)
+        if is_future and match_id:
+            season_results[match_id] = (
+                winner, score_a, score_b, elo_a_before, elo_b_before
+            )
 
         if winner == a:
             points[a] += 3
+            if use_hardset:
+                expected_points[a] += 3
         elif winner == b:
             points[b] += 3
-        # Em caso de 'Draw' (se implementado pontos por empate), adicionar lógica aqui
-        # Por enquanto mantemos 3 pts vitória / 0 pts derrota/empate para simplificação
-        # ou ajustar se o sistema de pontos tiver empates (ex: 1 ponto)
+            if use_hardset:
+                expected_points[b] += 3
         elif winner == "Draw":
             points[a] += 1
             points[b] += 1
+            if use_hardset:
+                expected_points[a] += 1
+                expected_points[b] += 1
 
-    # Guardar ELOs finais após a época regular
     final_elos = {team: teams[team].elo for team in teams}
-
     return points, dict(expected_points), final_elos, season_results
 
 
 def simulate_season_with_hardset(
-    teams: Dict[str, Team],
-    fixtures: List[Dict],
-    elo_system: CompleteTacauaEloSystem,
-    score_simulator: SportScoreSimulator,
-    hardset_manager: Optional[HardsetManager] = None,
-) -> Tuple[Dict[str, int], Dict[str, float], Dict[str, float], Dict[str, str]]:
+    teams: Dict[str, "Team"],
+    fixtures: List,
+    elo_system: "CompleteTacauaEloSystem",
+    score_simulator: "SportScoreSimulator",
+    hardset_manager: Optional["HardsetManager"] = None,
+) -> Tuple[Dict[str, int], Dict[str, float], Dict[str, float], Dict]:
     """
-    Simula época COM suporte para resultados fixados.
+    Alias de compatibilidade para simulate_season com hardset_manager.
 
-    IMPORTANTE: expected_points é calculado APÓS a simulação usando os resultados reais,
-    não probabilidades pré-jogo. Isso garante que hardsets afetam visualmente os expected_points.
+    .. deprecated::
+        Use simulate_season(..., hardset_manager=...) diretamente.
     """
-    points = defaultdict(int)
-    expected_points = defaultdict(float)
-    season_results = {}
-
-    total_games = {}
-    for team_name in teams:
-        count = sum(1 for match in fixtures if team_name in (match["a"], match["b"]))
-        total_games[team_name] = count if count > 0 else 1
-
-    for match in fixtures:
-        a = match["a"]
-        b = match["b"]
-        match_id = match.get("id")
-        division = None
-        div_raw = str(match.get("divisao", "")).strip()
-        if div_raw:
-            try:
-                division = int(div_raw)
-            except ValueError:
-                division = None
-
-        elo_a_before = teams[a].elo
-        elo_b_before = teams[b].elo
-
-        # Simular jogo COM hardset PRIMEIRO
-        winner, margin, score_a, score_b = simulate_match_with_hardset(
-            teams[a],
-            teams[b],
-            elo_system,
-            score_simulator,
-            total_games[a],
-            hardset_manager=hardset_manager,
-            match_id=match_id,
-            division=division,
-        )
-
-        if match_id:
-            season_results[match_id] = {
-                "winner": winner,
-                "margin": margin,
-                "score_a": score_a,
-                "score_b": score_b,
-                "elo_a_before": elo_a_before,
-                "elo_b_before": elo_b_before,
-                "elo_a_after": teams[a].elo,
-                "elo_b_after": teams[b].elo,
-            }
-
-        # Depois CALCULAR expected_points baseado no resultado real
-        if winner == a:
-            points[a] += 3
-            # Expected points é 3 (vitória confirmada)
-            expected_points[a] += 3
-            expected_points[b] += 0
-        elif winner == b:
-            points[b] += 3
-            # Expected points é 3 (vitória confirmada)
-            expected_points[b] += 3
-            expected_points[a] += 0
-        elif winner == "Draw":
-            points[a] += 1
-            points[b] += 1
-            # Expected points é 1 para cada (empate confirmado)
-            expected_points[a] += 1
-            expected_points[b] += 1
-
-    final_elos = {team: teams[team].elo for team in teams}
-
-    return points, dict(expected_points), final_elos, season_results
+    return simulate_season(
+        teams,
+        fixtures,
+        elo_system,
+        score_simulator,
+        hardset_manager=hardset_manager,
+    )
 
 
 def simulate_playoffs(
@@ -1794,201 +1791,40 @@ def get_num_workers() -> int:
     return num_workers
 
 
-# Variável global para rastreamento de progresso (process-safe)
-_progress_tracker: Optional[ProgressTracker] = None
-_csv_rows_cache: Dict[str, List[Dict[str, str]]] = {}
 
+@functools.lru_cache(maxsize=64)
+def _load_csv_rows_cached(csv_file: str) -> tuple:
+    """Carrega e cacheia linhas de CSV (lru_cache; imutável — retorna tupla).
 
-def _load_csv_rows_cached(csv_file: str) -> List[Dict[str, str]]:
-    """Carrega e cacheia linhas de CSV para evitar parse repetido na mesma execução."""
-    if csv_file in _csv_rows_cache:
-        return _csv_rows_cache[csv_file]
+    O lru_cache é seguro para uso no processo principal. Cada processo filho
+    terá a sua própria cópia do cache (comportamento normal de fork/spawn),
+    o que é aceitável dado que os workers não chamam esta função diretamente.
 
+    Returns:
+        Tupla de dicionários (imutável para compatibilidade com lru_cache).
+    """
     with open(csv_file, newline="", encoding="utf-8-sig") as csvfile:
-        rows = list(csv.DictReader(csvfile))
+        return tuple(csv.DictReader(csvfile))
 
-    _csv_rows_cache[csv_file] = rows
-    return rows
+
+def _clear_csv_cache() -> None:
+    """Limpa o cache de CSV (útil em testes ou entre execuções longas)."""
+    _load_csv_rows_cached.cache_clear()
+
 
 
 def _run_single_simulation_worker(args_tuple):
     """
-    Worker para executar uma simulação Monte Carlo.
-    Recebe tupla com todos os args necessários e retorna os dados da simulação.
+    Worker unificado para Monte Carlo — suporta modo normal e hardset.
+
+    Recebe preprocessed_fixtures (saída de _preprocess_fixtures) em vez
+    da lista de dicts raw, eliminando parsing repetido por simulação.
     """
     (
         sim_idx,
         worker_id,
         teams,
-        fixtures,
-        elo_system,
-        score_simulator,
-        n_simulations,
-        team_division,
-        has_liguilla,
-        real_points,
-        playoff_slots,
-        total_playoff_slots,
-    ) = args_tuple
-
-    # Não precisamos mais rastrear progresso aqui - é feito no processo principal
-
-    sim_teams = {
-        name: Team(name, team.elo, team.games_played) for name, team in teams.items()
-    }
-
-    # Simular época regular
-    points_future, sim_expected_points, final_elos, season_results = simulate_season(
-        sim_teams,
-        fixtures,
-        elo_system,
-        score_simulator,
-    )
-
-    points = {
-        team: points_future.get(team, 0) + real_points.get(team, 0) for team in teams
-    }
-
-    ranking = sorted(points.items(), key=lambda x: x[1], reverse=True)
-    playoff_teams = {name: Team(name, final_elos[name]) for name in final_elos}
-
-    # Acumular estatísticas de jogos futuros
-    match_stats_sim = defaultdict(lambda: {"1": 0, "X": 0, "2": 0, "total": 0})
-    match_elo_sum_sim = defaultdict(
-        lambda: {"a_sum": 0.0, "a_sq": 0.0, "b_sum": 0.0, "b_sq": 0.0, "count": 0}
-    )
-    match_score_stats_sim = defaultdict(
-        lambda: defaultdict(int)
-    )  # {match_id: {"3-2": count, ...}}
-
-    for match in fixtures:
-        if match.get("is_future") and match.get("id"):
-            mid = match["id"]
-            res = season_results.get(mid)
-            if res:
-                winner = res["winner"]
-                if winner == match["a"]:
-                    match_stats_sim[mid]["1"] += 1
-                elif winner == match["b"]:
-                    match_stats_sim[mid]["2"] += 1
-                else:
-                    match_stats_sim[mid]["X"] += 1
-                match_stats_sim[mid]["total"] += 1
-
-                elo_a = res["elo_a_before"]
-                elo_b = res["elo_b_before"]
-                match_elo_sum_sim[mid]["a_sum"] += elo_a
-                match_elo_sum_sim[mid]["a_sq"] += elo_a * elo_a
-                match_elo_sum_sim[mid]["b_sum"] += elo_b
-                match_elo_sum_sim[mid]["b_sq"] += elo_b * elo_b
-                match_elo_sum_sim[mid]["count"] += 1
-
-                # Adicionar distribuição de placares
-                score_key = f"{res['score_a']}-{res['score_b']}"
-                match_score_stats_sim[mid][score_key] += 1
-
-    # Armazenar expected points, posição na regular e ELO final
-    expected_points_sim = {}
-    final_elos_sim = {}
-    regular_season_places_sim = {}
-
-    for team in teams:
-        real_pts = real_points.get(team, 0)
-        future_xpts = sim_expected_points.get(team, 0.0)
-        total_xpts = real_pts + future_xpts
-        expected_points_sim[team] = total_xpts
-        final_elos_sim[team] = final_elos.get(team, teams[team].elo)
-
-    # Calcular posição por grupo (em vez de global)
-    standings_by_group_for_places = defaultdict(list)
-    if team_division:
-        for team, pts in ranking:
-            div, grp = team_division.get(team, (1, "")) if team_division else (1, "")
-            standings_by_group_for_places[(div, grp)].append((team, pts))
-
-        for group_key in standings_by_group_for_places:
-            for place, (team, _) in enumerate(
-                standings_by_group_for_places[group_key], 1
-            ):
-                regular_season_places_sim[team] = place
-    else:
-        # Se não há divisões, usar ranking global
-        for place, (team, _) in enumerate(ranking, 1):
-            regular_season_places_sim[team] = place
-
-    # Contar playoffs
-    playoff_count_sim = {}
-    if playoff_slots:
-        standings_by_group = defaultdict(list)
-        for team, pts in ranking:
-            div, grp = team_division.get(team, (1, "")) if team_division else (1, "")
-            standings_by_group[(div, grp)].append((team, pts))
-
-        for group_key, slots in playoff_slots.items():
-            placed = 0
-            for team, _ in standings_by_group.get(group_key, []):
-                if is_b_team(team):
-                    continue
-                playoff_count_sim[team] = 1
-                placed += 1
-                if placed >= slots:
-                    break
-    else:
-        playoff_qualifiers = 0
-        for team, _ in ranking:
-            if playoff_qualifiers >= total_playoff_slots:
-                break
-            if not is_b_team(team):
-                playoff_count_sim[team] = 1
-                playoff_qualifiers += 1
-
-    # Simular playoffs
-    champion, semifinalists, finalists = simulate_playoffs(
-        playoff_teams, ranking, elo_system, score_simulator
-    )
-
-    semifinal_count_sim = {t: 1 for t in semifinalists}
-    final_count_sim = {t: 1 for t in finalists}
-    champion_count_sim = {champion: 1} if champion else {}
-
-    # Calcular promoções/descidas
-    promotion_count_sim = {}
-    relegation_count_sim = {}
-    if team_division:
-        promoted, relegated = calculate_promotions_relegations(
-            points, team_division, sim_teams, has_liguilla
-        )
-        for t in promoted:
-            promotion_count_sim[t] = 1
-        for t in relegated:
-            relegation_count_sim[t] = 1
-
-    return {
-        "expected_points": expected_points_sim,
-        "final_elos": final_elos_sim,
-        "regular_season_places": regular_season_places_sim,
-        "playoff_count": playoff_count_sim,
-        "semifinal_count": semifinal_count_sim,
-        "final_count": final_count_sim,
-        "champion_count": champion_count_sim,
-        "promotion_count": promotion_count_sim,
-        "relegation_count": relegation_count_sim,
-        "match_stats": dict(match_stats_sim),
-        "match_elo_sum": {k: dict(v) for k, v in match_elo_sum_sim.items()},
-        "match_score_stats": {k: dict(v) for k, v in match_score_stats_sim.items()},
-    }
-
-
-def _run_single_simulation_with_hardset_worker(args_tuple):
-    """
-    Worker para executar uma simulação Monte Carlo com hardset.
-    Recebe tupla com todos os args necessários e retorna os dados da simulação.
-    """
-    (
-        sim_idx,
-        worker_id,
-        teams,
-        fixtures,
+        preprocessed_fixtures,
         elo_system,
         score_simulator,
         n_simulations,
@@ -2000,21 +1836,16 @@ def _run_single_simulation_with_hardset_worker(args_tuple):
         hardset_manager,
     ) = args_tuple
 
-    # Não precisamos mais rastrear progresso aqui - é feito no processo principal
-
     sim_teams = {
         name: Team(name, team.elo, team.games_played) for name, team in teams.items()
     }
 
-    # Simular época regular COM hardset
-    points_future, sim_expected_points, final_elos, season_results = (
-        simulate_season_with_hardset(
-            sim_teams,
-            fixtures,
-            elo_system,
-            score_simulator,
-            hardset_manager=hardset_manager,
-        )
+    points_future, sim_expected_points, final_elos, season_results = simulate_season(
+        sim_teams,
+        preprocessed_fixtures,
+        elo_system,
+        score_simulator,
+        hardset_manager=hardset_manager,
     )
 
     points = {
@@ -2024,81 +1855,88 @@ def _run_single_simulation_with_hardset_worker(args_tuple):
     ranking = sorted(points.items(), key=lambda x: x[1], reverse=True)
     playoff_teams = {name: Team(name, final_elos[name]) for name in final_elos}
 
-    # Acumular estatísticas de jogos futuros
-    match_stats_sim = defaultdict(lambda: {"1": 0, "X": 0, "2": 0, "total": 0})
-    match_elo_sum_sim = defaultdict(
-        lambda: {"a_sum": 0.0, "a_sq": 0.0, "b_sum": 0.0, "b_sq": 0.0, "count": 0}
-    )
-    match_score_stats_sim = defaultdict(
-        lambda: defaultdict(int)
-    )  # {match_id: {"3-2": count, ...}}
+    # Acumular estatísticas apenas de jogos futuros
+    # season_results: {match_id: (winner, score_a, score_b, elo_a_before, elo_b_before)}
+    match_stats_sim: Dict = {}
+    match_elo_sum_sim: Dict = {}
+    match_score_stats_sim: Dict = {}
 
-    for match in fixtures:
-        if match.get("is_future") and match.get("id"):
-            mid = match["id"]
-            res = season_results.get(mid)
-            if res:
-                winner = res["winner"]
-                if winner == match["a"]:
-                    match_stats_sim[mid]["1"] += 1
-                elif winner == match["b"]:
-                    match_stats_sim[mid]["2"] += 1
-                else:
-                    match_stats_sim[mid]["X"] += 1
-                match_stats_sim[mid]["total"] += 1
+    for (a, b, mid, _div, is_future, _tg, *_rest) in preprocessed_fixtures:
+        if not is_future or not mid:
+            continue
+        res = season_results.get(mid)
+        if not res:
+            continue
 
-                elo_a = res["elo_a_before"]
-                elo_b = res["elo_b_before"]
-                match_elo_sum_sim[mid]["a_sum"] += elo_a
-                match_elo_sum_sim[mid]["a_sq"] += elo_a * elo_a
-                match_elo_sum_sim[mid]["b_sum"] += elo_b
-                match_elo_sum_sim[mid]["b_sq"] += elo_b * elo_b
-                match_elo_sum_sim[mid]["count"] += 1
+        winner, score_a, score_b, elo_a, elo_b = res
 
-                # Adicionar distribuição de placares
-                score_key = f"{res['score_a']}-{res['score_b']}"
-                match_score_stats_sim[mid][score_key] += 1
+        # match_stats
+        if mid not in match_stats_sim:
+            match_stats_sim[mid] = {"1": 0, "X": 0, "2": 0, "total": 0}
+        ms = match_stats_sim[mid]
+        if winner == a:
+            ms["1"] += 1
+        elif winner == b:
+            ms["2"] += 1
+        else:
+            ms["X"] += 1
+        ms["total"] += 1
 
-    # Armazenar expected points, posição na regular e ELO final
+        # elo sums
+        if mid not in match_elo_sum_sim:
+            match_elo_sum_sim[mid] = {"a_sum": 0.0, "a_sq": 0.0,
+                                       "b_sum": 0.0, "b_sq": 0.0, "count": 0}
+        me = match_elo_sum_sim[mid]
+        me["a_sum"] += elo_a
+        me["a_sq"] += elo_a * elo_a
+        me["b_sum"] += elo_b
+        me["b_sq"] += elo_b * elo_b
+        me["count"] += 1
+
+        # score distribution
+        score_key = f"{score_a}-{score_b}"
+        if mid not in match_score_stats_sim:
+            match_score_stats_sim[mid] = {}
+        sc = match_score_stats_sim[mid]
+        sc[score_key] = sc.get(score_key, 0) + 1
+
     expected_points_sim = {}
     final_elos_sim = {}
     regular_season_places_sim = {}
 
     for team in teams:
-        real_pts = real_points.get(team, 0)
-        future_xpts = sim_expected_points.get(team, 0.0)
-        total_xpts = real_pts + future_xpts
-        expected_points_sim[team] = total_xpts
+        expected_points_sim[team] = real_points.get(team, 0) + sim_expected_points.get(team, 0.0)
         final_elos_sim[team] = final_elos.get(team, teams[team].elo)
 
-    # Calcular posição por grupo (em vez de global)
-    standings_by_group_for_places = defaultdict(list)
+    standings_by_group_for_places: Dict = {}
     if team_division:
         for team, pts in ranking:
-            div, grp = team_division.get(team, (1, "")) if team_division else (1, "")
-            standings_by_group_for_places[(div, grp)].append((team, pts))
+            div, grp = team_division.get(team, (1, ""))
+            key = (div, grp)
+            if key not in standings_by_group_for_places:
+                standings_by_group_for_places[key] = []
+            standings_by_group_for_places[key].append(team)
 
-        for group_key in standings_by_group_for_places:
-            for place, (team, _) in enumerate(
-                standings_by_group_for_places[group_key], 1
-            ):
+        for group_key, group_teams in standings_by_group_for_places.items():
+            for place, team in enumerate(group_teams, 1):
                 regular_season_places_sim[team] = place
     else:
-        # Se não há divisões, usar ranking global
         for place, (team, _) in enumerate(ranking, 1):
             regular_season_places_sim[team] = place
 
-    # Contar playoffs
-    playoff_count_sim = {}
+    playoff_count_sim: Dict = {}
     if playoff_slots:
-        standings_by_group = defaultdict(list)
+        standings_by_group: Dict = {}
         for team, pts in ranking:
-            div, grp = team_division.get(team, (1, "")) if team_division else (1, "")
-            standings_by_group[(div, grp)].append((team, pts))
+            div, grp = team_division.get(team, (1, ""))
+            key = (div, grp)
+            if key not in standings_by_group:
+                standings_by_group[key] = []
+            standings_by_group[key].append(team)
 
         for group_key, slots in playoff_slots.items():
             placed = 0
-            for team, _ in standings_by_group.get(group_key, []):
+            for team in standings_by_group.get(group_key, []):
                 if is_b_team(team):
                     continue
                 playoff_count_sim[team] = 1
@@ -2114,18 +1952,12 @@ def _run_single_simulation_with_hardset_worker(args_tuple):
                 playoff_count_sim[team] = 1
                 playoff_qualifiers += 1
 
-    # Simular playoffs
     champion, semifinalists, finalists = simulate_playoffs(
         playoff_teams, ranking, elo_system, score_simulator
     )
 
-    semifinal_count_sim = {t: 1 for t in semifinalists}
-    final_count_sim = {t: 1 for t in finalists}
-    champion_count_sim = {champion: 1} if champion else {}
-
-    # Calcular promoções/descidas
-    promotion_count_sim = {}
-    relegation_count_sim = {}
+    promotion_count_sim: Dict = {}
+    relegation_count_sim: Dict = {}
     if team_division:
         promoted, relegated = calculate_promotions_relegations(
             points, team_division, sim_teams, has_liguilla
@@ -2140,15 +1972,25 @@ def _run_single_simulation_with_hardset_worker(args_tuple):
         "final_elos": final_elos_sim,
         "regular_season_places": regular_season_places_sim,
         "playoff_count": playoff_count_sim,
-        "semifinal_count": semifinal_count_sim,
-        "final_count": final_count_sim,
-        "champion_count": champion_count_sim,
+        "semifinal_count": {t: 1 for t in semifinalists},
+        "final_count": {t: 1 for t in finalists},
+        "champion_count": {champion: 1} if champion else {},
         "promotion_count": promotion_count_sim,
         "relegation_count": relegation_count_sim,
-        "match_stats": dict(match_stats_sim),
-        "match_elo_sum": {k: dict(v) for k, v in match_elo_sum_sim.items()},
-        "match_score_stats": {k: dict(v) for k, v in match_score_stats_sim.items()},
+        "match_stats": match_stats_sim,
+        "match_elo_sum": match_elo_sum_sim,
+        "match_score_stats": match_score_stats_sim,
     }
+
+
+def _run_single_simulation_with_hardset_worker(args_tuple):
+    """
+    Alias de compatibilidade para _run_single_simulation_worker.
+
+    .. deprecated::
+        Use _run_single_simulation_worker diretamente — já suporta hardset_manager.
+    """
+    return _run_single_simulation_worker(args_tuple)
 
 
 def monte_carlo_forecast(
@@ -2162,14 +2004,29 @@ def monte_carlo_forecast(
     real_points: Dict[str, int] = None,
     playoff_slots: Dict[Tuple[int, str], int] = None,
     total_playoff_slots: int = 8,
+    hardset_manager: Optional["HardsetManager"] = None,
 ) -> Tuple[
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
+    Dict[str, Dict[str, int]],
 ]:
-    """OTIMIZADO PARA LINUX - Batching + Chunking + Agregação Eficiente"""
+    """Monte Carlo com suporte opcional a resultados fixados (hardset).
+
+    Quando hardset_manager é fornecido, os jogos com resultado fixado usam
+    esse resultado em todas as simulações. Exibe um resumo dos hardsets ativos
+    no início da execução.
+    """
     if real_points is None:
         real_points = {}
+
+    if hardset_manager and hardset_manager.fixed_results:
+        print(f"\n{'='*60}")
+        print(hardset_manager.summary())
+        print(f"{'='*60}\n")
+
+    # Pré-processar fixtures UMA vez — elimina O(N_teams × N_fixtures) por simulação
+    preprocessed_fixtures = _preprocess_fixtures(fixtures, teams)
 
     playoff_count = defaultdict(int)
     semifinal_count = defaultdict(int)
@@ -2178,7 +2035,6 @@ def monte_carlo_forecast(
     promotion_count = defaultdict(int)
     relegation_count = defaultdict(int)
 
-    # Agregação eficiente: somas em vez de listas
     expected_points_sum = defaultdict(float)
     expected_points_sq_sum = defaultdict(float)
     regular_places_sum = defaultdict(float)
@@ -2195,7 +2051,6 @@ def monte_carlo_forecast(
     num_workers = get_num_workers()
     print(f"\n✓ Detectados {num_workers} cores disponíveis")
 
-    # Batching adaptativo
     if n_simulations >= 1000000:
         batch_size = 50000
         chunksize = 500
@@ -2211,8 +2066,7 @@ def monte_carlo_forecast(
         f"✓ {n_simulations} simulações em {num_batches} batch(es) | Chunksize: {chunksize}\n"
     )
 
-    global _progress_tracker
-    _progress_tracker = ProgressTracker(num_workers, n_simulations)
+    progress_tracker = ProgressTracker(num_workers, n_simulations)
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         for batch_num in range(num_batches):
@@ -2226,7 +2080,7 @@ def monte_carlo_forecast(
                     sim_idx,
                     worker_id,
                     teams,
-                    fixtures,
+                    preprocessed_fixtures,
                     elo_system,
                     score_simulator,
                     n_simulations,
@@ -2235,13 +2089,14 @@ def monte_carlo_forecast(
                     real_points,
                     playoff_slots,
                     total_playoff_slots,
+                    hardset_manager,
                 )
                 simulation_args.append(args_tuple)
 
             for sim_result in executor.map(
                 _run_single_simulation_worker, simulation_args, chunksize=chunksize
             ):
-                _progress_tracker.increment()
+                progress_tracker.increment()
 
                 for team in teams:
                     if team in sim_result["expected_points"]:
@@ -2365,8 +2220,7 @@ def monte_carlo_forecast(
                 "elo_b_std": std_b,
             }
 
-    if _progress_tracker:
-        _progress_tracker.print_summary()
+    progress_tracker.print_summary()
 
     return results, match_forecasts, match_elo_forecast, match_score_stats
 
@@ -2382,223 +2236,32 @@ def monte_carlo_forecast_with_hardset(
     real_points: Dict[str, int] = None,
     playoff_slots: Dict[Tuple[int, str], int] = None,
     total_playoff_slots: int = 8,
-    hardset_manager: Optional[HardsetManager] = None,
+    hardset_manager: Optional["HardsetManager"] = None,
 ) -> Tuple[
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
+    Dict[str, Dict[str, int]],
 ]:
-    """OTIMIZADO PARA LINUX - Batching + Chunking + Agregação Eficiente (COM HARDSET)"""
-    if real_points is None:
-        real_points = {}
+    """
+    Alias de compatibilidade para monte_carlo_forecast com hardset_manager.
 
-    # Mostrar resumo de hardsets se existirem
-    if hardset_manager and hardset_manager.fixed_results:
-        print(f"\n{'='*60}")
-        print(hardset_manager.summary())
-        print(f"{'='*60}\n")
-
-    playoff_count = defaultdict(int)
-    semifinal_count = defaultdict(int)
-    final_count = defaultdict(int)
-    champion_count = defaultdict(int)
-    promotion_count = defaultdict(int)
-    relegation_count = defaultdict(int)
-
-    # Agregação eficiente: somas em vez de listas
-    expected_points_sum = defaultdict(float)
-    expected_points_sq_sum = defaultdict(float)
-    regular_places_sum = defaultdict(float)
-    regular_places_sq_sum = defaultdict(float)
-    final_elos_sum = defaultdict(float)
-    final_elos_sq_sum = defaultdict(float)
-
-    match_stats = defaultdict(lambda: {"1": 0, "X": 0, "2": 0, "total": 0})
-    match_elo_sum = defaultdict(
-        lambda: {"a_sum": 0.0, "a_sq": 0.0, "b_sum": 0.0, "b_sq": 0.0, "count": 0}
+    .. deprecated::
+        Use monte_carlo_forecast(..., hardset_manager=...) diretamente.
+    """
+    return monte_carlo_forecast(
+        teams,
+        fixtures,
+        elo_system,
+        score_simulator,
+        n_simulations=n_simulations,
+        team_division=team_division,
+        has_liguilla=has_liguilla,
+        real_points=real_points,
+        playoff_slots=playoff_slots,
+        total_playoff_slots=total_playoff_slots,
+        hardset_manager=hardset_manager,
     )
-    match_score_stats = defaultdict(lambda: defaultdict(int))
-
-    num_workers = get_num_workers()
-    print(f"\n✓ Detectados {num_workers} cores disponíveis")
-
-    # Batching adaptativo
-    if n_simulations >= 1000000:
-        batch_size = 50000
-        chunksize = 500
-    elif n_simulations >= 100000:
-        batch_size = 10000
-        chunksize = 100
-    else:
-        batch_size = n_simulations
-        chunksize = max(1, n_simulations // (num_workers * 4))
-
-    num_batches = (n_simulations + batch_size - 1) // batch_size
-    print(
-        f"✓ {n_simulations} simulações em {num_batches} batch(es) | Chunksize: {chunksize}\n"
-    )
-
-    global _progress_tracker
-    _progress_tracker = ProgressTracker(num_workers, n_simulations)
-
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        for batch_num in range(num_batches):
-            batch_start = batch_num * batch_size
-            batch_end = min(batch_start + batch_size, n_simulations)
-
-            simulation_args = []
-            for sim_idx in range(batch_start, batch_end):
-                worker_id = sim_idx % num_workers
-                args_tuple = (
-                    sim_idx,
-                    worker_id,
-                    teams,
-                    fixtures,
-                    elo_system,
-                    score_simulator,
-                    n_simulations,
-                    team_division,
-                    has_liguilla,
-                    real_points,
-                    playoff_slots,
-                    total_playoff_slots,
-                    hardset_manager,
-                )
-                simulation_args.append(args_tuple)
-
-            for sim_result in executor.map(
-                _run_single_simulation_with_hardset_worker,
-                simulation_args,
-                chunksize=chunksize,
-            ):
-                _progress_tracker.increment()
-
-                for team in teams:
-                    if team in sim_result["expected_points"]:
-                        val = sim_result["expected_points"][team]
-                        expected_points_sum[team] += val
-                        expected_points_sq_sum[team] += val * val
-
-                        elo_val = sim_result["final_elos"][team]
-                        final_elos_sum[team] += elo_val
-                        final_elos_sq_sum[team] += elo_val * elo_val
-
-                        place_val = sim_result["regular_season_places"][team]
-                        regular_places_sum[team] += place_val
-                        regular_places_sq_sum[team] += place_val * place_val
-
-                for team, count in sim_result["playoff_count"].items():
-                    playoff_count[team] += count
-                for team, count in sim_result["semifinal_count"].items():
-                    semifinal_count[team] += count
-                for team, count in sim_result["final_count"].items():
-                    final_count[team] += count
-                for team, count in sim_result["champion_count"].items():
-                    champion_count[team] += count
-                for team, count in sim_result["promotion_count"].items():
-                    promotion_count[team] += count
-                for team, count in sim_result["relegation_count"].items():
-                    relegation_count[team] += count
-
-                for mid, stats in sim_result["match_stats"].items():
-                    for key in ["1", "X", "2", "total"]:
-                        match_stats[mid][key] += stats[key]
-
-                for mid, elo_sums in sim_result["match_elo_sum"].items():
-                    match_elo_sum[mid]["a_sum"] += elo_sums["a_sum"]
-                    match_elo_sum[mid]["a_sq"] += elo_sums["a_sq"]
-                    match_elo_sum[mid]["b_sum"] += elo_sums["b_sum"]
-                    match_elo_sum[mid]["b_sq"] += elo_sums["b_sq"]
-                    match_elo_sum[mid]["count"] += elo_sums["count"]
-
-                for mid, score_data in sim_result["match_score_stats"].items():
-                    for score_key, count in score_data.items():
-                        match_score_stats[mid][score_key] += count
-
-        gc.collect()
-
-    results = {}
-    for team in teams:
-        n = n_simulations
-
-        mean_xpts = (
-            expected_points_sum[team] / n if team in expected_points_sum else 0.0
-        )
-        variance_xpts = (
-            (expected_points_sq_sum[team] / n - mean_xpts**2)
-            if team in expected_points_sq_sum
-            else 0.0
-        )
-        std_xpts = variance_xpts**0.5 if variance_xpts > 0 else 0.0
-
-        mean_place = (
-            regular_places_sum[team] / n if team in regular_places_sum else len(teams)
-        )
-        variance_place = (
-            (regular_places_sq_sum[team] / n - mean_place**2)
-            if team in regular_places_sq_sum
-            else 0.0
-        )
-        std_place = variance_place**0.5 if variance_place > 0 else 0.0
-
-        mean_elo = (
-            final_elos_sum[team] / n if team in final_elos_sum else teams[team].elo
-        )
-        variance_elo = (
-            (final_elos_sq_sum[team] / n - mean_elo**2)
-            if team in final_elos_sq_sum
-            else 0.0
-        )
-        std_elo = variance_elo**0.5 if variance_elo > 0 else 0.0
-
-        results[team] = {
-            "p_playoffs": playoff_count[team] / n_simulations,
-            "p_meias_finais": semifinal_count[team] / n_simulations,
-            "p_finais": final_count[team] / n_simulations,
-            "p_champion": champion_count[team] / n_simulations,
-            "expected_points": mean_xpts,
-            "expected_points_std": std_xpts,
-            "expected_place": mean_place,
-            "expected_place_std": std_place,
-            "avg_final_elo": mean_elo,
-            "avg_final_elo_std": std_elo,
-            "p_promocao": promotion_count[team] / n_simulations,
-            "p_descida": relegation_count[team] / n_simulations,
-        }
-
-    match_forecasts = {}
-    for mid, stats in match_stats.items():
-        total = stats["total"]
-        if total > 0:
-            match_forecasts[mid] = {
-                "p_win_a": stats["1"] / total,
-                "p_draw": stats["X"] / total,
-                "p_win_b": stats["2"] / total,
-            }
-
-    match_elo_forecast = {}
-    for mid, elo_sums in match_elo_sum.items():
-        count = elo_sums["count"]
-        if count > 0:
-            mean_a = elo_sums["a_sum"] / count
-            variance_a = elo_sums["a_sq"] / count - mean_a**2
-            std_a = variance_a**0.5 if variance_a > 0 else 0.0
-
-            mean_b = elo_sums["b_sum"] / count
-            variance_b = elo_sums["b_sq"] / count - mean_b**2
-            std_b = variance_b**0.5 if variance_b > 0 else 0.0
-
-            match_elo_forecast[mid] = {
-                "elo_a_mean": mean_a,
-                "elo_a_std": std_a,
-                "elo_b_mean": mean_b,
-                "elo_b_std": std_b,
-            }
-
-    if _progress_tracker:
-        _progress_tracker.print_summary()
-
-    return results, match_forecasts, match_elo_forecast, match_score_stats
 
 
 # ============================================================================
@@ -3035,9 +2698,8 @@ def detect_withdrawn_teams_from_csv(
         if not team_a_raw or not team_b_raw:
             continue
 
-        # Verificar coluna de falta de comparência
-        falta_a = str(row.get("Falta de Comparência", "")).strip()
-        falta_b = str(row.get("Falta de Comparência", "")).strip()
+        # Verificar coluna de falta de comparência (única coluna partilhada por ambas as equipas)
+        falta_valor = str(row.get("Falta de Comparência", "")).strip()
 
         # Normalizar nomes
         team_a = normalize_team_name(team_a_raw, course_mapping)
@@ -3047,14 +2709,14 @@ def detect_withdrawn_teams_from_csv(
             if team_a not in team_game_count:
                 team_game_count[team_a] = {"total": 0, "withdrawn": 0}
             team_game_count[team_a]["total"] += 1
-            if falta_a and team_a_raw in falta_a:
+            if falta_valor and team_a_raw in falta_valor:
                 team_game_count[team_a]["withdrawn"] += 1
 
         if team_b:
             if team_b not in team_game_count:
                 team_game_count[team_b] = {"total": 0, "withdrawn": 0}
             team_game_count[team_b]["total"] += 1
-            if falta_b and team_b_raw in falta_b:
+            if falta_valor and team_b_raw in falta_valor:
                 team_game_count[team_b]["withdrawn"] += 1
 
     # Identificar desistentes (100% com falta)
@@ -3089,12 +2751,374 @@ def get_initial_rating_from_division(
 
     # Prioridade 2: Usar ELO padrão baseado em divisão
     if division == 1:
-        return 1000.0
+        return ELO_DEFAULT_DIV1
     elif division == 2:
-        return 500.0
+        return ELO_DEFAULT_DIV2
     else:
-        # Sem divisão ou divisão desconhecida → 750 padrão
-        return 750.0
+        # Sem divisão ou divisão desconhecida → ELO padrão
+        return ELO_DEFAULT_UNKNOWN
+
+
+def _build_hardset_manager(
+    hardset_args: Optional[list],
+    hardset_csv: Optional[str],
+    course_mapping_short: Dict[str, str],
+) -> Optional[HardsetManager]:
+    """Inicializa e povoa um HardsetManager a partir de argumentos CLI e/ou CSV.
+
+    Retorna None se não houver resultados fixados a carregar.
+    """
+    if not hardset_args and not hardset_csv:
+        return None
+
+    manager = HardsetManager(mapping_short=course_mapping_short)
+
+    if hardset_args:
+        print("\n🎯 HARDSET CARREGADO VIA ARGUMENTOS:\n")
+        for match_id, score in hardset_args:
+            try:
+                parts = score.split("-")
+                if len(parts) != 2:
+                    print(f"❌ Formato inválido para score: {score}. Use 'A-B'")
+                    continue
+                score_a, score_b = int(parts[0]), int(parts[1])
+                manager.add_fixed_result(match_id, score_a, score_b)
+            except ValueError:
+                print(f"❌ Erro ao processar score: {score}")
+
+    if hardset_csv:
+        manager.add_from_csv(hardset_csv)
+
+    print()
+    return manager
+
+
+def _load_modalidade_data(
+    modalidade: str,
+    date_pattern: str,
+    past_seasons: List[str],
+    docs_dir: str,
+    modalidades_path: str,
+    modalidade_file: str,
+    course_mapping: Dict[str, str],
+    score_simulator: SportScoreSimulator,
+    calibrated_config: Optional[Dict],
+) -> Tuple[Dict[str, float], list, list, list, Dict, Dict]:
+    """Carrega todos os dados necessários para simular uma modalidade.
+
+    Retorna:
+        (initial_elos, all_csv_rows, past_matches_rows, future_matches_rows,
+         division_baselines, division_draw_rates)
+    """
+    # Carregar ELOs da época anterior
+    elo_file = os.path.join(
+        docs_dir, "output", "elo_ratings", f"elo_{modalidade}{date_pattern}.csv"
+    )
+    initial_elos: Dict[str, float] = {}
+    if os.path.exists(elo_file):
+        with open(elo_file, newline="", encoding="utf-8-sig") as csvfile:
+            reader = csv.reader(csvfile)
+            headers = next(reader)
+            rows = list(reader)
+            if rows:
+                last_row = rows[-1]
+                for i, team_name in enumerate(headers):
+                    if i < len(last_row):
+                        try:
+                            normalized_name = normalize_team_name(team_name, course_mapping)
+                            initial_elos[normalized_name] = float(last_row[i])
+                        except ValueError:
+                            continue
+
+    # Carregar e separar jogos
+    all_csv_rows = _load_csv_rows_cached(
+        os.path.join(modalidades_path, modalidade_file)
+    )
+    past_matches_rows, future_matches_rows = separate_past_and_future_matches(all_csv_rows)
+
+    # Calcular e aplicar baselines históricos ao simulador
+    division_baselines = calculate_division_baselines(
+        modalidade, past_seasons, past_matches_rows, docs_dir
+    )
+    division_draw_rates = calculate_division_draw_rates(
+        modalidade, past_seasons, past_matches_rows, docs_dir
+    )
+    score_simulator.set_division_baselines(division_baselines)
+    score_simulator.set_division_draw_rates(division_draw_rates)
+
+    # Aplicar parâmetros calibrados (têm prioridade sobre os históricos)
+    if calibrated_config and modalidade in calibrated_config:
+        score_simulator.apply_calibrated_params(calibrated_config[modalidade])
+
+    return (
+        initial_elos,
+        all_csv_rows,
+        past_matches_rows,
+        future_matches_rows,
+        division_baselines,
+        division_draw_rates,
+    )
+
+
+def _build_teams_and_fixtures(
+    all_csv_rows,
+    past_matches_rows,
+    future_matches_rows,
+    course_mapping: Dict[str, str],
+    course_mapping_short: Dict[str, str],
+    initial_elos: Dict[str, float],
+    modalidade: str,
+) -> Tuple[Dict[str, Team], List[Dict], Set[str], Dict[str, Tuple[int, str]]]:
+    """Constrói teams, fixtures, all_teams_in_epoch e team_division.
+
+    Retorna:
+        (teams, fixtures, all_teams_in_epoch, team_division)
+    """
+    teams: Dict[str, Team] = {}
+    fixtures: List[Dict] = []
+    all_teams_in_epoch: Set[str] = set()
+
+    # Detectar desistentes antes de processar qualquer jogo
+    withdrawn_teams = detect_withdrawn_teams_from_csv(future_matches_rows, course_mapping)
+
+    # Mapear divisão/grupo para todas as equipas (passado + futuro)
+    team_division: Dict[str, Tuple[int, str]] = {}
+    for row in all_csv_rows:
+        t1_raw = row.get("Equipa 1", "").strip()
+        t2_raw = row.get("Equipa 2", "").strip()
+        if not t1_raw or not t2_raw:
+            continue
+        t1 = normalize_team_name(t1_raw, course_mapping)
+        t2 = normalize_team_name(t2_raw, course_mapping)
+        div = row.get("Divisão", "") or "1"
+        grp = (row.get("Grupo", "") or "").strip().upper()
+        try:
+            div_int = int(div)
+        except ValueError:
+            div_int = 1
+        if t1 and t1 not in team_division:
+            team_division[t1] = (div_int, grp)
+        if t2 and t2 not in team_division:
+            team_division[t2] = (div_int, grp)
+
+    def _register_team(name: str) -> None:
+        if name not in teams:
+            div = team_division.get(name, (None, None))[0]
+            teams[name] = Team(name, get_initial_rating_from_division(name, div, initial_elos))
+
+    # Jogos futuros → fixtures de simulação
+    for row in future_matches_rows:
+        team_a_raw = row["Equipa 1"].strip()
+        team_b_raw = row["Equipa 2"].strip()
+        if not is_valid_team(team_a_raw) or not is_valid_team(team_b_raw):
+            continue
+        team_a = normalize_team_name(team_a_raw, course_mapping)
+        team_b = normalize_team_name(team_b_raw, course_mapping)
+        if team_a in withdrawn_teams or team_b in withdrawn_teams:
+            continue
+
+        all_teams_in_epoch.add(team_a)
+        all_teams_in_epoch.add(team_b)
+        _register_team(team_a)
+        _register_team(team_b)
+
+        team_a_short = get_team_short_name(team_a, course_mapping_short)
+        team_b_short = get_team_short_name(team_b, course_mapping_short)
+        match_id = f"{modalidade}_{row.get('Jornada', '0')}_{team_a_short}_{team_b_short}"
+
+        fixtures.append({
+            "a": team_a,
+            "b": team_b,
+            "is_future": True,
+            "id": match_id,
+            "jornada": row.get("Jornada", ""),
+            "dia": row.get("Dia", ""),
+            "hora": row.get("Hora", ""),
+            "divisao": row.get("Divisão", ""),
+            "grupo": row.get("Grupo", ""),
+        })
+
+    # Jogos passados → registar equipas (para histórico de ELO)
+    for row in past_matches_rows:
+        team_a_raw = row["Equipa 1"].strip()
+        team_b_raw = row["Equipa 2"].strip()
+        if not is_valid_team(team_a_raw) or not is_valid_team(team_b_raw):
+            continue
+        team_a = normalize_team_name(team_a_raw, course_mapping)
+        team_b = normalize_team_name(team_b_raw, course_mapping)
+        if team_a in withdrawn_teams or team_b in withdrawn_teams:
+            continue
+
+        all_teams_in_epoch.add(team_a)
+        all_teams_in_epoch.add(team_b)
+        _register_team(team_a)
+        _register_team(team_b)
+
+    return teams, fixtures, all_teams_in_epoch, team_division
+
+
+def _export_results(
+    docs_dir: str,
+    modalidade: str,
+    ano_atual: int,
+    n_simulations: int,
+    hardset_manager: Optional[HardsetManager],
+    all_teams_in_epoch: Set[str],
+    teams: Dict[str, Team],
+    team_division: Dict[str, Tuple[int, str]],
+    initial_elos: Dict[str, float],
+    real_points: Dict[str, int],
+    results: Dict,
+    fixtures: List[Dict],
+    match_forecasts: Dict,
+    match_elo_forecast: Dict,
+    match_score_stats: Dict,
+) -> None:
+    """Escreve os dois CSVs de output: forecast de equipas e previsões de jogos."""
+    is_hardset = bool(hardset_manager and hardset_manager.fixed_results)
+    subfolder = "cenarios" if is_hardset else "previsoes"
+    suffix = "_hardset" if is_hardset else ""
+
+    output_file = os.path.join(
+        docs_dir, "output", subfolder,
+        f"forecast_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv",
+    )
+    predictions_file = os.path.join(
+        docs_dir, "output", subfolder,
+        f"previsoes_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv",
+    )
+
+    # --- CSV 1: Forecast de equipas ---
+    with open(output_file, "w", newline="", encoding="utf-8-sig") as csvfile:
+        fieldnames = [
+            "team", "p_playoffs", "p_meias_finais", "p_finais", "p_champion",
+            "p_promocao", "p_descida", "expected_points", "expected_points_std",
+            "expected_place_in_group", "expected_place_in_group_std",
+            "avg_final_elo", "avg_final_elo_std",
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for team in sorted(all_teams_in_epoch):
+            if team in results:
+                r = results[team]
+                row = {
+                    "team": team,
+                    "p_playoffs":               f"{r['p_playoffs'] * 100:.4f}",
+                    "p_meias_finais":            f"{r['p_meias_finais'] * 100:.4f}",
+                    "p_finais":                  f"{r['p_finais'] * 100:.4f}",
+                    "p_champion":                f"{r['p_champion'] * 100:.4f}",
+                    "p_promocao":                f"{r['p_promocao'] * 100:.4f}",
+                    "p_descida":                 f"{r['p_descida'] * 100:.4f}",
+                    "expected_points":           f"{r['expected_points']:.2f}",
+                    "expected_points_std":       f"{r['expected_points_std']:.2f}",
+                    "expected_place_in_group":   f"{r['expected_place']:.2f}",
+                    "expected_place_in_group_std": f"{r['expected_place_std']:.2f}",
+                    "avg_final_elo":             f"{r['avg_final_elo']:.1f}",
+                    "avg_final_elo_std":         f"{r['avg_final_elo_std']:.1f}",
+                }
+            else:
+                team_div = team_division.get(team, (None, ""))[0]
+                row = {
+                    "team": team,
+                    "p_playoffs": "0.0000", "p_meias_finais": "0.0000",
+                    "p_finais": "0.0000", "p_champion": "0.0000",
+                    "p_promocao": "0.0000", "p_descida": "0.0000",
+                    "expected_points":     f"{real_points.get(team, 0.0):.2f}",
+                    "expected_points_std": "0.00",
+                    "expected_place_in_group":     f"{float(len(all_teams_in_epoch)):.2f}",
+                    "expected_place_in_group_std": "0.00",
+                    "avg_final_elo": f"{get_initial_rating_from_division(team, team_div, initial_elos):.1f}",
+                    "avg_final_elo_std": "0.0",
+                }
+            writer.writerow(row)
+
+    print(f"Resultados guardados em {output_file}")
+
+    # --- CSV 2: Previsões de jogos futuros ---
+    future_count = 0
+    with open(predictions_file, "w", newline="", encoding="utf-8-sig") as csvfile:
+        fieldnames = [
+            "jornada", "dia", "hora", "team_a", "team_b",
+            "expected_elo_a", "expected_elo_a_std", "expected_elo_b", "expected_elo_b_std",
+            "prob_vitoria_a", "prob_empate", "prob_vitoria_b",
+            "expected_goals_a", "expected_goals_a_std",
+            "expected_goals_b", "expected_goals_b_std",
+            "distribuicao_placares", "divisao", "grupo",
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for match in fixtures:
+            if not (match.get("is_future") and match.get("id") in match_forecasts):
+                continue
+
+            mid = match["id"]
+            fc = match_forecasts[mid]
+            elo_fc = match_elo_forecast.get(mid, {})
+            score_dist = match_score_stats.get(mid, {})
+
+            elo_a_expected = elo_fc.get("elo_a_mean", teams[match["a"]].elo)
+            elo_a_std      = elo_fc.get("elo_a_std", 0.0)
+            elo_b_expected = elo_fc.get("elo_b_mean", teams[match["b"]].elo)
+            elo_b_std      = elo_fc.get("elo_b_std", 0.0)
+
+            # Calcular golos esperados e desvio padrão a partir da distribuição de placares
+            expected_goals_a = expected_goals_b = 0.0
+            variance_a = variance_b = 0.0
+            if score_dist:
+                total_sims = sum(score_dist.values())
+                for score_str, count in score_dist.items():
+                    try:
+                        ga, gb = (int(x) for x in score_str.split("-"))
+                        w = count / total_sims
+                        expected_goals_a += ga * w
+                        expected_goals_b += gb * w
+                    except (ValueError, IndexError):
+                        pass
+                for score_str, count in score_dist.items():
+                    try:
+                        ga, gb = (int(x) for x in score_str.split("-"))
+                        w = count / total_sims
+                        variance_a += w * (ga - expected_goals_a) ** 2
+                        variance_b += w * (gb - expected_goals_b) ** 2
+                    except (ValueError, IndexError):
+                        pass
+
+                sorted_scores = sorted(score_dist.items(), key=lambda x: x[1], reverse=True)
+                distribuicao_str = "|".join(
+                    f"{s}:{(c / total_sims) * 100:.4f}%" for s, c in sorted_scores
+                )
+            else:
+                distribuicao_str = ""
+
+            writer.writerow({
+                "jornada":              match.get("jornada", ""),
+                "dia":                  match.get("dia", ""),
+                "hora":                 match.get("hora", ""),
+                "team_a":               match["a"],
+                "team_b":               match["b"],
+                "expected_elo_a":       f"{elo_a_expected:.1f}",
+                "expected_elo_a_std":   f"{elo_a_std:.1f}",
+                "expected_elo_b":       f"{elo_b_expected:.1f}",
+                "expected_elo_b_std":   f"{elo_b_std:.1f}",
+                "prob_vitoria_a":       f"{fc.get('p_win_a', 0) * 100:.4f}",
+                "prob_empate":          f"{fc.get('p_draw', 0) * 100:.4f}",
+                "prob_vitoria_b":       f"{fc.get('p_win_b', 0) * 100:.4f}",
+                "expected_goals_a":     f"{expected_goals_a:.2f}",
+                "expected_goals_a_std": f"{variance_a ** 0.5:.2f}",
+                "expected_goals_b":     f"{expected_goals_b:.2f}",
+                "expected_goals_b_std": f"{variance_b ** 0.5:.2f}",
+                "distribuicao_placares": distribuicao_str,
+                "divisao":              match.get("divisao", ""),
+                "grupo":                match.get("grupo", ""),
+            })
+            future_count += 1
+
+    if future_count > 0:
+        print(f"Previsões de {future_count} jogos futuros guardadas em {predictions_file}\n")
+    else:
+        print(f"Nenhum jogo futuro encontrado para {modalidade} (ou sem previsões disponíveis)\n")
 
 
 def main(
@@ -3107,7 +3131,7 @@ def main(
     calibrated_config_path: Optional[str] = None,
 ):
     """
-    Função principal que simula futuras épocas e gera previsões.
+    Orquestra a pipeline completa: carrega dados, corre Monte Carlo e exporta resultados.
 
     Args:
         hardset_args: Lista de tuplas (match_id, score) do argparse (opcional).
@@ -3118,643 +3142,180 @@ def main(
         use_calibrated: Usar parâmetros calibrados (opcional).
         calibrated_config_path: Caminho customizado para config calibrada (opcional).
     """
-    # Definir diretório base do projeto (baseado na localização deste script)
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_dir = os.path.dirname(script_dir)  # Diretório pai de 'src'
+    project_dir = os.path.dirname(script_dir)
     docs_dir = os.path.join(project_dir, "docs")
 
-    # Criar diretórios de output se não existirem
     os.makedirs(os.path.join(docs_dir, "output", "previsoes"), exist_ok=True)
     os.makedirs(os.path.join(docs_dir, "output", "cenarios"), exist_ok=True)
 
     course_mapping, course_mapping_short = load_course_mapping(docs_dir)
-    print(
-        f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos\n"
-    )
+    print(f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos\n")
 
-    # Inicializar hardset manager com course_mapping_short
-    hardset_manager = None
-    if hardset_args or hardset_csv:
-        hardset_manager = HardsetManager(mapping_short=course_mapping_short)
+    hardset_manager = _build_hardset_manager(hardset_args, hardset_csv, course_mapping_short)
 
-        # Processar argumentos --hardset
-        if hardset_args:
-            print("\n🎯 HARDSET CARREGADO VIA ARGUMENTOS:\n")
-            for match_id, score in hardset_args:
-                try:
-                    parts = score.split("-")
-                    if len(parts) != 2:
-                        print(f"❌ Formato inválido para score: {score}. Use 'A-B'")
-                        continue
-                    score_a, score_b = int(parts[0]), int(parts[1])
-                    hardset_manager.add_fixed_result(match_id, score_a, score_b)
-                except ValueError:
-                    print(f"❌ Erro ao processar score: {score}")
+    elo_system = CompleteTacauaEloSystem(k_base=ELO_K_BASE)
+    sport_simulators = {
+        "FUTSAL FEMININO":       SportScoreSimulator("futsal"),
+        "FUTSAL MASCULINO":      SportScoreSimulator("futsal"),
+        "ANDEBOL MISTO":         SportScoreSimulator("andebol"),
+        "BASQUETEBOL FEMININO":  SportScoreSimulator("basquete"),
+        "BASQUETEBOL MASCULINO": SportScoreSimulator("basquete"),
+        "VOLEIBOL FEMININO":     SportScoreSimulator("volei"),
+        "VOLEIBOL MASCULINO":    SportScoreSimulator("volei"),
+        "FUTEBOL DE 7 MASCULINO": SportScoreSimulator("futebol7"),
+    }
 
-        # Processar arquivo CSV
-        if hardset_csv:
-            hardset_manager.add_from_csv(hardset_csv)
-
-        print()
-
-    # Inicializar sistemas ELO
-    elo_system = CompleteTacauaEloSystem(k_base=100)
-    score_sim_futsal = SportScoreSimulator("futsal")
-    score_sim_andebol = SportScoreSimulator("andebol")
-    score_sim_basquete = SportScoreSimulator("basquete")
-    score_sim_volei = SportScoreSimulator("volei")
-    score_sim_futebol7 = SportScoreSimulator("futebol7")
-
-    # Sempre tentar carregar parâmetros calibrados (se existirem)
     calibrated_config = load_calibrated_config(docs_dir, calibrated_config_path)
     if calibrated_config:
         print("✅ Parâmetros calibrados carregados - serão utilizados nesta simulação")
 
-    # Mapear modalidades aos simuladores apropriados
-    sport_simulators = {
-        "FUTSAL FEMININO": score_sim_futsal,
-        "FUTSAL MASCULINO": score_sim_futsal,
-        "ANDEBOL MISTO": score_sim_andebol,
-        "BASQUETEBOL FEMININO": score_sim_basquete,
-        "BASQUETEBOL MASCULINO": score_sim_basquete,
-        "VOLEIBOL FEMININO": score_sim_volei,
-        "VOLEIBOL MASCULINO": score_sim_volei,
-        "FUTEBOL DE 7 MASCULINO": score_sim_futebol7,
-    }
-
-    # Processar cada modalidade
     ano_atual = datetime.now().year
 
-    # Se há hardset, detectar modalidades afetadas e filtrar
-    hardset_modalidades = set()
+    # Determinar quais modalidades processar (filtragem por hardset ou argumento)
+    hardset_modalidades: Set[str] = set()
     if hardset_manager and hardset_manager.fixed_results:
         hardset_modalidades = hardset_manager.get_affected_modalidades()
         if hardset_modalidades:
-            print(
-                f"\n🎯 Hardset afeta modalidades: {', '.join(sorted(hardset_modalidades))}"
-            )
+            print(f"\n🎯 Hardset afeta modalidades: {', '.join(sorted(hardset_modalidades))}")
             print("ℹ️ Processando APENAS essas modalidades...\n")
         else:
             print("\n⚠️ Aviso: Hardset carregado mas nenhuma modalidade foi detectada")
             print("ℹ️ Processando TODAS as modalidades...\n")
 
-    modalidades_path = os.path.join(docs_dir, "output", "csv_modalidades")
-    for modalidade_file in os.listdir(modalidades_path):
-        # Filtro de ficheiros por épocas
-        ano_passado_2d = str(ano_atual - 2)[2:]
-        ano_passado_1d = str(ano_atual - 1)[2:]
-        ano_atual_2d = str(ano_atual)[2:]
+    n_simulations = (
+        N_SIMULATIONS_DEFAULT
+        if not deep_simulation and not deeper_simulation
+        else (N_SIMULATIONS_DEEPER if deeper_simulation else N_SIMULATIONS_DEEP)
+    )
 
-        # Processar apenas a epoca mais recente (ex: 25_26)
-        if not modalidade_file.endswith(f"_{ano_passado_1d}_{ano_atual_2d}.csv"):
+    modalidades_path = os.path.join(docs_dir, "output", "csv_modalidades")
+    ano_passado_2d = str(ano_atual - 2)[2:]
+    ano_passado_1d = str(ano_atual - 1)[2:]
+    ano_atual_2d   = str(ano_atual)[2:]
+    season_suffix  = f"_{ano_passado_1d}_{ano_atual_2d}"
+
+    for modalidade_file in os.listdir(modalidades_path):
+        if not modalidade_file.endswith(f"{season_suffix}.csv"):
             continue
 
-        # Extrair nome da modalidade e padrao de data (epoca mais recente)
-        date_pattern = f"_{ano_passado_1d}_{ano_atual_2d}"
-        modalidade = modalidade_file.replace(
-            f"_{ano_passado_1d}_{ano_atual_2d}.csv", ""
-        )
+        modalidade = modalidade_file.replace(f"{season_suffix}.csv", "")
 
-        # Filtrar modalidades se houver hardset ou filtro específico
         if hardset_modalidades and modalidade not in hardset_modalidades:
             continue
-
-        # Filtrar por modalidade específica se solicitado
         if filter_modalidade and modalidade != filter_modalidade:
             continue
 
         print(f"Simulando modalidade: {modalidade}")
 
-        # Selecionar simulador de resultados apropriado
-        score_simulator = sport_simulators.get(modalidade, score_sim_futsal)
-
+        score_simulator = sport_simulators.get(modalidade, sport_simulators["FUTSAL MASCULINO"])
         past_seasons = [
             f"{ano_passado_2d}_{ano_passado_1d}",
             f"{ano_passado_1d}_{ano_atual_2d}",
         ]
 
-        # Calcular taxa histórica de empates para esta modalidade (múltiplas épocas anteriores)
-        historical_draw_rate = calculate_historical_draw_rate(
-            modalidade,
-            past_seasons,
-            docs_dir,
-        )
+        historical_draw_rate = calculate_historical_draw_rate(modalidade, past_seasons, docs_dir)
         if historical_draw_rate > 0:
             print(f"  Taxa histórica de empates: {historical_draw_rate:.1%}")
 
-        # Carregar dados
-        teams = {}
-        fixtures = []
-        all_teams_in_epoch = set()
-
-        # Carregar ELOs mais recentes do ficheiro de ELO
-        elo_file = os.path.join(
-            docs_dir, "output", "elo_ratings", f"elo_{modalidade}{date_pattern}.csv"
-        )
-        initial_elos = {}
-        if os.path.exists(elo_file):
-            with open(elo_file, newline="", encoding="utf-8-sig") as csvfile:
-                reader = csv.reader(csvfile)
-                headers = next(reader)
-                rows = list(reader)
-                if rows:
-                    last_row = rows[-1]
-                    for i, team_name in enumerate(headers):
-                        if i < len(last_row):
-                            try:
-                                normalized_name = normalize_team_name(
-                                    team_name, course_mapping
-                                )
-                                initial_elos[normalized_name] = float(last_row[i])
-                            except ValueError:
-                                normalized_name = normalize_team_name(
-                                    team_name, course_mapping
-                                )
-                                # Ignorar valores inválidos para não introduzir ELO arbitrário
-                                # (equipas sem ELO anterior usam fallback por divisão em get_initial_rating_from_division)
-                                continue
-
-        # Processar resultados de jogos (carregar TODOS os jogos)
-        all_csv_rows = []
-        all_csv_rows = _load_csv_rows_cached(
-            os.path.join(modalidades_path, modalidade_file)
-        )
-
-        # Separar jogos passados de futuros
-        past_matches_rows, future_matches_rows = separate_past_and_future_matches(
-            all_csv_rows
-        )
-
-        # Ajustar baselines por divisão com dados históricos + época atual
-        division_baselines = calculate_division_baselines(
-            modalidade,
-            past_seasons,
+        # --- Carregar dados ---
+        (
+            initial_elos,
+            all_csv_rows,
             past_matches_rows,
-            docs_dir,
-        )
-        division_draw_rates = calculate_division_draw_rates(
-            modalidade,
-            past_seasons,
-            past_matches_rows,
-            docs_dir,
-        )
-        score_simulator.set_division_baselines(division_baselines)
-        score_simulator.set_division_draw_rates(division_draw_rates)
-
-        # Aplicar parâmetros calibrados DEPOIS dos baselines históricos
-        # para que os valores calibrados tenham prioridade
-        if calibrated_config and modalidade in calibrated_config:
-            score_simulator.apply_calibrated_params(calibrated_config[modalidade])
-
-        # ===== NOVA LÓGICA: DETECTAR DESISTÊNCIAS E MAPEAR DIVISÕES =====
-        # Detectar equipas desistentes ANTES de processar jogos
-        withdrawn_teams = detect_withdrawn_teams_from_csv(
-            future_matches_rows, course_mapping
+            future_matches_rows,
+            division_baselines,
+            division_draw_rates,
+        ) = _load_modalidade_data(
+            modalidade, season_suffix, past_seasons, docs_dir, modalidades_path,
+            modalidade_file, course_mapping, score_simulator, calibrated_config,
         )
 
-        # Mapear divisão/grupo de TODAS as equipas (futuro + passado)
-        team_division = {}
-        for row in all_csv_rows:
-            t1_raw = row.get("Equipa 1", "").strip()
-            t2_raw = row.get("Equipa 2", "").strip()
-            if not t1_raw or not t2_raw:
-                continue
-            t1 = normalize_team_name(t1_raw, course_mapping)
-            t2 = normalize_team_name(t2_raw, course_mapping)
-            div = row.get("Divisão", "") or "1"
-            grp = (row.get("Grupo", "") or "").strip().upper()
-            try:
-                div_int = int(div)
-            except ValueError:
-                div_int = 1
-            if t1 and t1 not in team_division:
-                team_division[t1] = (div_int, grp)
-            if t2 and t2 not in team_division:
-                team_division[t2] = (div_int, grp)
+        # --- Construir equipas e fixtures ---
+        teams, fixtures, all_teams_in_epoch, team_division = _build_teams_and_fixtures(
+            all_csv_rows, past_matches_rows, future_matches_rows,
+            course_mapping, course_mapping_short, initial_elos, modalidade,
+        )
 
-        # Processar APENAS jogos futuros para as fixtures (a simulação)
-        # Jogos passados são usados apenas para histórico de ELO
-        for row in future_matches_rows:
-            team_a_raw = row["Equipa 1"].strip()
-            team_b_raw = row["Equipa 2"].strip()
-
-            if not is_valid_team(team_a_raw) or not is_valid_team(team_b_raw):
-                continue
-
-            team_a = normalize_team_name(team_a_raw, course_mapping)
-            team_b = normalize_team_name(team_b_raw, course_mapping)
-
-            # NOVO: Descartar jogos onde alguma equipa é desistente
-            if team_a in withdrawn_teams or team_b in withdrawn_teams:
-                continue
-
-            all_teams_in_epoch.add(team_a)
-            all_teams_in_epoch.add(team_b)
-
-            if team_a not in teams:
-                div_a = team_division.get(team_a, (None, None))[0]
-                elo_a = get_initial_rating_from_division(team_a, div_a, initial_elos)
-                teams[team_a] = Team(team_a, elo_a)
-            if team_b not in teams:
-                div_b = team_division.get(team_b, (None, None))[0]
-                elo_b = get_initial_rating_from_division(team_b, div_b, initial_elos)
-                teams[team_b] = Team(team_b, elo_b)
-
-            # Usar nomes curtos para match_id (compatível com CSV)
-            team_a_short = get_team_short_name(team_a, course_mapping_short)
-            team_b_short = get_team_short_name(team_b, course_mapping_short)
-            match_id = (
-                f"{modalidade}_{row.get('Jornada', '0')}_{team_a_short}_{team_b_short}"
-            )
-
-            fixtures.append(
-                {
-                    "a": team_a,
-                    "b": team_b,
-                    "is_future": True,  # Sempre true nesta lista
-                    "id": match_id,
-                    "jornada": row.get("Jornada", ""),
-                    "dia": row.get("Dia", ""),
-                    "hora": row.get("Hora", ""),
-                    "divisao": row.get("Divisão", ""),
-                    "grupo": row.get("Grupo", ""),
-                }
-            )
-
-        # Adicionar equipas dos jogos passados (para histórico)
-        for row in past_matches_rows:
-            team_a_raw = row["Equipa 1"].strip()
-            team_b_raw = row["Equipa 2"].strip()
-
-            if not is_valid_team(team_a_raw) or not is_valid_team(team_b_raw):
-                continue
-
-            team_a = normalize_team_name(team_a_raw, course_mapping)
-            team_b = normalize_team_name(team_b_raw, course_mapping)
-
-            # NOVO: Descartar equipas desistentes também do histórico
-            if team_a in withdrawn_teams or team_b in withdrawn_teams:
-                continue
-
-            all_teams_in_epoch.add(team_a)
-            all_teams_in_epoch.add(team_b)
-
-            if team_a not in teams:
-                div_a = team_division.get(team_a, (None, None))[0]
-                elo_a = get_initial_rating_from_division(team_a, div_a, initial_elos)
-                teams[team_a] = Team(team_a, elo_a)
-            if team_b not in teams:
-                div_b = team_division.get(team_b, (None, None))[0]
-                elo_b = get_initial_rating_from_division(team_b, div_b, initial_elos)
-                teams[team_b] = Team(team_b, elo_b)
-
-        # Simular
-        if fixtures:
-            # Apenas usar equipas que têm fixtures
-            teams_with_fixtures = {
-                team: teams[team] for team in all_teams_in_epoch if team in teams
-            }
-
-            # Mapear divisão/grupo das equipas (default 1ª divisão quando vazio)
-            # JÁ MAPEADO ACIMA na nova lógica de detecção
-
-            # Detectar se há liguilha (LM/PM) no CSV já carregado
-            has_liguilla = False
-            for row in all_csv_rows:
-                jornada_val = str(row.get("Jornada", "")).upper()
-                if jornada_val.startswith("LM") or jornada_val.startswith("PM"):
-                    has_liguilla = True
-                    break
-
-            # Inferir slots de playoffs por divisão/grupo a partir dos placeholders das eliminatórias
-            playoff_slots, total_playoff_slots = parse_playoff_slots(all_csv_rows)
-
-            # Calcular pontos reais já alcançados na época regular
-            real_points = calculate_real_points(past_matches_rows, course_mapping)
-
-            # Calcular número de simulações
-            n_simulations = (
-                10000
-                if not deep_simulation and not deeper_simulation
-                else (1000000 if deeper_simulation else 100000)
-            )
-
-            results, match_forecasts, match_elo_forecast, match_score_stats = (
-                monte_carlo_forecast_with_hardset(
-                    teams_with_fixtures,
-                    fixtures,
-                    elo_system,
-                    score_simulator,
-                    n_simulations=n_simulations,
-                    team_division=team_division,
-                    has_liguilla=has_liguilla,
-                    real_points=real_points,
-                    playoff_slots=playoff_slots,
-                    total_playoff_slots=(
-                        total_playoff_slots if total_playoff_slots > 0 else 8
-                    ),
-                    hardset_manager=hardset_manager,  # Passar hardset manager
-                )
-            )
-
-            predicted_stats = calculate_predicted_division_stats(
-                fixtures,
-                match_score_stats,
-            )
-
-            print("Medias historicas e previstas (golos por equipa) e taxa de empates:")
-            all_divs = set(division_baselines.keys()) | set(predicted_stats.keys())
-            all_divs.add(None)
-            for div_key in sorted([d for d in all_divs if d is not None]) + [None]:
-                hist_base = division_baselines.get(div_key)
-                hist_draw = division_draw_rates.get(div_key, 0.0)
-                pred = predicted_stats.get(div_key)
-
-                div_label = f"Div {div_key}" if div_key is not None else "Geral"
-                hist_mean = hist_base["mean"] if hist_base else 0.0
-                hist_std = hist_base.get("std", 0.0) if hist_base else 0.0
-                pred_mean = pred["mean"] if pred else 0.0
-                pred_draw = pred["draw_rate"] if pred else 0.0
-                pred_matches = pred["matches"] if pred else 0
-
-                print(
-                    f"  {div_label}: historico={hist_mean:.2f} +/- {hist_std:.2f}, "
-                    f"empates={hist_draw:.1%} | previsto={pred_mean:.2f}, "
-                    f"empates={pred_draw:.1%} (jogos={pred_matches})"
-                )
-
-            # Debug info
-            print(f"Equipas com fixtures: {len(all_teams_in_epoch)}")
-
-            # Verificação: soma das probabilidades de playoffs por grupo/divisão
-            if playoff_slots:
-                print("Somas de p_playoffs por grupo (devem bater com vagas x 100%):")
-                for (div, grp), slots in sorted(playoff_slots.items()):
-                    group_key = (div, grp)
-                    expected_sum = slots * 100.0
-                    group_teams = [
-                        team for team, tg in team_division.items() if tg == group_key
-                    ]
-                    prob_sum = sum(
-                        results.get(team, {}).get("p_playoffs", 0.0) * 100.0
-                        for team in group_teams
-                    )
-                    print(
-                        f"  Div {div} Grupo {grp or '-'}: vagas={slots}, soma={prob_sum:.2f}, esperado={expected_sum:.2f}, diff={prob_sum - expected_sum:.2f}"
-                    )
-                print()
-
-            # Guardar resultados (APENAS equipas com fixtures)
-            # Se há hardset, guardar na pasta cenarios com sufixo _hardset
-            if hardset_manager and hardset_manager.fixed_results:
-                output_file = os.path.join(
-                    docs_dir,
-                    "output",
-                    "cenarios",
-                    f"forecast_{modalidade}_{ano_atual}_{n_simulations}_hardset.csv",
-                )
-            else:
-                output_file = os.path.join(
-                    docs_dir,
-                    "output",
-                    "previsoes",
-                    f"forecast_{modalidade}_{ano_atual}_{n_simulations}.csv",
-                )
-
-            with open(output_file, "w", newline="", encoding="utf-8-sig") as csvfile:
-                fieldnames = [
-                    "team",
-                    "p_playoffs",
-                    "p_meias_finais",
-                    "p_finais",
-                    "p_champion",
-                    "p_promocao",
-                    "p_descida",
-                    "expected_points",
-                    "expected_points_std",
-                    "expected_place_in_group",
-                    "expected_place_in_group_std",
-                    "avg_final_elo",
-                    "avg_final_elo_std",
-                ]
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-
-                for team in sorted(all_teams_in_epoch):
-                    if team in results:
-                        p_playoffs = results[team]["p_playoffs"] * 100
-                        p_meias_finais = results[team]["p_meias_finais"] * 100
-                        p_finais = results[team]["p_finais"] * 100
-                        p_champion = results[team]["p_champion"] * 100
-                        p_promocao = results[team]["p_promocao"] * 100
-                        p_descida = results[team]["p_descida"] * 100
-                        expected_points = results[team]["expected_points"]
-                        expected_points_std = results[team]["expected_points_std"]
-                        expected_place = results[team]["expected_place"]
-                        expected_place_std = results[team]["expected_place_std"]
-                        avg_final_elo = results[team]["avg_final_elo"]
-                        avg_final_elo_std = results[team]["avg_final_elo_std"]
-                    else:
-                        p_playoffs = 0.0
-                        p_meias_finais = 0.0
-                        p_finais = 0.0
-                        p_champion = 0.0
-                        p_promocao = 0.0
-                        p_descida = 0.0
-                        # Equipas sem jogos futuros: expected_points = pontos reais já conquistados
-                        expected_points = real_points.get(team, 0.0)
-                        expected_points_std = 0.0
-                        expected_place = len(all_teams_in_epoch)
-                        expected_place_std = 0.0
-                        team_div = team_division.get(team, (None, ""))[0]
-                        avg_final_elo = get_initial_rating_from_division(
-                            team, team_div, initial_elos
-                        )
-                        avg_final_elo_std = 0.0
-
-                    writer.writerow(
-                        {
-                            "team": team,
-                            "p_playoffs": f"{p_playoffs:.4f}",
-                            "p_meias_finais": f"{p_meias_finais:.4f}",
-                            "p_finais": f"{p_finais:.4f}",
-                            "p_champion": f"{p_champion:.4f}",
-                            "p_promocao": f"{p_promocao:.4f}",
-                            "p_descida": f"{p_descida:.4f}",
-                            "expected_points": f"{expected_points:.2f}",
-                            "expected_points_std": f"{expected_points_std:.2f}",
-                            "expected_place_in_group": f"{expected_place:.2f}",
-                            "expected_place_in_group_std": f"{expected_place_std:.2f}",
-                            "avg_final_elo": f"{avg_final_elo:.1f}",
-                            "avg_final_elo_std": f"{avg_final_elo_std:.1f}",
-                        }
-                    )
-
-            print(f"Resultados guardados em {output_file}")
-
-            # Guardar previsões para jogos futuros
-            # Se há hardset, guardar na pasta cenarios com sufixo _hardset
-            if hardset_manager and hardset_manager.fixed_results:
-                predictions_file = os.path.join(
-                    docs_dir,
-                    "output",
-                    "cenarios",
-                    f"previsoes_{modalidade}_{ano_atual}_{n_simulations}_hardset.csv",
-                )
-            else:
-                predictions_file = os.path.join(
-                    docs_dir,
-                    "output",
-                    "previsoes",
-                    f"previsoes_{modalidade}_{ano_atual}_{n_simulations}.csv",
-                )
-
-            future_count = 0
-
-            with open(
-                predictions_file, "w", newline="", encoding="utf-8-sig"
-            ) as csvfile:
-                fieldnames = [
-                    "jornada",
-                    "dia",
-                    "hora",
-                    "team_a",
-                    "team_b",
-                    "expected_elo_a",
-                    "expected_elo_a_std",
-                    "expected_elo_b",
-                    "expected_elo_b_std",
-                    "prob_vitoria_a",
-                    "prob_empate",
-                    "prob_vitoria_b",
-                    "expected_goals_a",
-                    "expected_goals_a_std",
-                    "expected_goals_b",
-                    "expected_goals_b_std",
-                    "distribuicao_placares",
-                    "divisao",
-                    "grupo",
-                ]
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-
-                for match in fixtures:
-                    if match.get("is_future") and match.get("id") in match_forecasts:
-                        mid = match["id"]
-                        stats_a = match_forecasts[mid].get("p_win_a", 0) * 100
-                        stats_draw = match_forecasts[mid].get("p_draw", 0) * 100
-                        stats_b = match_forecasts[mid].get("p_win_b", 0) * 100
-
-                        # Usar ELOs esperados NO MOMENTO DO JOGO (médias das simulações naquele ponto)
-                        elo_forecast = match_elo_forecast.get(mid, {})
-                        elo_a_expected = elo_forecast.get(
-                            "elo_a_mean", teams[match["a"]].elo
-                        )
-                        elo_a_std = elo_forecast.get("elo_a_std", 0.0)
-                        elo_b_expected = elo_forecast.get(
-                            "elo_b_mean", teams[match["b"]].elo
-                        )
-                        elo_b_std = elo_forecast.get("elo_b_std", 0.0)
-
-                        # Obter distribuição completa de placares
-                        score_dist = match_score_stats.get(mid, {})
-                        expected_goals_a = 0.0
-                        expected_goals_b = 0.0
-                        expected_goals_a_std = 0.0
-                        expected_goals_b_std = 0.0
-
-                        if score_dist:
-                            # Calcular total de simulações
-                            total_sims = sum(score_dist.values())
-
-                            # Primeiro passo: calcular médias ponderadas (expected_goals)
-                            for score_str, count in score_dist.items():
-                                try:
-                                    parts = score_str.split("-")
-                                    if len(parts) == 2:
-                                        goals_a = int(parts[0])
-                                        goals_b = int(parts[1])
-                                        weight = count / total_sims
-                                        expected_goals_a += goals_a * weight
-                                        expected_goals_b += goals_b * weight
-                                except (ValueError, IndexError):
-                                    pass
-
-                            # Segundo passo: calcular variância ponderada e desvio padrão
-                            variance_a = 0.0
-                            variance_b = 0.0
-                            for score_str, count in score_dist.items():
-                                try:
-                                    parts = score_str.split("-")
-                                    if len(parts) == 2:
-                                        goals_a = int(parts[0])
-                                        goals_b = int(parts[1])
-                                        weight = count / total_sims
-                                        variance_a += weight * (
-                                            (goals_a - expected_goals_a) ** 2
-                                        )
-                                        variance_b += weight * (
-                                            (goals_b - expected_goals_b) ** 2
-                                        )
-                                except (ValueError, IndexError):
-                                    pass
-
-                            expected_goals_a_std = variance_a**0.5
-                            expected_goals_b_std = variance_b**0.5
-
-                            # Ordenar by frequência (probabilidade)
-                            sorted_scores = sorted(
-                                score_dist.items(), key=lambda x: x[1], reverse=True
-                            )
-
-                            # Criar string com TODOS os placares e suas probabilidades
-                            distribuicao_str = "|".join(
-                                [
-                                    f"{score}:{(count / total_sims) * 100:.4f}%"
-                                    for score, count in sorted_scores
-                                ]
-                            )
-                        else:
-                            distribuicao_str = ""
-
-                        writer.writerow(
-                            {
-                                "jornada": match.get("jornada", ""),
-                                "dia": match.get("dia", ""),
-                                "hora": match.get("hora", ""),
-                                "team_a": match["a"],
-                                "team_b": match["b"],
-                                "expected_elo_a": f"{elo_a_expected:.1f}",
-                                "expected_elo_a_std": f"{elo_a_std:.1f}",
-                                "expected_elo_b": f"{elo_b_expected:.1f}",
-                                "expected_elo_b_std": f"{elo_b_std:.1f}",
-                                "prob_vitoria_a": f"{stats_a:.4f}",
-                                "prob_empate": f"{stats_draw:.4f}",
-                                "prob_vitoria_b": f"{stats_b:.4f}",
-                                "expected_goals_a": f"{expected_goals_a:.2f}",
-                                "expected_goals_a_std": f"{expected_goals_a_std:.2f}",
-                                "expected_goals_b": f"{expected_goals_b:.2f}",
-                                "expected_goals_b_std": f"{expected_goals_b_std:.2f}",
-                                "distribuicao_placares": distribuicao_str,
-                                "divisao": match.get("divisao", ""),
-                                "grupo": match.get("grupo", ""),
-                            }
-                        )
-                        future_count += 1
-
-            if future_count > 0:
-                print(
-                    f"Previsões de {future_count} jogos futuros guardadas em {predictions_file}\n"
-                )
-            else:
-                print(
-                    f"Nenhum jogo futuro encontrado para {modalidade} (ou sem previsões disponíveis)\n"
-                )
-                # Apagar ficheiro vazio se não houver previsões
-                # (Opcional, mas mantém comportamento limpo)
-
-        else:
+        if not fixtures:
             print(f"Nenhum fixture encontrado para {modalidade}\n")
+            continue
+
+        # --- Correr simulação ---
+        teams_with_fixtures = {t: teams[t] for t in all_teams_in_epoch if t in teams}
+
+        has_liguilla = any(
+            str(row.get("Jornada", "")).upper().startswith(("LM", "PM"))
+            for row in all_csv_rows
+        )
+        playoff_slots, total_playoff_slots = parse_playoff_slots(all_csv_rows)
+        real_points = calculate_real_points(past_matches_rows, course_mapping)
+
+        results, match_forecasts, match_elo_forecast, match_score_stats = (
+            monte_carlo_forecast(
+                teams_with_fixtures,
+                fixtures,
+                elo_system,
+                score_simulator,
+                n_simulations=n_simulations,
+                team_division=team_division,
+                has_liguilla=has_liguilla,
+                real_points=real_points,
+                playoff_slots=playoff_slots,
+                total_playoff_slots=(
+                    total_playoff_slots if total_playoff_slots > 0 else PLAYOFF_SLOTS_DEFAULT
+                ),
+                hardset_manager=hardset_manager,
+            )
+        )
+
+        # --- Diagnóstico de baselines ---
+        predicted_stats = calculate_predicted_division_stats(fixtures, match_score_stats)
+        print("Medias historicas e previstas (golos por equipa) e taxa de empates:")
+        all_divs = set(division_baselines.keys()) | set(predicted_stats.keys())
+        all_divs.add(None)
+        for div_key in sorted([d for d in all_divs if d is not None]) + [None]:
+            hist_base = division_baselines.get(div_key)
+            hist_draw = division_draw_rates.get(div_key, 0.0)
+            pred = predicted_stats.get(div_key)
+            div_label  = f"Div {div_key}" if div_key is not None else "Geral"
+            hist_mean  = hist_base["mean"] if hist_base else 0.0
+            hist_std   = hist_base.get("std", 0.0) if hist_base else 0.0
+            pred_mean  = pred["mean"] if pred else 0.0
+            pred_draw  = pred["draw_rate"] if pred else 0.0
+            pred_n     = pred["matches"] if pred else 0
+            print(
+                f"  {div_label}: historico={hist_mean:.2f} +/- {hist_std:.2f}, "
+                f"empates={hist_draw:.1%} | previsto={pred_mean:.2f}, "
+                f"empates={pred_draw:.1%} (jogos={pred_n})"
+            )
+
+        print(f"Equipas com fixtures: {len(all_teams_in_epoch)}")
+
+        if playoff_slots:
+            print("Somas de p_playoffs por grupo (devem bater com vagas x 100%):")
+            for (div, grp), slots in sorted(playoff_slots.items()):
+                group_key = (div, grp)
+                group_teams = [t for t, tg in team_division.items() if tg == group_key]
+                prob_sum = sum(
+                    results.get(t, {}).get("p_playoffs", 0.0) * 100.0 for t in group_teams
+                )
+                expected_sum = slots * 100.0
+                print(
+                    f"  Div {div} Grupo {grp or '-'}: vagas={slots}, "
+                    f"soma={prob_sum:.2f}, esperado={expected_sum:.2f}, "
+                    f"diff={prob_sum - expected_sum:.2f}"
+                )
+            print()
+
+        # --- Exportar resultados ---
+        _export_results(
+            docs_dir, modalidade, ano_atual, n_simulations, hardset_manager,
+            all_teams_in_epoch, teams, team_division, initial_elos, real_points,
+            results, fixtures, match_forecasts, match_elo_forecast, match_score_stats,
+        )
+
+
 
 
 if __name__ == "__main__":
