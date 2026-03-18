@@ -1,11 +1,11 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
-1,,1,Eng. Mecânica,21,7,7,0,0,29,9,20,0
-1,,2,Finanças,19,8,6,1,1,26,11,15,0
-1,,3,Bioquímica,14,8,4,2,2,26,19,7,0
-1,,4,Contabilidade,14,8,4,2,2,16,15,1,0
+1,,1,Finanças,22,9,7,1,1,33,14,19,0
+1,,2,Eng. Mecânica,21,7,7,0,0,29,9,20,0
+1,,3,Contabilidade,15,9,4,3,2,19,18,1,0
+1,,4,Bioquímica,14,9,4,2,3,29,26,3,0
 1,,5,Gestão e Planeamento em Turismo,13,8,4,1,3,18,18,0,0
 1,,6,Eng. e Gestão Industrial,12,7,4,0,3,27,16,11,0
-1,,7,Eng. Biomédica,11,8,3,2,3,31,23,8,0
+1,,7,Eng. Biomédica,12,9,3,3,3,34,26,8,0
 1,,8,Eng. Química,9,7,2,3,2,19,18,1,0
 1,,9,Fisioterapia,7,7,2,1,4,19,17,2,0
 1,,10,Enfermagem,6,8,2,0,6,22,28,-6,0
@@ -15,11 +15,11 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,A,2,Economia,12,6,4,0,2,34,12,22,0
 2,A,3,Eng. Informática,12,6,4,0,2,34,10,24,0
 2,A,4,Música,9,5,3,0,2,16,18,-2,0
-2,A,5,Ciências do Mar,7,5,2,1,2,14,16,-2,0
+2,A,5,Ciências do Mar,7,6,2,1,3,19,24,-5,0
 2,A,6,Psicologia,6,5,2,0,3,14,30,-16,0
 2,A,7,Automação e Sistemas de Produção,4,5,1,1,3,7,32,-25,0
 2,A,8,Design,4,6,1,1,4,12,25,-13,0
-2,A,9,Biologia e Geologia,1,5,0,1,4,12,23,-11,0
+2,A,9,Biologia e Geologia,4,6,1,1,4,20,28,-8,0
 2,B,1,Eng. e Gestão Industrial B,15,5,5,0,0,30,12,18,0
 2,B,2,Eng. Computacional,15,6,5,0,1,30,15,15,0
 2,B,3,Gestão,12,6,4,0,2,38,14,24,0
