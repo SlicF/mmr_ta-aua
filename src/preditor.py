@@ -35,10 +35,13 @@ import math
 import random
 import json
 import functools
+import logging
 import numpy as np
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 from collections import defaultdict
-from typing import List, Tuple, Dict, Optional, Set
+from typing import List, Tuple, Dict, Set, Sequence, Any
+from typing import TypedDict
 import csv
 import os
 from datetime import datetime
@@ -48,8 +51,9 @@ import locale
 import re
 import multiprocessing
 import gc
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import threading
+from concurrent.futures import ProcessPoolExecutor
+
+logger = logging.getLogger(__name__)
 
 # Configurar encoding UTF-8 para Windows
 if sys.platform == "win32":
@@ -110,8 +114,47 @@ BASQUETE_OT_LOSE_1PT_PROB: float = 0.40  # P(adversário marcar 1 pt antes do 2.
 # --- Proporção de golos (cálculo K-factor) ---
 SCORE_PROPORTION_EXPONENT: float = 1 / 10  # Expoente da proporção de golos
 
+# --- Nomes de colunas CSV (evita typos silenciosos e facilita renomear) ---
+COL_EQUIPA_1: str = "Equipa 1"
+COL_EQUIPA_2: str = "Equipa 2"
+COL_GOLOS_1: str = "Golos 1"
+COL_GOLOS_2: str = "Golos 2"
+COL_DIVISAO: str = "Divisão"
+COL_GRUPO: str = "Grupo"
+COL_JORNADA: str = "Jornada"
+COL_DIA: str = "Dia"
+COL_HORA: str = "Hora"
+COL_FALTA_COMPARENCIA: str = "Falta de Comparência"
 
-@dataclass
+# --- Sub-pastas de output (relativas a docs/output/) ---
+DIR_PREVISOES: str = "previsoes"
+DIR_CENARIOS: str = "cenarios"
+DIR_CSV_MODALIDADES: str = "csv_modalidades"
+DIR_ELO_RATINGS: str = "elo_ratings"
+DIR_CALIBRATION: str = "calibration"
+
+
+class SimulationResult(TypedDict):
+    """Resultado devolvido por _run_single_simulation_worker.
+
+    Usar TypedDict em vez de Dict[str, Any] garante type-checking estático
+    e elimina a possibilidade de typos silenciosos nas 12 chaves de string.
+    """
+    expected_points:       Dict[str, float]
+    final_elos:            Dict[str, float]
+    regular_season_places: Dict[str, int]
+    playoff_count:         Dict[str, int]
+    semifinal_count:       Dict[str, int]
+    final_count:           Dict[str, int]
+    champion_count:        Dict[str, int]
+    promotion_count:       Dict[str, int]
+    relegation_count:      Dict[str, int]
+    match_stats:           Dict[str, Dict[str, int]]
+    match_elo_sum:         Dict[str, Dict[str, float]]
+    match_score_stats:     Dict[str, Dict[str, int]]
+
+
+@dataclass(slots=True)
 class Team:
     name: str
     elo: float
@@ -274,7 +317,7 @@ class CompleteTacauaEloSystem:
 # ============================================================================
 
 
-@dataclass
+@dataclass(slots=True)
 class FixedResult:
     """Representa um resultado fixado para simulação."""
 
@@ -282,7 +325,7 @@ class FixedResult:
     score_a: int
     score_b: int
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.match_id}: {self.score_a}-{self.score_b}"
 
 
@@ -361,7 +404,7 @@ class HardsetManager:
             score_b: Golos da equipa B
         """
         self.fixed_results[match_id] = FixedResult(match_id, score_a, score_b)
-        print(f"✓ Resultado fixado: {match_id} → {score_a}-{score_b}")
+        logger.info(f"Resultado fixado: {match_id} → {score_a}-{score_b}")
 
     def add_from_dict(self, fixed_dict: Dict[str, Tuple[int, int]]) -> None:
         """
@@ -411,11 +454,11 @@ class HardsetManager:
                                     match_id = match_id.replace(long_name, short_name)
 
                     self.add_fixed_result(match_id, score_a, score_b)
-            print(f"✓ Carregados {len(self.fixed_results)} resultados de {csv_file}")
+            logger.info(f"Carregados {len(self.fixed_results)} resultados de {csv_file}")
         except Exception as e:
-            print(f"❌ Erro ao carregar hardset CSV: {e}")
+            logger.error(f"Erro ao carregar hardset CSV: {e}")
 
-    def get_fixed_result(self, match_id: str) -> Optional[FixedResult]:
+    def get_fixed_result(self, match_id: str) -> FixedResult | None:
         """Retorna resultado fixado para um jogo, se existir."""
         # Procurar com normalização
         normalized = self._normalize_match_id_for_lookup(match_id)
@@ -431,7 +474,7 @@ class HardsetManager:
         """Remove todos os resultados fixados."""
         self.fixed_results.clear()
         self.match_id_aliases.clear()
-        print("✓ Todos os resultados fixados foram removidos")
+        logger.info("Todos os resultados fixados foram removidos")
 
     def summary(self) -> str:
         """Retorna resumo dos resultados fixados."""
@@ -585,23 +628,23 @@ class SportScoreSimulator:
         self._refresh_draw_cache()
 
     def set_division_baselines(
-        self, baselines: Dict[Optional[int], Dict[str, float]]
+        self, baselines: Dict[int | None, Dict[str, float]]
     ) -> None:
         # Cópia rasa para evitar aliasing com o dict original (apply_calibrated_params
         # adiciona novas entradas, não muta os sub-dicts existentes)
         self.division_baselines = dict(baselines) if baselines else {}
 
-    def set_division_draw_rates(self, draw_rates: Dict[Optional[int], float]) -> None:
+    def set_division_draw_rates(self, draw_rates: Dict[int | None, float]) -> None:
         self.division_draw_rates = draw_rates or {}
 
     def _get_division_baseline(
-        self, division: Optional[int]
-    ) -> Optional[Dict[str, float]]:
+        self, division: int | None
+    ) -> Dict[str, float] | None:
         if division in self.division_baselines:
             return self.division_baselines[division]
         return self.division_baselines.get(None)
 
-    def _get_division_draw_rate(self, division: Optional[int]) -> float:
+    def _get_division_draw_rate(self, division: int | None) -> float:
         if division in self.division_draw_rates:
             return self.division_draw_rates[division]
         if None in self.division_draw_rates:
@@ -671,7 +714,7 @@ class SportScoreSimulator:
         elo_a: float,
         elo_b: float,
         force_winner: bool = False,
-        division: Optional[int] = None,
+        division: int | None = None,
     ) -> Tuple[int, int]:
         """Simula resultado baseado no tipo de desporto e ELOs.
 
@@ -948,9 +991,9 @@ def load_course_mapping(docs_dir: str = None) -> Tuple[Dict[str, str], Dict[str,
     """
     try:
         if docs_dir:
-            config_path = os.path.join(docs_dir, "config", "config_cursos.json")
+            config_path = Path(docs_dir) / "config" / "config_cursos.json"
         else:
-            config_path = "../docs/config/config_cursos.json"
+            config_path = Path("..") / "docs" / "config" / "config_cursos.json"
 
         with open(config_path, encoding="utf-8-sig") as f:
             config = json.load(f)
@@ -1007,32 +1050,30 @@ def load_course_mapping(docs_dir: str = None) -> Tuple[Dict[str, str], Dict[str,
 
             return mapping_display, mapping_short
     except Exception as e:
-        print(f"Erro ao carregar config_cursos.json: {e}")
+        logger.error(f"Erro ao carregar config_cursos.json: {e}")
         return {}, {}
 
 
 def load_calibrated_config(
-    docs_dir: str = None, custom_path: Optional[str] = None
+    docs_dir: str = None, custom_path: str | None = None
 ) -> Dict:
     """Carrega configuração calibrada gerada pelo calibrator.py."""
     if custom_path:
         config_path = custom_path
     elif docs_dir:
-        config_path = os.path.join(
-            docs_dir, "output", "calibration", "calibrated_simulator_config.json"
-        )
+        config_path = Path(docs_dir) / "output" / "calibration" / "calibrated_simulator_config.json"
     else:
-        config_path = "../docs/output/calibration/calibrated_simulator_config.json"
+        config_path = Path("..") / "docs" / "output" / DIR_CALIBRATION / "calibrated_simulator_config.json"
 
-    if not os.path.exists(config_path):
-        print(f"⚠️  Config calibrada não encontrada: {config_path}")
+    if not Path(config_path).exists():
+        logger.warning(f"Config calibrada não encontrada: {config_path}")
         return {}
 
     try:
         with open(config_path, encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
-        print(f"⚠️  Erro ao ler config calibrada: {e}")
+        logger.warning(f"Erro ao ler config calibrada: {e}")
         return {}
 
 
@@ -1051,7 +1092,7 @@ def parse_playoff_slots(csv_rows: List[Dict]) -> Tuple[Dict[Tuple[int, str], int
     )
 
     for row in csv_rows:
-        jornada_val = str(row.get("Jornada", "")).strip().upper()
+        jornada_val = str(row.get(COL_JORNADA, "")).strip().upper()
         if not jornada_val.startswith("E"):
             continue
 
@@ -1139,8 +1180,8 @@ def calculate_real_points(
     real_points = defaultdict(int)
 
     for row in past_matches_rows:
-        team_a_raw = row["Equipa 1"].strip()
-        team_b_raw = row["Equipa 2"].strip()
+        team_a_raw = row[COL_EQUIPA_1].strip()
+        team_b_raw = row[COL_EQUIPA_2].strip()
 
         if not is_valid_team(team_a_raw) or not is_valid_team(team_b_raw):
             continue
@@ -1148,8 +1189,8 @@ def calculate_real_points(
         team_a = normalize_team_name(team_a_raw, course_mapping)
         team_b = normalize_team_name(team_b_raw, course_mapping)
 
-        golos_1_str = row.get("Golos 1", "").strip()
-        golos_2_str = row.get("Golos 2", "").strip()
+        golos_1_str = row.get(COL_GOLOS_1, "").strip()
+        golos_2_str = row.get(COL_GOLOS_2, "").strip()
 
         if not golos_1_str or not golos_2_str:
             continue
@@ -1186,8 +1227,8 @@ def separate_past_and_future_matches(
     future_matches = []
 
     for row in csv_rows:
-        golos_1 = row.get("Golos 1", "").strip()
-        golos_2 = row.get("Golos 2", "").strip()
+        golos_1 = row.get(COL_GOLOS_1, "").strip()
+        golos_2 = row.get(COL_GOLOS_2, "").strip()
 
         # Se ambos os scores estão preenchidos, é um jogo passado
         if golos_1 and golos_2:
@@ -1205,9 +1246,9 @@ def simulate_match(
     score_simulator: SportScoreSimulator,
     total_group_games: int = 10,
     is_playoff: bool = False,
-    division: Optional[int] = None,
-    hardset_manager: Optional["HardsetManager"] = None,
-    match_id: Optional[str] = None,
+    division: int | None = None,
+    hardset_manager: "HardsetManager | None" = None,
+    match_id: str | None = None,
 ) -> Tuple[str, int, int, int]:
     """
     Simula um jogo com sistema ELO completo.
@@ -1268,35 +1309,6 @@ def simulate_match(
     return winner_name, margin, score1, score2
 
 
-def simulate_match_with_hardset(
-    team_a: Team,
-    team_b: Team,
-    elo_system: CompleteTacauaEloSystem,
-    score_simulator: SportScoreSimulator,
-    total_group_games: int = 10,
-    is_playoff: bool = False,
-    hardset_manager: Optional["HardsetManager"] = None,
-    match_id: Optional[str] = None,
-    division: Optional[int] = None,
-) -> Tuple[str, int, int, int]:
-    """
-    Alias de compatibilidade para simulate_match com suporte a hardset.
-
-    .. deprecated::
-        Use simulate_match(..., hardset_manager=..., match_id=...) diretamente.
-    """
-    return simulate_match(
-        team_a,
-        team_b,
-        elo_system,
-        score_simulator,
-        total_group_games=total_group_games,
-        is_playoff=is_playoff,
-        division=division,
-        hardset_manager=hardset_manager,
-        match_id=match_id,
-    )
-
 
 def _preprocess_fixtures(
     fixtures: List[Dict],
@@ -1350,7 +1362,7 @@ def simulate_season(
     preprocessed_fixtures: List[Tuple],
     elo_system: "CompleteTacauaEloSystem",
     score_simulator: "SportScoreSimulator",
-    hardset_manager: Optional["HardsetManager"] = None,
+    hardset_manager: "HardsetManager | None" = None,
 ) -> Tuple[Dict[str, int], Dict[str, float], Dict[str, float], Dict]:
     """Simula uma época completa com sistema ELO completo.
 
@@ -1424,27 +1436,6 @@ def simulate_season(
     final_elos = {team: teams[team].elo for team in teams}
     return points, dict(expected_points), final_elos, season_results
 
-
-def simulate_season_with_hardset(
-    teams: Dict[str, "Team"],
-    fixtures: List,
-    elo_system: "CompleteTacauaEloSystem",
-    score_simulator: "SportScoreSimulator",
-    hardset_manager: Optional["HardsetManager"] = None,
-) -> Tuple[Dict[str, int], Dict[str, float], Dict[str, float], Dict]:
-    """
-    Alias de compatibilidade para simulate_season com hardset_manager.
-
-    .. deprecated::
-        Use simulate_season(..., hardset_manager=...) diretamente.
-    """
-    return simulate_season(
-        teams,
-        fixtures,
-        elo_system,
-        score_simulator,
-        hardset_manager=hardset_manager,
-    )
 
 
 def simulate_playoffs(
@@ -1735,7 +1726,7 @@ class ProgressTracker:
         self.completed = 0
         self.last_percent = 0
 
-    def increment(self):
+    def increment(self) -> None:
         """Incrementa o contador (chamado apenas no processo principal)."""
         self.completed += 1
         current_percent = int((self.completed / self.n_simulations) * 100)
@@ -1756,7 +1747,7 @@ class ProgressTracker:
             )
             self.last_percent = current_percent
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         """Imprime sumário final."""
         print(f"\n\n✓ CONCLUÍDO")
         print(f"  Workers usados: {self.num_workers}")
@@ -1813,7 +1804,7 @@ def _clear_csv_cache() -> None:
 
 
 
-def _run_single_simulation_worker(args_tuple):
+def _run_single_simulation_worker(args_tuple) -> SimulationResult:
     """
     Worker unificado para Monte Carlo — suporta modo normal e hardset.
 
@@ -1983,15 +1974,6 @@ def _run_single_simulation_worker(args_tuple):
     }
 
 
-def _run_single_simulation_with_hardset_worker(args_tuple):
-    """
-    Alias de compatibilidade para _run_single_simulation_worker.
-
-    .. deprecated::
-        Use _run_single_simulation_worker diretamente — já suporta hardset_manager.
-    """
-    return _run_single_simulation_worker(args_tuple)
-
 
 def monte_carlo_forecast(
     teams: Dict[str, Team],
@@ -2004,7 +1986,7 @@ def monte_carlo_forecast(
     real_points: Dict[str, int] = None,
     playoff_slots: Dict[Tuple[int, str], int] = None,
     total_playoff_slots: int = 8,
-    hardset_manager: Optional["HardsetManager"] = None,
+    hardset_manager: "HardsetManager | None" = None,
 ) -> Tuple[
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
@@ -2225,259 +2207,162 @@ def monte_carlo_forecast(
     return results, match_forecasts, match_elo_forecast, match_score_stats
 
 
-def monte_carlo_forecast_with_hardset(
-    teams: Dict[str, Team],
-    fixtures: List[Dict],
-    elo_system: CompleteTacauaEloSystem,
-    score_simulator: SportScoreSimulator,
-    n_simulations: int = 10000,
-    team_division: Dict[str, Tuple[int, str]] = None,
-    has_liguilla: bool = False,
-    real_points: Dict[str, int] = None,
-    playoff_slots: Dict[Tuple[int, str], int] = None,
-    total_playoff_slots: int = 8,
-    hardset_manager: Optional["HardsetManager"] = None,
-) -> Tuple[
-    Dict[str, Dict[str, float]],
-    Dict[str, Dict[str, float]],
-    Dict[str, Dict[str, float]],
-    Dict[str, Dict[str, int]],
-]:
-    """
-    Alias de compatibilidade para monte_carlo_forecast com hardset_manager.
-
-    .. deprecated::
-        Use monte_carlo_forecast(..., hardset_manager=...) diretamente.
-    """
-    return monte_carlo_forecast(
-        teams,
-        fixtures,
-        elo_system,
-        score_simulator,
-        n_simulations=n_simulations,
-        team_division=team_division,
-        has_liguilla=has_liguilla,
-        real_points=real_points,
-        playoff_slots=playoff_slots,
-        total_playoff_slots=total_playoff_slots,
-        hardset_manager=hardset_manager,
-    )
-
 
 # ============================================================================
 # VALIDAÇÃO E BACKTEST - Avaliar precisão das previsões
 # ============================================================================
 
 
-def calculate_historical_draw_rate(
-    modalidade: str, past_seasons: List[str], docs_dir: str = None
-) -> float:
-    """
-    Analisa épocas anteriores para calcular taxa real de empates.
+def _season_csv_path(
+    modalidade: str, season_pattern: str, docs_dir: str | None
+) -> Path:
+    """Devolve o caminho para o CSV de uma época de uma modalidade."""
+    if docs_dir:
+        return Path(docs_dir) / "output" / DIR_CSV_MODALIDADES / f"{modalidade}_{season_pattern}.csv"
+    return Path("..") / "docs" / "output" / DIR_CSV_MODALIDADES / f"{modalidade}_{season_pattern}.csv"
+
+
+def _load_season_rows(
+    modalidade: str,
+    past_seasons: Sequence[str],
+    current_rows: Sequence[Dict],
+    docs_dir: str | None,
+) -> List[Dict]:
+    """Carrega e concatena todas as linhas de CSV de épocas anteriores + época actual.
+
+    Centraliza a lógica de resolução de caminho e o lru_cache que antes estava
+    duplicada em calculate_historical_draw_rate, calculate_division_baselines e
+    calculate_division_draw_rates. Cada CSV é lido uma única vez graças ao cache.
 
     Args:
-        modalidade: Nome da modalidade (ex: "FUTSAL MASCULINO")
-        past_seasons: Lista de padrões de época (ex: ["23_24", "22_23"])
-        docs_dir: Caminho para o diretório docs. Se None, usa caminho relativo.
+        modalidade: Nome da modalidade.
+        past_seasons: Padrões de época anteriores (ex: ["23_24", "24_25"]).
+        current_rows: Linhas da época actual (já em memória).
+        docs_dir: Raiz do directório docs; None usa caminho relativo.
 
-    Retorna taxa de empates (0.0 a 1.0)
+    Returns:
+        Lista combinada de todos os rows, épocas anteriores primeiro.
     """
-    total_games = 0
-    total_draws = 0
-
+    all_rows: List[Dict] = []
     for season_pattern in past_seasons:
-        if docs_dir:
-            csv_file = os.path.join(
-                docs_dir,
-                "output",
-                "csv_modalidades",
-                f"{modalidade}_{season_pattern}.csv",
-            )
-        else:
-            csv_file = (
-                f"../docs/output/csv_modalidades/{modalidade}_{season_pattern}.csv"
-            )
-        if not os.path.exists(csv_file):
+        csv_path = _season_csv_path(modalidade, season_pattern, docs_dir)
+        if not csv_path.exists():
             continue
-
         try:
-            rows = _load_csv_rows_cached(csv_file)
+            all_rows.extend(_load_csv_rows_cached(str(csv_path)))
         except FileNotFoundError:
             continue
+    all_rows.extend(current_rows)
+    return all_rows
 
-        for row in rows:
-            golos_1_str = row.get("Golos 1", "").strip()
-            golos_2_str = row.get("Golos 2", "").strip()
 
-            if not golos_1_str or not golos_2_str:
-                continue
+def _parse_score_row(row: Dict) -> tuple[int, int, int | None] | None:
+    """Extrai (golos_1, golos_2, divisao) de uma linha de CSV.
 
-            try:
-                golos_1 = int(float(golos_1_str))
-                golos_2 = int(float(golos_2_str))
-                total_games += 1
-                if golos_1 == golos_2:
-                    total_draws += 1
-            except ValueError:
-                continue
+    Retorna None se a linha não tiver marcador válido.
+    A divisão é None quando o campo está vazio ou não é inteiro.
+    """
+    g1_str = row.get(COL_GOLOS_1, "").strip()
+    g2_str = row.get(COL_GOLOS_2, "").strip()
+    if not g1_str or not g2_str:
+        return None
+    try:
+        g1 = int(float(g1_str))
+        g2 = int(float(g2_str))
+    except ValueError:
+        return None
 
-    if total_games == 0:
-        return 0.0
+    div_raw = str(row.get(COL_DIVISAO, "")).strip()
+    div: int | None = None
+    if div_raw:
+        try:
+            div = int(div_raw)
+        except ValueError:
+            pass
+    return g1, g2, div
 
-    return total_draws / total_games
+
+def calculate_historical_draw_rate(
+    modalidade: str,
+    past_seasons: Sequence[str],
+    docs_dir: str | None = None,
+) -> float:
+    """Taxa histórica de empates para uma modalidade ao longo de épocas anteriores.
+
+    Returns:
+        Fracção de jogos que terminaram empatados (0.0–1.0).
+    """
+    total = draws = 0
+    for row in _load_season_rows(modalidade, past_seasons, [], docs_dir):
+        parsed = _parse_score_row(row)
+        if parsed is None:
+            continue
+        g1, g2, _ = parsed
+        total += 1
+        if g1 == g2:
+            draws += 1
+    return draws / total if total else 0.0
 
 
 def calculate_division_baselines(
     modalidade: str,
-    past_seasons: List[str],
-    current_rows: List[Dict],
-    docs_dir: str = None,
-) -> Dict[Optional[int], Dict[str, float]]:
+    past_seasons: Sequence[str],
+    current_rows: Sequence[Dict],
+    docs_dir: str | None = None,
+) -> Dict[int | None, Dict[str, float]]:
+    """Média e desvio padrão de golos por divisão (épocas anteriores + actual).
+
+    Returns:
+        {divisao: {"mean": x, "std": y}, None: {"mean": x, "std": y}}
     """
-    Calcula médias e desvios padrão de golos/pontos por divisão.
-
-    Retorna dict: {divisao: {"mean": x, "std": y}, None: {"mean": x, "std": y}}
-    """
-    score_data: Dict[Optional[int], List[int]] = defaultdict(list)
-
-    def add_row(row: Dict) -> None:
-        golos_1_str = row.get("Golos 1", "").strip()
-        golos_2_str = row.get("Golos 2", "").strip()
-        if not golos_1_str or not golos_2_str:
-            return
-
-        try:
-            score_1 = int(float(golos_1_str))
-            score_2 = int(float(golos_2_str))
-        except ValueError:
-            return
-
-        div_raw = str(row.get("Divisão", "")).strip()
-        div_key = None
-        if div_raw:
-            try:
-                div_key = int(div_raw)
-            except ValueError:
-                div_key = None
-
-        score_data[div_key].extend([score_1, score_2])
-        score_data[None].extend([score_1, score_2])
-
-    for season_pattern in past_seasons:
-        if docs_dir:
-            csv_file = os.path.join(
-                docs_dir,
-                "output",
-                "csv_modalidades",
-                f"{modalidade}_{season_pattern}.csv",
-            )
-        else:
-            csv_file = (
-                f"../docs/output/csv_modalidades/{modalidade}_{season_pattern}.csv"
-            )
-        if not os.path.exists(csv_file):
+    score_data: Dict[int | None, List[int]] = defaultdict(list)
+    for row in _load_season_rows(modalidade, past_seasons, current_rows, docs_dir):
+        parsed = _parse_score_row(row)
+        if parsed is None:
             continue
+        g1, g2, div = parsed
+        score_data[div].extend([g1, g2])
+        score_data[None].extend([g1, g2])
 
-        try:
-            rows = _load_csv_rows_cached(csv_file)
-        except FileNotFoundError:
-            continue
-
-        for row in rows:
-            add_row(row)
-
-    for row in current_rows:
-        add_row(row)
-
-    baselines: Dict[Optional[int], Dict[str, float]] = {}
-    for div_key, scores in score_data.items():
-        if scores:
-            baselines[div_key] = {
-                "mean": float(np.mean(scores)),
-                "std": float(np.std(scores)),
-            }
-
-    return baselines
+    return {
+        div: {"mean": float(np.mean(scores)), "std": float(np.std(scores))}
+        for div, scores in score_data.items()
+        if scores
+    }
 
 
 def calculate_division_draw_rates(
     modalidade: str,
-    past_seasons: List[str],
-    current_rows: List[Dict],
-    docs_dir: str = None,
-) -> Dict[Optional[int], float]:
+    past_seasons: Sequence[str],
+    current_rows: Sequence[Dict],
+    docs_dir: str | None = None,
+) -> Dict[int | None, float]:
+    """Taxa de empates por divisão (épocas anteriores + actual).
+
+    Returns:
+        {divisao: rate, None: rate_global}
     """
-    Calcula taxa de empates por divisao.
+    totals: Dict[int | None, int] = defaultdict(int)
+    draws: Dict[int | None, int] = defaultdict(int)
 
-    Retorna dict: {divisao: rate, None: rate}
-    """
-    totals = defaultdict(int)
-    draws = defaultdict(int)
-
-    def add_row(row: Dict) -> None:
-        golos_1_str = row.get("Golos 1", "").strip()
-        golos_2_str = row.get("Golos 2", "").strip()
-        if not golos_1_str or not golos_2_str:
-            return
-
-        try:
-            score_1 = int(float(golos_1_str))
-            score_2 = int(float(golos_2_str))
-        except ValueError:
-            return
-
-        div_raw = str(row.get("Divisao", row.get("Divisão", ""))).strip()
-        div_key = None
-        if div_raw:
-            try:
-                div_key = int(div_raw)
-            except ValueError:
-                div_key = None
-
-        totals[div_key] += 1
+    for row in _load_season_rows(modalidade, past_seasons, current_rows, docs_dir):
+        parsed = _parse_score_row(row)
+        if parsed is None:
+            continue
+        g1, g2, div = parsed
+        totals[div] += 1
         totals[None] += 1
-        if score_1 == score_2:
-            draws[div_key] += 1
+        if g1 == g2:
+            draws[div] += 1
             draws[None] += 1
 
-    for season_pattern in past_seasons:
-        if docs_dir:
-            csv_file = os.path.join(
-                docs_dir,
-                "output",
-                "csv_modalidades",
-                f"{modalidade}_{season_pattern}.csv",
-            )
-        else:
-            csv_file = (
-                f"../docs/output/csv_modalidades/{modalidade}_{season_pattern}.csv"
-            )
-        if not os.path.exists(csv_file):
-            continue
-
-        try:
-            rows = _load_csv_rows_cached(csv_file)
-        except FileNotFoundError:
-            continue
-
-        for row in rows:
-            add_row(row)
-
-    for row in current_rows:
-        add_row(row)
-
-    rates: Dict[Optional[int], float] = {}
-    for div_key, total in totals.items():
-        if total > 0:
-            rates[div_key] = draws[div_key] / total
-
-    return rates
+    return {div: draws[div] / t for div, t in totals.items() if t > 0}
 
 
 def calculate_predicted_division_stats(
     fixtures: List[Dict],
     match_score_stats: Dict[str, Dict[str, int]],
-) -> Dict[Optional[int], Dict[str, float]]:
+) -> Dict[int | None, Dict[str, float]]:
     """
     Calcula medias previstas e taxa de empates por divisao.
 
@@ -2531,7 +2416,7 @@ def calculate_predicted_division_stats(
         agg[None]["sum_draw"] += exp_draw
         agg[None]["matches"] += 1
 
-    stats: Dict[Optional[int], Dict[str, float]] = {}
+    stats: Dict[int | None, Dict[str, float]] = {}
     for div_key, data in agg.items():
         if data["matches"] > 0:
             mean_per_team = (data["sum_goals"] / data["matches"]) / 2.0
@@ -2549,104 +2434,6 @@ def calculate_predicted_division_stats(
 # FUNÇÃO AUXILIAR: Comparar Cenários
 # ============================================================================
 
-
-def compare_scenarios(
-    baseline_results: Dict[str, Dict[str, float]],
-    hardset_results: Dict[str, Dict[str, float]],
-    top_n: int = 10,
-) -> None:
-    """
-    Compara dois cenários (baseline vs hardset) e mostra diferenças.
-
-    Args:
-        baseline_results: Resultados sem hardset
-        hardset_results: Resultados com hardset
-        top_n: Mostrar top N equipas mais afetadas
-    """
-    print(f"\n{'='*80}")
-    print("📊 COMPARAÇÃO DE CENÁRIOS: Baseline vs Hardset")
-    print(f"{'='*80}\n")
-
-    # Calcular diferenças
-    diffs = []
-    for team in baseline_results:
-        if team not in hardset_results:
-            continue
-
-        diff_champion = (
-            hardset_results[team]["p_champion"] - baseline_results[team]["p_champion"]
-        ) * 100
-        diff_playoffs = (
-            hardset_results[team]["p_playoffs"] - baseline_results[team]["p_playoffs"]
-        ) * 100
-        diff_place = (
-            hardset_results[team]["expected_place"]
-            - baseline_results[team]["expected_place"]
-        )
-        diff_points = (
-            hardset_results[team]["expected_points"]
-            - baseline_results[team]["expected_points"]
-        )
-        diff_elo = (
-            hardset_results[team]["avg_final_elo"]
-            - baseline_results[team]["avg_final_elo"]
-        )
-
-        # Magnitude total de mudança
-        magnitude = (
-            abs(diff_champion)
-            + abs(diff_playoffs) * 0.5
-            + abs(diff_place) * 2
-            + abs(diff_points)
-        )
-
-        diffs.append(
-            {
-                "team": team,
-                "diff_champion": diff_champion,
-                "diff_playoffs": diff_playoffs,
-                "diff_place": diff_place,
-                "diff_points": diff_points,
-                "diff_elo": diff_elo,
-                "magnitude": magnitude,
-            }
-        )
-
-    # Ordenar por magnitude de mudança
-    diffs_sorted = sorted(diffs, key=lambda x: x["magnitude"], reverse=True)
-
-    print(f"🔝 TOP {top_n} EQUIPAS MAIS AFETADAS:\n")
-    print(
-        f"{'Equipa':<30} {'ΔCampeão':>12} {'ΔPlayoffs':>12} {'ΔLugar':>10} {'ΔPontos':>10} {'ΔELO':>8}"
-    )
-    print(f"{'-'*92}")
-
-    for i, diff in enumerate(diffs_sorted[:top_n], 1):
-        team = diff["team"]
-        champion_arrow = (
-            "↑"
-            if diff["diff_champion"] > 0
-            else "↓" if diff["diff_champion"] < 0 else "→"
-        )
-        playoffs_arrow = (
-            "↑"
-            if diff["diff_playoffs"] > 0
-            else "↓" if diff["diff_playoffs"] < 0 else "→"
-        )
-        place_arrow = (
-            "↑" if diff["diff_place"] < 0 else "↓" if diff["diff_place"] > 0 else "→"
-        )
-
-        print(
-            f"{i:2}. {team:<27} "
-            f"{champion_arrow} {diff['diff_champion']:>9.2f}%  "
-            f"{playoffs_arrow} {diff['diff_playoffs']:>9.2f}%  "
-            f"{place_arrow} {diff['diff_place']:>7.2f}  "
-            f"{diff['diff_points']:>9.2f}  "
-            f"{diff['diff_elo']:>7.1f}"
-        )
-
-    print(f"\n{'='*80}\n")
 
 
 def example_hardset_usage():
@@ -2692,14 +2479,14 @@ def detect_withdrawn_teams_from_csv(
     team_game_count = {}  # {team: {'total': count, 'withdrawn': count}}
 
     for row in future_matches_rows:
-        team_a_raw = row.get("Equipa 1", "").strip()
-        team_b_raw = row.get("Equipa 2", "").strip()
+        team_a_raw = row.get(COL_EQUIPA_1, "").strip()
+        team_b_raw = row.get(COL_EQUIPA_2, "").strip()
 
         if not team_a_raw or not team_b_raw:
             continue
 
         # Verificar coluna de falta de comparência (única coluna partilhada por ambas as equipas)
-        falta_valor = str(row.get("Falta de Comparência", "")).strip()
+        falta_valor = str(row.get(COL_FALTA_COMPARENCIA, "")).strip()
 
         # Normalizar nomes
         team_a = normalize_team_name(team_a_raw, course_mapping)
@@ -2724,14 +2511,14 @@ def detect_withdrawn_teams_from_csv(
     for team, counts in team_game_count.items():
         if counts["total"] > 0 and counts["withdrawn"] == counts["total"]:
             withdrawn_teams.add(team)
-            print(f"⚠️  Equipa desistente detectada: {team} ({counts['total']} jogos)")
+            logger.warning(f"Equipa desistente detectada: {team} ({counts['total']} jogos)")
 
     return withdrawn_teams
 
 
 def get_initial_rating_from_division(
     team_name: str,
-    division: Optional[int],
+    division: int | None,
     initial_elos: Dict[str, float],
 ) -> float:
     """
@@ -2760,10 +2547,10 @@ def get_initial_rating_from_division(
 
 
 def _build_hardset_manager(
-    hardset_args: Optional[list],
-    hardset_csv: Optional[str],
+    hardset_args: list | None,
+    hardset_csv: str | None,
     course_mapping_short: Dict[str, str],
-) -> Optional[HardsetManager]:
+) -> HardsetManager | None:
     """Inicializa e povoa um HardsetManager a partir de argumentos CLI e/ou CSV.
 
     Retorna None se não houver resultados fixados a carregar.
@@ -2779,12 +2566,12 @@ def _build_hardset_manager(
             try:
                 parts = score.split("-")
                 if len(parts) != 2:
-                    print(f"❌ Formato inválido para score: {score}. Use 'A-B'")
+                    logger.error(f"Formato inválido para score: {score}. Use 'A-B'")
                     continue
                 score_a, score_b = int(parts[0]), int(parts[1])
                 manager.add_fixed_result(match_id, score_a, score_b)
             except ValueError:
-                print(f"❌ Erro ao processar score: {score}")
+                logger.error(f"Erro ao processar score: {score}")
 
     if hardset_csv:
         manager.add_from_csv(hardset_csv)
@@ -2802,7 +2589,7 @@ def _load_modalidade_data(
     modalidade_file: str,
     course_mapping: Dict[str, str],
     score_simulator: SportScoreSimulator,
-    calibrated_config: Optional[Dict],
+    calibrated_config: Dict | None,
 ) -> Tuple[Dict[str, float], list, list, list, Dict, Dict]:
     """Carrega todos os dados necessários para simular uma modalidade.
 
@@ -2811,11 +2598,9 @@ def _load_modalidade_data(
          division_baselines, division_draw_rates)
     """
     # Carregar ELOs da época anterior
-    elo_file = os.path.join(
-        docs_dir, "output", "elo_ratings", f"elo_{modalidade}{date_pattern}.csv"
-    )
+    elo_file = Path(docs_dir) / "output" / "elo_ratings" / "elo_{modalidade}{date_pattern}.csv"
     initial_elos: Dict[str, float] = {}
-    if os.path.exists(elo_file):
+    if Path(str(elo_file)).exists():
         with open(elo_file, newline="", encoding="utf-8-sig") as csvfile:
             reader = csv.reader(csvfile)
             headers = next(reader)
@@ -2832,7 +2617,7 @@ def _load_modalidade_data(
 
     # Carregar e separar jogos
     all_csv_rows = _load_csv_rows_cached(
-        os.path.join(modalidades_path, modalidade_file)
+        str(Path(modalidades_path) / modalidade_file)
     )
     past_matches_rows, future_matches_rows = separate_past_and_future_matches(all_csv_rows)
 
@@ -2884,14 +2669,14 @@ def _build_teams_and_fixtures(
     # Mapear divisão/grupo para todas as equipas (passado + futuro)
     team_division: Dict[str, Tuple[int, str]] = {}
     for row in all_csv_rows:
-        t1_raw = row.get("Equipa 1", "").strip()
-        t2_raw = row.get("Equipa 2", "").strip()
+        t1_raw = row.get(COL_EQUIPA_1, "").strip()
+        t2_raw = row.get(COL_EQUIPA_2, "").strip()
         if not t1_raw or not t2_raw:
             continue
         t1 = normalize_team_name(t1_raw, course_mapping)
         t2 = normalize_team_name(t2_raw, course_mapping)
-        div = row.get("Divisão", "") or "1"
-        grp = (row.get("Grupo", "") or "").strip().upper()
+        div = row.get(COL_DIVISAO, "") or "1"
+        grp = (row.get(COL_GRUPO, "") or "").strip().upper()
         try:
             div_int = int(div)
         except ValueError:
@@ -2908,8 +2693,8 @@ def _build_teams_and_fixtures(
 
     # Jogos futuros → fixtures de simulação
     for row in future_matches_rows:
-        team_a_raw = row["Equipa 1"].strip()
-        team_b_raw = row["Equipa 2"].strip()
+        team_a_raw = row[COL_EQUIPA_1].strip()
+        team_b_raw = row[COL_EQUIPA_2].strip()
         if not is_valid_team(team_a_raw) or not is_valid_team(team_b_raw):
             continue
         team_a = normalize_team_name(team_a_raw, course_mapping)
@@ -2931,17 +2716,17 @@ def _build_teams_and_fixtures(
             "b": team_b,
             "is_future": True,
             "id": match_id,
-            "jornada": row.get("Jornada", ""),
-            "dia": row.get("Dia", ""),
-            "hora": row.get("Hora", ""),
-            "divisao": row.get("Divisão", ""),
-            "grupo": row.get("Grupo", ""),
+            "jornada": row.get(COL_JORNADA, ""),
+            "dia": row.get(COL_DIA, ""),
+            "hora": row.get(COL_HORA, ""),
+            "divisao": row.get(COL_DIVISAO, ""),
+            "grupo": row.get(COL_GRUPO, ""),
         })
 
     # Jogos passados → registar equipas (para histórico de ELO)
     for row in past_matches_rows:
-        team_a_raw = row["Equipa 1"].strip()
-        team_b_raw = row["Equipa 2"].strip()
+        team_a_raw = row[COL_EQUIPA_1].strip()
+        team_b_raw = row[COL_EQUIPA_2].strip()
         if not is_valid_team(team_a_raw) or not is_valid_team(team_b_raw):
             continue
         team_a = normalize_team_name(team_a_raw, course_mapping)
@@ -2962,7 +2747,7 @@ def _export_results(
     modalidade: str,
     ano_atual: int,
     n_simulations: int,
-    hardset_manager: Optional[HardsetManager],
+    hardset_manager: HardsetManager | None,
     all_teams_in_epoch: Set[str],
     teams: Dict[str, Team],
     team_division: Dict[str, Tuple[int, str]],
@@ -2979,14 +2764,9 @@ def _export_results(
     subfolder = "cenarios" if is_hardset else "previsoes"
     suffix = "_hardset" if is_hardset else ""
 
-    output_file = os.path.join(
-        docs_dir, "output", subfolder,
-        f"forecast_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv",
-    )
-    predictions_file = os.path.join(
-        docs_dir, "output", subfolder,
-        f"previsoes_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv",
-    )
+    out_dir = Path(docs_dir) / "output" / subfolder
+    output_file = out_dir / f"forecast_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv"
+    predictions_file = out_dir / f"previsoes_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv"
 
     # --- CSV 1: Forecast de equipas ---
     with open(output_file, "w", newline="", encoding="utf-8-sig") as csvfile:
@@ -3122,13 +2902,13 @@ def _export_results(
 
 
 def main(
-    hardset_args: Optional[Tuple] = None,
-    hardset_csv: Optional[str] = None,
-    filter_modalidade: Optional[str] = None,
+    hardset_args: Tuple | None = None,
+    hardset_csv: str | None = None,
+    filter_modalidade: str | None = None,
     deep_simulation: bool = False,
     deeper_simulation: bool = False,
     use_calibrated: bool = False,
-    calibrated_config_path: Optional[str] = None,
+    calibrated_config_path: str | None = None,
 ):
     """
     Orquestra a pipeline completa: carrega dados, corre Monte Carlo e exporta resultados.
@@ -3142,12 +2922,10 @@ def main(
         use_calibrated: Usar parâmetros calibrados (opcional).
         calibrated_config_path: Caminho customizado para config calibrada (opcional).
     """
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_dir = os.path.dirname(script_dir)
-    docs_dir = os.path.join(project_dir, "docs")
+    docs_dir = str(Path(__file__).resolve().parent.parent / "docs")
 
-    os.makedirs(os.path.join(docs_dir, "output", "previsoes"), exist_ok=True)
-    os.makedirs(os.path.join(docs_dir, "output", "cenarios"), exist_ok=True)
+    os.makedirs(Path(docs_dir) / "output" / "previsoes", exist_ok=True)
+    os.makedirs(Path(docs_dir) / "output" / "cenarios", exist_ok=True)
 
     course_mapping, course_mapping_short = load_course_mapping(docs_dir)
     print(f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos\n")
@@ -3189,7 +2967,7 @@ def main(
         else (N_SIMULATIONS_DEEPER if deeper_simulation else N_SIMULATIONS_DEEP)
     )
 
-    modalidades_path = os.path.join(docs_dir, "output", "csv_modalidades")
+    modalidades_path = Path(docs_dir) / "output" / "csv_modalidades"
     ano_passado_2d = str(ano_atual - 2)[2:]
     ano_passado_1d = str(ano_atual - 1)[2:]
     ano_atual_2d   = str(ano_atual)[2:]
@@ -3245,7 +3023,7 @@ def main(
         teams_with_fixtures = {t: teams[t] for t in all_teams_in_epoch if t in teams}
 
         has_liguilla = any(
-            str(row.get("Jornada", "")).upper().startswith(("LM", "PM"))
+            str(row.get(COL_JORNADA, "")).upper().startswith(("LM", "PM"))
             for row in all_csv_rows
         )
         playoff_slots, total_playoff_slots = parse_playoff_slots(all_csv_rows)
