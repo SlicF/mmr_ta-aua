@@ -1,9 +1,9 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
 1,,1,Finanças,22,9,7,1,1,33,14,19,0
 1,,2,Eng. Mecânica,21,7,7,0,0,29,9,20,0
-1,,3,Contabilidade,15,9,4,3,2,19,18,1,0
+1,,3,Contabilidade,15,9,4,3,2,18,18,0,1
 1,,4,Bioquímica,14,9,4,2,3,29,26,3,0
-1,,5,Gestão e Planeamento em Turismo,13,8,4,1,3,18,18,0,0
+1,,5,Gestão e Planeamento em Turismo,13,8,4,1,3,18,17,1,0
 1,,6,Eng. e Gestão Industrial,12,7,4,0,3,27,16,11,0
 1,,7,Eng. Biomédica,12,9,3,3,3,34,26,8,0
 1,,8,Eng. Química,9,7,2,3,2,19,18,1,0

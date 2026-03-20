@@ -116,7 +116,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 7,2026-03-08 00:00:00,23h30,PAH,Eng. Civil,0.0,2.0,EET,1,,Excel,Excel,False,False,
 7,2026-03-08 00:00:00,23h30,PAH,Fisioterapia,2.0,0.0,GPT,1,,Excel,Excel,False,False,
 8,2026-03-19 00:00:00,20h15,PAH,Adminstração Pública,,,Eng. Ambiente,2,A,Excel,Excel,False,False,
-8,2026-03-19 00:00:00,20h15,PAH,Educação Básica,,,ECT,2,A,Excel,Excel,False,False,
+8,2026-03-19 00:00:00,20h15,PAH,Educação Básica,0.0,2.0,ECT,2,A,Excel,Excel,False,False,
 8,2026-03-19 00:00:00,20h15,PAH,LRE,,,Bioquímica,2,A,Excel,Excel,False,False,
 8,2026-03-19 00:00:00,21h15,PAH,Biologia e Geologia,,,LLC,2,B,Excel,Excel,False,False,
 8,2026-03-19 00:00:00,21h15,PAH,Economia,,,Gestão,2,B,Excel,Excel,False,False,

@@ -106,7 +106,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 6,2026-03-02 00:00:00,22h00,Caixa UA,Design,1.0,2.0,ASP,2,A,Excel,Excel,False,False,
 6,2026-03-02 00:00:00,23h00,Caixa UA,Eng. Informática,4.0,1.0,Psicologia,2,A,Excel,Excel,False,False,
 7,2026-03-03 00:00:00,21h00,Caixa UA,Bioquímica,6.0,5.0,Eng. Biomédica,1,,Calendário PDF (corrigido),Excel,False,False,
-7,2026-03-03 00:00:00,22h00,Caixa UA,GPT,3.0,1.0,Contabilidade,1,,Calendário PDF (corrigido),Excel,False,False,
+7,2026-03-03 00:00:00,22h00,Caixa UA,GPT,3.0,0.0,Contabilidade,1,,Calendário PDF (corrigido),Excel,False,False,Contabilidade
 7,2026-03-03 00:00:00,23h00,Caixa UA,Eng. Mecânica,4.0,3.0,Finanças,1,,Calendário PDF (corrigido),Excel,False,False,
 6,2026-03-04 00:00:00,17h30,PAH,Eng. Mecânica B,2.0,4.0,Eng. Aeroespacial,2,C,Excel,Excel,False,False,
 6,2026-03-04 00:00:00,18h30,PAH,Marketing,8.0,3.0,CBM,2,C,Excel,Excel,False,False,
