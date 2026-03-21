@@ -126,12 +126,12 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 9,2026-03-16 00:00:00,21h00,Caixa UA,Eng. Biomédica,3.0,3.0,Contabilidade,1,,Excel,Excel,False,False,
 9,2026-03-16 00:00:00,22h00,Caixa UA,Bioquímica,3.0,7.0,Finanças,1,,Excel,Excel,False,False,
 7,2026-03-16 00:00:00,23h00,Caixa UA,Biologia e Geologia,8.0,5.0,Ciências do Mar,2,A,Excel,Excel,False,False,
-7,2026-03-17 00:00:00,21h00,Caixa UA,Psicologia,,,Design,2,A,Excel,Excel,False,False,
-7,2026-03-17 00:00:00,22h00,Caixa UA,Economia,,,Eng. Materiais,2,A,Excel,Excel,False,False,
-7,2026-03-17 00:00:00,23h00,Caixa UA,ASP,,,Música,2,A,Excel,Excel,False,False,
-8,2026-03-19 00:00:00,21h00,Caixa UA,Eng. Física,,,Eng. Mecânica,1,,Excel,Excel,False,False,
-8,2026-03-19 00:00:00,22h00,Caixa UA,EGI,,,EET,1,,Excel,Excel,False,False,
-8,2026-03-19 00:00:00,23h00,Caixa UA,Eng. Química,,,Fisioterapia,1,,Excel,Excel,False,False,
+7,2026-03-17 00:00:00,21h00,Caixa UA,Psicologia,3.0,0.0,Design,2,A,Excel,Excel,False,False,Design
+7,2026-03-17 00:00:00,22h00,Caixa UA,Economia,2.0,8.0,Eng. Materiais,2,A,Excel,Excel,False,False,
+7,2026-03-17 00:00:00,23h00,Caixa UA,ASP,0.0,3.0,Música,2,A,Excel,Excel,False,False,ASP
+8,2026-03-19 00:00:00,21h00,Caixa UA,Eng. Física,0.0,2.0,Eng. Mecânica,1,,Excel,Excel,False,False,
+8,2026-03-19 00:00:00,22h00,Caixa UA,EGI,5.0,0.0,EET,1,,Excel,Excel,False,False,
+8,2026-03-19 00:00:00,23h00,Caixa UA,Eng. Química,3.0,5.0,Fisioterapia,1,,Excel,Excel,False,False,
 7,2026-03-23 00:00:00,21h00,Caixa UA,Biologia,,,MOC,2,B,Excel,Excel,False,False,
 7,2026-03-23 00:00:00,22h00,Caixa UA,EGI B,,,Matemática,2,B,Excel,Excel,False,False,
 7,2026-03-23 00:00:00,23h00,Caixa UA,Eng. Ambiente,,,LRE,2,B,Excel,Excel,False,False,

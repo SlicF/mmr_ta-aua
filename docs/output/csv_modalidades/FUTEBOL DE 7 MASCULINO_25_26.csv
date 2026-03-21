@@ -78,10 +78,10 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 7,2026-03-17 00:00:00,21h00,Sintético,Biotecnologia,2.0,2.0,EET,1,,Excel,Excel,False,False,
 7,2026-03-17 00:00:00,22h00,Sintético,Administração Pública,0.0,4.0,Eng. Mecânica,1,,Excel,Excel,False,False,
 7,2026-03-17 00:00:00,23h00,Sintético,GPT,6.0,2.0,Eng. Biomédica,1,,Excel,Excel,False,False,
-6,2026-03-19 00:00:00,21h00,Sintético,Marketing,,,Biologia e Geologia,2,B,Excel,Excel,False,False,
-6,2026-03-19 00:00:00,22h00,Sintético,Gestão,,,Eng. Civil,2,B,Excel,Excel,False,False,
+6,2026-03-19 00:00:00,21h00,Sintético,Marketing,3.0,1.0,Biologia e Geologia,2,B,Excel,Excel,False,False,
+6,2026-03-19 00:00:00,22h00,Sintético,Gestão,3.0,4.0,Eng. Civil,2,B,Excel,Excel,False,False,
 7,2026-03-19 00:00:00,23h00,Sintético,Economia,,,Finanças,1,,Excel,Excel,False,False,Finanças
-5,2026-03-20 00:00:00,15h00,Sintético,Tecnologias de Informação,3.0,4.0,Geologia,2,A,,Placeholder,True,True,
+5,2026-03-21 00:00:00,15h00,Sintético,Tecnologias de Informação,3.0,4.0,Geologia,2,A,,Placeholder,True,True,
 7,2026-03-23 00:00:00,21h00,Sintético,ECT,,,EGI,1,,Excel,Excel,False,False,
 5,2026-03-23 00:00:00,22h00,Sintético,Eng. Civil,,,Marketing,2,B,Calendário PDF,Excel,False,False,
 7,2026-03-23 00:00:00,23h00,Sintético,Biologia e Geologia,,,Gestão,2,B,Excel,Excel,False,False,
