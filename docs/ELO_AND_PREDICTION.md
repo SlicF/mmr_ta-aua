@@ -1,5 +1,7 @@
 # Documentação Técnica: Sistema de ELO e Motor de Previsão
 
+[🇬🇧 View English Version](ELO_AND_PREDICTION_EN.md)
+
 Documentação técnica dos algoritmos ELO, sistema de calibração de parâmetros e motor de simulação Monte Carlo implementados no projeto `mmr_taçaua`.
 
 ---

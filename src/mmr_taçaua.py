@@ -440,7 +440,6 @@ class StandingsCalculator:
         self.sport = sport
         self.teams = teams
         self.withdrawn_teams = set((withdrawn_teams or {}).keys())
-        self.absence_teams = self._collect_absence_teams(df)
 
         # Identificar colunas de divisão e grupo - corrigido para ser mais robusto
         self.div_col = next(
@@ -477,6 +476,18 @@ class StandingsCalculator:
         # Filtrar apenas jogos da fase de grupos (exclui E*, MP*, LP*)
         group_phase_mask = ~self.df["Jornada"].apply(is_playoff_jornada)
         df_group = self.df[group_phase_mask].copy()
+
+        # Jogos com equipas desistentes não contam para a classificação.
+        if self.withdrawn_teams:
+            valid_group_mask = ~(
+                df_group["Equipa 1"]
+                .apply(normalize_team_name)
+                .isin(self.withdrawn_teams)
+                | df_group["Equipa 2"]
+                .apply(normalize_team_name)
+                .isin(self.withdrawn_teams)
+            )
+            df_group = df_group[valid_group_mask].copy()
 
         # Se não houver divisões nem grupos, criar uma classificação única
         if not self.div_col and not self.group_col:
@@ -749,6 +760,10 @@ class StandingsCalculator:
             if not team1 or not team2 or team1 not in stats or team2 not in stats:
                 continue
 
+            # Defesa adicional caso linhas de desistentes cheguem aqui.
+            if team1 in self.withdrawn_teams or team2 in self.withdrawn_teams:
+                continue
+
             try:
                 score1 = int(row.get("Golos 1"))
                 score2 = int(row.get("Golos 2"))
@@ -814,8 +829,8 @@ class StandingsCalculator:
         if not (score1_missing and score2_missing):
             return False
 
-        team1_withdrawn = team1 in self.withdrawn_teams or team1 in self.absence_teams
-        team2_withdrawn = team2 in self.withdrawn_teams or team2 in self.absence_teams
+        team1_withdrawn = team1 in self.withdrawn_teams
+        team2_withdrawn = team2 in self.withdrawn_teams
 
         # Precisa de exatamente uma equipa desistente.
         if team1_withdrawn == team2_withdrawn:
@@ -1631,14 +1646,37 @@ class EloRatingSystem:
         return teams, elo_history, detailed_rows, real_standings, withdrawn_teams
 
     def _detect_withdrawn_teams(self, df: pd.DataFrame) -> dict:
-        """Deteta equipas desistentes (todos os jogos com resultados ausentes).
+        """Deteta equipas desistentes (todos os jogos sem participação efetiva).
 
         Uma equipa é considerada desistente se TODOS os seus jogos têm
-        resultados ausentes (NaN), ou seja, nunca compareceu.
+        ausência registada, seja por:
+        - resultado ausente no lado da equipa (NaN/vazio), ou
+        - equipa marcada em "Falta de Comparência" (mesmo com 2-0 administrativo).
 
         Returns:
             Dict contendo {equipa_normalizada: num_jogos} para equipas desistentes
         """
+
+        def _is_team_marked_absent(falta_value, team_name: str) -> bool:
+            if pd.isna(falta_value):
+                return False
+
+            raw_value = str(falta_value).strip()
+            if not raw_value:
+                return False
+
+            # Caso simples: uma única equipa na célula
+            if normalize_team_name(raw_value) == team_name:
+                return True
+
+            # Caso composto: múltiplas equipas separadas por vírgula
+            if "," in raw_value:
+                for piece in raw_value.split(","):
+                    if normalize_team_name(piece.strip()) == team_name:
+                        return True
+
+            return False
+
         # Coletar todas as equipas e contar jogos com resultado ausente
         team_games = {}  # {equipa: {'total': count, 'absent': count}}
 
@@ -1655,7 +1693,9 @@ class EloRatingSystem:
                 if equipa1 not in team_games:
                     team_games[equipa1] = {"total": 0, "absent": 0}
                 team_games[equipa1]["total"] += 1
-                if resultado1_absent:
+                if resultado1_absent or _is_team_marked_absent(
+                    row.get("Falta de Comparência"), equipa1
+                ):
                     team_games[equipa1]["absent"] += 1
 
             # Registar jogo para equipa2
@@ -1663,7 +1703,9 @@ class EloRatingSystem:
                 if equipa2 not in team_games:
                     team_games[equipa2] = {"total": 0, "absent": 0}
                 team_games[equipa2]["total"] += 1
-                if resultado2_absent:
+                if resultado2_absent or _is_team_marked_absent(
+                    row.get("Falta de Comparência"), equipa2
+                ):
                     team_games[equipa2]["absent"] += 1
 
         # Identificar desistentes (100% de ausências)

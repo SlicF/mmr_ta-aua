@@ -1,5 +1,7 @@
 # OPERATIONS_GUIDE.md - Guia Operacional Completo
 
+[🇬🇧 View English Version](OPERATIONS_GUIDE_EN.md)
+
 ## Índice
 
 1. [Pipeline de Execução](#pipeline)

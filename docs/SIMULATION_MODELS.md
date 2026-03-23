@@ -1,5 +1,7 @@
 # SIMULATION_MODELS.md - Modelos de Simulação Desportiva
 
+[🇬🇧 View English Version](SIMULATION_MODELS_EN.md)
+
 ## Índice
 
 1. [Visão Geral dos Modelos](#overview)

@@ -80,13 +80,13 @@ if sys.platform == "win32":
 # ============================================================================
 
 # --- Sistema ELO ---
-ELO_DIVISOR: float = 250.0          # Denominador da fórmula logística ELO
-ELO_K_BASE: float = 100.0           # K-factor base padrão
-ELO_SCALE_NORMALIZED: float = 8.0   # Escala normalizada para número de jogos
+ELO_DIVISOR: float = 250.0  # Denominador da fórmula logística ELO
+ELO_K_BASE: float = 100.0  # K-factor base padrão
+ELO_SCALE_NORMALIZED: float = 8.0  # Escala normalizada para número de jogos
 
 # Multiplicadores de fase de época
-PHASE_MULT_E3L: float = 0.75        # Jogo do 3.º lugar (E3L)
-PHASE_MULT_PLAYOFFS: float = 1.5    # Playoffs / eliminatórias
+PHASE_MULT_E3L: float = 0.75  # Jogo do 3.º lugar (E3L)
+PHASE_MULT_PLAYOFFS: float = 1.5  # Playoffs / eliminatórias
 PHASE_EARLY_THRESHOLD: float = 1 / 3  # Primeiros 1/3 da época = fase inicial
 
 # --- ELOs iniciais por divisão (fallback quando não há época anterior) ---
@@ -108,7 +108,7 @@ DRAW_GAUSSIAN_PEAK_FACTOR: float = 2.5  # Pico ≈ 2.5 × taxa histórica de emp
 
 # --- Basquete 3×3 ---
 BASQUETE_MAX_SCORE: int = 21
-BASQUETE_OT_WIN_2PT_PROB: float = 0.30   # P(vencer prolongamento com cesto de 2 pts)
+BASQUETE_OT_WIN_2PT_PROB: float = 0.30  # P(vencer prolongamento com cesto de 2 pts)
 BASQUETE_OT_LOSE_1PT_PROB: float = 0.40  # P(adversário marcar 1 pt antes do 2.º cesto)
 
 # --- Proporção de golos (cálculo K-factor) ---
@@ -140,18 +140,19 @@ class SimulationResult(TypedDict):
     Usar TypedDict em vez de Dict[str, Any] garante type-checking estático
     e elimina a possibilidade de typos silenciosos nas 12 chaves de string.
     """
-    expected_points:       Dict[str, float]
-    final_elos:            Dict[str, float]
+
+    expected_points: Dict[str, float]
+    final_elos: Dict[str, float]
     regular_season_places: Dict[str, int]
-    playoff_count:         Dict[str, int]
-    semifinal_count:       Dict[str, int]
-    final_count:           Dict[str, int]
-    champion_count:        Dict[str, int]
-    promotion_count:       Dict[str, int]
-    relegation_count:      Dict[str, int]
-    match_stats:           Dict[str, Dict[str, int]]
-    match_elo_sum:         Dict[str, Dict[str, float]]
-    match_score_stats:     Dict[str, Dict[str, int]]
+    playoff_count: Dict[str, int]
+    semifinal_count: Dict[str, int]
+    final_count: Dict[str, int]
+    champion_count: Dict[str, int]
+    promotion_count: Dict[str, int]
+    relegation_count: Dict[str, int]
+    match_stats: Dict[str, Dict[str, int]]
+    match_elo_sum: Dict[str, Dict[str, float]]
+    match_score_stats: Dict[str, Dict[str, int]]
 
 
 @dataclass(slots=True)
@@ -216,11 +217,16 @@ class CompleteTacauaEloSystem:
                 5 + (game_number_after - 1) / total_group_games * ELO_SCALE_NORMALIZED
             )
 
-            if game_number_after_scaled < ELO_SCALE_NORMALIZED * PHASE_EARLY_THRESHOLD + 5:
+            if (
+                game_number_after_scaled
+                < ELO_SCALE_NORMALIZED * PHASE_EARLY_THRESHOLD + 5
+            ):
                 return (1 / math.log(4 * (game_number_after_scaled - 4), 16)) ** (1 / 2)
             return 1.0
         elif game_number_scaled < ELO_SCALE_NORMALIZED * PHASE_EARLY_THRESHOLD:
-            game_number_start_scaled = 1 + (game_number - 1) / total_group_games * ELO_SCALE_NORMALIZED
+            game_number_start_scaled = (
+                1 + (game_number - 1) / total_group_games * ELO_SCALE_NORMALIZED
+            )
             return 1 / math.log(4 * game_number_start_scaled, 16)
         else:
             return 1.0
@@ -278,23 +284,35 @@ class CompleteTacauaEloSystem:
             and games_before_winter_team2 is None
             and not has_absence
         ):
-            scaled1 = (game_number_team1 / total_group_games_team1) * ELO_SCALE_NORMALIZED
-            scaled2 = (game_number_team2 / total_group_games_team2) * ELO_SCALE_NORMALIZED
+            scaled1 = (
+                game_number_team1 / total_group_games_team1
+            ) * ELO_SCALE_NORMALIZED
+            scaled2 = (
+                game_number_team2 / total_group_games_team2
+            ) * ELO_SCALE_NORMALIZED
             early_threshold = ELO_SCALE_NORMALIZED * PHASE_EARLY_THRESHOLD
-            if (early_threshold <= scaled1 <= ELO_SCALE_NORMALIZED
-                    and early_threshold <= scaled2 <= ELO_SCALE_NORMALIZED):
+            if (
+                early_threshold <= scaled1 <= ELO_SCALE_NORMALIZED
+                and early_threshold <= scaled2 <= ELO_SCALE_NORMALIZED
+            ):
                 k = self.k_base * proportion_mult
                 expected2 = 1.0 - expected1
                 score_real_2 = 1.0 - score_real_1
-                return round(k * (score_real_1 - expected1)), round(k * (score_real_2 - expected2))
+                return round(k * (score_real_1 - expected1)), round(
+                    k * (score_real_2 - expected2)
+                )
 
         phase_mult_1 = self.calculate_season_phase_multiplier(
-            game_number_team1, total_group_games_team1,
-            games_before_winter_team1, jornada,
+            game_number_team1,
+            total_group_games_team1,
+            games_before_winter_team1,
+            jornada,
         )
         phase_mult_2 = self.calculate_season_phase_multiplier(
-            game_number_team2, total_group_games_team2,
-            games_before_winter_team2, jornada,
+            game_number_team2,
+            total_group_games_team2,
+            games_before_winter_team2,
+            jornada,
         )
 
         k_factor_1 = self.k_base * phase_mult_1 * proportion_mult
@@ -454,7 +472,9 @@ class HardsetManager:
                                     match_id = match_id.replace(long_name, short_name)
 
                     self.add_fixed_result(match_id, score_a, score_b)
-            logger.info(f"Carregados {len(self.fixed_results)} resultados de {csv_file}")
+            logger.info(
+                f"Carregados {len(self.fixed_results)} resultados de {csv_file}"
+            )
         except Exception as e:
             logger.error(f"Erro ao carregar hardset CSV: {e}")
 
@@ -637,9 +657,7 @@ class SportScoreSimulator:
     def set_division_draw_rates(self, draw_rates: Dict[int | None, float]) -> None:
         self.division_draw_rates = draw_rates or {}
 
-    def _get_division_baseline(
-        self, division: int | None
-    ) -> Dict[str, float] | None:
+    def _get_division_baseline(self, division: int | None) -> Dict[str, float] | None:
         if division in self.division_baselines:
             return self.division_baselines[division]
         return self.division_baselines.get(None)
@@ -880,8 +898,12 @@ class SportScoreSimulator:
         base_score_a = base_score + elo_diff
         base_score_b = base_score - elo_diff
 
-        score_a = min(BASQUETE_MAX_SCORE, max(0, int(np.random.normal(base_score_a, sigma))))
-        score_b = min(BASQUETE_MAX_SCORE, max(0, int(np.random.normal(base_score_b, sigma))))
+        score_a = min(
+            BASQUETE_MAX_SCORE, max(0, int(np.random.normal(base_score_a, sigma)))
+        )
+        score_b = min(
+            BASQUETE_MAX_SCORE, max(0, int(np.random.normal(base_score_b, sigma)))
+        )
 
         # Se não há empate ou não força vencedor, retornar
         if score_a != score_b or not force_winner:
@@ -1061,9 +1083,20 @@ def load_calibrated_config(
     if custom_path:
         config_path = custom_path
     elif docs_dir:
-        config_path = Path(docs_dir) / "output" / "calibration" / "calibrated_simulator_config.json"
+        config_path = (
+            Path(docs_dir)
+            / "output"
+            / "calibration"
+            / "calibrated_simulator_config.json"
+        )
     else:
-        config_path = Path("..") / "docs" / "output" / DIR_CALIBRATION / "calibrated_simulator_config.json"
+        config_path = (
+            Path("..")
+            / "docs"
+            / "output"
+            / DIR_CALIBRATION
+            / "calibrated_simulator_config.json"
+        )
 
     if not Path(config_path).exists():
         logger.warning(f"Config calibrada não encontrada: {config_path}")
@@ -1309,7 +1342,6 @@ def simulate_match(
     return winner_name, margin, score1, score2
 
 
-
 def _preprocess_fixtures(
     fixtures: List[Dict],
     teams: Dict[str, "Team"],
@@ -1341,19 +1373,21 @@ def _preprocess_fixtures(
             except ValueError:
                 pass
 
-        processed.append((
-            match["a"],
-            match["b"],
-            match.get("id"),
-            division,
-            bool(match.get("is_future")),
-            total_games.get(match["a"], 1),
-            # preservar campos de output para o CSV de previsões
-            match.get("jornada", ""),
-            match.get("dia", ""),
-            match.get("hora", ""),
-            match.get("grupo", ""),
-        ))
+        processed.append(
+            (
+                match["a"],
+                match["b"],
+                match.get("id"),
+                division,
+                bool(match.get("is_future")),
+                total_games.get(match["a"], 1),
+                # preservar campos de output para o CSV de previsões
+                match.get("jornada", ""),
+                match.get("dia", ""),
+                match.get("hora", ""),
+                match.get("grupo", ""),
+            )
+        )
     return processed
 
 
@@ -1384,8 +1418,18 @@ def simulate_season(
     # Apenas jogos futuros entram em season_results (reduz alocações ~50%)
     season_results: Dict[str, Dict] = {}
 
-    for (a, b, match_id, division, is_future, total_games_a,
-         _jornada, _dia, _hora, _grupo) in preprocessed_fixtures:
+    for (
+        a,
+        b,
+        match_id,
+        division,
+        is_future,
+        total_games_a,
+        _jornada,
+        _dia,
+        _hora,
+        _grupo,
+    ) in preprocessed_fixtures:
 
         elo_a_before = teams[a].elo
         elo_b_before = teams[b].elo
@@ -1415,7 +1459,11 @@ def simulate_season(
         # Guardar resultado apenas para jogos futuros (worker só consulta esses)
         if is_future and match_id:
             season_results[match_id] = (
-                winner, score_a, score_b, elo_a_before, elo_b_before
+                winner,
+                score_a,
+                score_b,
+                elo_a_before,
+                elo_b_before,
             )
 
         if winner == a:
@@ -1435,7 +1483,6 @@ def simulate_season(
 
     final_elos = {team: teams[team].elo for team in teams}
     return points, dict(expected_points), final_elos, season_results
-
 
 
 def simulate_playoffs(
@@ -1782,7 +1829,6 @@ def get_num_workers() -> int:
     return num_workers
 
 
-
 @functools.lru_cache(maxsize=64)
 def _load_csv_rows_cached(csv_file: str) -> tuple:
     """Carrega e cacheia linhas de CSV (lru_cache; imutável — retorna tupla).
@@ -1801,7 +1847,6 @@ def _load_csv_rows_cached(csv_file: str) -> tuple:
 def _clear_csv_cache() -> None:
     """Limpa o cache de CSV (útil em testes ou entre execuções longas)."""
     _load_csv_rows_cached.cache_clear()
-
 
 
 def _run_single_simulation_worker(args_tuple) -> SimulationResult:
@@ -1875,8 +1920,13 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
 
         # elo sums
         if mid not in match_elo_sum_sim:
-            match_elo_sum_sim[mid] = {"a_sum": 0.0, "a_sq": 0.0,
-                                       "b_sum": 0.0, "b_sq": 0.0, "count": 0}
+            match_elo_sum_sim[mid] = {
+                "a_sum": 0.0,
+                "a_sq": 0.0,
+                "b_sum": 0.0,
+                "b_sq": 0.0,
+                "count": 0,
+            }
         me = match_elo_sum_sim[mid]
         me["a_sum"] += elo_a
         me["a_sq"] += elo_a * elo_a
@@ -1896,7 +1946,9 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
     regular_season_places_sim = {}
 
     for team in teams:
-        expected_points_sim[team] = real_points.get(team, 0) + sim_expected_points.get(team, 0.0)
+        expected_points_sim[team] = real_points.get(team, 0) + sim_expected_points.get(
+            team, 0.0
+        )
         final_elos_sim[team] = final_elos.get(team, teams[team].elo)
 
     standings_by_group_for_places: Dict = {}
@@ -1972,7 +2024,6 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         "match_elo_sum": match_elo_sum_sim,
         "match_score_stats": match_score_stats_sim,
     }
-
 
 
 def monte_carlo_forecast(
@@ -2207,7 +2258,6 @@ def monte_carlo_forecast(
     return results, match_forecasts, match_elo_forecast, match_score_stats
 
 
-
 # ============================================================================
 # VALIDAÇÃO E BACKTEST - Avaliar precisão das previsões
 # ============================================================================
@@ -2218,8 +2268,19 @@ def _season_csv_path(
 ) -> Path:
     """Devolve o caminho para o CSV de uma época de uma modalidade."""
     if docs_dir:
-        return Path(docs_dir) / "output" / DIR_CSV_MODALIDADES / f"{modalidade}_{season_pattern}.csv"
-    return Path("..") / "docs" / "output" / DIR_CSV_MODALIDADES / f"{modalidade}_{season_pattern}.csv"
+        return (
+            Path(docs_dir)
+            / "output"
+            / DIR_CSV_MODALIDADES
+            / f"{modalidade}_{season_pattern}.csv"
+        )
+    return (
+        Path("..")
+        / "docs"
+        / "output"
+        / DIR_CSV_MODALIDADES
+        / f"{modalidade}_{season_pattern}.csv"
+    )
 
 
 def _load_season_rows(
@@ -2435,7 +2496,6 @@ def calculate_predicted_division_stats(
 # ============================================================================
 
 
-
 def example_hardset_usage():
     """Exemplo de como usar o sistema de hardset."""
 
@@ -2511,7 +2571,9 @@ def detect_withdrawn_teams_from_csv(
     for team, counts in team_game_count.items():
         if counts["total"] > 0 and counts["withdrawn"] == counts["total"]:
             withdrawn_teams.add(team)
-            logger.warning(f"Equipa desistente detectada: {team} ({counts['total']} jogos)")
+            logger.warning(
+                f"Equipa desistente detectada: {team} ({counts['total']} jogos)"
+            )
 
     return withdrawn_teams
 
@@ -2598,7 +2660,12 @@ def _load_modalidade_data(
          division_baselines, division_draw_rates)
     """
     # Carregar ELOs da época anterior
-    elo_file = Path(docs_dir) / "output" / "elo_ratings" / "elo_{modalidade}{date_pattern}.csv"
+    elo_file = (
+        Path(docs_dir)
+        / "output"
+        / "elo_ratings"
+        / f"elo_{modalidade}{date_pattern}.csv"
+    )
     initial_elos: Dict[str, float] = {}
     if Path(str(elo_file)).exists():
         with open(elo_file, newline="", encoding="utf-8-sig") as csvfile:
@@ -2610,16 +2677,18 @@ def _load_modalidade_data(
                 for i, team_name in enumerate(headers):
                     if i < len(last_row):
                         try:
-                            normalized_name = normalize_team_name(team_name, course_mapping)
+                            normalized_name = normalize_team_name(
+                                team_name, course_mapping
+                            )
                             initial_elos[normalized_name] = float(last_row[i])
                         except ValueError:
                             continue
 
     # Carregar e separar jogos
-    all_csv_rows = _load_csv_rows_cached(
-        str(Path(modalidades_path) / modalidade_file)
+    all_csv_rows = _load_csv_rows_cached(str(Path(modalidades_path) / modalidade_file))
+    past_matches_rows, future_matches_rows = separate_past_and_future_matches(
+        all_csv_rows
     )
-    past_matches_rows, future_matches_rows = separate_past_and_future_matches(all_csv_rows)
 
     # Calcular e aplicar baselines históricos ao simulador
     division_baselines = calculate_division_baselines(
@@ -2664,7 +2733,9 @@ def _build_teams_and_fixtures(
     all_teams_in_epoch: Set[str] = set()
 
     # Detectar desistentes antes de processar qualquer jogo
-    withdrawn_teams = detect_withdrawn_teams_from_csv(future_matches_rows, course_mapping)
+    withdrawn_teams = detect_withdrawn_teams_from_csv(
+        future_matches_rows, course_mapping
+    )
 
     # Mapear divisão/grupo para todas as equipas (passado + futuro)
     team_division: Dict[str, Tuple[int, str]] = {}
@@ -2689,7 +2760,9 @@ def _build_teams_and_fixtures(
     def _register_team(name: str) -> None:
         if name not in teams:
             div = team_division.get(name, (None, None))[0]
-            teams[name] = Team(name, get_initial_rating_from_division(name, div, initial_elos))
+            teams[name] = Team(
+                name, get_initial_rating_from_division(name, div, initial_elos)
+            )
 
     # Jogos futuros → fixtures de simulação
     for row in future_matches_rows:
@@ -2709,19 +2782,23 @@ def _build_teams_and_fixtures(
 
         team_a_short = get_team_short_name(team_a, course_mapping_short)
         team_b_short = get_team_short_name(team_b, course_mapping_short)
-        match_id = f"{modalidade}_{row.get('Jornada', '0')}_{team_a_short}_{team_b_short}"
+        match_id = (
+            f"{modalidade}_{row.get('Jornada', '0')}_{team_a_short}_{team_b_short}"
+        )
 
-        fixtures.append({
-            "a": team_a,
-            "b": team_b,
-            "is_future": True,
-            "id": match_id,
-            "jornada": row.get(COL_JORNADA, ""),
-            "dia": row.get(COL_DIA, ""),
-            "hora": row.get(COL_HORA, ""),
-            "divisao": row.get(COL_DIVISAO, ""),
-            "grupo": row.get(COL_GRUPO, ""),
-        })
+        fixtures.append(
+            {
+                "a": team_a,
+                "b": team_b,
+                "is_future": True,
+                "id": match_id,
+                "jornada": row.get(COL_JORNADA, ""),
+                "dia": row.get(COL_DIA, ""),
+                "hora": row.get(COL_HORA, ""),
+                "divisao": row.get(COL_DIVISAO, ""),
+                "grupo": row.get(COL_GRUPO, ""),
+            }
+        )
 
     # Jogos passados → registar equipas (para histórico de ELO)
     for row in past_matches_rows:
@@ -2765,16 +2842,29 @@ def _export_results(
     suffix = "_hardset" if is_hardset else ""
 
     out_dir = Path(docs_dir) / "output" / subfolder
-    output_file = out_dir / f"forecast_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv"
-    predictions_file = out_dir / f"previsoes_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv"
+    output_file = (
+        out_dir / f"forecast_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv"
+    )
+    predictions_file = (
+        out_dir / f"previsoes_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv"
+    )
 
     # --- CSV 1: Forecast de equipas ---
     with open(output_file, "w", newline="", encoding="utf-8-sig") as csvfile:
         fieldnames = [
-            "team", "p_playoffs", "p_meias_finais", "p_finais", "p_champion",
-            "p_promocao", "p_descida", "expected_points", "expected_points_std",
-            "expected_place_in_group", "expected_place_in_group_std",
-            "avg_final_elo", "avg_final_elo_std",
+            "team",
+            "p_playoffs",
+            "p_meias_finais",
+            "p_finais",
+            "p_champion",
+            "p_promocao",
+            "p_descida",
+            "expected_points",
+            "expected_points_std",
+            "expected_place_in_group",
+            "expected_place_in_group_std",
+            "avg_final_elo",
+            "avg_final_elo_std",
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -2784,29 +2874,32 @@ def _export_results(
                 r = results[team]
                 row = {
                     "team": team,
-                    "p_playoffs":               f"{r['p_playoffs'] * 100:.4f}",
-                    "p_meias_finais":            f"{r['p_meias_finais'] * 100:.4f}",
-                    "p_finais":                  f"{r['p_finais'] * 100:.4f}",
-                    "p_champion":                f"{r['p_champion'] * 100:.4f}",
-                    "p_promocao":                f"{r['p_promocao'] * 100:.4f}",
-                    "p_descida":                 f"{r['p_descida'] * 100:.4f}",
-                    "expected_points":           f"{r['expected_points']:.2f}",
-                    "expected_points_std":       f"{r['expected_points_std']:.2f}",
-                    "expected_place_in_group":   f"{r['expected_place']:.2f}",
+                    "p_playoffs": f"{r['p_playoffs'] * 100:.4f}",
+                    "p_meias_finais": f"{r['p_meias_finais'] * 100:.4f}",
+                    "p_finais": f"{r['p_finais'] * 100:.4f}",
+                    "p_champion": f"{r['p_champion'] * 100:.4f}",
+                    "p_promocao": f"{r['p_promocao'] * 100:.4f}",
+                    "p_descida": f"{r['p_descida'] * 100:.4f}",
+                    "expected_points": f"{r['expected_points']:.2f}",
+                    "expected_points_std": f"{r['expected_points_std']:.2f}",
+                    "expected_place_in_group": f"{r['expected_place']:.2f}",
                     "expected_place_in_group_std": f"{r['expected_place_std']:.2f}",
-                    "avg_final_elo":             f"{r['avg_final_elo']:.1f}",
-                    "avg_final_elo_std":         f"{r['avg_final_elo_std']:.1f}",
+                    "avg_final_elo": f"{r['avg_final_elo']:.1f}",
+                    "avg_final_elo_std": f"{r['avg_final_elo_std']:.1f}",
                 }
             else:
                 team_div = team_division.get(team, (None, ""))[0]
                 row = {
                     "team": team,
-                    "p_playoffs": "0.0000", "p_meias_finais": "0.0000",
-                    "p_finais": "0.0000", "p_champion": "0.0000",
-                    "p_promocao": "0.0000", "p_descida": "0.0000",
-                    "expected_points":     f"{real_points.get(team, 0.0):.2f}",
+                    "p_playoffs": "0.0000",
+                    "p_meias_finais": "0.0000",
+                    "p_finais": "0.0000",
+                    "p_champion": "0.0000",
+                    "p_promocao": "0.0000",
+                    "p_descida": "0.0000",
+                    "expected_points": f"{real_points.get(team, 0.0):.2f}",
                     "expected_points_std": "0.00",
-                    "expected_place_in_group":     f"{float(len(all_teams_in_epoch)):.2f}",
+                    "expected_place_in_group": f"{float(len(all_teams_in_epoch)):.2f}",
                     "expected_place_in_group_std": "0.00",
                     "avg_final_elo": f"{get_initial_rating_from_division(team, team_div, initial_elos):.1f}",
                     "avg_final_elo_std": "0.0",
@@ -2819,12 +2912,25 @@ def _export_results(
     future_count = 0
     with open(predictions_file, "w", newline="", encoding="utf-8-sig") as csvfile:
         fieldnames = [
-            "jornada", "dia", "hora", "team_a", "team_b",
-            "expected_elo_a", "expected_elo_a_std", "expected_elo_b", "expected_elo_b_std",
-            "prob_vitoria_a", "prob_empate", "prob_vitoria_b",
-            "expected_goals_a", "expected_goals_a_std",
-            "expected_goals_b", "expected_goals_b_std",
-            "distribuicao_placares", "divisao", "grupo",
+            "jornada",
+            "dia",
+            "hora",
+            "team_a",
+            "team_b",
+            "expected_elo_a",
+            "expected_elo_a_std",
+            "expected_elo_b",
+            "expected_elo_b_std",
+            "prob_vitoria_a",
+            "prob_empate",
+            "prob_vitoria_b",
+            "expected_goals_a",
+            "expected_goals_a_std",
+            "expected_goals_b",
+            "expected_goals_b_std",
+            "distribuicao_placares",
+            "divisao",
+            "grupo",
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -2839,9 +2945,9 @@ def _export_results(
             score_dist = match_score_stats.get(mid, {})
 
             elo_a_expected = elo_fc.get("elo_a_mean", teams[match["a"]].elo)
-            elo_a_std      = elo_fc.get("elo_a_std", 0.0)
+            elo_a_std = elo_fc.get("elo_a_std", 0.0)
             elo_b_expected = elo_fc.get("elo_b_mean", teams[match["b"]].elo)
-            elo_b_std      = elo_fc.get("elo_b_std", 0.0)
+            elo_b_std = elo_fc.get("elo_b_std", 0.0)
 
             # Calcular golos esperados e desvio padrão a partir da distribuição de placares
             expected_goals_a = expected_goals_b = 0.0
@@ -2865,40 +2971,48 @@ def _export_results(
                     except (ValueError, IndexError):
                         pass
 
-                sorted_scores = sorted(score_dist.items(), key=lambda x: x[1], reverse=True)
+                sorted_scores = sorted(
+                    score_dist.items(), key=lambda x: x[1], reverse=True
+                )
                 distribuicao_str = "|".join(
                     f"{s}:{(c / total_sims) * 100:.4f}%" for s, c in sorted_scores
                 )
             else:
                 distribuicao_str = ""
 
-            writer.writerow({
-                "jornada":              match.get("jornada", ""),
-                "dia":                  match.get("dia", ""),
-                "hora":                 match.get("hora", ""),
-                "team_a":               match["a"],
-                "team_b":               match["b"],
-                "expected_elo_a":       f"{elo_a_expected:.1f}",
-                "expected_elo_a_std":   f"{elo_a_std:.1f}",
-                "expected_elo_b":       f"{elo_b_expected:.1f}",
-                "expected_elo_b_std":   f"{elo_b_std:.1f}",
-                "prob_vitoria_a":       f"{fc.get('p_win_a', 0) * 100:.4f}",
-                "prob_empate":          f"{fc.get('p_draw', 0) * 100:.4f}",
-                "prob_vitoria_b":       f"{fc.get('p_win_b', 0) * 100:.4f}",
-                "expected_goals_a":     f"{expected_goals_a:.2f}",
-                "expected_goals_a_std": f"{variance_a ** 0.5:.2f}",
-                "expected_goals_b":     f"{expected_goals_b:.2f}",
-                "expected_goals_b_std": f"{variance_b ** 0.5:.2f}",
-                "distribuicao_placares": distribuicao_str,
-                "divisao":              match.get("divisao", ""),
-                "grupo":                match.get("grupo", ""),
-            })
+            writer.writerow(
+                {
+                    "jornada": match.get("jornada", ""),
+                    "dia": match.get("dia", ""),
+                    "hora": match.get("hora", ""),
+                    "team_a": match["a"],
+                    "team_b": match["b"],
+                    "expected_elo_a": f"{elo_a_expected:.1f}",
+                    "expected_elo_a_std": f"{elo_a_std:.1f}",
+                    "expected_elo_b": f"{elo_b_expected:.1f}",
+                    "expected_elo_b_std": f"{elo_b_std:.1f}",
+                    "prob_vitoria_a": f"{fc.get('p_win_a', 0) * 100:.4f}",
+                    "prob_empate": f"{fc.get('p_draw', 0) * 100:.4f}",
+                    "prob_vitoria_b": f"{fc.get('p_win_b', 0) * 100:.4f}",
+                    "expected_goals_a": f"{expected_goals_a:.2f}",
+                    "expected_goals_a_std": f"{variance_a ** 0.5:.2f}",
+                    "expected_goals_b": f"{expected_goals_b:.2f}",
+                    "expected_goals_b_std": f"{variance_b ** 0.5:.2f}",
+                    "distribuicao_placares": distribuicao_str,
+                    "divisao": match.get("divisao", ""),
+                    "grupo": match.get("grupo", ""),
+                }
+            )
             future_count += 1
 
     if future_count > 0:
-        print(f"Previsões de {future_count} jogos futuros guardadas em {predictions_file}\n")
+        print(
+            f"Previsões de {future_count} jogos futuros guardadas em {predictions_file}\n"
+        )
     else:
-        print(f"Nenhum jogo futuro encontrado para {modalidade} (ou sem previsões disponíveis)\n")
+        print(
+            f"Nenhum jogo futuro encontrado para {modalidade} (ou sem previsões disponíveis)\n"
+        )
 
 
 def main(
@@ -2928,19 +3042,23 @@ def main(
     os.makedirs(Path(docs_dir) / "output" / "cenarios", exist_ok=True)
 
     course_mapping, course_mapping_short = load_course_mapping(docs_dir)
-    print(f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos\n")
+    print(
+        f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos\n"
+    )
 
-    hardset_manager = _build_hardset_manager(hardset_args, hardset_csv, course_mapping_short)
+    hardset_manager = _build_hardset_manager(
+        hardset_args, hardset_csv, course_mapping_short
+    )
 
     elo_system = CompleteTacauaEloSystem(k_base=ELO_K_BASE)
     sport_simulators = {
-        "FUTSAL FEMININO":       SportScoreSimulator("futsal"),
-        "FUTSAL MASCULINO":      SportScoreSimulator("futsal"),
-        "ANDEBOL MISTO":         SportScoreSimulator("andebol"),
-        "BASQUETEBOL FEMININO":  SportScoreSimulator("basquete"),
+        "FUTSAL FEMININO": SportScoreSimulator("futsal"),
+        "FUTSAL MASCULINO": SportScoreSimulator("futsal"),
+        "ANDEBOL MISTO": SportScoreSimulator("andebol"),
+        "BASQUETEBOL FEMININO": SportScoreSimulator("basquete"),
         "BASQUETEBOL MASCULINO": SportScoreSimulator("basquete"),
-        "VOLEIBOL FEMININO":     SportScoreSimulator("volei"),
-        "VOLEIBOL MASCULINO":    SportScoreSimulator("volei"),
+        "VOLEIBOL FEMININO": SportScoreSimulator("volei"),
+        "VOLEIBOL MASCULINO": SportScoreSimulator("volei"),
         "FUTEBOL DE 7 MASCULINO": SportScoreSimulator("futebol7"),
     }
 
@@ -2955,7 +3073,9 @@ def main(
     if hardset_manager and hardset_manager.fixed_results:
         hardset_modalidades = hardset_manager.get_affected_modalidades()
         if hardset_modalidades:
-            print(f"\n🎯 Hardset afeta modalidades: {', '.join(sorted(hardset_modalidades))}")
+            print(
+                f"\n🎯 Hardset afeta modalidades: {', '.join(sorted(hardset_modalidades))}"
+            )
             print("ℹ️ Processando APENAS essas modalidades...\n")
         else:
             print("\n⚠️ Aviso: Hardset carregado mas nenhuma modalidade foi detectada")
@@ -2970,8 +3090,8 @@ def main(
     modalidades_path = Path(docs_dir) / "output" / "csv_modalidades"
     ano_passado_2d = str(ano_atual - 2)[2:]
     ano_passado_1d = str(ano_atual - 1)[2:]
-    ano_atual_2d   = str(ano_atual)[2:]
-    season_suffix  = f"_{ano_passado_1d}_{ano_atual_2d}"
+    ano_atual_2d = str(ano_atual)[2:]
+    season_suffix = f"_{ano_passado_1d}_{ano_atual_2d}"
 
     for modalidade_file in os.listdir(modalidades_path):
         if not modalidade_file.endswith(f"{season_suffix}.csv"):
@@ -2986,13 +3106,17 @@ def main(
 
         print(f"Simulando modalidade: {modalidade}")
 
-        score_simulator = sport_simulators.get(modalidade, sport_simulators["FUTSAL MASCULINO"])
+        score_simulator = sport_simulators.get(
+            modalidade, sport_simulators["FUTSAL MASCULINO"]
+        )
         past_seasons = [
             f"{ano_passado_2d}_{ano_passado_1d}",
             f"{ano_passado_1d}_{ano_atual_2d}",
         ]
 
-        historical_draw_rate = calculate_historical_draw_rate(modalidade, past_seasons, docs_dir)
+        historical_draw_rate = calculate_historical_draw_rate(
+            modalidade, past_seasons, docs_dir
+        )
         if historical_draw_rate > 0:
             print(f"  Taxa histórica de empates: {historical_draw_rate:.1%}")
 
@@ -3005,14 +3129,26 @@ def main(
             division_baselines,
             division_draw_rates,
         ) = _load_modalidade_data(
-            modalidade, season_suffix, past_seasons, docs_dir, modalidades_path,
-            modalidade_file, course_mapping, score_simulator, calibrated_config,
+            modalidade,
+            season_suffix,
+            past_seasons,
+            docs_dir,
+            modalidades_path,
+            modalidade_file,
+            course_mapping,
+            score_simulator,
+            calibrated_config,
         )
 
         # --- Construir equipas e fixtures ---
         teams, fixtures, all_teams_in_epoch, team_division = _build_teams_and_fixtures(
-            all_csv_rows, past_matches_rows, future_matches_rows,
-            course_mapping, course_mapping_short, initial_elos, modalidade,
+            all_csv_rows,
+            past_matches_rows,
+            future_matches_rows,
+            course_mapping,
+            course_mapping_short,
+            initial_elos,
+            modalidade,
         )
 
         if not fixtures:
@@ -3041,14 +3177,18 @@ def main(
                 real_points=real_points,
                 playoff_slots=playoff_slots,
                 total_playoff_slots=(
-                    total_playoff_slots if total_playoff_slots > 0 else PLAYOFF_SLOTS_DEFAULT
+                    total_playoff_slots
+                    if total_playoff_slots > 0
+                    else PLAYOFF_SLOTS_DEFAULT
                 ),
                 hardset_manager=hardset_manager,
             )
         )
 
         # --- Diagnóstico de baselines ---
-        predicted_stats = calculate_predicted_division_stats(fixtures, match_score_stats)
+        predicted_stats = calculate_predicted_division_stats(
+            fixtures, match_score_stats
+        )
         print("Medias historicas e previstas (golos por equipa) e taxa de empates:")
         all_divs = set(division_baselines.keys()) | set(predicted_stats.keys())
         all_divs.add(None)
@@ -3056,12 +3196,12 @@ def main(
             hist_base = division_baselines.get(div_key)
             hist_draw = division_draw_rates.get(div_key, 0.0)
             pred = predicted_stats.get(div_key)
-            div_label  = f"Div {div_key}" if div_key is not None else "Geral"
-            hist_mean  = hist_base["mean"] if hist_base else 0.0
-            hist_std   = hist_base.get("std", 0.0) if hist_base else 0.0
-            pred_mean  = pred["mean"] if pred else 0.0
-            pred_draw  = pred["draw_rate"] if pred else 0.0
-            pred_n     = pred["matches"] if pred else 0
+            div_label = f"Div {div_key}" if div_key is not None else "Geral"
+            hist_mean = hist_base["mean"] if hist_base else 0.0
+            hist_std = hist_base.get("std", 0.0) if hist_base else 0.0
+            pred_mean = pred["mean"] if pred else 0.0
+            pred_draw = pred["draw_rate"] if pred else 0.0
+            pred_n = pred["matches"] if pred else 0
             print(
                 f"  {div_label}: historico={hist_mean:.2f} +/- {hist_std:.2f}, "
                 f"empates={hist_draw:.1%} | previsto={pred_mean:.2f}, "
@@ -3076,7 +3216,8 @@ def main(
                 group_key = (div, grp)
                 group_teams = [t for t, tg in team_division.items() if tg == group_key]
                 prob_sum = sum(
-                    results.get(t, {}).get("p_playoffs", 0.0) * 100.0 for t in group_teams
+                    results.get(t, {}).get("p_playoffs", 0.0) * 100.0
+                    for t in group_teams
                 )
                 expected_sum = slots * 100.0
                 print(
@@ -3088,12 +3229,22 @@ def main(
 
         # --- Exportar resultados ---
         _export_results(
-            docs_dir, modalidade, ano_atual, n_simulations, hardset_manager,
-            all_teams_in_epoch, teams, team_division, initial_elos, real_points,
-            results, fixtures, match_forecasts, match_elo_forecast, match_score_stats,
+            docs_dir,
+            modalidade,
+            ano_atual,
+            n_simulations,
+            hardset_manager,
+            all_teams_in_epoch,
+            teams,
+            team_division,
+            initial_elos,
+            real_points,
+            results,
+            fixtures,
+            match_forecasts,
+            match_elo_forecast,
+            match_score_stats,
         )
-
-
 
 
 if __name__ == "__main__":

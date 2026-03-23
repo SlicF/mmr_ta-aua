@@ -1,5 +1,7 @@
 # CALIBRATION_DETAILED.md - Calibração de Parâmetros Estatísticos
 
+[🇬🇧 View English Version](CALIBRATION_DETAILED_EN.md)
+
 ## Índice
 
 1. [Objetivo da Calibração](#objetivo)

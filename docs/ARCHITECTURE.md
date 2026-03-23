@@ -1,398 +1,207 @@
-# ARCHITECTURE.md - Arquitetura Técnica do Sistema ELO Taçaua
+# ARCHITECTURE.md - Arquitetura Técnica do Sistema ELO Taça UA
 
-## Visão Geral do Sistema
-
-Sistema de **ranking ELO adaptativo** e **simulação Monte Carlo** para competições desportivas universitárias.
-Combina modelo ELO modificado (K-factor dinâmico) com calibração estatística Gamma-Poisson e simulação estocástica.
-
-**Versão:** 2.1  
-**Linguagem:** Python 3.8+  
-**Dependências críticas:** numpy, scipy, sklearn, pandas
+[🇬🇧 View English Version](ARCHITECTURE_EN.md)
 
 ---
 
-## Pipeline Completo de Dados
+## Visão Geral do Sistema
+
+Este modelo computacional de **ranking ELO adaptativo** e **simulação Monte Carlo** foi concebido exclusivamente para modelar competições desportivas do desporto universitário. A infraestrutura conjuga um método ELO otimizado, assente num $K$-factor dinâmico não linear, com uma robusta calibração estatística que emprega regressão Gamma-Poisson para suportar projeções estocásticas em massa.
+
+**Versão da Build:** 2.1  
+**Ambiente de Execução:** Python 3.8+  
+**Dependências do Núcleo:** `numpy`, `scipy`, `scikit-learn`, `pandas`
+
+---
+
+## Estrutura do Pipeline de Dados (Data Pipeline)
 
 ```ini
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    FASE 1: EXTRAÇÃO DE DADOS                            │
+│                    FASE 1: EXTRAÇÃO E NORMALIZAÇÃO                      │
 └─────────────────────────────────────────────────────────────────────────┘
               │
-              │  extrator.py (30s runtime)
+              │  extrator.py (Tempo de execução: ~30s)
               ▼
      ┌─────────────────────────────┐
-     │  Excel Oficial (Taça UA)    │
-     │  - Múltiplas folhas         │──┐
-     │  - Normalização de nomes     │  │ Lê Excel row-by-row
-     │  - Detecção de modalidades   │  │ Aplica normalize_team_name()
-     └─────────────────────────────┘  │ Infere Sport enum
+     │  Grelha Fonte (Excel)       │
+     │  - Extração em múltiplas    │──┐
+     │    folhas                   │  │ Parsing iterativo linha-a-linha
+     │  - Sanitização de entidades │  │ Executa normalize_team_name()
+     │  - Identificação orgânica   │  │ Infere o contexto 'Sport' enum
+     └─────────────────────────────┘  │
               │                        │
-              │  CSV files/modalidade ◀┘
+              │  Ficheiros CSV Particionados ◀┘
               ▼
      docs/output/csv_modalidades/
      ├── <modalidade>_<época>.csv
-     └── (múltiplos ficheiros por modalidade/época)
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                  FASE 2: CÁLCULO DE ELO RATINGS                         │
+│                  FASE 2: CONTAGEM E AVALIAÇÃO ELO                       │
 └─────────────────────────────────────────────────────────────────────────┘
               │
-              │  mmr_taçaua.py (2-3 min)
+              │  mmr_taçaua.py (Tempo de execução: 2-3 min)
               ▼
      ┌───────────────────────────────────┐
-     │  EloRatingSystem() init           │
-     │  - K_base = 100                   │
-     │  - E_factor = 250                 │
-     │  - Sport-specific PointsCalc      │
+     │  Instanciação EloRatingSystem()   │
+     │  - K_base indexado: 100           │
+     │  - E_factor modelado: 250         │
+     │  - Computador de Pontos Específico│
      └───────────────────────────────────┘
               │
-              │  Para cada jogo cronológico:
+              │  Para cada iteração cronológica competitiva:
               ▼
      ┌───────────────────────────────────┐
-     │  ΔElo = K × (S_real - S_expected) │
-     │                                    │
+     │  ΔElo = K × (S_historico - S_proj)│
+     │                                   │
      │  K = K_base × M_fase × M_prop     │──┐
-     │  M_fase = f(jornada, posição)     │  │ Dynamic K-factor
-     │  M_prop = (max/min golos)^(1/10)  │  │ (ver seção 3)
-     │                                    │  │
-     │  S_expected = 1/(1+10^(-Δ/250))   │◀─┘
+     │  M_fase = f(jornada, momento)     │  │ K-factor mutável
+     │  M_prop = log_scale(diferencial)  │  │ (refira-se à Seção 3)
+     │                                   │  │
+     │  S_proj = 1/(1+10^(-Δ/250))       │◀─┘
      └───────────────────────────────────┘
               │
-              │  CSV outputs (classificações + ELO)
+              │  Estruturas CSV / JSON (Outputs persistentes)
               ▼
      docs/output/elo_ratings/
-     ├── classificacao_FUTSAL MASCULINO_25_26.csv
      ├── classificacao_<modalidade>_<época>.csv
      ├── elo_history_<modalidade>_<época>.json
-     └── backtest_summary_<modalidade>.json
-┌─────────────────────────────────────────────────────────────────────────┐
-│              FASE 3: CALIBRAÇÃO DE PARÂMETROS                           │
-└─────────────────────────────────────────────────────────────────────────┘
-              │
-              │  calibrator.py (1 min)
-              ▼
-     ┌──────────────────────────────────────────────┐
-     │  HistoricalDataLoader                        │
-     │  - Carrega CSVs de épocas passadas           │
-     │  - Filtra ausências (~4.5% removidas)        │
-     └──────────────────────────────────────────────┘
-              │
-              │  HistoricalEloCalculator
-              │  Retroactivamente calcula ELO_before para cada jogo
-              ▼
-     ┌──────────────────────────────────────────────┐
-     │  DrawProbabilityCalibrator                   │
-     │  Modelo: logit(P(draw)) = β₀ + β₁|Δ| + β₂|Δ|²│
-     │  Método: LogisticRegression (sklearn)        │
-     │  Validação: ≥5 empates OR fallback gaussiano │
-     └──────────────────────────────────────────────┘
-              │
-              │  GoalsDistributionCalibrator
-              ▼
-     ┌──────────────────────────────────────────────┐
-     │  GAMMA-POISSON FITTING                       │
-     │                                              │
-     │  k = μ² / (σ² - μ)   com floor k ≥ 3.0      │
-     │                                              │
-     │  μ = E[golos/equipa]                         │
-     │  σ² = Var[golos/equipa]                      │
-     │  k = parâmetro de dispersão (shape)          │
-     │                                              │
-     │  Floor k≥3.0 evita overdispersion (σ>33%)    │
-     └──────────────────────────────────────────────┘
-              │
-              │  JSON outputs
-              ▼
-     docs/output/calibration/
-     ├── calibrated_simulator_config.json  ← USADO pelo preditor
-     └── calibrated_params_full.json       ← DEBUG info
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│              FASE 4: SIMULAÇÃO MONTE CARLO                              │
+│              FASE 3: CALIBRAÇÃO PARAMÉTRICA GLOBAL                      │
 └─────────────────────────────────────────────────────────────────────────┘
               │
-              │  preditor.py (5 min deep-simulation)
+              │  calibrator.py (Tempo de execução: ~1 min)
               ▼
      ┌──────────────────────────────────────────────┐
-     │  SportScoreSimulator                         │
-     │  - Carrega calibrated_simulator_config.json  │
-     │  - Aplica parâmetros específicos/modalidade  │
+     │  Módulo 'HistoricalDataLoader'               │
+     │  - Valida dataframes em memória              │
+     │  - Expurgos: omissões e anomalias de jogo    │
      └──────────────────────────────────────────────┘
               │
-              │  Para cada cenário (N=10k-1M iterações):
+              │  Calibrador de Histórico ELO
               ▼
      ┌──────────────────────────────────────────────┐
-     │  simulate_score(elo_a, elo_b)                │
+     │  Calibrador de Probabilidades de Empate      │
+     │  P_draw: logit(P) = β₀ + β₁|Δ| + β₂|Δ|²      │
+     │  Otimizador: Regressão Logística (sklearn)   │
+     └──────────────────────────────────────────────┘
+              │
+              │  Calibrador de Distribuição (Golos)
+              ▼
+     ┌──────────────────────────────────────────────┐
+     │  RECONHECIMENTO GAMMA-POISSON                │
+     │  k = μ² / (σ² - μ)   com teto  k ≥ 3.0       │
      │                                              │
-     │  MODELO A (Poisson): Futsal, Futebol7        │
-     │  MODELO B (Gamma-Poisson): Andebol           │
-     │  MODELO C (Gaussiano): Basquete 3x3          │
-     │  MODELO D (Sets): Voleibol                   │
-     │                                              │
-     │  (ver SIMULATION_MODELS.md para detalhes)    │
+     │  Limites de 'k' regulam 'overdispersion'     │
      └──────────────────────────────────────────────┘
               │
-              │  Agregação de resultados
+              │  Mapeamento em JSON
+              ▼
+     docs/output/calibration/
+     ├── calibrated_simulator_config.json
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│              FASE 4: MOTOR DE SIMULAÇÃO MONTE CARLO                     │
+└─────────────────────────────────────────────────────────────────────────┘
+              │
+              │  preditor.py (Tempo de exc. Típico: ~5 min)
               ▼
      ┌──────────────────────────────────────────────┐
-     │  Output: Probabilidades finais               │
-     │  - P(classificação) para cada equipa         │
-     │  - P(campeão), P(top3), P(relegação)         │
-     │  - Forecast: posição mais provável           │
+     │  Inicializador 'SportScoreSimulator'         │
+     │  - Importa configurações calibradas          │
      └──────────────────────────────────────────────┘
               │
-              │  CSV outputs
+              │  Por cada universo (N = 10⁴ a 10⁶):
+              ▼
+     ┌──────────────────────────────────────────────┐
+     │  Processar simulação(elo_a, elo_b)           │
+     │                                              │
+     │  Módulos ativados conforme o Desporto:       │
+     │  (Ver: SIMULATION_MODELS.md)                 │
+     └──────────────────────────────────────────────┘
+              │
+              │  Agregação em Memória Volátil
+              ▼
+     ┌──────────────────────────────────────────────┐
+     │  Compilação e Exportação                     │
+     │  - Asserções preditivas para final, P(top3)  │
+     └──────────────────────────────────────────────┘
+              │
+              │  Persistência Física
               ▼
      docs/output/previsoes/
-     ├── forecast_FUTSAL MASCULINO_2026.csv
      ├── forecast_<modalidade>_<ano>.csv
 ```
 
 ---
 
-## Componentes Críticos
+## Módulos Sistémicos Críticos
 
-### 1. Sistema ELO Modificado
+### 1. Motor ELO Dinâmico e Reajuste Empírico
 
-#### Fórmula Base
+#### Fator de Escala (E-factor) = 250
 
-```ini
-ΔElo_A = K_factor × (S_real - S_expected)
+A base quantitativa centraliza a transição do termodinâmico standard $E=400$ (aplicado ao xadrez convencional) em direção a uma escala tática de $E=250$. 
 
-Onde:
-  S_expected_A = 1 / (1 + 10^((ELO_B - ELO_A) / E_factor))
-  S_real ∈ {0, 0.5, 1}  (derrota, empate, vitória)
-  E_factor = 250  (ajustado para desportos, não 400 de xadrez)
-```
+**Resolução Técnica:**
+A contração do fator E inflaciona artificialmente os gradientes nas extremidades probabilísticas, promovendo uma sensibilidade acentuada à flutuação orgânica desportiva. Este valor calibrado demonstrou um índice de correlação retroativa (*goodness of fit*) exímio ($R² = 0.992$), traduzindo um $\Delta ELO = 200$ numa expectativa pragmática de 73% vitórias (próximo dos 72% de empirismo testado).
 
-**Justificação E=250:**
+#### Complexidade do K-factor Variável
 
-- E-factor reduzido (vs xadrez E=400) para aumentar variância do sistema
-- Valor calibrado para relação com ELOs iniciais: 1000 (padrão), 500 (equipas novas), 750 (promoções)
-- Validação empírica: ΔElo=200 → P(vitória)=73% vs 72% observado (fit R²=0.992)
+O escalar de atualização, contrariamente aos sistemas monolíticos, obedece à equação multivariável funcional:
 
-#### K-factor Dinâmico
+$$K_{factor} = K_{base} \times M_{fase} \times M_{proporcao}$$
 
-```python
-K_factor = K_base × M_fase × M_proporção
+- O **Teto Primário ($K_{base} = 100$)** permite aberturas para que a inflação compense volatilidades agudas nas provas;
+- O fator temporal **$M_{fase}$** altera a resiliência do valor, maximizando a reavaliação nos momentos propedêuticos (onde incerteza é soberana) ou nos estádios colossais eliminatórios (Playoffs);
+- O rácio logarítmico **$M_{proporcao}$** avalia tangencialmente o esmagamento entre pontuações das equipas envolvidas, amortecendo picos irrazoáveis deriváveis de distribuições atípicas mediante extração da base de 10.
 
-# Componente 1: K_base
-K_base = 100  # vs xadrez 32; desportos mais voláteis
+### 2. Sanitização Fonética e Semiótica
 
-# Componente 2: M_fase (multiplier de fase da época)
-def calculate_season_phase_multiplier(game_num, total_games, jornada):
-    game_scaled = (game_num / total_games) * 8
-    
-    if jornada == "E3L":  # Jogo do 3º lugar
-        return 0.75
-    elif game_scaled > 8:  # Playoffs
-        return 1.5
-    elif game_scaled < 8/3:  # Primeiros jogos (início época)
-        return 1 / log(4 × game_scaled, 16)  # Decrescente: ~2.5 → ~1.1
-    else:  # Meio/fim época regular
-        return 1.0
+**Fundamentação Teórica:** Equipas detentoras de variações nominais idiossincráticas ou de preenchimento incoerente (siglas divergentes) propagam erro no registo temporal (e consequentemente induzem divisão e falha ELO).
 
-# Componente 3: M_proporção (multiplier por margem)
-def calculate_score_proportion(score1, score2):
-    max_score = max(score1, score2)
-    min_score = max(0.5, min(score1, score2))  # Evitar divisão por zero
-    proportion = max_score / min_score
-    return proportion ** (1/10)  # Raiz 10ª suaviza impacto
+**Tratamento Sistematizado:** O módulo propaga 3 níveis de abstração para processamento textual (Natural Language Treatment):
+1. **Dicionário JSON (`config_cursos.json`)**: Regula de forma binária com privilégios absolutos o mapeamento explícito entre variantes comuns e a nomenclatura canónica real.
+2. **Hardcoding de Transições**: Processa e une rastreios legados, mantendo ligações em heranças lógicas passadas (ex. 'Contabilidade' migra integralmente para 'Marketing').
+3. **Decadificação Unicode (NFD)**: Executa redução purgada de acentuação, convertendo os blocos brutos em referências *hashing* confiéis.
 
-# Exemplo numérico:
-# Goleada 5-0:  M_prop = (5/0.5)^0.1 = 10^0.1 ≈ 1.26 (+26% ELO change)
-# Vitória 2-1:  M_prop = (2/1)^0.1 = 2^0.1 ≈ 1.07 (+7%)
-# Empate 1-1:   M_prop = (1/1)^0.1 = 1.0 (sem bonus)
-```
+### 3. Matriz de Detecção Desportiva
 
-**Impacto observado:**
-
-- K médio observado = 102 (vs esperado 100)
-- Range: ~65 (empates late-season) até ~210 (goleadas início época)
-
----
-
-### 2. Normalização de Nomes
-
-**Problema:** Equipas com nomes variantes (acentos, abreviaturas, erros tipográficos) criam duplicações nos rankings.
-
-**Solução:** Sistema de mapeamento centralizado com 3 níveis:
+O reconhecimento dos regulamentos decorre através de padrões e sub-padrões regex predefinidos ou da correspondência de topónimo no *Dataframe*:
 
 ```python
-# Nível 1: Config JSON (source of truth)
-config_cursos.json contém:
-  "TRADUÇÃO": {
-    "displayName": "Tradução",
-    "variants": ["Traduçao", "TRADUÇÃO", "traducao"]
-  }
-
-# Nível 2: Mapeamentos hardcoded (casos não-JSON)
-TEAM_MAPPINGS = {
-    "Eng. Informatica": "EI",
-    "Contabilidade": "Marketing"  # Transição específica andebol 24→25
-}
-
-# Nível 3: Normalização Unicode
-normalize_team_name("Traduçao") → "Tradução"
-  1. Strip whitespace
-  2. Filtrar placeholders ("1º Class.", "Vencedor QF1")
-  3. Aplicar mappings (JSON prioritário)
-  4. NFD decomposition + accent removal
-  5. Return canonical name
-```
-
-**Casos especiais:**
-
-- **Transições entre épocas:** Contabilidade → Marketing (andebol 24-25 → 25-26)
-   - ELO transferido automaticamente via `handle_special_team_transitions()`
-
-- **Siglas:** "Engenharia Informática" → "EI"
-- **Erros conhecidos:** "EGO" → "EGI"
-
----
-
-### 3. Detecção e Pontuação por Modalidade
-
-```python
-class Sport(Enum):
-    ANDEBOL = "andebol"
-    FUTSAL = "futsal"
-    BASQUETE = "basquete"
-    VOLEI = "volei"
-
-# Pontuação específica (implementado em PointsCalculator)
+# Tabela de Recompensas Matriciais Associadas ($X$ \mapsto (V,E,D))
 POINTS_RULES = {
-    "FUTSAL":    {win: 3, draw: 1, loss: 0},
-    "ANDEBOL":   {win: 3, draw: 2, loss: 1},  # ← Diferente!
-    "BASQUETE":  {win: 2, draw: 1, loss: 0},  # 3x3 raramente empata
-    "VOLEI":     {
-        "2-0": (3, 0),  # Sweep
-        "2-1": (2, 1),  # Vitória apertada
-    }  # NUNCA empata
+    "FUTSAL":    (3, 1, 0),
+    "ANDEBOL":   (3, 2, 1), # Valorização extrema do empate
+    "BASQUETE":  (2, 1, 0), # Redução do empate 3x3
+    "VOLEI":     "Sub-matriz de paridade estruturada"
 }
-
-# Detecção automática via filename pattern matching
-def detect_from_filename(filename):
-    if "andebol" in filename.lower():
-        return Sport.ANDEBOL
-    elif "futsal" in filename.lower() or "futebol" in filename.lower():
-        return Sport.FUTSAL
-    # ... etc
 ```
 
----
+### 4. Gestão de Contingências (Faltas e Resoluções)
 
-### 4. Divisões e Grupos
+A pipeline é programada rigorosamente para identificar e ativamente expurgar de certas zonas de cálculo ocorrências de Forfaits (Abstenções/Ausências não documentadas), equivalentes a aproximadamente $4.5\%$ do total empírico. 
 
-```python
-# Sistema hierárquico: Modalidade → Divisão → Grupo
-class StandingsCalculator:
-    def __init__(self, df, sport, teams):
-        self.div_col = find_column(df, ["Divisão", "Divisao"])
-        self.group_col = find_column(df, ["Grupo"])
-    
-    def calculate_standings(self):
-        # Inferir grupos por conectividade se não houver coluna explícita
-        if not self.group_col:
-            groups = self._infer_groups_from_games()  # Graph connectivity
-        
-        # Classificar separadamente cada (divisão, grupo)
-        for (div, grp) in product(divisions, groups):
-            standings = self._calculate_single_standings(filtered_games)
-            # Aplicar tie-breaks: pontos → diff golos → confronto direto
-```
-
-**Critérios de desempate (hierárquicos):**
-
-1. Pontos totais
-2. Diferença de golos (total)
-3. Confronto direto (se 2 equipas empatadas)
-4. Golos marcados
-5. Ordem alfabética (fallback)
+- **Camada de Restrição do ELO**: Forfaits **não despoletam modificadores**, mitigando oscilações enganosas do modelo;
+- **Camada de Restrição Calibradora**: As resoluções em falso também são suprimidas na regressão estatística para impedir distorções na extração da curva $\lambda$ de Poisson.
 
 ---
 
-### 5. Filtragem de Jogos
+## Tabela de Complexidade e Consumo
 
-**Jogos removidos do cálculo ELO:**
+| Rotina Tecnológica | Procedimento Matemático / Asserção | Classificação (Big O) | Consumo ($T_{\text{cpu}}$) |
+|--------------------|------------------------------------|-----------------------|----------------------------|
+| Extrator | Sanitizações Cruzadas (`Regex` e Hash) | $\mathcal{O}(N \times M)$ | $\sim 30 \text{ sec}$ |
+| ELO System | Processamento Serializado Vectorial | $\mathcal{O}(N)$ | $\sim 2-3 \text{ min}$ |
+| Calibração | Convergência _L-BFGS_ (_sklearn_) | $\mathcal{O}(N \log N)$ | $\sim 1 \text{ min}$ |
+| Previsão (Standard) | Paralelismo $10^4$ simulações | $\mathcal{O}(I \times T \times G)$ | $\sim 30 \text{ sec}$ |
+| Previsão (Deep) | Paralelismo $10^6$ simulações | $\mathcal{O}(I \times T \times G)$ | $\sim 5 \text{ min}$ |
 
-- ✗ Placeholders de playoffs: "1º Class.", "Vencedor QF1"
-- ✗ Faltas de comparência (~4.5% dos jogos)
-   - Razão: Distorcem médias (resultado típico 3-0 WO não reflete ELO)
-   - Impacto: +1-2% precisão (Brier Score melhora ~0.002-0.004)
-
-**Jogos removidos da calibração (mas mantidos no ELO):**
-
-- ✗ Jogos com ausência (campo "Falta de Comparência" ≠ vazio)
-- ✗ Modelos de empate instáveis (<5 empates observados em divisão)
-   - Fallback: Usar modelo gaussiano com `base_draw_rate` histórico
+O paralelismo (suportado por `ProcessPoolExecutor`) conjugado com as diretrizes e transformações nativas de arranjos estáticos via `numpy` providenciaram uma **escalabilidade assinalável**: uma redução temporal com a magnitude de $5\times$ até $10\times$ aquando das simulações estocásticas pesadas.
 
 ---
 
-## Estrutura de Outputs
-
-```ini
-docs/output/
-├── csv_modalidades/         # Fase 1: Extração
-│   └── {MODALIDADE}_{ÉPOCA}.csv
-├── elo_ratings/             # Fase 2: ELO
-│   ├── classificacao_{MODALIDADE}_{ÉPOCA}.csv
-│   ├── elo_history_{MODALIDADE}_{ÉPOCA}.json
-│   └── backtest_summary_{MODALIDADE}.json
-├── calibration/             # Fase 3: Calibração
-│   ├── calibrated_simulator_config.json
-│   ├── calibrated_params_full.json
-│   └── comparison_{MODALIDADE}_{ÉPOCA}.json
-└── previsoes/               # Fase 4: Simulação
-    ├── forecast_{MODALIDADE}_{ANO}.csv
-    └── previsoes_{MODALIDADE}_{ANO}_hardset.csv
-```
-
----
-
-## Complexidade Computacional
-
-| Módulo | Operação Crítica | Complexidade | Runtime Típico |
-|--------|------------------|--------------|----------------|
-| __extrator.py__ | Normalização nomes | O(N×M) N=jogos, M=mappings | ~30s |
-| __mmr_taçaua.py__ | Cálculo ELO iterativo | O(N) N=jogos | ~2-3 min |
-| __calibrator.py__ | Logistic Regression | O(N log N) sklearn solver | ~1 min |
-| __preditor.py__ | Monte Carlo (10k iter) | O(I×T×G) I=iter, T=equipas, G=jogos | ~30s |
-| __preditor.py__ | Deep (1M iter) | O(I×T×G) com I=1M | ~5 min |
-
-**Otimização implementada:**
-
-- ProcessPoolExecutor: Paraleliza simulações (~5-10x speedup)
-- numpy vetorizado: Substitui loops Python nativos
-- Caching de ELOs: Evita recálculo em cada iteração
-
----
-
-## Dependências Externas
-
-```toml
-[core]
-numpy >= 1.21.0        # Arrays numéricos, np.random.poisson()
-pandas >= 1.3.0        # DataFrames, CSV I/O
-scipy >= 1.7.0         # scipy.stats.linregress() (calibração)
-scikit-learn >= 0.24   # LogisticRegression (empates)
-
-[optional]
-openpyxl >= 3.0        # Leitura Excel (extrator.py)
-multiprocessing        # Stdlib, paralelização
-```
-
----
-
-## Próximos Passos
-
-1. __[CALIBRATION_DETAILED.md](CALIBRATION_DETAILED.md)__ - Derivações matemáticas completas
-2. __[SIMULATION_MODELS.md](SIMULATION_MODELS.md)__ - Pseudo-código dos 4 modelos
-3. __[OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md)__ - Procedimentos operacionais
-4. __[SPECIAL_CASES.md](SPECIAL_CASES.md)__ - Edge cases e hardcoded logic
-
----
-
-**Última atualização:** Época 25-26 (2026-03-02)  
-**Autor:** Sistema Taça UA  
-**Licença:** Uso interno UA
+**Comissão e Gestão Técnica do Sistema:** 2026-03  
+**Domínio Operativo:** Gestão de Modelagem Analytics da Taça UA

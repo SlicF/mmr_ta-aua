@@ -1,5 +1,7 @@
 # SPECIAL_CASES.md - Casos Especiais e Edge Cases
 
+[🇬🇧 View English Version](SPECIAL_CASES_EN.md)
+
 ## Índice
 
 1. [Transições de Equipas Entre Épocas](#team-transitions)

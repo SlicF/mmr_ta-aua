@@ -6554,6 +6554,7 @@ const appState = {
     data: {
         teams: [],
         rankings: {},
+        withdrawnTeams: new Set(),
         eloHistory: {},
         matches: [],
         bracket: {},
@@ -7561,6 +7562,7 @@ function changeModalidade(mod) {
     sampleData = {
         teams: [],
         rankings: {},
+        withdrawnTeams: new Set(),
         eloHistory: {},
         gameDetails: {},  // ← ADICIONADO para guardar detalhes de cada jogo (adversário, resultado, variação)
         roundMapping: [],  // ← ADICIONADO para mapear índice do gráfico -> jornada real
@@ -7817,6 +7819,63 @@ function matchesCalendarDivisionGroup(match, targetDivision, targetGroup) {
     if (targetGroup && matchGroup !== targetGroup) return false;
 
     return true;
+}
+
+function getWithdrawnTeamsSet() {
+    if (!(sampleData.withdrawnTeams instanceof Set)) {
+        sampleData.withdrawnTeams = new Set();
+    }
+    return sampleData.withdrawnTeams;
+}
+
+function getNormalizedTeamSignature(teamName) {
+    if (!teamName) return '';
+    return normalizeText(String(teamName)).replace(/[^a-z0-9]/g, '');
+}
+
+function getWithdrawnTeamSignatures() {
+    const withdrawnTeams = getWithdrawnTeamsSet();
+    const signatures = new Set();
+
+    withdrawnTeams.forEach(team => {
+        const rawSignature = getNormalizedTeamSignature(team);
+        if (rawSignature) signatures.add(rawSignature);
+
+        const normalized = normalizeTeamName(team);
+        const normalizedSignature = getNormalizedTeamSignature(normalized);
+        if (normalizedSignature) signatures.add(normalizedSignature);
+
+        const canonical = resolveCanonicalCourseKey(normalized) || normalized;
+        const canonicalSignature = getNormalizedTeamSignature(canonical);
+        if (canonicalSignature) signatures.add(canonicalSignature);
+    });
+
+    return signatures;
+}
+
+function isWithdrawnCalendarTeam(teamName) {
+    if (!teamName) return false;
+
+    const withdrawnTeams = getWithdrawnTeamsSet();
+    if (withdrawnTeams.size === 0) return false;
+
+    const normalizedTeam = normalizeTeamName(teamName);
+    const canonicalTeam = resolveCanonicalCourseKey(normalizedTeam) || normalizedTeam;
+    const teamSignature = getNormalizedTeamSignature(canonicalTeam || normalizedTeam || teamName);
+
+    if (withdrawnTeams.has(normalizedTeam) || withdrawnTeams.has(canonicalTeam)) {
+        return true;
+    }
+
+    if (!teamSignature) return false;
+
+    const withdrawnSignatures = getWithdrawnTeamSignatures();
+    return withdrawnSignatures.has(teamSignature);
+}
+
+function isWithdrawnCalendarMatch(match) {
+    if (!match) return false;
+    return isWithdrawnCalendarTeam(match.team1) || isWithdrawnCalendarTeam(match.team2);
 }
 
 function parseCalendarTimeToMinutes(timeStr) {
@@ -8111,6 +8170,8 @@ function updateAvailableJornadas(options = {}) {
 
     // Filtrar jornadas para a divisão/grupo atual
     const filteredMatches = sampleData.matches.filter(match => {
+        if (isWithdrawnCalendarMatch(match)) return false;
+
         if (!match.jornada || isNaN(parseInt(match.jornada))) return false;
 
         return matchesCalendarDivisionGroup(match, targetDivision, targetGroup);
@@ -8142,6 +8203,8 @@ function getCurrentJornada() {
 
     // Pré-filtrar jogos uma única vez por divisão/grupo (O(n))
     const filteredMatches = sampleData.matches.filter(match => {
+        if (isWithdrawnCalendarMatch(match)) return false;
+
         // Filtrar por divisão/grupo se necessário
         if (targetDivision) {
             const matchDiv = match.division ? match.division.toString() : null;
@@ -8567,6 +8630,10 @@ function updateCalendar() {
 
     // Usar dados do calendário (csv_modalidades) que tem TODOS os jogos (realizados e futuros)
     let games = sampleData.matches.filter(match => {
+        if (isWithdrawnCalendarMatch(match)) {
+            return false;
+        }
+
         if (!matchesCalendarDivisionGroup(match, targetDivision, targetGroup)) {
             return false;
         }
@@ -8872,6 +8939,7 @@ function processRankings(data) {
         if (!sampleData.rankings[mainKey]) sampleData.rankings[mainKey] = [];
         sampleData.rankings[mainKey].push({
             team: normalizedTeamName,
+            games: parseInt(row.jogos) || 0,
             points: parseInt(row.pontos) || 0,
             wins: parseInt(row.vitorias) || 0,
             draws: parseInt(row.empates) || 0,
@@ -8887,6 +8955,9 @@ function processRankings(data) {
     DebugUtils.debugRankingsProcessing('rankings_complete', { keys: Object.keys(sampleData.rankings), details: sampleData.rankings });
 
     DebugUtils.debugFileLoading('rankings_processed', sampleData.rankings);
+
+    // Atualizar índice de equipas desistentes para uso no calendário.
+    recomputeWithdrawnTeamsIndex();
 
     // Limpar cache de equipas qualificadas quando rankings mudam
     qualifiedTeamsCache = null;
@@ -8921,6 +8992,90 @@ function getMatchRowScore(row) {
     const score1 = raw1 !== '' && raw1 !== undefined && raw1 !== null ? parseInt(raw1) : null;
     const score2 = raw2 !== '' && raw2 !== undefined && raw2 !== null ? parseInt(raw2) : null;
     return { score1, score2 };
+}
+
+function isMissingScoreValue(value) {
+    if (value === null || value === undefined) return true;
+    const text = String(value).trim();
+    return text === '' || text.toLowerCase() === 'nan';
+}
+
+function parseAbsentTeamSignatures(faltaValue) {
+    if (faltaValue === null || faltaValue === undefined) return new Set();
+
+    const raw = String(faltaValue).trim();
+    if (!raw) return new Set();
+
+    const signatures = new Set();
+    raw.split(',').forEach(piece => {
+        const name = normalizeTeamName(piece.trim());
+        const signature = getNormalizedTeamSignature(name);
+        if (signature) signatures.add(signature);
+    });
+
+    return signatures;
+}
+
+function recomputeWithdrawnTeamsIndex() {
+    const withdrawnTeams = new Set();
+    const rankingSignatures = new Set();
+
+    // 1) Fonte classificação: faltas >= jogos
+    Object.values(sampleData.rankings || {}).forEach(divisionTeams => {
+        (divisionTeams || []).forEach(team => {
+            const games = parseInt(team.games) || 0;
+            const noShows = parseInt(team.noShows) || 0;
+
+            const normalized = normalizeTeamName(team.team);
+            const canonical = resolveCanonicalCourseKey(normalized) || normalized;
+            const signature = getNormalizedTeamSignature(canonical);
+            if (signature) rankingSignatures.add(signature);
+
+            if (games > 0 && noShows >= games) {
+                withdrawnTeams.add(normalized);
+                withdrawnTeams.add(canonical);
+            }
+        });
+    });
+
+    // 2) Fonte calendário: equipa ausente em todos os jogos
+    const matchStats = new Map();
+    (sampleData.matches || []).forEach(match => {
+        const team1 = normalizeTeamName(match.team1);
+        const team2 = normalizeTeamName(match.team2);
+        if (!team1 || !team2) return;
+
+        const team1Signature = getNormalizedTeamSignature(team1);
+        const team2Signature = getNormalizedTeamSignature(team2);
+        if (!team1Signature || !team2Signature) return;
+
+        if (!matchStats.has(team1Signature)) matchStats.set(team1Signature, { name: team1, total: 0, absent: 0 });
+        if (!matchStats.has(team2Signature)) matchStats.set(team2Signature, { name: team2, total: 0, absent: 0 });
+
+        const absentSignatures = parseAbsentTeamSignatures(match.absentTeam || match['Falta de Comparência']);
+        const team1Absent = isMissingScoreValue(match.score1) || absentSignatures.has(team1Signature);
+        const team2Absent = isMissingScoreValue(match.score2) || absentSignatures.has(team2Signature);
+
+        const stats1 = matchStats.get(team1Signature);
+        const stats2 = matchStats.get(team2Signature);
+
+        stats1.total += 1;
+        stats2.total += 1;
+        if (team1Absent) stats1.absent += 1;
+        if (team2Absent) stats2.absent += 1;
+    });
+
+    // Só adiciona da fonte calendário equipas removidas da classificação.
+    matchStats.forEach((stats, signature) => {
+        if (stats.total > 0 && stats.absent >= stats.total && !rankingSignatures.has(signature)) {
+            const normalized = normalizeTeamName(stats.name);
+            const canonical = resolveCanonicalCourseKey(normalized) || normalized;
+            withdrawnTeams.add(normalized);
+            withdrawnTeams.add(canonical);
+        }
+    });
+
+    sampleData.withdrawnTeams = withdrawnTeams;
 }
 
 function getMatchRowQuality(row) {
@@ -9035,6 +9190,7 @@ function processMatches(data) {
             team2: team2,
             score1: golos1 !== '' && golos1 !== undefined ? parseInt(golos1) : null,
             score2: golos2 !== '' && golos2 !== undefined ? parseInt(golos2) : null,
+            absentTeam: row['Falta de Comparência'] || '',
             date: date,
             time: time,
             location: location,
@@ -9045,6 +9201,8 @@ function processMatches(data) {
             locationSource: row['Fonte_Local'] || ''
         });
     });
+
+    recomputeWithdrawnTeamsIndex();
 }
 
 /**
