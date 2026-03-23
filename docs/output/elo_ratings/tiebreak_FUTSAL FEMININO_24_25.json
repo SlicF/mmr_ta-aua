@@ -1,0 +1,457 @@
+{
+  "version": 1,
+  "modalidade": "FUTSAL FEMININO",
+  "epoca": "24_25",
+  "events": [
+    {
+      "context": {
+        "Divisao": null,
+        "Grupo": "A",
+        "ranking_key": "Grupo A"
+      },
+      "tie_points": 15,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Eng. Civil",
+        "Eng. de Materiais"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. de Materiais",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 1,
+            "golos_marcados_h2h": 4,
+            "diferenca_golos": 19,
+            "golos_marcados": 32
+          }
+        },
+        {
+          "team": "Eng. Civil",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -1,
+            "golos_marcados_h2h": 3,
+            "diferenca_golos": 45,
+            "golos_marcados": 58
+          }
+        }
+      ],
+      "event_id": 1
+    },
+    {
+      "context": {
+        "Divisao": null,
+        "Grupo": "A",
+        "ranking_key": "Grupo A"
+      },
+      "tie_points": 4,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Eng. Informática",
+        "Educação Básica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "faltas_comparencia",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. Informática",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": 0,
+            "golos_marcados_h2h": 5,
+            "diferenca_golos": -15,
+            "golos_marcados": 15
+          }
+        },
+        {
+          "team": "Educação Básica",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 1,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": 0,
+            "golos_marcados_h2h": 5,
+            "diferenca_golos": -29,
+            "golos_marcados": 12
+          }
+        }
+      ],
+      "event_id": 2
+    },
+    {
+      "context": {
+        "Divisao": null,
+        "Grupo": "B",
+        "ranking_key": "Grupo B"
+      },
+      "tie_points": 15,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Matemática",
+        "Fisioterapia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Fisioterapia",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 2,
+            "golos_marcados_h2h": 3,
+            "diferenca_golos": 30,
+            "golos_marcados": 36
+          }
+        },
+        {
+          "team": "Matemática",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 1,
+            "diferenca_golos": 47,
+            "golos_marcados": 53
+          }
+        }
+      ],
+      "event_id": 3
+    },
+    {
+      "context": {
+        "Divisao": null,
+        "Grupo": "B",
+        "ranking_key": "Grupo B"
+      },
+      "tie_points": 9,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Psicologia",
+        "Eng. Mecânica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. Mecânica",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 4,
+            "golos_marcados_h2h": 4,
+            "diferenca_golos": -10,
+            "golos_marcados": 23
+          }
+        },
+        {
+          "team": "Psicologia",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -4,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": -9,
+            "golos_marcados": 10
+          }
+        }
+      ],
+      "event_id": 4
+    }
+  ],
+  "indexByContextTeam": {
+    "Grupo A::Eng. de Materiais": {
+      "event_id": 1,
+      "ranking_key": "Grupo A",
+      "team": "Eng. de Materiais",
+      "tie_type": "head_to_head",
+      "tie_points": 15,
+      "tied_teams": [
+        "Eng. Civil",
+        "Eng. de Materiais"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 1,
+        "golos_marcados_h2h": 4,
+        "diferenca_golos": 19,
+        "golos_marcados": 32
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 1
+    },
+    "Grupo A::Eng. Civil": {
+      "event_id": 1,
+      "ranking_key": "Grupo A",
+      "team": "Eng. Civil",
+      "tie_type": "head_to_head",
+      "tie_points": 15,
+      "tied_teams": [
+        "Eng. Civil",
+        "Eng. de Materiais"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -1,
+        "golos_marcados_h2h": 3,
+        "diferenca_golos": 45,
+        "golos_marcados": 58
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 2
+    },
+    "Grupo A::Eng. Informática": {
+      "event_id": 2,
+      "ranking_key": "Grupo A",
+      "team": "Eng. Informática",
+      "tie_type": "head_to_head",
+      "tie_points": 4,
+      "tied_teams": [
+        "Eng. Informática",
+        "Educação Básica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "faltas_comparencia",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": 0,
+        "golos_marcados_h2h": 5,
+        "diferenca_golos": -15,
+        "golos_marcados": 15
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 5
+    },
+    "Grupo A::Educação Básica": {
+      "event_id": 2,
+      "ranking_key": "Grupo A",
+      "team": "Educação Básica",
+      "tie_type": "head_to_head",
+      "tie_points": 4,
+      "tied_teams": [
+        "Eng. Informática",
+        "Educação Básica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "faltas_comparencia",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 1,
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": 0,
+        "golos_marcados_h2h": 5,
+        "diferenca_golos": -29,
+        "golos_marcados": 12
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 6
+    },
+    "Grupo B::Fisioterapia": {
+      "event_id": 3,
+      "ranking_key": "Grupo B",
+      "team": "Fisioterapia",
+      "tie_type": "head_to_head",
+      "tie_points": 15,
+      "tied_teams": [
+        "Matemática",
+        "Fisioterapia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 2,
+        "golos_marcados_h2h": 3,
+        "diferenca_golos": 30,
+        "golos_marcados": 36
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 1
+    },
+    "Grupo B::Matemática": {
+      "event_id": 3,
+      "ranking_key": "Grupo B",
+      "team": "Matemática",
+      "tie_type": "head_to_head",
+      "tie_points": 15,
+      "tied_teams": [
+        "Matemática",
+        "Fisioterapia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 1,
+        "diferenca_golos": 47,
+        "golos_marcados": 53
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 2
+    },
+    "Grupo B::Eng. Mecânica": {
+      "event_id": 4,
+      "ranking_key": "Grupo B",
+      "team": "Eng. Mecânica",
+      "tie_type": "head_to_head",
+      "tie_points": 9,
+      "tied_teams": [
+        "Psicologia",
+        "Eng. Mecânica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 4,
+        "golos_marcados_h2h": 4,
+        "diferenca_golos": -10,
+        "golos_marcados": 23
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 4
+    },
+    "Grupo B::Psicologia": {
+      "event_id": 4,
+      "ranking_key": "Grupo B",
+      "team": "Psicologia",
+      "tie_type": "head_to_head",
+      "tie_points": 9,
+      "tied_teams": [
+        "Psicologia",
+        "Eng. Mecânica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -4,
+        "golos_marcados_h2h": 0,
+        "diferenca_golos": -9,
+        "golos_marcados": 10
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 5
+    }
+  }
+}

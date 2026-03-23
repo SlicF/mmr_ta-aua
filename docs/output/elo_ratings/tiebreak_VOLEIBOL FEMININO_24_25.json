@@ -1,0 +1,457 @@
+{
+  "version": 1,
+  "modalidade": "VOLEIBOL FEMININO",
+  "epoca": "24_25",
+  "events": [
+    {
+      "context": {
+        "Divisao": 1,
+        "Grupo": null,
+        "ranking_key": "1ª Divisão"
+      },
+      "tie_points": 11,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Eng. Civil",
+        "Eng. Biomédica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. Biomédica",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 2,
+            "diferenca_golos_h2h": 1,
+            "golos_marcados_h2h": 2,
+            "diferenca_golos": -8,
+            "golos_marcados": 9
+          }
+        },
+        {
+          "team": "Eng. Civil",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": -1,
+            "golos_marcados_h2h": 1,
+            "diferenca_golos": -8,
+            "golos_marcados": 9
+          }
+        }
+      ],
+      "event_id": 1
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": "A",
+        "ranking_key": "2ª Divisão - Grupo A"
+      },
+      "tie_points": 9,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Eng. Mecânica",
+        "Gestão Comercial"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. Mecânica",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 2,
+            "golos_marcados_h2h": 2,
+            "diferenca_golos": -4,
+            "golos_marcados": 8
+          }
+        },
+        {
+          "team": "Gestão Comercial",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": -4,
+            "golos_marcados": 6
+          }
+        }
+      ],
+      "event_id": 2
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": "B",
+        "ranking_key": "2ª Divisão - Grupo B"
+      },
+      "tie_points": 19,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Geologia",
+        "Eng. Física"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Geologia",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 2,
+            "diferenca_golos_h2h": 1,
+            "golos_marcados_h2h": 2,
+            "diferenca_golos": 8,
+            "golos_marcados": 16
+          }
+        },
+        {
+          "team": "Eng. Física",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": -1,
+            "golos_marcados_h2h": 1,
+            "diferenca_golos": 7,
+            "golos_marcados": 15
+          }
+        }
+      ],
+      "event_id": 3
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": "B",
+        "ranking_key": "2ª Divisão - Grupo B"
+      },
+      "tie_points": 13,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Línguas e Relações Empresariais",
+        "Ciências Biomédicas B"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Ciências Biomédicas B",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 2,
+            "golos_marcados_h2h": 2,
+            "diferenca_golos": -1,
+            "golos_marcados": 9
+          }
+        },
+        {
+          "team": "Línguas e Relações Empresariais",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": -1,
+            "golos_marcados": 10
+          }
+        }
+      ],
+      "event_id": 4
+    }
+  ],
+  "indexByContextTeam": {
+    "1ª Divisão::Eng. Biomédica": {
+      "event_id": 1,
+      "ranking_key": "1ª Divisão",
+      "team": "Eng. Biomédica",
+      "tie_type": "head_to_head",
+      "tie_points": 11,
+      "tied_teams": [
+        "Eng. Civil",
+        "Eng. Biomédica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 2,
+        "diferenca_golos_h2h": 1,
+        "golos_marcados_h2h": 2,
+        "diferenca_golos": -8,
+        "golos_marcados": 9
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": null
+    },
+    "1ª Divisão::Eng. Civil": {
+      "event_id": 1,
+      "ranking_key": "1ª Divisão",
+      "team": "Eng. Civil",
+      "tie_type": "head_to_head",
+      "tie_points": 11,
+      "tied_teams": [
+        "Eng. Civil",
+        "Eng. Biomédica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": -1,
+        "golos_marcados_h2h": 1,
+        "diferenca_golos": -8,
+        "golos_marcados": 9
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": null
+    },
+    "2ª Divisão - Grupo A::Eng. Mecânica": {
+      "event_id": 2,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Eng. Mecânica",
+      "tie_type": "head_to_head",
+      "tie_points": 9,
+      "tied_teams": [
+        "Eng. Mecânica",
+        "Gestão Comercial"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 2,
+        "golos_marcados_h2h": 2,
+        "diferenca_golos": -4,
+        "golos_marcados": 8
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": null
+    },
+    "2ª Divisão - Grupo A::Gestão Comercial": {
+      "event_id": 2,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Gestão Comercial",
+      "tie_type": "head_to_head",
+      "tie_points": 9,
+      "tied_teams": [
+        "Eng. Mecânica",
+        "Gestão Comercial"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 0,
+        "diferenca_golos": -4,
+        "golos_marcados": 6
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": null
+    },
+    "2ª Divisão - Grupo B::Geologia": {
+      "event_id": 3,
+      "ranking_key": "2ª Divisão - Grupo B",
+      "team": "Geologia",
+      "tie_type": "head_to_head",
+      "tie_points": 19,
+      "tied_teams": [
+        "Geologia",
+        "Eng. Física"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 2,
+        "diferenca_golos_h2h": 1,
+        "golos_marcados_h2h": 2,
+        "diferenca_golos": 8,
+        "golos_marcados": 16
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": null
+    },
+    "2ª Divisão - Grupo B::Eng. Física": {
+      "event_id": 3,
+      "ranking_key": "2ª Divisão - Grupo B",
+      "team": "Eng. Física",
+      "tie_type": "head_to_head",
+      "tie_points": 19,
+      "tied_teams": [
+        "Geologia",
+        "Eng. Física"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": -1,
+        "golos_marcados_h2h": 1,
+        "diferenca_golos": 7,
+        "golos_marcados": 15
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": null
+    },
+    "2ª Divisão - Grupo B::Ciências Biomédicas B": {
+      "event_id": 4,
+      "ranking_key": "2ª Divisão - Grupo B",
+      "team": "Ciências Biomédicas B",
+      "tie_type": "head_to_head",
+      "tie_points": 13,
+      "tied_teams": [
+        "Línguas e Relações Empresariais",
+        "Ciências Biomédicas B"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 2,
+        "golos_marcados_h2h": 2,
+        "diferenca_golos": -1,
+        "golos_marcados": 9
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": null
+    },
+    "2ª Divisão - Grupo B::Línguas e Relações Empresariais": {
+      "event_id": 4,
+      "ranking_key": "2ª Divisão - Grupo B",
+      "team": "Línguas e Relações Empresariais",
+      "tie_type": "head_to_head",
+      "tie_points": 13,
+      "tied_teams": [
+        "Línguas e Relações Empresariais",
+        "Ciências Biomédicas B"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 0,
+        "diferenca_golos": -1,
+        "golos_marcados": 10
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": null
+    }
+  }
+}

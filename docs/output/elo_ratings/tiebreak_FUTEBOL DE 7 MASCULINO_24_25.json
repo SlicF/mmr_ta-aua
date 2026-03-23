@@ -1,0 +1,345 @@
+{
+  "version": 1,
+  "modalidade": "FUTEBOL DE 7 MASCULINO",
+  "epoca": "24_25",
+  "events": [
+    {
+      "context": {
+        "Divisao": 1,
+        "Grupo": null,
+        "ranking_key": "1ª Divisão"
+      },
+      "tie_points": 24,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Eng. e Gestão Industrial",
+        "Finanças"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. e Gestão Industrial",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 2,
+            "golos_marcados_h2h": 3,
+            "diferenca_golos": 23,
+            "golos_marcados": 36
+          }
+        },
+        {
+          "team": "Finanças",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 1,
+            "diferenca_golos": 23,
+            "golos_marcados": 43
+          }
+        }
+      ],
+      "event_id": 1
+    },
+    {
+      "context": {
+        "Divisao": 1,
+        "Grupo": null,
+        "ranking_key": "1ª Divisão"
+      },
+      "tie_points": 9,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Economia",
+        "Eng. Física"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Economia",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 4,
+            "golos_marcados_h2h": 5,
+            "diferenca_golos": -14,
+            "golos_marcados": 30
+          }
+        },
+        {
+          "team": "Eng. Física",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -4,
+            "golos_marcados_h2h": 1,
+            "diferenca_golos": -17,
+            "golos_marcados": 23
+          }
+        }
+      ],
+      "event_id": 2
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": "A",
+        "ranking_key": "2ª Divisão - Grupo A"
+      },
+      "tie_points": 8,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "MTC",
+        "Eng. Computacional"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. Computacional",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 4,
+            "golos_marcados_h2h": 7,
+            "diferenca_golos": 2,
+            "golos_marcados": 26
+          }
+        },
+        {
+          "team": "MTC",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -4,
+            "golos_marcados_h2h": 3,
+            "diferenca_golos": -8,
+            "golos_marcados": 24
+          }
+        }
+      ],
+      "event_id": 3
+    }
+  ],
+  "indexByContextTeam": {
+    "1ª Divisão::Eng. e Gestão Industrial": {
+      "event_id": 1,
+      "ranking_key": "1ª Divisão",
+      "team": "Eng. e Gestão Industrial",
+      "tie_type": "head_to_head",
+      "tie_points": 24,
+      "tied_teams": [
+        "Eng. e Gestão Industrial",
+        "Finanças"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 2,
+        "golos_marcados_h2h": 3,
+        "diferenca_golos": 23,
+        "golos_marcados": 36
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 2
+    },
+    "1ª Divisão::Finanças": {
+      "event_id": 1,
+      "ranking_key": "1ª Divisão",
+      "team": "Finanças",
+      "tie_type": "head_to_head",
+      "tie_points": 24,
+      "tied_teams": [
+        "Eng. e Gestão Industrial",
+        "Finanças"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 1,
+        "diferenca_golos": 23,
+        "golos_marcados": 43
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 3
+    },
+    "1ª Divisão::Economia": {
+      "event_id": 2,
+      "ranking_key": "1ª Divisão",
+      "team": "Economia",
+      "tie_type": "head_to_head",
+      "tie_points": 9,
+      "tied_teams": [
+        "Economia",
+        "Eng. Física"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 4,
+        "golos_marcados_h2h": 5,
+        "diferenca_golos": -14,
+        "golos_marcados": 30
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 8
+    },
+    "1ª Divisão::Eng. Física": {
+      "event_id": 2,
+      "ranking_key": "1ª Divisão",
+      "team": "Eng. Física",
+      "tie_type": "head_to_head",
+      "tie_points": 9,
+      "tied_teams": [
+        "Economia",
+        "Eng. Física"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -4,
+        "golos_marcados_h2h": 1,
+        "diferenca_golos": -17,
+        "golos_marcados": 23
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 9
+    },
+    "2ª Divisão - Grupo A::Eng. Computacional": {
+      "event_id": 3,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Eng. Computacional",
+      "tie_type": "head_to_head",
+      "tie_points": 8,
+      "tied_teams": [
+        "MTC",
+        "Eng. Computacional"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 4,
+        "golos_marcados_h2h": 7,
+        "diferenca_golos": 2,
+        "golos_marcados": 26
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 7
+    },
+    "2ª Divisão - Grupo A::MTC": {
+      "event_id": 3,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "MTC",
+      "tie_type": "head_to_head",
+      "tie_points": 8,
+      "tied_teams": [
+        "MTC",
+        "Eng. Computacional"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -4,
+        "golos_marcados_h2h": 3,
+        "diferenca_golos": -8,
+        "golos_marcados": 24
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 8
+    }
+  }
+}

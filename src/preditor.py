@@ -2523,22 +2523,44 @@ def example_hardset_usage():
 
 
 def detect_withdrawn_teams_from_csv(
-    future_matches_rows: List[Dict],
+    csv_rows: List[Dict],
     course_mapping: Dict[str, str],
 ) -> Set[str]:
     """
-    Detecta equipas desistentes (100% dos jogos com Falta de Comparência preenchida).
+    Detecta equipas desistentes (100% dos jogos sem participação efetiva).
+
+    Lógica alinhada com o mmr_taçaua:
+    - conta ausência se o score do lado da equipa está vazio/NaN, ou
+    - equipa marcada em "Falta de Comparência" (incluindo listas separadas por vírgula).
 
     Args:
-        future_matches_rows: Lista de dicionários com jogos futuros
+        csv_rows: Lista de dicionários com jogos da modalidade
         course_mapping: Mapeamento de nomes de cursos
 
     Returns:
         Set com nomes normalizados de equipas desistentes
     """
-    team_game_count = {}  # {team: {'total': count, 'withdrawn': count}}
+    team_game_count = {}  # {team: {'total': count, 'absent': count}}
 
-    for row in future_matches_rows:
+    def _is_team_marked_absent(falta_value, team_name: str) -> bool:
+        if falta_value is None:
+            return False
+
+        raw_value = str(falta_value).strip()
+        if not raw_value:
+            return False
+
+        if normalize_team_name(raw_value, course_mapping) == team_name:
+            return True
+
+        if "," in raw_value:
+            for piece in raw_value.split(","):
+                if normalize_team_name(piece.strip(), course_mapping) == team_name:
+                    return True
+
+        return False
+
+    for row in csv_rows:
         team_a_raw = row.get(COL_EQUIPA_1, "").strip()
         team_b_raw = row.get(COL_EQUIPA_2, "").strip()
 
@@ -2546,7 +2568,12 @@ def detect_withdrawn_teams_from_csv(
             continue
 
         # Verificar coluna de falta de comparência (única coluna partilhada por ambas as equipas)
-        falta_valor = str(row.get(COL_FALTA_COMPARENCIA, "")).strip()
+        falta_valor = row.get(COL_FALTA_COMPARENCIA)
+
+        golos_1_raw = row.get(COL_GOLOS_1)
+        golos_2_raw = row.get(COL_GOLOS_2)
+        resultado1_absent = golos_1_raw is None or str(golos_1_raw).strip() == ""
+        resultado2_absent = golos_2_raw is None or str(golos_2_raw).strip() == ""
 
         # Normalizar nomes
         team_a = normalize_team_name(team_a_raw, course_mapping)
@@ -2554,25 +2581,25 @@ def detect_withdrawn_teams_from_csv(
 
         if team_a:
             if team_a not in team_game_count:
-                team_game_count[team_a] = {"total": 0, "withdrawn": 0}
+                team_game_count[team_a] = {"total": 0, "absent": 0}
             team_game_count[team_a]["total"] += 1
-            if falta_valor and team_a_raw in falta_valor:
-                team_game_count[team_a]["withdrawn"] += 1
+            if resultado1_absent or _is_team_marked_absent(falta_valor, team_a):
+                team_game_count[team_a]["absent"] += 1
 
         if team_b:
             if team_b not in team_game_count:
-                team_game_count[team_b] = {"total": 0, "withdrawn": 0}
+                team_game_count[team_b] = {"total": 0, "absent": 0}
             team_game_count[team_b]["total"] += 1
-            if falta_valor and team_b_raw in falta_valor:
-                team_game_count[team_b]["withdrawn"] += 1
+            if resultado2_absent or _is_team_marked_absent(falta_valor, team_b):
+                team_game_count[team_b]["absent"] += 1
 
-    # Identificar desistentes (100% com falta)
+    # Identificar desistentes (100% de ausências)
     withdrawn_teams = set()
     for team, counts in team_game_count.items():
-        if counts["total"] > 0 and counts["withdrawn"] == counts["total"]:
+        if counts["total"] > 0 and counts["absent"] == counts["total"]:
             withdrawn_teams.add(team)
             logger.warning(
-                f"Equipa desistente detectada: {team} ({counts['total']} jogos)"
+                f"Equipa desistente detectada: {team} ({counts['total']} jogos com ausência)"
             )
 
     return withdrawn_teams
@@ -2732,10 +2759,14 @@ def _build_teams_and_fixtures(
     fixtures: List[Dict] = []
     all_teams_in_epoch: Set[str] = set()
 
-    # Detectar desistentes antes de processar qualquer jogo
-    withdrawn_teams = detect_withdrawn_teams_from_csv(
-        future_matches_rows, course_mapping
-    )
+    # Detectar desistentes antes de processar qualquer jogo (lógica alinhada com mmr_taçaua)
+    withdrawn_teams = detect_withdrawn_teams_from_csv(all_csv_rows, course_mapping)
+
+    if withdrawn_teams:
+        logger.info(
+            f"Equipas desistentes excluídas da simulação em {modalidade}: "
+            f"{sorted(withdrawn_teams)}"
+        )
 
     # Mapear divisão/grupo para todas as equipas (passado + futuro)
     team_division: Dict[str, Tuple[int, str]] = {}

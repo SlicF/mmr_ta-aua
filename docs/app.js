@@ -326,8 +326,9 @@ function createTeamSelector() {
         const grouped = {};
 
         teams.forEach(team => {
-            const division = team.division || 'A';
-            const group = team.group || 'Único';
+            // Se divisão é null/undefined/vazio, usar "geral" como divisão padronizada
+            const division = team.division || 'geral';
+            const group = team.group || null;
 
             if (!grouped[division]) {
                 grouped[division] = {};
@@ -379,7 +380,18 @@ function createTeamSelector() {
         divisionTitle.className = 'team-division-title';
         const groupCount = Object.keys(groups).length;
         const teamCount = Object.values(groups).flat().length;
-        const divisionLabel = division === 'geral' ? t('divisionGeneral') : `${division}` + t('divisionNth');
+
+        let divisionLabel;
+        if (division === 'geral') {
+            divisionLabel = t('divisionGeneral');
+        } else if (division.startsWith('Grupo') || division.startsWith('Group')) {
+            // Já vem com formato "Grupo X", não adicionar sufixo
+            divisionLabel = division;
+        } else {
+            // É um número (1, 2, 3, etc.) - adicionar sufixo
+            divisionLabel = `${division}` + t('divisionNth');
+        }
+
         const singular = t('teamSingular');
         const plural = t('teamPlural');
         divisionTitle.textContent = `${divisionLabel} (${teamCount} ${teamCount !== 1 ? plural : singular})`;
@@ -3147,6 +3159,11 @@ function updateRankingsTable() {
         // Criar indicador de progressão
         const progressionClass = showProgressionIndicators ? `progression-${progression.type}` : 'progression-safe';
         const badgeTitle = showProgressionIndicators ? progression.description : `${position}º lugar`;
+        const rankingKeyForRow = team.rankingKey || currentDivision;
+        const tiebreakInfo = getTiebreakInfoForRow(rankingKeyForRow, normalizedTeamName);
+        const tiebreakIndicatorHtml = tiebreakInfo
+            ? `<span class="tiebreak-indicator" tabindex="0" aria-label="${escapeHtmlAttribute(t('tiebreakIndicatorAria'))}">TB</span>`
+            : '';
 
         // Obter informação do ELO - aplicar normalização
         const eloInfo = getTeamEloInfo(normalizedTeamName);
@@ -3164,6 +3181,7 @@ function updateRankingsTable() {
         row.innerHTML = `
                     <td>
                         <span class="rank-badge ${progressionClass}" title="${badgeTitle}">${position}</span>
+                        ${tiebreakIndicatorHtml}
                     </td>
                     <td class="team-cell ${isTeamFavorite(team.team) ? 'favorite-team-row' : ''}">
                         <button class="favorite-btn ${isTeamFavorite(team.team) ? 'active' : ''}" 
@@ -3207,6 +3225,39 @@ function updateRankingsTable() {
             teamCell.addEventListener('mouseleave', () => {
                 clearTimeout(tooltipTimer);
                 hideHistoricalTooltip();
+            });
+        }
+
+        const tiebreakIndicator = row.querySelector('.tiebreak-indicator');
+        if (tiebreakIndicator && tiebreakInfo) {
+            tiebreakIndicator.addEventListener('mouseenter', () => {
+                if (!isMobileDevice()) {
+                    showTiebreakTooltip(tiebreakIndicator, tiebreakInfo, team.team);
+                }
+            });
+
+            tiebreakIndicator.addEventListener('mouseleave', () => {
+                if (!isMobileDevice()) {
+                    hideTiebreakTooltipWithDelay(120);
+                }
+            });
+
+            tiebreakIndicator.addEventListener('focus', () => {
+                showTiebreakTooltip(tiebreakIndicator, tiebreakInfo, team.team);
+            });
+
+            tiebreakIndicator.addEventListener('blur', () => {
+                hideTiebreakTooltipWithDelay(120);
+            });
+
+            tiebreakIndicator.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const isOpen = tiebreakTooltipEl && tiebreakTooltipEl.style.display === 'block';
+                if (isOpen) {
+                    hideTiebreakTooltip();
+                } else {
+                    showTiebreakTooltip(tiebreakIndicator, tiebreakInfo, team.team);
+                }
             });
         }
 
@@ -6554,6 +6605,10 @@ const appState = {
     data: {
         teams: [],
         rankings: {},
+        tiebreakMetadata: {
+            events: [],
+            indexByContextTeam: {}
+        },
         withdrawnTeams: new Set(),
         eloHistory: {},
         matches: [],
@@ -6582,6 +6637,8 @@ const appState = {
 
 let currentLoadToken = 0;
 let historicalTooltipEl = null;
+let tiebreakTooltipEl = null;
+let tiebreakTooltipHideTimer = null;
 
 // ==================== COMPATIBILIDADE COM CÓDIGO LEGADO ====================
 // Proxies para sincronizar variáveis antigas com appState
@@ -6885,6 +6942,421 @@ function parseRankingKey(rankingKey) {
     return { division: rankingKey, group: null };
 }
 
+function escapeHtmlAttribute(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '&#10;');
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function buildTiebreakLookupKey(rankingKey, teamName) {
+    return `${rankingKey || 'geral'}::${normalizeTeamName(teamName || '')}`;
+}
+
+function getTiebreakInfoForRow(rankingKey, teamName) {
+    const metadata = sampleData.tiebreakMetadata || {};
+    const index = metadata.indexByContextTeam || {};
+    const key = buildTiebreakLookupKey(rankingKey, teamName);
+    return index[key] || null;
+}
+
+function getCurrentModalityNameUpper() {
+    if (!currentModalidade) return '';
+    return currentModalidade.replace(/_\d{2}_\d{2}$/, '').toUpperCase();
+}
+
+function isBasketballModality() {
+    return getCurrentModalityNameUpper().includes('BASQUETEBOL');
+}
+
+function getTiebreakCriterionLabel(criterionId) {
+    if (criterionId === 'diferenca_golos_h2h') {
+        if (isVolleyballModality()) return t('tbSetDiffH2H');
+        if (isBasketballModality()) return t('tbBasketDiffH2H');
+        return t('tbGoalDiffH2H');
+    }
+
+    if (criterionId === 'golos_marcados_h2h') {
+        if (isVolleyballModality()) return t('tbSetsScoredH2H');
+        if (isBasketballModality()) return t('tbBasketsScoredH2H');
+        return t('tbGoalsScoredH2H');
+    }
+
+    if (criterionId === 'diferenca_golos') {
+        if (isVolleyballModality()) return t('tbSetDiffOverall');
+        if (isBasketballModality()) return t('tbBasketDiffOverall');
+        return t('tbGoalDiffOverall');
+    }
+
+    if (criterionId === 'golos_marcados') {
+        if (isVolleyballModality()) return t('tbSetsScoredOverall');
+        if (isBasketballModality()) return t('tbBasketsScoredOverall');
+        return t('tbGoalsScoredOverall');
+    }
+
+    const map = {
+        faltas_comparencia: 'tbFaltasComparencia',
+        pontos_h2h: 'tbPointsH2H',
+        faltas_h2h: 'tbNoShowsH2H',
+        diferenca_sets_h2h: 'tbSetDiffH2H',
+        diferenca_sets: 'tbSetDiffOverall',
+        tb_sets_scored_h2h: 'tbSetsScoredH2H',
+        tb_sets_scored_overall: 'tbSetsScoredOverall'
+    };
+
+    const key = map[criterionId];
+    return key ? t(key) : criterionId;
+}
+
+function getDisplayedTiebreakCriteria(criteriaOrder, decidingCriterion, requiredCriteria = []) {
+    const ordered = Array.isArray(criteriaOrder) ? criteriaOrder : [];
+    if (!ordered.length) return [];
+
+    const required = [decidingCriterion, ...(Array.isArray(requiredCriteria) ? requiredCriteria : [])]
+        .filter(Boolean);
+
+    let endIndex = -1;
+    for (const criterion of required) {
+        const index = ordered.indexOf(criterion);
+        if (index > endIndex) endIndex = index;
+    }
+
+    if (endIndex < 0) {
+        endIndex = Math.min(ordered.length - 1, 2);
+    }
+
+    let displayed = ordered.slice(0, endIndex + 1);
+    const maxColumns = 4;
+
+    if (displayed.length > maxColumns) {
+        // Manter sempre colunas contíguas desde o início para não “saltar” para critérios finais.
+        displayed = ordered.slice(0, maxColumns);
+    }
+
+    return displayed;
+}
+
+function areTiebreakValuesEqual(valueA, valueB) {
+    const isMissingA = valueA === null || valueA === undefined;
+    const isMissingB = valueB === null || valueB === undefined;
+    if (isMissingA && isMissingB) return true;
+    if (isMissingA || isMissingB) return false;
+    return valueA === valueB;
+}
+
+function getTiebreakDecisionsByPosition(standings, criteriaOrder) {
+    const orderedStandings = (Array.isArray(standings) ? standings : [])
+        .slice()
+        .sort((a, b) => (a.rank_in_tiebreak || 999) - (b.rank_in_tiebreak || 999));
+
+    const orderedCriteria = Array.isArray(criteriaOrder) ? criteriaOrder : [];
+    const decisions = [];
+
+    for (let index = 0; index < orderedStandings.length - 1; index++) {
+        const higher = orderedStandings[index];
+        const lower = orderedStandings[index + 1];
+        const higherValues = higher?.criteria_values || {};
+        const lowerValues = lower?.criteria_values || {};
+
+        let appliedCriterion = null;
+        for (const criterion of orderedCriteria) {
+            const higherValue = higherValues[criterion];
+            const lowerValue = lowerValues[criterion];
+
+            if (!areTiebreakValuesEqual(higherValue, lowerValue)) {
+                appliedCriterion = criterion;
+                break;
+            }
+        }
+
+        decisions.push({
+            fromRank: higher?.rank_in_tiebreak ?? index + 1,
+            toRank: lower?.rank_in_tiebreak ?? index + 2,
+            criterion: appliedCriterion
+        });
+    }
+
+    return decisions;
+}
+
+function buildTiebreakTooltipText(tiebreakInfo) {
+    if (!tiebreakInfo) return '';
+
+    const lines = [];
+    const tieTypeLabel = tiebreakInfo.tie_type === 'mini_league' ? t('tiebreakMiniLeague') : t('tiebreakHeadToHead');
+    lines.push(`${t('tiebreakApplied')}: ${tieTypeLabel}`);
+
+    if (tiebreakInfo.tie_points !== null && tiebreakInfo.tie_points !== undefined) {
+        lines.push(`${t('tiebreakTiePoints')}: ${tiebreakInfo.tie_points}`);
+    }
+
+    const tiedTeams = Array.isArray(tiebreakInfo.tied_teams) ? tiebreakInfo.tied_teams : [];
+    if (tiedTeams.length) {
+        lines.push(`${t('tiebreakTiedTeams')}: ${tiedTeams.map(team => {
+            const info = getCourseInfo(normalizeTeamName(team));
+            return translateTeamName(info.shortName || team);
+        }).join(' | ')}`);
+    }
+
+    const criteriaOrder = Array.isArray(tiebreakInfo.criteria_order) ? tiebreakInfo.criteria_order : [];
+    if (criteriaOrder.length) {
+        lines.push(`${t('tiebreakCriteriaOrder')}: ${criteriaOrder.map(getTiebreakCriterionLabel).join(' > ')}`);
+    }
+
+    if (tiebreakInfo.deciding_criterion) {
+        lines.push(`${t('tiebreakDecidingCriterion')}: ${getTiebreakCriterionLabel(tiebreakInfo.deciding_criterion)}`);
+    }
+
+    lines.push(
+        `${t('tiebreakFallback')}: ${tiebreakInfo.used_global_fallback ? t('tiebreakFallbackYes') : t('tiebreakFallbackNo')}`
+    );
+
+    const criteriaValues = tiebreakInfo.criteria_values || {};
+    const valuesSummary = Object.entries(criteriaValues)
+        .map(([criterion, value]) => `${getTiebreakCriterionLabel(criterion)}=${value}`)
+        .join(' | ');
+    if (valuesSummary) {
+        lines.push(`${t('tiebreakTeamValues')}: ${valuesSummary}`);
+    }
+
+    return lines.join('\n');
+}
+
+function processTiebreakMetadata(payload) {
+    const safePayload = payload && typeof payload === 'object' ? payload : {};
+    const rawIndex = safePayload.indexByContextTeam && typeof safePayload.indexByContextTeam === 'object'
+        ? safePayload.indexByContextTeam
+        : {};
+
+    const normalizedIndex = {};
+    Object.values(rawIndex).forEach(entry => {
+        if (!entry || typeof entry !== 'object') return;
+        const rankingKey = entry.ranking_key || 'geral';
+        const teamName = normalizeTeamName(entry.team || '');
+        if (!teamName) return;
+        normalizedIndex[buildTiebreakLookupKey(rankingKey, teamName)] = entry;
+    });
+
+    sampleData.tiebreakMetadata = {
+        events: Array.isArray(safePayload.events) ? safePayload.events : [],
+        indexByContextTeam: normalizedIndex
+    };
+}
+
+function getTiebreakEventById(eventId) {
+    const events = sampleData.tiebreakMetadata?.events || [];
+    return events.find(event => Number(event.event_id) === Number(eventId)) || null;
+}
+
+function ensureTiebreakTooltipElement() {
+    if (tiebreakTooltipEl) return tiebreakTooltipEl;
+
+    const el = document.createElement('div');
+    el.id = 'tiebreak-tooltip';
+    el.className = 'tiebreak-tooltip-panel';
+    el.style.display = 'none';
+
+    el.addEventListener('mouseenter', () => {
+        if (tiebreakTooltipHideTimer) {
+            clearTimeout(tiebreakTooltipHideTimer);
+            tiebreakTooltipHideTimer = null;
+        }
+    });
+
+    el.addEventListener('mouseleave', () => {
+        hideTiebreakTooltipWithDelay(120);
+    });
+
+    document.body.appendChild(el);
+    tiebreakTooltipEl = el;
+    return el;
+}
+
+function buildTiebreakTooltipTableHtml(tiebreakInfo, eventData, currentTeam) {
+    const tieTypeLabel = tiebreakInfo.tie_type === 'mini_league' ? t('tiebreakMiniLeague') : t('tiebreakHeadToHead');
+    const decidingCriterion = tiebreakInfo.deciding_criterion;
+    const decidingLabel = decidingCriterion ? getTiebreakCriterionLabel(decidingCriterion) : '—';
+    const criteriaOrder = Array.isArray(tiebreakInfo.criteria_order) ? tiebreakInfo.criteria_order : [];
+    const standings = Array.isArray(eventData?.standings) ? eventData.standings : [];
+    const pairwiseDecisions = getTiebreakDecisionsByPosition(standings, criteriaOrder);
+    const criteriaUsedByPairs = pairwiseDecisions
+        .map(decision => decision.criterion)
+        .filter(Boolean);
+    const displayedCriteria = getDisplayedTiebreakCriteria(
+        criteriaOrder,
+        decidingCriterion || criteriaUsedByPairs[0] || null,
+        criteriaUsedByPairs
+    );
+    const displayedCriteriaSet = new Set(displayedCriteria);
+    const activeCriteriaSet = new Set(
+        criteriaUsedByPairs.filter(criterion => displayedCriteriaSet.has(criterion))
+    );
+    const pairwiseSummary = pairwiseDecisions.length
+        ? pairwiseDecisions
+            .map(decision => {
+                const criterionLabel = decision.criterion
+                    ? getTiebreakCriterionLabel(decision.criterion)
+                    : '—';
+                return `${decision.fromRank}-${decision.toRank}: ${criterionLabel}`;
+            })
+            .join(' • ')
+        : '—';
+
+    const tiedTeams = (tiebreakInfo.tied_teams || []).map(team => {
+        const info = getCourseInfo(normalizeTeamName(team));
+        return translateTeamName(info.shortName || team);
+    }).join(' | ');
+
+    const criteriaHead = displayedCriteria
+        .map(criterion => `<th class="tb-criterion ${activeCriteriaSet.has(criterion) ? 'is-deciding' : ''}">${escapeHtml(getTiebreakCriterionLabel(criterion))}</th>`)
+        .join('');
+
+    const rowsHtml = standings
+        .slice()
+        .sort((a, b) => (a.rank_in_tiebreak || 999) - (b.rank_in_tiebreak || 999))
+        .map(row => {
+            const normalizedTeam = normalizeTeamName(row.team || '');
+            const info = getCourseInfo(normalizedTeam);
+            const displayName = translateTeamName(info.shortName || row.team || '');
+            const isCurrent = normalizedTeam === normalizeTeamName(currentTeam || '');
+
+            const criteriaCells = displayedCriteria
+                .map(criterion => {
+                    const value = row.criteria_values && row.criteria_values[criterion] !== undefined && row.criteria_values[criterion] !== null
+                        ? row.criteria_values[criterion]
+                        : '—';
+                    const extraClass = activeCriteriaSet.has(criterion) ? 'is-deciding' : '';
+                    return `<td class="tb-value ${extraClass}">${escapeHtml(value)}</td>`;
+                })
+                .join('');
+
+            return `
+                <tr class="tb-row ${isCurrent ? 'is-current' : ''}">
+                    <td class="tb-rank">${escapeHtml(row.rank_in_tiebreak ?? '—')}</td>
+                    <td class="tb-team">${escapeHtml(displayName)}</td>
+                    ${criteriaCells}
+                </tr>
+            `;
+        })
+        .join('');
+
+    return `
+        <div class="tb-header">
+            <div class="tb-title">${escapeHtml(t('tiebreakApplied'))}: ${escapeHtml(tieTypeLabel)}</div>
+            <div class="tb-subtitle">${escapeHtml(t('tiebreakDecidingCriterion'))}: <strong>${escapeHtml(decidingLabel)}</strong></div>
+            <div class="tb-subtitle">${escapeHtml(t('tiebreakAppliedByPosition'))}: ${escapeHtml(pairwiseSummary)}</div>
+            <div class="tb-subtitle">${escapeHtml(t('tiebreakTiedTeams'))}: ${escapeHtml(tiedTeams || '—')}</div>
+        </div>
+        <div class="tb-table-wrap">
+            <table class="tb-table">
+                <thead>
+                    <tr>
+                        <th>${escapeHtml(t('posAbbr'))}</th>
+                        <th>${escapeHtml(t('team'))}</th>
+                        ${criteriaHead}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function positionTiebreakTooltip(anchorEl) {
+    if (!tiebreakTooltipEl || !anchorEl) return;
+
+    const padding = 10;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const anchorRect = anchorEl.getBoundingClientRect();
+    const tooltipRect = tiebreakTooltipEl.getBoundingClientRect();
+
+    let left = anchorRect.right + 10;
+    let top = anchorRect.top - 4;
+
+    if (left + tooltipRect.width > viewportWidth - padding) {
+        left = anchorRect.left - tooltipRect.width - 10;
+    }
+
+    if (left < padding) {
+        left = Math.max(padding, Math.min(anchorRect.left, viewportWidth - tooltipRect.width - padding));
+        top = anchorRect.bottom + 10;
+    }
+
+    if (top + tooltipRect.height > viewportHeight - padding) {
+        top = viewportHeight - tooltipRect.height - padding;
+    }
+
+    top = Math.max(padding, top);
+
+    tiebreakTooltipEl.style.left = `${left}px`;
+    tiebreakTooltipEl.style.top = `${top}px`;
+}
+
+function showTiebreakTooltip(anchorEl, tiebreakInfo, currentTeam) {
+    if (!tiebreakInfo) return;
+
+    if (tiebreakTooltipHideTimer) {
+        clearTimeout(tiebreakTooltipHideTimer);
+        tiebreakTooltipHideTimer = null;
+    }
+
+    const eventData = getTiebreakEventById(tiebreakInfo.event_id);
+    if (!eventData) return;
+
+    const tooltip = ensureTiebreakTooltipElement();
+    tooltip.innerHTML = buildTiebreakTooltipTableHtml(tiebreakInfo, eventData, currentTeam);
+    tooltip.style.display = 'block';
+    positionTiebreakTooltip(anchorEl);
+}
+
+function hideTiebreakTooltip() {
+    if (!tiebreakTooltipEl) return;
+    tiebreakTooltipEl.style.display = 'none';
+}
+
+function hideTiebreakTooltipWithDelay(delayMs = 120) {
+    if (tiebreakTooltipHideTimer) {
+        clearTimeout(tiebreakTooltipHideTimer);
+    }
+    tiebreakTooltipHideTimer = setTimeout(() => {
+        hideTiebreakTooltip();
+        tiebreakTooltipHideTimer = null;
+    }, delayMs);
+}
+
+document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const clickedIndicator = target.closest('.tiebreak-indicator');
+    const clickedTooltip = target.closest('#tiebreak-tooltip');
+    if (!clickedIndicator && !clickedTooltip) {
+        hideTiebreakTooltip();
+    }
+});
+
+window.addEventListener('resize', () => {
+    hideTiebreakTooltip();
+});
+
+window.addEventListener('scroll', () => {
+    hideTiebreakTooltip();
+}, true);
+
 // ==================== SISTEMA DE HISTÓRICO DE CLASSIFICAÇÕES ====================
 
 /**
@@ -6913,8 +7385,8 @@ function getChampionPredictionLabel(modalidade) {
     const normalized = (modalidade || '').toUpperCase();
     const isFeminino = normalized.includes('FEMININO');
     return isFeminino
-        ? { label: 'Campeãs', description: 'Probabilidade de serem campeãs' }
-        : { label: 'Campeões', description: 'Probabilidade de serem campeões' };
+        ? { label: t('predChampionsFemale'), description: t('predChampionsFemaleDesc') }
+        : { label: t('predChampionsMale'), description: t('predChampionsMaleDesc') };
 }
 
 /**
@@ -7556,12 +8028,17 @@ function changeModalidade(mod) {
     const classificacaoPath = `output/elo_ratings/classificacao_${mod}.csv`;
     const detalhePath = `output/elo_ratings/detalhe_${mod}.csv`;
     const eloPath = `output/elo_ratings/elo_${mod}.csv`;
+    const tiebreakPath = `output/elo_ratings/tiebreak_${mod}.json`;
     const jogosPath = `output/csv_modalidades/${mod}.csv`;
 
     // Reset dos dados e variáveis globais
     sampleData = {
         teams: [],
         rankings: {},
+        tiebreakMetadata: {
+            events: [],
+            indexByContextTeam: {}
+        },
         withdrawnTeams: new Set(),
         eloHistory: {},
         gameDetails: {},  // ← ADICIONADO para guardar detalhes de cada jogo (adversário, resultado, variação)
@@ -7586,7 +8063,7 @@ function changeModalidade(mod) {
     document.getElementById('rankingsBody').innerHTML = `<tr><td colspan="11" class="loading">${t('loadingRankings')}</td></tr>`;
 
     let loadedFiles = 0;
-    const totalFiles = 4; // Agora são 4 ficheiros
+    const totalFiles = 5;
 
     function checkAllLoaded() {
         if (loadToken !== currentLoadToken) return;
@@ -7695,6 +8172,24 @@ function changeModalidade(mod) {
             checkAllLoaded();
         }
     });
+
+    fetch(`${tiebreakPath}?t=${Date.now()}`, { cache: 'no-store' })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(payload => {
+            if (loadToken !== currentLoadToken) return;
+            processTiebreakMetadata(payload);
+            checkAllLoaded();
+        })
+        .catch(() => {
+            if (loadToken !== currentLoadToken) return;
+            processTiebreakMetadata({ events: [], indexByContextTeam: {} });
+            checkAllLoaded();
+        });
 
     // Carregar ficheiro elo_*.csv com ELOs iniciais PRIMEIRO
     Papa.parse(eloPath, {
@@ -7947,6 +8442,19 @@ function hasMatchResult(match) {
 
     return (result1 !== null && result1 !== undefined && result1 !== '') &&
         (result2 !== null && result2 !== undefined && result2 !== '');
+}
+
+function isCalendarMatchPastWithoutResult(match, now = new Date()) {
+    if (!match || hasMatchResult(match)) return false;
+
+    const rawDate = (match.date || match.Data || match.Dia || '').toString().trim();
+    if (!rawDate) return false;
+
+    const matchDateTimestamp = parseCalendarDateToTimestamp(rawDate);
+    if (!Number.isFinite(matchDateTimestamp)) return false;
+
+    const todayTimestamp = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    return matchDateTimestamp < todayTimestamp;
 }
 
 function buildCalendarDatePages(filteredMatches, options = {}) {
@@ -8705,6 +9213,7 @@ function createGameItem(game) {
     // Verificar se jogo foi realizado (resultado pode ser 0, então usar null check)
     const hasResult = (result1 !== null && result1 !== undefined && result1 !== '') &&
         (result2 !== null && result2 !== undefined && result2 !== '');
+    const isPastWithoutResult = isCalendarMatchPastWithoutResult(game);
 
     // Data e hora do jogo
     const gameDate = game.date || game.Data || game.Dia || '';
@@ -8744,6 +9253,10 @@ function createGameItem(game) {
         locationStr += ` <span class="placeholder-badge" title="${t('provisionalLocationPlaceholder')}">*</span>`;
     }
 
+    const pendingResultWarningHtml = isPastWithoutResult
+        ? `<div class="game-warning">${t('calendarPendingResultWarning')}</div>`
+        : '';
+
     // Resultado
     let scoreHtml = '';
     if (hasResult) {
@@ -8773,6 +9286,7 @@ function createGameItem(game) {
                 <div class="game-meta">
                     <div class="game-date">${dateStr}</div>
                     <div class="game-location">${locationStr}</div>
+                    ${pendingResultWarningHtml}
                 </div>
                 <div class="game-teams">
                     <div class="game-team home">
@@ -8897,6 +9411,14 @@ function processRankings(data) {
             grupo = null;
         }
 
+        // Limpar divisão: converter "1.0" para "1", etc.
+        if (divisao) {
+            const numDiv = parseInt(divisao);
+            if (!isNaN(numDiv)) {
+                divisao = numDiv.toString();
+            }
+        }
+
         // Determinar mainKey
         if (!divisao && !grupo) {
             // Liga única sem divisões nem grupos
@@ -8920,8 +9442,8 @@ function processRankings(data) {
 
         const team = {
             name: normalizedTeamName,
-            division: divisao || mainKey,
-            group: grupo,
+            division: divisao || null,  // Manter null se não há divisão
+            group: grupo || null,  // Manter null se não há grupo
             color: courseInfo.primaryColor,
             secondaryColor: courseInfo.secondaryColor,
             fullName: courseInfo.fullName,
@@ -8939,6 +9461,7 @@ function processRankings(data) {
         if (!sampleData.rankings[mainKey]) sampleData.rankings[mainKey] = [];
         sampleData.rankings[mainKey].push({
             team: normalizedTeamName,
+            rankingKey: mainKey,
             games: parseInt(row.jogos) || 0,
             points: parseInt(row.pontos) || 0,
             wins: parseInt(row.vitorias) || 0,
@@ -11201,19 +11724,19 @@ function updatePredictionsStats() {
     const championPrediction = getChampionPredictionLabel(currentModalidade);
     const stats = [
         {
-            label: 'Playoffs',
+            label: t('predPlayoffs'),
             value: `${(teamData.p_playoffs || 0).toFixed(1)}%`,
-            description: 'Probabilidade de qualificação'
+            description: t('predQualification')
         },
         {
-            label: 'Meias-Finais',
+            label: t('predSemiFinals'),
             value: `${(teamData.p_meias_finais || 0).toFixed(1)}%`,
-            description: 'Probabilidade de chegarem às meias'
+            description: t('predReachSemis')
         },
         {
-            label: 'Final',
+            label: t('predFinal'),
             value: `${(teamData.p_finais || 0).toFixed(1)}%`,
-            description: 'Probabilidade de chegarem à final'
+            description: t('predReachFinals')
         },
         {
             label: championPrediction.label,
@@ -11221,35 +11744,35 @@ function updatePredictionsStats() {
             description: championPrediction.description
         },
         {
-            label: 'Pontos Esperados',
+            label: t('expectedPoints'),
             value: (teamData.expected_points || 0).toFixed(1),
-            description: `± ${(teamData.expected_points_std || 0).toFixed(1)} pontos`
+            description: `± ${(teamData.expected_points_std || 0).toFixed(1)} ${t('points')}`
         },
         {
-            label: 'Posição Esperada no Grupo',
+            label: t('expectedPosition'),
             value: `${expectedPlaceRank > 0 ? expectedPlaceRank : '-'}º`,
-            description: `Valor esperado: ${expectedPlaceValue} (± ${expectedPlaceStd} posições)`
+            description: `${t('expectedValue')}: ${expectedPlaceValue} (± ${expectedPlaceStd} ${t('positions')})`
         },
         {
-            label: 'ELO Final Médio',
+            label: t('avgFinalElo'),
             value: Math.round(teamData.avg_final_elo || 0),
-            description: `± ${Math.round(teamData.avg_final_elo_std || 0)} pontos`
+            description: `± ${Math.round(teamData.avg_final_elo_std || 0)} ${t('points')}`
         }
     ];
 
     // Adicionar promoção ou descida se existirem
     if (teamData.p_promocao && teamData.p_promocao > 0) {
         stats.push({
-            label: 'Promoção',
+            label: t('predPromotion'),
             value: `${(teamData.p_promocao).toFixed(1)}%`,
-            description: 'Probabilidade de subir de divisão'
+            description: t('predPromotionDesc')
         });
     }
     if (teamData.p_descida && teamData.p_descida > 0) {
         stats.push({
-            label: 'Descida',
+            label: t('predRelegation'),
             value: `${(teamData.p_descida).toFixed(1)}%`,
-            description: 'Probabilidade de descer de divisão'
+            description: t('predRelegationDesc')
         });
     }
 

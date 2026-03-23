@@ -455,6 +455,11 @@ class StandingsCalculator:
         logger.info(
             f"Colunas detectadas - Divisão: {self.div_col}, Grupo: {self.group_col}"
         )
+        self.tiebreak_events = []
+
+    def get_tiebreak_events(self):
+        """Retorna eventos de desempate capturados durante o cálculo."""
+        return self.tiebreak_events
 
     def _collect_absence_teams(self, df):
         """Coleta equipas que aparecem na coluna de falta de comparência."""
@@ -491,7 +496,8 @@ class StandingsCalculator:
 
         # Se não houver divisões nem grupos, criar uma classificação única
         if not self.div_col and not self.group_col:
-            return self._calculate_single_standings(df_group, self.teams)
+            context = {"Divisao": None, "Grupo": None, "ranking_key": "geral"}
+            return self._calculate_single_standings(df_group, self.teams, context)
 
         # Determinar como agrupar as equipas
         group_key_col = self._create_group_key_column(df_group)
@@ -548,14 +554,16 @@ class StandingsCalculator:
             logger.warning(
                 f"Coluna de agrupamento '{group_key_col}' não encontrada. A usar classificação única."
             )
-            return self._calculate_single_standings(df_group, self.teams)
+            context = {"Divisao": None, "Grupo": None, "ranking_key": "geral"}
+            return self._calculate_single_standings(df_group, self.teams, context)
 
         # Obter grupos únicos
         groups = df_group[group_key_col].dropna().unique()
 
         if not len(groups):
             logger.info("Nenhum grupo encontrado. A calcular classificação única.")
-            return self._calculate_single_standings(df_group, self.teams)
+            context = {"Divisao": None, "Grupo": None, "ranking_key": "geral"}
+            return self._calculate_single_standings(df_group, self.teams, context)
 
         all_standings = []
 
@@ -582,7 +590,8 @@ class StandingsCalculator:
                 continue
 
             # Calcular classificação para este grupo
-            grp_standings = self._calculate_single_standings(df_grp, teams_grp)
+            context = self._build_group_context(group, group_key_col)
+            grp_standings = self._calculate_single_standings(df_grp, teams_grp, context)
 
             # Adicionar informações do grupo
             if self.div_col and group_key_col == "Inferred_Group":
@@ -601,7 +610,8 @@ class StandingsCalculator:
                     grp_standings["Divisao"] = int(float(div_num))
                 except ValueError:
                     grp_standings["Divisao"] = div_num
-                grp_standings["Grupo"] = grp_num
+                if str(grp_num).strip() != "":
+                    grp_standings["Grupo"] = grp_num
             elif self.group_col:
                 grp_standings["Grupo"] = group
 
@@ -615,7 +625,39 @@ class StandingsCalculator:
             cols = self._get_columns_order(result)
             return result[cols]
         else:
-            return self._calculate_single_standings(df_group, self.teams)
+            context = {"Divisao": None, "Grupo": None, "ranking_key": "geral"}
+            return self._calculate_single_standings(df_group, self.teams, context)
+
+    def _build_group_context(self, group, group_key_col):
+        """Monta contexto estável de classificação para indexação de desempates."""
+        divisao = None
+        grupo = None
+
+        if self.div_col and group_key_col == "Inferred_Group":
+            try:
+                divisao = int(float(group))
+            except ValueError:
+                divisao = group
+        elif self.div_col and group_key_col == "Group_Key":
+            div_num, grp_num = str(group).split("_")
+            try:
+                divisao = int(float(div_num))
+            except ValueError:
+                divisao = div_num
+            grupo = grp_num if str(grp_num).strip() != "" else None
+        elif self.group_col:
+            grupo = group
+
+        if divisao is not None and grupo is not None:
+            ranking_key = f"{divisao}ª Divisão - Grupo {grupo}"
+        elif divisao is not None:
+            ranking_key = f"{divisao}ª Divisão"
+        elif grupo is not None:
+            ranking_key = f"Grupo {grupo}"
+        else:
+            ranking_key = "geral"
+
+        return {"Divisao": divisao, "Grupo": grupo, "ranking_key": ranking_key}
 
     def _get_columns_order(self, result):
         """Determina a ordem correta das colunas baseada nas colunas disponíveis"""
@@ -709,7 +751,7 @@ class StandingsCalculator:
 
         return groups
 
-    def _calculate_single_standings(self, df_group, teams):
+    def _calculate_single_standings(self, df_group, teams, context):
         """Calcula classificação para um único grupo/divisão"""
         # Inicializar estatísticas para cada equipa
         stats = self._initialize_team_stats(teams)
@@ -725,10 +767,18 @@ class StandingsCalculator:
         standings_df.rename(columns={"index": "Equipa"}, inplace=True)
 
         # Aplicar critérios de desempate
-        standings_df = self._apply_tiebreaking_criteria(standings_df, df_group)
+        standings_df = self._apply_tiebreaking_criteria(standings_df, df_group, context)
 
         # Reordenar colunas
         cols = self._get_standings_columns()
+
+        # Adicionar Divisao e Grupo se existirem no standings_df
+        # e não estiverem já na lista de colunas padrão
+        if "Divisao" in standings_df.columns and "Divisao" not in cols:
+            cols.insert(2, "Divisao")  # Inserir após Equipa
+        if "Grupo" in standings_df.columns and "Grupo" not in cols:
+            insert_pos = 3 if "Divisao" in cols else 2
+            cols.insert(insert_pos, "Grupo")
 
         return standings_df[cols]
 
@@ -898,7 +948,7 @@ class StandingsCalculator:
                 stats[team]["sets_ganhos"] - stats[team]["sets_perdidos"]
             )
 
-    def _apply_tiebreaking_criteria(self, standings_df, df_games):
+    def _apply_tiebreaking_criteria(self, standings_df, df_games, context):
         """Aplica critérios de desempate sequenciais conforme regulamento"""
         # Ordenação inicial por pontos e faltas
         standings_df = standings_df.sort_values(
@@ -909,7 +959,9 @@ class StandingsCalculator:
         tied_groups = self._find_tied_groups(standings_df)
 
         # Resolver empates para cada grupo
-        final_standings = self._resolve_all_ties(standings_df, tied_groups, df_games)
+        final_standings = self._resolve_all_ties(
+            standings_df, tied_groups, df_games, context
+        )
 
         # Adicionar posições
         final_standings["Posicao"] = range(1, len(final_standings) + 1)
@@ -917,19 +969,30 @@ class StandingsCalculator:
         return final_standings
 
     def _find_tied_groups(self, standings_df):
-        """Encontra grupos de equipas empatadas em pontos"""
+        """Encontra grupos de equipas empatadas em pontos (excluindo equipas desistentes)"""
         tied_groups = []
         current_group = []
         current_points = None
 
         for idx, row in standings_df.iterrows():
+            team = row["Equipa"]
+
+            # Ignorar equipas desistentes para desempate
+            if team in self.withdrawn_teams:
+                # Se há grupo atual, salvá-lo antes de passar para desistente
+                if len(current_group) > 1:
+                    tied_groups.append(current_group.copy())
+                current_group = []
+                current_points = None
+                continue
+
             if current_points is None or row["pontos"] == current_points:
-                current_group.append(row["Equipa"])
+                current_group.append(team)
                 current_points = row["pontos"]
             else:
                 if len(current_group) > 1:
                     tied_groups.append(current_group.copy())
-                current_group = [row["Equipa"]]
+                current_group = [team]
                 current_points = row["pontos"]
 
         # Adicionar último grupo se tiver mais de 1 equipa
@@ -938,7 +1001,7 @@ class StandingsCalculator:
 
         return tied_groups
 
-    def _resolve_all_ties(self, standings_df, tied_groups, df_games):
+    def _resolve_all_ties(self, standings_df, tied_groups, df_games, context):
         """Resolve todos os empates identificados"""
         final_standings = []
         processed_teams = set()
@@ -952,9 +1015,14 @@ class StandingsCalculator:
             tied_group = next((group for group in tied_groups if team in group), None)
 
             if tied_group:
+                tie_points = row.get("pontos")
                 # Resolver empate usando confrontos diretos
                 resolved_group = self._resolve_head_to_head_tiebreak(
-                    tied_group, df_games, standings_df
+                    tied_group,
+                    df_games,
+                    standings_df,
+                    context,
+                    tie_points,
                 )
                 final_standings.extend(resolved_group)
                 processed_teams.update(tied_group)
@@ -965,7 +1033,9 @@ class StandingsCalculator:
         # Recriar DataFrame com ordem correta
         return pd.DataFrame(final_standings)
 
-    def _resolve_head_to_head_tiebreak(self, tied_teams, df_games, original_standings):
+    def _resolve_head_to_head_tiebreak(
+        self, tied_teams, df_games, original_standings, context, tie_points
+    ):
         """
         Resolve empate usando confrontos diretos entre equipas empatadas.
 
@@ -1007,7 +1077,13 @@ class StandingsCalculator:
         h2h_df = self._create_h2h_standings(h2h_stats)
 
         # Criar resultado final com dados originais e critérios completos
-        return self._create_final_h2h_result(h2h_df, original_standings)
+        return self._create_final_h2h_result(
+            h2h_df,
+            original_standings,
+            tied_teams,
+            context,
+            tie_points,
+        )
 
     def _initialize_h2h_stats(self, tied_teams):
         """Inicializa estatísticas para confronto direto"""
@@ -1096,39 +1172,48 @@ class StandingsCalculator:
             [
                 "pontos_h2h",
                 "faltas_h2h",
-                "diferenca_sets_h2h",
                 "diferenca_golos_h2h",
                 "golos_marcados_h2h",
             ],
-            ascending=[False, True, False, False, False],
+            ascending=[False, True, False, False],
         )
 
-    def _create_final_h2h_result(self, h2h_df, original_standings):
+    def _create_final_h2h_result(
+        self, h2h_df, original_standings, tied_teams, context, tie_points
+    ):
         """Cria resultado final do desempate usando os dados originais e aplicando critérios adicionais quando necessário"""
         # Mesclar dados de h2h com os dados originais para ter todos os critérios disponíveis
         merged_df = pd.merge(
             h2h_df, original_standings, on="Equipa", suffixes=("_h2h", "")
         )
 
-        # Aplicar todos os critérios de desempate na ordem correta:
-        # 1. Pontos no confronto direto
-        # 2. Faltas de comparência no confronto direto
-        # 3. Diferença de sets no confronto direto (para vôlei)
-        # 4. Diferença de gols no confronto direto
-        # 5. Gols marcados no confronto direto
-        # 6. Diferença de sets total (para vôlei)
-        # 7. Diferença de gols total
-        # 8. Gols marcados total
+        # Aplicar todos os critérios de desempate na ordem CORRETA conforme regulamento:
+        # 1. Faltas de comparência GERAL (menos é melhor) - PRIMEIRO critério
+        # 2. Resultado H2H (pontos marcados no confronto direto)
+        # 3. Diferença de golos/sets H2H
+        # 4. Golos/pontos marcados H2H
+        # 5. Diferença de golos/sets GERAL
+        # 6. Golos/pontos marcados GERAL
+        # NOTA: Critério de disciplina é saltado pois não há dados
+
         sort_columns = [
-            "pontos_h2h",
-            "faltas_h2h",
-            "diferenca_sets_h2h",
-            "diferenca_golos_h2h",
-            "golos_marcados_h2h",
-            "diferenca_sets",
-            "diferenca_golos",
-            "golos_marcados",
+            "faltas_comparencia",  # PRIMEIRO: Faltas gerais (menos é melhor)
+            "pontos_h2h",  # DEPOIS: Pontos no H2H
         ]
+
+        sort_columns.extend(
+            [
+                "diferenca_golos_h2h",
+                "golos_marcados_h2h",
+            ]
+        )
+
+        sort_columns.extend(
+            [
+                "diferenca_golos",
+                "golos_marcados",
+            ]
+        )
 
         # Filtrar apenas colunas que existem
         valid_columns = [col for col in sort_columns if col in merged_df.columns]
@@ -1146,6 +1231,66 @@ class StandingsCalculator:
             ascending=ascending_values,
             kind="stable",  # Usa algoritmo estável de ordenação
         )
+
+        deciding_criterion = None
+        # Encontrar o primeiro critério onde o 1º e 2º times diferem
+        if len(sorted_df) >= 2:
+            for col in valid_columns:
+                val_first = sorted_df.iloc[0][col]
+                val_second = sorted_df.iloc[1][col]
+                # Comparar valores (tratando NaNs)
+                if pd.isna(val_first) and pd.isna(val_second):
+                    continue
+                if pd.isna(val_first) or pd.isna(val_second):
+                    deciding_criterion = col
+                    break
+                if val_first != val_second:
+                    deciding_criterion = col
+                    break
+        # Se todos os valores são iguais, usar o primeiro critério com valores únicos
+        if deciding_criterion is None:
+            for col in valid_columns:
+                if sorted_df[col].nunique(dropna=False) > 1:
+                    deciding_criterion = col
+                    break
+
+        global_criteria = {"diferenca_golos", "golos_marcados"}
+        used_global_fallback = deciding_criterion in global_criteria
+
+        standings_details = []
+        for rank, (_, row) in enumerate(sorted_df.iterrows(), start=1):
+            criteria_values = {}
+            for col in valid_columns:
+                value = row.get(col)
+                if pd.isna(value):
+                    criteria_values[col] = None
+                else:
+                    criteria_values[col] = (
+                        int(value) if float(value).is_integer() else float(value)
+                    )
+            standings_details.append(
+                {
+                    "team": row["Equipa"],
+                    "rank_in_tiebreak": rank,
+                    "criteria_values": criteria_values,
+                }
+            )
+
+        tie_event = {
+            "context": {
+                "Divisao": context.get("Divisao"),
+                "Grupo": context.get("Grupo"),
+                "ranking_key": context.get("ranking_key", "geral"),
+            },
+            "tie_points": int(tie_points) if pd.notna(tie_points) else None,
+            "tie_type": "mini_league" if len(tied_teams) > 2 else "head_to_head",
+            "tied_teams": list(tied_teams),
+            "criteria_order": valid_columns,
+            "deciding_criterion": deciding_criterion,
+            "used_global_fallback": bool(used_global_fallback),
+            "standings": standings_details,
+        }
+        self.tiebreak_events.append(tie_event)
 
         # Criar lista final
         result_teams = []
@@ -1627,6 +1772,7 @@ class EloRatingSystem:
             df, sport, teams, withdrawn_teams=withdrawn_teams
         )
         real_standings = standings_calculator.calculate_standings()
+        tiebreak_events = standings_calculator.get_tiebreak_events()
 
         # Processar jogos e calcular ELO
         elo_history, detailed_rows = self._process_games(
@@ -1643,7 +1789,14 @@ class EloRatingSystem:
             df, teams, sport, elo_history, detailed_rows
         )
 
-        return teams, elo_history, detailed_rows, real_standings, withdrawn_teams
+        return (
+            teams,
+            elo_history,
+            detailed_rows,
+            real_standings,
+            withdrawn_teams,
+            tiebreak_events,
+        )
 
     def _detect_withdrawn_teams(self, df: pd.DataFrame) -> dict:
         """Deteta equipas desistentes (todos os jogos sem participação efetiva).
@@ -2347,9 +2500,14 @@ class TournamentProcessor:
                 self.elo_system.load_other_sport_ratings({})
 
                 # Processar o torneio
-                teams, elo_history, detailed_rows, real_standings, withdrawn_teams = (
-                    self.elo_system.process_tournament(df, filename)
-                )
+                (
+                    teams,
+                    elo_history,
+                    detailed_rows,
+                    real_standings,
+                    withdrawn_teams,
+                    tiebreak_events,
+                ) = self.elo_system.process_tournament(df, filename)
 
                 # Salvar resultados
                 self._save_tournament_results(
@@ -2359,6 +2517,8 @@ class TournamentProcessor:
                     detailed_rows,
                     real_standings,
                     withdrawn_teams,
+                    tiebreak_events,
+                    df,
                 )
 
                 logger.info(f"Arquivo {filename} processado com sucesso")
@@ -2423,9 +2583,14 @@ class TournamentProcessor:
                 ]
 
                 # Processar o torneio
-                teams, elo_history, detailed_rows, real_standings, withdrawn_teams = (
-                    self.elo_system.process_tournament(df, filename)
-                )
+                (
+                    teams,
+                    elo_history,
+                    detailed_rows,
+                    real_standings,
+                    withdrawn_teams,
+                    tiebreak_events,
+                ) = self.elo_system.process_tournament(df, filename)
 
                 # Salvar resultados
                 self._save_tournament_results(
@@ -2435,6 +2600,8 @@ class TournamentProcessor:
                     detailed_rows,
                     real_standings,
                     withdrawn_teams,
+                    tiebreak_events,
+                    df,
                 )
 
                 logger.info(f"Arquivo {filename} processado com sucesso")
@@ -2625,10 +2792,14 @@ class TournamentProcessor:
         detailed_rows,
         real_standings,
         withdrawn_teams=None,
+        tiebreak_events=None,
+        df_original=None,
     ):
         """Salva os resultados do processamento de um torneio"""
         if withdrawn_teams is None:
             withdrawn_teams = {}
+        if tiebreak_events is None:
+            tiebreak_events = []
 
         base_name = os.path.splitext(filename)[0]
 
@@ -2638,6 +2809,7 @@ class TournamentProcessor:
                 logger.info(
                     f"Salvando classificação para {filename}. withdrawn_teams: {withdrawn_teams}"
                 )
+                standings_was_mutated = False
 
                 # Adicionar/atualizar equipas desistentes à classificação
                 for withdrawn_team, num_games in withdrawn_teams.items():
@@ -2665,6 +2837,7 @@ class TournamentProcessor:
                         real_standings.loc[team_mask, "golos_marcados"] = 0
                         real_standings.loc[team_mask, "golos_sofridos"] = 0
                         real_standings.loc[team_mask, "diferenca_golos"] = 0
+                        standings_was_mutated = True
                         continue
 
                     # Se não existir, adicionar nova linha
@@ -2686,6 +2859,47 @@ class TournamentProcessor:
                         "diferenca_golos": 0,
                         "faltas_comparencia": num_games,
                     }
+
+                    # Extrair divisão e grupo originais da equipa desistente do DataFrame original
+                    if df_original is not None:
+                        # Procurar a equipa desistente no DataFrame original para obter divisão/grupo
+                        team_data = df_original[
+                            df_original["Equipa 1"] == withdrawn_team
+                        ]
+                        if team_data.empty:
+                            team_data = df_original[
+                                df_original["Equipa 2"] == withdrawn_team
+                            ]
+
+                        if not team_data.empty:
+                            # Extrair divisão e grupo (usar o primeiro encontrado)
+                            div_col = next(
+                                (
+                                    col
+                                    for col in team_data.columns
+                                    if "divis" in col.lower().replace("ã", "a")
+                                ),
+                                None,
+                            )
+                            group_col = next(
+                                (
+                                    col
+                                    for col in team_data.columns
+                                    if "grupo" in col.lower().replace("ã", "a")
+                                ),
+                                None,
+                            )
+
+                            if div_col and div_col in team_data.columns:
+                                original_div = team_data[div_col].iloc[0]
+                                if pd.notna(original_div) and original_div != "":
+                                    withdrawn_row[div_col] = original_div
+
+                            if group_col and group_col in team_data.columns:
+                                original_group = team_data[group_col].iloc[0]
+                                if pd.notna(original_group) and original_group != "":
+                                    withdrawn_row[group_col] = original_group
+
                     # Adicionar colunas extras se existirem (Divisao, Grupo, etc.)
                     for col in real_standings.columns:
                         if col not in withdrawn_row:
@@ -2696,59 +2910,70 @@ class TournamentProcessor:
                         [real_standings, pd.DataFrame([withdrawn_row])],
                         ignore_index=True,
                     )
+                    standings_was_mutated = True
                     logger.info(
                         f"  > Linha adicionada com sucesso. Total de equipas: {len(real_standings)}"
                     )
 
-                # Ordenar DENTRO DE CADA GRUPO, não globalmente
-                # Isto preserva a separação entre divisões e grupos
-                if (
-                    "Divisao" in real_standings.columns
-                    and "Grupo" in real_standings.columns
-                ):
-                    # Ordena cada (Divisão, Grupo) internamente
-                    sorted_groups = []
-                    for (div, grp), group_df in real_standings.groupby(
-                        ["Divisao", "Grupo"], sort=False
+                # Só recalcula ordem quando há mutações (ex.: equipas desistentes adicionadas).
+                # Preserva a ordem já desempatada calculada no StandingsCalculator.
+                if standings_was_mutated:
+                    sort_keys = ["pontos", "faltas_comparencia"]
+                    sort_ascending = [False, True]
+
+                    if "Posicao" in real_standings.columns:
+                        sort_keys.append("Posicao")
+                        sort_ascending.append(True)
+
+                    if (
+                        "Divisao" in real_standings.columns
+                        and "Grupo" in real_standings.columns
                     ):
-                        # Ordenar este grupo por pontos e faltas
-                        group_sorted = group_df.sort_values(
-                            ["pontos", "faltas_comparencia"], ascending=[False, True]
+                        sorted_groups = []
+                        for (_, _), group_df in real_standings.groupby(
+                            ["Divisao", "Grupo"], sort=False, dropna=False
+                        ):
+                            group_sorted = group_df.sort_values(
+                                sort_keys,
+                                ascending=sort_ascending,
+                                kind="stable",
+                            ).reset_index(drop=True)
+                            group_sorted["Posicao"] = range(1, len(group_sorted) + 1)
+                            sorted_groups.append(group_sorted)
+                        real_standings = pd.concat(sorted_groups, ignore_index=True)
+                    elif "Divisao" in real_standings.columns:
+                        sorted_divs = []
+                        for _, div_df in real_standings.groupby(
+                            "Divisao", sort=False, dropna=False
+                        ):
+                            div_sorted = div_df.sort_values(
+                                sort_keys,
+                                ascending=sort_ascending,
+                                kind="stable",
+                            ).reset_index(drop=True)
+                            div_sorted["Posicao"] = range(1, len(div_sorted) + 1)
+                            sorted_divs.append(div_sorted)
+                        real_standings = pd.concat(sorted_divs, ignore_index=True)
+                    elif "Grupo" in real_standings.columns:
+                        sorted_groups = []
+                        for _, grp_df in real_standings.groupby(
+                            "Grupo", sort=False, dropna=False
+                        ):
+                            grp_sorted = grp_df.sort_values(
+                                sort_keys,
+                                ascending=sort_ascending,
+                                kind="stable",
+                            ).reset_index(drop=True)
+                            grp_sorted["Posicao"] = range(1, len(grp_sorted) + 1)
+                            sorted_groups.append(grp_sorted)
+                        real_standings = pd.concat(sorted_groups, ignore_index=True)
+                    else:
+                        real_standings = real_standings.sort_values(
+                            sort_keys,
+                            ascending=sort_ascending,
+                            kind="stable",
                         ).reset_index(drop=True)
-                        # Recalcular posições dentro deste grupo
-                        group_sorted["Posicao"] = range(1, len(group_sorted) + 1)
-                        sorted_groups.append(group_sorted)
-                    real_standings = pd.concat(sorted_groups, ignore_index=True)
-                elif "Divisao" in real_standings.columns:
-                    # Ordena cada Divisão internamente
-                    sorted_divs = []
-                    for div, div_df in real_standings.groupby("Divisao", sort=False):
-                        # Ordenar esta divisão por pontos e faltas
-                        div_sorted = div_df.sort_values(
-                            ["pontos", "faltas_comparencia"], ascending=[False, True]
-                        ).reset_index(drop=True)
-                        # Recalcular posições dentro desta divisão
-                        div_sorted["Posicao"] = range(1, len(div_sorted) + 1)
-                        sorted_divs.append(div_sorted)
-                    real_standings = pd.concat(sorted_divs, ignore_index=True)
-                elif "Grupo" in real_standings.columns:
-                    # Ordena cada Grupo internamente
-                    sorted_groups = []
-                    for grp, grp_df in real_standings.groupby("Grupo", sort=False):
-                        # Ordenar este grupo por pontos e faltas
-                        grp_sorted = grp_df.sort_values(
-                            ["pontos", "faltas_comparencia"], ascending=[False, True]
-                        ).reset_index(drop=True)
-                        # Recalcular posições dentro deste grupo
-                        grp_sorted["Posicao"] = range(1, len(grp_sorted) + 1)
-                        sorted_groups.append(grp_sorted)
-                    real_standings = pd.concat(sorted_groups, ignore_index=True)
-                else:
-                    # Sem divisões nem grupos, ordenar globalmente
-                    real_standings = real_standings.sort_values(
-                        ["pontos", "faltas_comparencia"], ascending=[False, True]
-                    ).reset_index(drop=True)
-                    real_standings["Posicao"] = range(1, len(real_standings) + 1)
+                        real_standings["Posicao"] = range(1, len(real_standings) + 1)
 
                 # Converter a coluna Divisao para inteiro quando existir
                 if "Divisao" in real_standings.columns:
@@ -2773,6 +2998,7 @@ class TournamentProcessor:
                     os.path.join(self.output_dir, f"classificacao_{filename}"),
                     index=False,
                 )
+                self._save_tiebreak_metadata(filename, tiebreak_events, real_standings)
             else:
                 logger.warning(f"Classificação não disponível para {filename}")
 
@@ -2791,6 +3017,86 @@ class TournamentProcessor:
             logger.error(
                 f"Erro ao salvar resultados para {filename}: {e}", exc_info=True
             )
+
+    def _save_tiebreak_metadata(self, filename, tiebreak_events, real_standings):
+        """Salva metadados de desempate em JSON para consumo do frontend."""
+        base_name = os.path.splitext(filename)[0]
+        season_match = re.search(r"_(\d{2}_\d{2})$", base_name)
+        season = season_match.group(1) if season_match else None
+        modalidade = base_name[: -(len(season) + 1)] if season else base_name
+
+        events = []
+        index_by_context_team = {}
+
+        standings_positions = {}
+        if isinstance(real_standings, pd.DataFrame) and not real_standings.empty:
+            for _, row in real_standings.iterrows():
+                team = row.get("Equipa")
+                if not team:
+                    continue
+
+                divisao = row.get("Divisao")
+                grupo = row.get("Grupo")
+                if pd.isna(divisao) or divisao == "":
+                    divisao = None
+                if pd.isna(grupo) or grupo == "":
+                    grupo = None
+
+                if divisao is not None and grupo is not None:
+                    ranking_key = f"{divisao}ª Divisão - Grupo {grupo}"
+                elif divisao is not None:
+                    ranking_key = f"{divisao}ª Divisão"
+                elif grupo is not None:
+                    ranking_key = f"Grupo {grupo}"
+                else:
+                    ranking_key = "geral"
+
+                standings_positions[(ranking_key, team)] = row.get("Posicao")
+
+        for event_id, event in enumerate(tiebreak_events or [], start=1):
+            event_copy = dict(event)
+            event_copy["event_id"] = event_id
+            events.append(event_copy)
+
+            context = event_copy.get("context", {})
+            ranking_key = context.get("ranking_key", "geral")
+            for team_entry in event_copy.get("standings", []):
+                team_name = team_entry.get("team")
+                if not team_name:
+                    continue
+
+                final_position = standings_positions.get((ranking_key, team_name))
+                key = f"{ranking_key}::{team_name}"
+                index_by_context_team[key] = {
+                    "event_id": event_id,
+                    "ranking_key": ranking_key,
+                    "team": team_name,
+                    "tie_type": event_copy.get("tie_type"),
+                    "tie_points": event_copy.get("tie_points"),
+                    "tied_teams": event_copy.get("tied_teams", []),
+                    "criteria_order": event_copy.get("criteria_order", []),
+                    "deciding_criterion": event_copy.get("deciding_criterion"),
+                    "used_global_fallback": event_copy.get(
+                        "used_global_fallback", False
+                    ),
+                    "criteria_values": team_entry.get("criteria_values", {}),
+                    "rank_in_tiebreak": team_entry.get("rank_in_tiebreak"),
+                    "final_position": (
+                        int(final_position) if pd.notna(final_position) else None
+                    ),
+                }
+
+        payload = {
+            "version": 1,
+            "modalidade": modalidade,
+            "epoca": season,
+            "events": events,
+            "indexByContextTeam": index_by_context_team,
+        }
+
+        output_path = os.path.join(self.output_dir, f"tiebreak_{base_name}.json")
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
 
     def _format_elo_history(self, elo_history):
         """Formata o histórico de ELO para salvar em CSV"""

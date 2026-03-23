@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "modalidade": "BASQUETEBOL FEMININO",
+  "epoca": "24_25",
+  "events": [
+    {
+      "context": {
+        "Divisao": null,
+        "Grupo": "B",
+        "ranking_key": "Grupo B"
+      },
+      "tie_points": 8,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Eng. Eletrónica e Telecomunicações",
+        "Línguas e Relações Empresariais"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Línguas e Relações Empresariais",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 2,
+            "diferenca_golos_h2h": 2,
+            "golos_marcados_h2h": 5,
+            "diferenca_golos": -1,
+            "golos_marcados": 45
+          }
+        },
+        {
+          "team": "Eng. Eletrónica e Telecomunicações",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 3,
+            "diferenca_golos": 3,
+            "golos_marcados": 36
+          }
+        }
+      ],
+      "event_id": 1
+    },
+    {
+      "context": {
+        "Divisao": null,
+        "Grupo": "B",
+        "ranking_key": "Grupo B"
+      },
+      "tie_points": 4,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Tradução",
+        "Biologia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Biologia",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 2,
+            "diferenca_golos_h2h": 12,
+            "golos_marcados_h2h": 15,
+            "diferenca_golos": -17,
+            "golos_marcados": 42
+          }
+        },
+        {
+          "team": "Tradução",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -12,
+            "golos_marcados_h2h": 3,
+            "diferenca_golos": -28,
+            "golos_marcados": 24
+          }
+        }
+      ],
+      "event_id": 2
+    }
+  ],
+  "indexByContextTeam": {
+    "Grupo B::Línguas e Relações Empresariais": {
+      "event_id": 1,
+      "ranking_key": "Grupo B",
+      "team": "Línguas e Relações Empresariais",
+      "tie_type": "head_to_head",
+      "tie_points": 8,
+      "tied_teams": [
+        "Eng. Eletrónica e Telecomunicações",
+        "Línguas e Relações Empresariais"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 2,
+        "diferenca_golos_h2h": 2,
+        "golos_marcados_h2h": 5,
+        "diferenca_golos": -1,
+        "golos_marcados": 45
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 2
+    },
+    "Grupo B::Eng. Eletrónica e Telecomunicações": {
+      "event_id": 1,
+      "ranking_key": "Grupo B",
+      "team": "Eng. Eletrónica e Telecomunicações",
+      "tie_type": "head_to_head",
+      "tie_points": 8,
+      "tied_teams": [
+        "Eng. Eletrónica e Telecomunicações",
+        "Línguas e Relações Empresariais"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 3,
+        "diferenca_golos": 3,
+        "golos_marcados": 36
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 3
+    },
+    "Grupo B::Biologia": {
+      "event_id": 2,
+      "ranking_key": "Grupo B",
+      "team": "Biologia",
+      "tie_type": "head_to_head",
+      "tie_points": 4,
+      "tied_teams": [
+        "Tradução",
+        "Biologia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 2,
+        "diferenca_golos_h2h": 12,
+        "golos_marcados_h2h": 15,
+        "diferenca_golos": -17,
+        "golos_marcados": 42
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 5
+    },
+    "Grupo B::Tradução": {
+      "event_id": 2,
+      "ranking_key": "Grupo B",
+      "team": "Tradução",
+      "tie_type": "head_to_head",
+      "tie_points": 4,
+      "tied_teams": [
+        "Tradução",
+        "Biologia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -12,
+        "golos_marcados_h2h": 3,
+        "diferenca_golos": -28,
+        "golos_marcados": 24
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 6
+    }
+  }
+}

@@ -1,0 +1,504 @@
+{
+  "version": 1,
+  "modalidade": "ANDEBOL MISTO",
+  "epoca": "24_25",
+  "events": [
+    {
+      "context": {
+        "Divisao": 1,
+        "Grupo": null,
+        "ranking_key": "1ª Divisão"
+      },
+      "tie_points": 26,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Eng. Mecânica",
+        "Biotecnologia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "diferenca_golos",
+      "used_global_fallback": true,
+      "standings": [
+        {
+          "team": "Eng. Mecânica",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 2,
+            "diferenca_golos_h2h": 0,
+            "golos_marcados_h2h": 28,
+            "diferenca_golos": 91,
+            "golos_marcados": 252
+          }
+        },
+        {
+          "team": "Biotecnologia",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 2,
+            "diferenca_golos_h2h": 0,
+            "golos_marcados_h2h": 28,
+            "diferenca_golos": 54,
+            "golos_marcados": 322
+          }
+        }
+      ],
+      "event_id": 1
+    },
+    {
+      "context": {
+        "Divisao": 1,
+        "Grupo": null,
+        "ranking_key": "1ª Divisão"
+      },
+      "tie_points": 18,
+      "tie_type": "mini_league",
+      "tied_teams": [
+        "Eng. Computadores e Telemática",
+        "Eng. Civil",
+        "Eng. Informática"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. Informática",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 5,
+            "diferenca_golos_h2h": 2,
+            "golos_marcados_h2h": 41,
+            "diferenca_golos": -58,
+            "golos_marcados": 209
+          }
+        },
+        {
+          "team": "Eng. Computadores e Telemática",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 4,
+            "diferenca_golos_h2h": 0,
+            "golos_marcados_h2h": 46,
+            "diferenca_golos": -60,
+            "golos_marcados": 237
+          }
+        },
+        {
+          "team": "Eng. Civil",
+          "rank_in_tiebreak": 3,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 39,
+            "diferenca_golos": -35,
+            "golos_marcados": 226
+          }
+        }
+      ],
+      "event_id": 2
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": null,
+        "ranking_key": "2ª Divisão"
+      },
+      "tie_points": 21,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Gestão",
+        "DPT"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Gestão",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 6,
+            "golos_marcados_h2h": 24,
+            "diferenca_golos": -2,
+            "golos_marcados": 204
+          }
+        },
+        {
+          "team": "DPT",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": -6,
+            "golos_marcados_h2h": 18,
+            "diferenca_golos": 0,
+            "golos_marcados": 211
+          }
+        }
+      ],
+      "event_id": 3
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": null,
+        "ranking_key": "2ª Divisão"
+      },
+      "tie_points": 14,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Eng. Química",
+        "MTC"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "faltas_comparencia",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Eng. Química",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 9,
+            "golos_marcados_h2h": 22,
+            "diferenca_golos": -64,
+            "golos_marcados": 147
+          }
+        },
+        {
+          "team": "MTC",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 1,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": -9,
+            "golos_marcados_h2h": 13,
+            "diferenca_golos": -54,
+            "golos_marcados": 156
+          }
+        }
+      ],
+      "event_id": 4
+    }
+  ],
+  "indexByContextTeam": {
+    "1ª Divisão::Eng. Mecânica": {
+      "event_id": 1,
+      "ranking_key": "1ª Divisão",
+      "team": "Eng. Mecânica",
+      "tie_type": "head_to_head",
+      "tie_points": 26,
+      "tied_teams": [
+        "Eng. Mecânica",
+        "Biotecnologia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "diferenca_golos",
+      "used_global_fallback": true,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 2,
+        "diferenca_golos_h2h": 0,
+        "golos_marcados_h2h": 28,
+        "diferenca_golos": 91,
+        "golos_marcados": 252
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 4
+    },
+    "1ª Divisão::Biotecnologia": {
+      "event_id": 1,
+      "ranking_key": "1ª Divisão",
+      "team": "Biotecnologia",
+      "tie_type": "head_to_head",
+      "tie_points": 26,
+      "tied_teams": [
+        "Eng. Mecânica",
+        "Biotecnologia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "diferenca_golos",
+      "used_global_fallback": true,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 2,
+        "diferenca_golos_h2h": 0,
+        "golos_marcados_h2h": 28,
+        "diferenca_golos": 54,
+        "golos_marcados": 322
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 5
+    },
+    "1ª Divisão::Eng. Informática": {
+      "event_id": 2,
+      "ranking_key": "1ª Divisão",
+      "team": "Eng. Informática",
+      "tie_type": "mini_league",
+      "tie_points": 18,
+      "tied_teams": [
+        "Eng. Computadores e Telemática",
+        "Eng. Civil",
+        "Eng. Informática"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 5,
+        "diferenca_golos_h2h": 2,
+        "golos_marcados_h2h": 41,
+        "diferenca_golos": -58,
+        "golos_marcados": 209
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 8
+    },
+    "1ª Divisão::Eng. Computadores e Telemática": {
+      "event_id": 2,
+      "ranking_key": "1ª Divisão",
+      "team": "Eng. Computadores e Telemática",
+      "tie_type": "mini_league",
+      "tie_points": 18,
+      "tied_teams": [
+        "Eng. Computadores e Telemática",
+        "Eng. Civil",
+        "Eng. Informática"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 4,
+        "diferenca_golos_h2h": 0,
+        "golos_marcados_h2h": 46,
+        "diferenca_golos": -60,
+        "golos_marcados": 237
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 9
+    },
+    "1ª Divisão::Eng. Civil": {
+      "event_id": 2,
+      "ranking_key": "1ª Divisão",
+      "team": "Eng. Civil",
+      "tie_type": "mini_league",
+      "tie_points": 18,
+      "tied_teams": [
+        "Eng. Computadores e Telemática",
+        "Eng. Civil",
+        "Eng. Informática"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 39,
+        "diferenca_golos": -35,
+        "golos_marcados": 226
+      },
+      "rank_in_tiebreak": 3,
+      "final_position": 10
+    },
+    "2ª Divisão::Gestão": {
+      "event_id": 3,
+      "ranking_key": "2ª Divisão",
+      "team": "Gestão",
+      "tie_type": "head_to_head",
+      "tie_points": 21,
+      "tied_teams": [
+        "Gestão",
+        "DPT"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 6,
+        "golos_marcados_h2h": 24,
+        "diferenca_golos": -2,
+        "golos_marcados": 204
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 6
+    },
+    "2ª Divisão::DPT": {
+      "event_id": 3,
+      "ranking_key": "2ª Divisão",
+      "team": "DPT",
+      "tie_type": "head_to_head",
+      "tie_points": 21,
+      "tied_teams": [
+        "Gestão",
+        "DPT"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": -6,
+        "golos_marcados_h2h": 18,
+        "diferenca_golos": 0,
+        "golos_marcados": 211
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 7
+    },
+    "2ª Divisão::Eng. Química": {
+      "event_id": 4,
+      "ranking_key": "2ª Divisão",
+      "team": "Eng. Química",
+      "tie_type": "head_to_head",
+      "tie_points": 14,
+      "tied_teams": [
+        "Eng. Química",
+        "MTC"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "faltas_comparencia",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 9,
+        "golos_marcados_h2h": 22,
+        "diferenca_golos": -64,
+        "golos_marcados": 147
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 11
+    },
+    "2ª Divisão::MTC": {
+      "event_id": 4,
+      "ranking_key": "2ª Divisão",
+      "team": "MTC",
+      "tie_type": "head_to_head",
+      "tie_points": 14,
+      "tied_teams": [
+        "Eng. Química",
+        "MTC"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "faltas_comparencia",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 1,
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": -9,
+        "golos_marcados_h2h": 13,
+        "diferenca_golos": -54,
+        "golos_marcados": 156
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 12
+    }
+  }
+}

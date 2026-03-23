@@ -1,40 +1,46 @@
 {
   "modalidade": "BASQUETEBOL MASCULINO",
   "num_seasons": 2,
-  "avg_brier_score": 0.027844766333333337,
-  "avg_rmse_place": 11.911254705231508,
-  "avg_rmse_points": 2.811864750724451,
+  "avg_brier_score": 0.028035661666666663,
+  "avg_rmse_place": 11.911159968729587,
+  "avg_rmse_points": 2.811649878816008,
   "seasons": [
     {
       "season": "24_25",
       "cutoff_jornada": 8,
       "num_teams": 30,
-      "brier_score_champion": 0.027560341333333335,
-      "rmse_expected_place": 11.881550472644552,
+      "brier_score_champion": 0.027532156,
+      "rmse_expected_place": 11.881588980687726,
       "rmse_expected_points": 1.3504924046833746,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.009962500000000001,
+          "predicted": 0.009804166666666666,
           "observed": 0.0,
           "count": 24,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.12681666666666666,
+          "predicted": 0.12745000000000004,
           "observed": 0.16666666666666666,
           "count": 6,
           "calibrated": true
         }
       },
       "calibration_playoffs": {
-        "20-30%": {
-          "predicted": 0.2848,
+        "30-40%": {
+          "predicted": 0.3175,
           "observed": 0.0,
-          "count": 2,
+          "count": 1,
+          "calibrated": false
+        },
+        "20-30%": {
+          "predicted": 0.2708,
+          "observed": 0.0,
+          "count": 1,
           "calibrated": false
         },
         "70-80%": {
-          "predicted": 0.7792,
+          "predicted": 0.7719,
           "observed": 1.0,
           "count": 1,
           "calibrated": false
@@ -46,13 +52,13 @@
           "calibrated": true
         },
         "0-10%": {
-          "predicted": 0.00498,
+          "predicted": 0.00518,
           "observed": 0.0,
           "count": 20,
           "calibrated": true
         },
         "50-60%": {
-          "predicted": 0.5516,
+          "predicted": 0.5362,
           "observed": 1.0,
           "count": 1,
           "calibrated": false
@@ -63,18 +69,18 @@
       "season": "25_26",
       "cutoff_jornada": 8,
       "num_teams": 30,
-      "brier_score_champion": 0.028129191333333338,
-      "rmse_expected_place": 11.940958937818465,
-      "rmse_expected_points": 4.273237096765527,
+      "brier_score_champion": 0.028539167333333327,
+      "rmse_expected_place": 11.940730956771448,
+      "rmse_expected_points": 4.272807352948641,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.01815,
+          "predicted": 0.01813076923076923,
           "observed": 0.0,
           "count": 26,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.13202499999999998,
+          "predicted": 0.13215,
           "observed": 0.25,
           "count": 4,
           "calibrated": true
@@ -82,49 +88,49 @@
       },
       "calibration_playoffs": {
         "0-10%": {
-          "predicted": 0.01388823529411765,
+          "predicted": 0.01398235294117647,
           "observed": 0.0,
           "count": 17,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.1651,
+          "predicted": 0.1628666666666667,
           "observed": 0.0,
           "count": 3,
           "calibrated": false
         },
-        "40-50%": {
-          "predicted": 0.46145,
+        "50-60%": {
+          "predicted": 0.5315000000000001,
           "observed": 1.0,
           "count": 2,
           "calibrated": false
         },
         "90-100%": {
-          "predicted": 0.98855,
+          "predicted": 0.987725,
           "observed": 1.0,
           "count": 4,
           "calibrated": true
         },
         "70-80%": {
-          "predicted": 0.7182,
+          "predicted": 0.718,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
         },
-        "50-60%": {
-          "predicted": 0.5635,
+        "40-50%": {
+          "predicted": 0.4398,
           "observed": 1.0,
           "count": 1,
           "calibrated": false
         },
         "80-90%": {
-          "predicted": 0.8413,
+          "predicted": 0.8408,
           "observed": 1.0,
           "count": 1,
           "calibrated": false
         },
         "20-30%": {
-          "predicted": 0.2685,
+          "predicted": 0.2612,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
