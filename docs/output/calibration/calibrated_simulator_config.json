@@ -1,25 +1,25 @@
 {
   "ANDEBOL MISTO": {
     "sport_type": "andebol",
-    "base_goals": 20.423645320197043,
-    "base_goals_std": 6.8906184892825575,
-    "dispersion_k": 15.416551344360622,
-    "base_draw_rate": 0.04433497536945813,
-    "draw_elo_sensitivity": 0.006365802520042504,
+    "base_goals": 20.452153110047846,
+    "base_goals_std": 6.88169735763001,
+    "dispersion_k": 15.546595604603644,
+    "base_draw_rate": 0.04784688995215311,
+    "draw_elo_sensitivity": 0.0024484827882546895,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.4508880840127603,
-      "coef_linear": -0.006365802520042504,
-      "coef_quadratic": -1.042986683131312e-06
+      "intercept": -2.567265502487324,
+      "coef_linear": -0.0024484827882546895,
+      "coef_quadratic": -9.469620119204911e-06
     },
-    "margin_elo_slope": 0.010001132263953183,
-    "margin_elo_intercept": 6.0926938162092625,
+    "margin_elo_slope": 0.011245878385461464,
+    "margin_elo_intercept": 5.974018419248173,
     "elo_adjustment_limit": 0.45,
     "division_params": {
       "1": {
-        "base_goals": 22.65463917525773,
-        "dispersion_k": 22.573176332553086,
-        "base_draw_rate": 0.061855670103092786
+        "base_goals": 22.58252427184466,
+        "dispersion_k": 22.456546102057928,
+        "base_draw_rate": 0.06796116504854369
       },
       "2": {
         "base_goals": 18.382075471698112,
@@ -58,7 +58,7 @@
     "sport_type": "basquete",
     "base_goals": 9.601626016260163,
     "base_goals_std": 4.609092881844485,
-    "dispersion_k": 7.918771840677665,
+    "dispersion_k": 7.9187718406776675,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
     "draw_multiplier": 1.0,
@@ -67,15 +67,15 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0020353446595346818,
-    "margin_elo_intercept": 5.177820395978797,
+    "margin_elo_slope": 0.004401423447778185,
+    "margin_elo_intercept": 4.906309155850424,
     "elo_adjustment_limit": 0.5,
     "base_score": 9.601626016260163,
     "sigma": 4.609092881844485,
     "division_params": {
       "1": {
         "base_goals": 10.154205607476635,
-        "dispersion_k": 11.534821173384014,
+        "dispersion_k": 11.53482117338402,
         "base_draw_rate": 0.0
       },
       "2": {
@@ -88,18 +88,18 @@
   "FUTEBOL DE 7 MASCULINO": {
     "sport_type": "futebol7",
     "base_goals": 2.4441964285714284,
-    "base_goals_std": 2.096236482362437,
-    "dispersion_k": 3.063621846055574,
+    "base_goals_std": 2.0962364823624373,
+    "dispersion_k": 3.063621846055572,
     "base_draw_rate": 0.11160714285714286,
-    "draw_elo_sensitivity": 7.975590123129892e-05,
+    "draw_elo_sensitivity": 0.002846774243881865,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.8157467012652917,
-      "coef_linear": 7.975590123129892e-05,
-      "coef_quadratic": -1.4577799973947416e-05
+      "intercept": -1.988728255467165,
+      "coef_linear": 0.002846774243881865,
+      "coef_quadratic": -1.9010274005822e-05
     },
-    "margin_elo_slope": 0.002777945529011794,
-    "margin_elo_intercept": 2.6360769969915983,
+    "margin_elo_slope": 0.0029627531624543614,
+    "margin_elo_intercept": 2.60231897201835,
     "elo_adjustment_limit": 1.0,
     "division_params": {
       "1": {
@@ -144,14 +144,14 @@
     "base_goals_std": 2.717227640850334,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.11585365853658537,
-    "draw_elo_sensitivity": 0.0017069453166363576,
+    "draw_elo_sensitivity": 0.0017069453166365474,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.682669127451905,
-      "coef_linear": -0.0017069453166363576,
-      "coef_quadratic": -1.1482824196098607e-05
+      "intercept": -1.6826691274518981,
+      "coef_linear": -0.0017069453166365474,
+      "coef_quadratic": -1.1482824196097838e-05
     },
-    "margin_elo_slope": 0.0031479357729561923,
+    "margin_elo_slope": 0.003147935772956191,
     "margin_elo_intercept": 3.2054332102196454,
     "elo_adjustment_limit": 1.2,
     "division_params": {
@@ -180,7 +180,7 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0008860565296498989,
+    "margin_elo_slope": 0.0008860565296498981,
     "margin_elo_intercept": 1.607501184906628,
     "elo_adjustment_limit": 0.5,
     "p_sweep_base": 0.713,
@@ -200,7 +200,7 @@
   "VOLEIBOL MASCULINO": {
     "sport_type": "volei",
     "base_goals": 1.1472491909385114,
-    "base_goals_std": 0.9116295765438079,
+    "base_goals_std": 0.9116295765438078,
     "dispersion_k": 10.0,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
@@ -210,8 +210,8 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.00037454520044743247,
-    "margin_elo_intercept": 1.6562143788330308,
+    "margin_elo_slope": 0.0001718710678675056,
+    "margin_elo_intercept": 1.6814808286830871,
     "elo_adjustment_limit": 0.5,
     "p_sweep_base": 0.706,
     "division_params": {

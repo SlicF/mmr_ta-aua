@@ -12,8 +12,8 @@
       "tie_points": 20,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Fisioterapia",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Geologia"
+        "Geologia",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,9 +162,9 @@
       "tie_points": 11,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Administração Pública",
         "MTC",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -325,8 +325,8 @@
       "tie_type": "head_to_head",
       "tie_points": 20,
       "tied_teams": [
-        "Fisioterapia",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -356,8 +356,8 @@
       "tie_type": "head_to_head",
       "tie_points": 20,
       "tied_teams": [
-        "Fisioterapia",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -449,8 +449,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Geologia"
+        "Geologia",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -480,8 +480,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Geologia"
+        "Geologia",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -511,9 +511,9 @@
       "tie_type": "mini_league",
       "tie_points": 11,
       "tied_teams": [
-        "Administração Pública",
         "MTC",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -543,9 +543,9 @@
       "tie_type": "mini_league",
       "tie_points": 11,
       "tied_teams": [
-        "Administração Pública",
         "MTC",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -575,9 +575,9 @@
       "tie_type": "mini_league",
       "tie_points": 11,
       "tied_teams": [
-        "Administração Pública",
         "MTC",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",

@@ -12,8 +12,8 @@
       "tie_points": 12,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Ciências do Mar",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -63,8 +63,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Fisioterapia",
-        "Administração Pública",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -175,8 +175,8 @@
       "tie_points": 22,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Contabilidade",
-        "Física"
+        "Física",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -325,8 +325,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Ciências do Mar",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -356,8 +356,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Ciências do Mar",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -388,8 +388,8 @@
       "tie_points": 18,
       "tied_teams": [
         "Fisioterapia",
-        "Administração Pública",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -420,8 +420,8 @@
       "tie_points": 18,
       "tied_teams": [
         "Fisioterapia",
-        "Administração Pública",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -452,8 +452,8 @@
       "tie_points": 18,
       "tied_teams": [
         "Fisioterapia",
-        "Administração Pública",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -545,8 +545,8 @@
       "tie_type": "head_to_head",
       "tie_points": 22,
       "tied_teams": [
-        "Contabilidade",
-        "Física"
+        "Física",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -576,8 +576,8 @@
       "tie_type": "head_to_head",
       "tie_points": 22,
       "tied_teams": [
-        "Contabilidade",
-        "Física"
+        "Física",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",

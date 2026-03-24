@@ -62,8 +62,8 @@
       "tie_points": 12,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Economia",
         "Música",
+        "Economia",
         "Eng. Informática"
       ],
       "criteria_order": [
@@ -288,8 +288,8 @@
       "tie_points": 1,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Tradução",
-        "MOC"
+        "MOC",
+        "Tradução"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -338,8 +338,8 @@
       "tie_points": 13,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Marketing",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Marketing"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -500,8 +500,8 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Economia",
         "Música",
+        "Economia",
         "Eng. Informática"
       ],
       "criteria_order": [
@@ -532,8 +532,8 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Economia",
         "Música",
+        "Economia",
         "Eng. Informática"
       ],
       "criteria_order": [
@@ -564,8 +564,8 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Economia",
         "Música",
+        "Economia",
         "Eng. Informática"
       ],
       "criteria_order": [
@@ -816,8 +816,8 @@
       "tie_type": "head_to_head",
       "tie_points": 1,
       "tied_teams": [
-        "Tradução",
-        "MOC"
+        "MOC",
+        "Tradução"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -847,8 +847,8 @@
       "tie_type": "head_to_head",
       "tie_points": 1,
       "tied_teams": [
-        "Tradução",
-        "MOC"
+        "MOC",
+        "Tradução"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -878,8 +878,8 @@
       "tie_type": "head_to_head",
       "tie_points": 13,
       "tied_teams": [
-        "Marketing",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Marketing"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -909,8 +909,8 @@
       "tie_type": "head_to_head",
       "tie_points": 13,
       "tied_teams": [
-        "Marketing",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Marketing"
       ],
       "criteria_order": [
         "faltas_comparencia",
