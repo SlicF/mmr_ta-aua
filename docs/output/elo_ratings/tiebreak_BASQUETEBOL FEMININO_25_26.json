@@ -98,8 +98,8 @@
             "pontos_h2h": 2,
             "diferenca_golos_h2h": 11,
             "golos_marcados_h2h": 16,
-            "diferenca_golos": 37,
-            "golos_marcados": 55
+            "diferenca_golos": 35,
+            "golos_marcados": 60
           }
         },
         {
@@ -186,8 +186,9 @@
         "ranking_key": "geral"
       },
       "tie_points": 2,
-      "tie_type": "head_to_head",
+      "tie_type": "mini_league",
       "tied_teams": [
+        "Biologia",
         "Eng. Física",
         "Economia"
       ],
@@ -199,12 +200,24 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "faltas_comparencia",
-      "used_global_fallback": false,
+      "deciding_criterion": "diferenca_golos",
+      "used_global_fallback": true,
       "standings": [
         {
-          "team": "Eng. Física",
+          "team": "Biologia",
           "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": 0,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": -16,
+            "golos_marcados": 33
+          }
+        },
+        {
+          "team": "Eng. Física",
+          "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 0,
@@ -216,7 +229,7 @@
         },
         {
           "team": "Economia",
-          "rank_in_tiebreak": 2,
+          "rank_in_tiebreak": 3,
           "criteria_values": {
             "faltas_comparencia": 1,
             "pontos_h2h": 0,
@@ -353,8 +366,8 @@
         "pontos_h2h": 2,
         "diferenca_golos_h2h": 11,
         "golos_marcados_h2h": 16,
-        "diferenca_golos": 37,
-        "golos_marcados": 55
+        "diferenca_golos": 35,
+        "golos_marcados": 60
       },
       "rank_in_tiebreak": 1,
       "final_position": 5
@@ -485,13 +498,14 @@
       "rank_in_tiebreak": 2,
       "final_position": 9
     },
-    "geral::Eng. Física": {
+    "geral::Biologia": {
       "event_id": 4,
       "ranking_key": "geral",
-      "team": "Eng. Física",
-      "tie_type": "head_to_head",
+      "team": "Biologia",
+      "tie_type": "mini_league",
       "tie_points": 2,
       "tied_teams": [
+        "Biologia",
         "Eng. Física",
         "Economia"
       ],
@@ -503,8 +517,40 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "faltas_comparencia",
-      "used_global_fallback": false,
+      "deciding_criterion": "diferenca_golos",
+      "used_global_fallback": true,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": 0,
+        "golos_marcados_h2h": 0,
+        "diferenca_golos": -16,
+        "golos_marcados": 33
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 10
+    },
+    "geral::Eng. Física": {
+      "event_id": 4,
+      "ranking_key": "geral",
+      "team": "Eng. Física",
+      "tie_type": "mini_league",
+      "tie_points": 2,
+      "tied_teams": [
+        "Biologia",
+        "Eng. Física",
+        "Economia"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "diferenca_golos",
+      "used_global_fallback": true,
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 0,
@@ -513,16 +559,17 @@
         "diferenca_golos": -29,
         "golos_marcados": 14
       },
-      "rank_in_tiebreak": 1,
-      "final_position": 10
+      "rank_in_tiebreak": 2,
+      "final_position": 11
     },
     "geral::Economia": {
       "event_id": 4,
       "ranking_key": "geral",
       "team": "Economia",
-      "tie_type": "head_to_head",
+      "tie_type": "mini_league",
       "tie_points": 2,
       "tied_teams": [
+        "Biologia",
         "Eng. Física",
         "Economia"
       ],
@@ -534,8 +581,8 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "faltas_comparencia",
-      "used_global_fallback": false,
+      "deciding_criterion": "diferenca_golos",
+      "used_global_fallback": true,
       "criteria_values": {
         "faltas_comparencia": 1,
         "pontos_h2h": 0,
@@ -544,8 +591,8 @@
         "diferenca_golos": -49,
         "golos_marcados": 30
       },
-      "rank_in_tiebreak": 2,
-      "final_position": 11
+      "rank_in_tiebreak": 3,
+      "final_position": 12
     }
   }
 }

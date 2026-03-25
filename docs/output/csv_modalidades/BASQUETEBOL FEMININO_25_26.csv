@@ -22,7 +22,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Fonte_Data,Fonte_Local,
 3,2025-12-17 00:00:00,20h20,Caixa UA,Design,5.0,16.0,Eng. Civil,Excel,Excel,False,False,
 4,2026-02-19 00:00:00,20h00,Caixa UA,EGI,21.0,8.0,EET,Excel,Excel,False,False,
 4,2026-02-19 00:00:00,20h20,Caixa UA,Fisioterapia,13.0,17.0,Eng. Mecânica,Excel,Excel,False,False,
-4,2026-02-19 00:00:00,20h40,Caixa UA,Biologia,,,Eng. Civil,Excel,Excel,False,False,
+4,2026-02-19 00:00:00,20h40,Caixa UA,Biologia,7.0,5.0,Eng. Civil,Excel,Excel,False,False,
 4,2026-02-19 00:00:00,21h00,Caixa UA,Tradução,9.0,10.0,Psicologia,Excel,Excel,False,False,
 4,2026-02-19 00:00:00,21h20,Caixa UA,Economia,12.0,9.0,MTC,Excel,Excel,False,False,
 4,2026-02-19 00:00:00,21h40,Caixa UA,Eng. Física,2.0,14.0,Design,Excel,Excel,False,False,
@@ -40,7 +40,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Fonte_Data,Fonte_Local,
 6,2026-03-18 00:00:00,23h00,Caixa UA,Biologia,6.0,8.0,Tradução,Excel,Excel,False,False,
 6,2026-03-18 00:00:00,23h20,Caixa UA,Ed.Básica,0.0,21.0,Eng. Física,Excel,Excel,False,False,Ed.Básica
 6,2026-03-18 00:00:00,23h40,Caixa UA,Economia,0.0,21.0,Eng. Civil,Excel,Excel,False,False,Economia
-7,2026-03-24 00:00:00,15h00,PAH (Aristides Hall),Eng. Mecânica,21.0,0.0,Ed.Básica,,Placeholder,True,True,Ed.Básica
+7,2026-03-25 00:00:00,15h00,PAH (Aristides Hall),Eng. Mecânica,21.0,0.0,Ed.Básica,,Placeholder,True,True,Ed.Básica
 5,,,,Economia,,,Eng. Física,,,False,False,
 7,,,,Biologia,,,Eng. Física,,,False,False,
 7,,,,EET,,,MTC,,,False,False,
