@@ -112,8 +112,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Geologia"
+        "Geologia",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -163,8 +163,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Línguas e Relações Empresariais",
-        "MTC",
-        "Administração Pública"
+        "Administração Pública",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -225,8 +225,8 @@
       "tie_points": 16,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Física",
-        "Gestão"
+        "Gestão",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -449,8 +449,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Geologia"
+        "Geologia",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -480,8 +480,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Geologia"
+        "Geologia",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -512,8 +512,8 @@
       "tie_points": 11,
       "tied_teams": [
         "Línguas e Relações Empresariais",
-        "MTC",
-        "Administração Pública"
+        "Administração Pública",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -544,8 +544,8 @@
       "tie_points": 11,
       "tied_teams": [
         "Línguas e Relações Empresariais",
-        "MTC",
-        "Administração Pública"
+        "Administração Pública",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -576,8 +576,8 @@
       "tie_points": 11,
       "tied_teams": [
         "Línguas e Relações Empresariais",
-        "MTC",
-        "Administração Pública"
+        "Administração Pública",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -607,8 +607,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Física",
-        "Gestão"
+        "Gestão",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -638,8 +638,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Física",
-        "Gestão"
+        "Gestão",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
