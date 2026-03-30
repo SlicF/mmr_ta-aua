@@ -85,11 +85,8 @@ python -c "import json; json.load(open('../docs/output/calibration/calibrated_si
 # Output: Probabilidades de classificação final
 # Tempo:  ~30s (10k iter) | ~5 min (1M iter deep)
 
-# Previsão rápida (10k iterações):
-python preditor.py --season 26_27
-
-# Previsão profunda (1M iterações, maior precisão):
-python preditor.py --season 26_27 --deep-simulation
+# Previsão (usa parâmetros calibrados automaticamente):
+python preditor.py
 
 # Validações:
 #   ✓ Soma de probabilidades = 100% para cada equipa
@@ -106,86 +103,55 @@ cat ..\docs\output\previsoes\forecast_FUTSAL_MASCULINO_2027.csv
 
 ### Comandos por Fase
 
+> **Nota:** Atualmente, nenhum dos scripts principais aceita flags de linha de comando.
+> A configuração é feita diretamente nos ficheiros fonte ou via importação programática.
+
 #### 1.1 Extração (extrator.py)
 
 ```bash
-# Modo standard (usa caminho padrão)
+# Modo standard (usa Excel na localização padrão)
 python src/extrator.py
 
-# Modo custom (especificar Excel)
-python src/extrator.py --input caminho/para/tacaua_26_27.xlsx
-
-# Flags úteis:
-#   --verbose       : Log detalhado de normalização
-#   --dry-run       : Simular sem escrever ficheiros (teste)
-#   --force-refresh : Ignorar cache, reprocessar tudo
-
-# Exemplo com debug:
-python src/extrator.py --verbose 2>&1 | tee extrator.log
+# Modo programático (para processar folhas específicas):
+python -c "
+from src.extrator import ExcelProcessor
+processor = ExcelProcessor('src/Resultados Taça UA 25_26.xlsx',
+                           sheets_to_process=['FUTSAL MASCULINO'])
+processor.process_all_sheets()
+"
 ```
 
 #### 1.2 Cálculo ELO (mmr_taçaua.py)
 
 ```bash
-# Modo standard (detecta época automaticamente)
+# Execução standard (detecta época automaticamente pelos CSVs)
 python src/mmr_taçaua.py
 
-# Especificar época:
-python src/mmr_taçaua.py --season <época>
-
-# Forçar reset de ELOs (início de competição):
-python src/mmr_taçaua.py --reset-elos
-
-# Flags avançadas:
-#   --carry-over    : Carregar ELOs de época anterior (padrão: True)
-#   --debug-k       : Log de K-factor aplicado a cada jogo
-#   --export-history: Gerar JSONs de histórico ELO completo
-
-# Backtest (validar época passada):
-python src/mmr_taçaua.py --season <época_anterior> --backtest
+# O script carrega automaticamente ELOs de épocas anteriores (carry-over).
+# Para debugar, consultar o ficheiro de log gerado: mmr_tacaua.log
 ```
 
 #### 1.3 Calibração (calibrator.py)
 
 ```bash
-# Calibração completa (todas modalidades):
+# Calibração completa (todas as modalidades com dados disponíveis)
 python src/calibrator.py
 
-# Calibrar modalidade específica:
-python src/calibrator.py --modalidade "FUTSAL MASCULINO"
-
-# Flags de diagnóstico:
-#   --verbose       : Log detalhado de ajustes
-#   --plot-curves   : Gerar gráficos (requer matplotlib)
-#   --cv-folds 5    : Cross-validation k-fold
-
-# Exemplo com validação cruzada:
-python src/calibrator.py --cv-folds 5 --verbose
+# Outputs gerados em docs/output/calibration/:
+#   - calibrated_params_full.json
+#   - calibrated_simulator_config.json
 ```
 
 #### 1.4 Previsão (preditor.py)
 
 ```bash
-# Previsão rápida (10k iterações, ~30s):
-python src/preditor.py --season 26_27
+# Previsão standard (usa parâmetros calibrados se disponíveis)
+python src/preditor.py
 
-# Previsão profunda (1M iterações, ~5 min):
-python src/preditor.py --season 26_27 --deep-simulation
-
-# Cenários personalizados:
-python src/preditor.py --season 26_27 \
-    --scenario "FUTSAL FEMININO" \
-    --iterations 100000 \
-    --force-winner  # Simular playoffs (sem empates)
-
-# Usar parâmetros não-calibrados (defaults):
-python src/preditor.py --no-calibrated --season 26_27
-
-# Flags úteis:
-#   --workers N     : Paralelização (padrão: CPU count - 1)
-#   --seed 42       : Reproduzibilidade (mesmo RNG)
-#   --output-format : csv | json | html
+# Para debug ou configuração avançada, editar as constantes no topo
+# do ficheiro preditor.py (N_SIMULATIONS, USE_CALIBRATED, etc.)
 ```
+
 
 ---
 
@@ -207,9 +173,9 @@ vi docs/config/config_cursos.json
 # 3. Executar pipeline COMPLETO
 cd src
 python extrator.py && \
-python mmr_taçaua.py --carry-over && \
+python mmr_taçaua.py && \
 python calibrator.py && \
-python preditor.py --season 26_27 --deep-simulation
+python preditor.py
 
 # 4. Commit mudanças
 cd ..
@@ -233,7 +199,7 @@ git push origin master
 cd src
 python extrator.py
 python mmr_taçaua.py  # Usa ELOs existentes + novos jogos
-python preditor.py --season 26_27  # 10k iter rápido (suficiente)
+python preditor.py    # Usa parâmetros calibrados automaticamente
 
 # 3. Validação rápida:
 #    - ELOs fazem sentido? (vencedores +15-50, perdedores -15-50)
@@ -255,21 +221,16 @@ git push
 
 cd src
 
-# 1. Calibrar APENAS época atual (override opção)
-python calibrator.py --seasons 26_27 --override-historical
+# 1. Recalibrar (usa automaticamente todos os dados disponíveis)
+python calibrator.py
 
-# 2. Comparar parâmetros:
-diff ../docs/output/calibration/calibrated_simulator_config.json \
-     ../docs/output/calibration/calibrated_simulator_config_26_27_mid.json
+# 2. Comparar parâmetros (verificar diffs no JSON de saída):
+git diff ../docs/output/calibration/calibrated_simulator_config.json
 
-# 3. Se melhoria significativa (Brier -2% ou mais):
-mv ../docs/output/calibration/calibrated_simulator_config_26_27_mid.json \
-   ../docs/output/calibration/calibrated_simulator_config.json
+# 3. Reprovar previsões com novos parâmetros:
+python preditor.py
 
-# 4. Reprovar previsões com novos parâmetros:
-python preditor.py --season 26_27 --deep-simulation
-
-# 5. Commit com comentário explicativo:
+# 4. Commit com comentário explicativo:
 git commit -m "calibration(26-27): Mid-season recalibration (Brier 0.145→0.138)"
 ```
 
@@ -313,10 +274,10 @@ python -c "from mmr_taçaua import create_team_name_mapping; \
 }
 
 # 2. Reprovar extrator:
-python src/extrator.py --force-refresh
+python src/extrator.py
 
-# 3. Reprovar ELO (reset para aplicar normalização):
-python src/mmr_taçaua.py --reset-elos
+# 3. Reprovar ELO:
+python src/mmr_taçaua.py
 ```
 
 ---
@@ -370,11 +331,9 @@ python src/calibrator.py
 **Caso 2: Dataset Pequeno**
 
 ```bash
-# Usar fallback conservador:
-python src/preditor.py --no-calibrated  # Usa defaults
-
-# Ou calibrar com épocas combinadas:
-python src/calibrator.py --seasons "<época1>,<época2>,<época3>"
+# Para usar defaults sem calibração, editar a variável USE_CALIBRATED
+# no topo de preditor.py para False
+python src/preditor.py
 ```
 
 ---
@@ -409,14 +368,13 @@ print(f"CPU cores: {multiprocessing.cpu_count()}")
 
 ```bash
 # 1. Reduzir workers se RAM baixa (<8GB):
-python src/preditor.py --workers 2
+#    Editar N_WORKERS no topo de preditor.py (ex: N_WORKERS = 2)
 
-# 2. Compilar numpy com OpenBLAS (speedup ~20%):
-pip uninstall numpy
-pip install numpy --no-binary numpy
+# 2. Reduzir iterações para testes rápidos:
+#    Editar N_SIMULATIONS no topo de preditor.py (ex: N_SIMULATIONS = 10000)
 
-# 3. Usar iterações menores para testes:
-python src/preditor.py --iterations 10000  # vs 1M padrão
+# 3. Reprovar:
+python src/preditor.py
 ```
 
 ---
@@ -487,7 +445,7 @@ grep "VOLEI" docs/output/csv_modalidades/VOLEIBOL_MASCULINO_26_27.csv | \
 # Adicionar "X" na coluna "Falta de Comparência"
 
 # 3. Reprovar extrator:
-python src/extrator.py --force-refresh
+python src/extrator.py
 ```
 
 ---
@@ -510,7 +468,7 @@ cd src
 python extrator.py && \
 python mmr_taçaua.py && \
 python calibrator.py && \
-python preditor.py --season 26_27 --iterations 1000  # Teste rápido
+python preditor.py  # Teste rápido
 
 # 4. Se tudo OK, atualizar requirements.txt:
 pip freeze > ../requirements.txt
@@ -601,7 +559,7 @@ def calculate(sport, score1, score2, sets1=None, sets2=None):
 #       - Falta de Comparência (vazio se jogo normal)
 
 # 2.2 Executar extrator (primeira vez):
-python src/extrator.py --verbose
+python src/extrator.py
 # Verificar log: "Modalidade detectada: TÉNIS DE MESA MASCULINO"
 
 # 2.3 Validar CSV gerado:
@@ -646,9 +604,9 @@ def _simulate_tenis_mesa(self, elo_a, elo_b, winner_is_a):
 # 4.1 Pipeline completo:
 cd src
 python extrator.py
-python mmr_taçaua.py --season 26_27
+python mmr_taçaua.py
 python calibrator.py  # Pode dar "insufficient_data" se <10 jogos
-python preditor.py --season 26_27
+python preditor.py
 
 # 4.2 Validar outputs:
 ls ../docs/output/previsoes/*TENIS_DE_MESA*.csv
@@ -765,9 +723,9 @@ pip install -r requirements.txt --no-cache-dir
 
 ```bash
 # Logs criados automaticamente:
-mmr_tacaua.log         # ELO calculation logs
-calibration.log        # Calibração (se --verbose)
-simulation.log         # Preditor (se --log-simulations)
+mmr_tacaua.log         # ELO calculation logs (gerado automaticamente)
+calibration.log        # Calibração (se configurado no código)
+simulation.log         # Preditor (se configurado no código)
 ```
 
 ### Níveis de Log

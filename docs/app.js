@@ -8374,13 +8374,24 @@ function isWithdrawnCalendarMatch(match) {
 }
 
 function parseCalendarTimeToMinutes(timeStr) {
-    if (!timeStr || typeof timeStr !== 'string') return Infinity;
+    if (!timeStr) return Infinity;
 
-    const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})$/);
-    if (!match) return Infinity;
+    const normalized = String(timeStr).trim();
+    if (!normalized) return Infinity;
 
-    const hours = parseInt(match[1], 10);
-    const minutes = parseInt(match[2], 10);
+    let hours;
+    let minutes;
+
+    const hhmmMatch = normalized.match(/^(\d{1,2})[:hH](\d{2})(?::\d{2})?$/);
+    if (hhmmMatch) {
+        hours = parseInt(hhmmMatch[1], 10);
+        minutes = parseInt(hhmmMatch[2], 10);
+    } else {
+        const hhOnlyMatch = normalized.match(/^(\d{1,2})\s*[hH]$/);
+        if (!hhOnlyMatch) return Infinity;
+        hours = parseInt(hhOnlyMatch[1], 10);
+        minutes = 0;
+    }
 
     if (Number.isNaN(hours) || Number.isNaN(minutes)) return Infinity;
     if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return Infinity;
@@ -8389,25 +8400,81 @@ function parseCalendarTimeToMinutes(timeStr) {
 }
 
 function parseCalendarDateToTimestamp(dateStr) {
-    if (!dateStr || typeof dateStr !== 'string') return Infinity;
+    if (!dateStr) return Infinity;
 
-    const trimmed = dateStr.trim();
-    const dateMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    const trimmed = String(dateStr).trim();
+    if (!trimmed) return Infinity;
 
-    if (dateMatch) {
-        const year = parseInt(dateMatch[1], 10);
-        const month = parseInt(dateMatch[2], 10);
-        const day = parseInt(dateMatch[3], 10);
+    const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+        const year = parseInt(isoMatch[1], 10);
+        const month = parseInt(isoMatch[2], 10);
+        const day = parseInt(isoMatch[3], 10);
+        return Date.UTC(year, month - 1, day);
+    }
+
+    const dmyMatch = trimmed.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/);
+    if (dmyMatch) {
+        const day = parseInt(dmyMatch[1], 10);
+        const month = parseInt(dmyMatch[2], 10);
+        const year = parseInt(dmyMatch[3], 10);
         return Date.UTC(year, month - 1, day);
     }
 
     const parsed = new Date(trimmed);
-    return Number.isNaN(parsed.getTime()) ? Infinity : parsed.getTime();
+    if (Number.isNaN(parsed.getTime())) return Infinity;
+
+    return Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate());
 }
 
 function extractCalendarDateKey(match) {
     const rawDate = (match.date || match.Data || match.Dia || '').toString().trim();
-    return rawDate.match(/^\d{4}-\d{2}-\d{2}/)?.[0] || null;
+    if (!rawDate) return null;
+
+    const isoMatch = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+        return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+    }
+
+    const dmyMatch = rawDate.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/);
+    if (dmyMatch) {
+        return `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
+    }
+
+    const timestamp = parseCalendarDateToTimestamp(rawDate);
+    if (!Number.isFinite(timestamp) || timestamp === Infinity) return null;
+
+    const date = new Date(timestamp);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+function compareCalendarMatchesChronologically(a, b) {
+    const dateA = parseCalendarDateToTimestamp(a.date || a.Data || a.Dia || '');
+    const dateB = parseCalendarDateToTimestamp(b.date || b.Data || b.Dia || '');
+    if (dateA !== dateB) return dateA - dateB;
+
+    const timeA = parseCalendarTimeToMinutes(a.time || a.Hora || '');
+    const timeB = parseCalendarTimeToMinutes(b.time || b.Hora || '');
+    if (timeA !== timeB) return timeA - timeB;
+
+    const jornadaA = parseInt(a.jornada, 10);
+    const jornadaB = parseInt(b.jornada, 10);
+    if (!Number.isNaN(jornadaA) && !Number.isNaN(jornadaB) && jornadaA !== jornadaB) {
+        return jornadaA - jornadaB;
+    }
+
+    const team1A = normalizeTeamName(a.team1 || a['Equipa 1'] || '');
+    const team1B = normalizeTeamName(b.team1 || b['Equipa 1'] || '');
+    const team1Diff = team1A.localeCompare(team1B, 'pt-PT');
+    if (team1Diff !== 0) return team1Diff;
+
+    const team2A = normalizeTeamName(a.team2 || a['Equipa 2'] || '');
+    const team2B = normalizeTeamName(b.team2 || b['Equipa 2'] || '');
+    return team2A.localeCompare(team2B, 'pt-PT');
 }
 
 function getCalendarPageLabel(startDateKey, endDateKey, hasUndated) {
@@ -8463,25 +8530,7 @@ function buildCalendarDatePages(filteredMatches, options = {}) {
         preserveCurrentPage = true
     } = options;
 
-    const sortedMatches = [...filteredMatches].sort((a, b) => {
-        const dateA = parseCalendarDateToTimestamp(a.date || a.Data || a.Dia || '');
-        const dateB = parseCalendarDateToTimestamp(b.date || b.Data || b.Dia || '');
-        if (dateA !== dateB) return dateA - dateB;
-
-        const timeA = parseCalendarTimeToMinutes(a.time || a.Hora || '');
-        const timeB = parseCalendarTimeToMinutes(b.time || b.Hora || '');
-        if (timeA !== timeB) return timeA - timeB;
-
-        const jornadaA = parseInt(a.jornada, 10);
-        const jornadaB = parseInt(b.jornada, 10);
-        if (!Number.isNaN(jornadaA) && !Number.isNaN(jornadaB) && jornadaA !== jornadaB) {
-            return jornadaA - jornadaB;
-        }
-
-        const teamA = `${a.team1 || ''}-${a.team2 || ''}`;
-        const teamB = `${b.team1 || ''}-${b.team2 || ''}`;
-        return teamA.localeCompare(teamB);
-    });
+    const sortedMatches = [...filteredMatches].sort(compareCalendarMatchesChronologically);
 
     // Separar jogos com e sem data
     const datedMatches = sortedMatches.filter(m => extractCalendarDateKey(m));
@@ -8500,11 +8549,25 @@ function buildCalendarDatePages(filteredMatches, options = {}) {
         pages.push(currentPage);
     };
 
-    // Páginas de jogos COM data: paginação gulosa sem repetição de equipa
+    // Páginas de jogos COM data: manter cada dia como bloco indivisível
+    // Se houver conflito de equipa com a página atual, o dia inteiro passa para a página seguinte.
+    const datedMatchesByDay = new Map();
     datedMatches.forEach(match => {
-        const team1 = resolveCanonicalCourseKey(normalizeTeamName(match.team1 || match['Equipa 1'] || ''));
-        const team2 = resolveCanonicalCourseKey(normalizeTeamName(match.team2 || match['Equipa 2'] || ''));
         const dateKey = extractCalendarDateKey(match);
+        if (!dateKey) return;
+        if (!datedMatchesByDay.has(dateKey)) datedMatchesByDay.set(dateKey, []);
+        datedMatchesByDay.get(dateKey).push(match);
+    });
+
+    datedMatchesByDay.forEach((dayMatches, dateKey) => {
+        const dayTeams = new Set();
+
+        dayMatches.forEach(match => {
+            const team1 = resolveCanonicalCourseKey(normalizeTeamName(match.team1 || match['Equipa 1'] || ''));
+            const team2 = resolveCanonicalCourseKey(normalizeTeamName(match.team2 || match['Equipa 2'] || ''));
+            if (team1) dayTeams.add(team1);
+            if (team2) dayTeams.add(team2);
+        });
 
         if (!currentPage) {
             currentPage = {
@@ -8516,10 +8579,10 @@ function buildCalendarDatePages(filteredMatches, options = {}) {
             };
         }
 
-        const teamAlreadyInPage = (team1 && currentPage.teamsInPage.has(team1)) ||
-            (team2 && currentPage.teamsInPage.has(team2));
+        const dayConflictsWithCurrentPage = currentPage.games.length > 0 &&
+            Array.from(dayTeams).some(team => currentPage.teamsInPage.has(team));
 
-        if (teamAlreadyInPage) {
+        if (dayConflictsWithCurrentPage) {
             pushCurrentPage();
             currentPage = {
                 startDateKey: dateKey,
@@ -8530,9 +8593,8 @@ function buildCalendarDatePages(filteredMatches, options = {}) {
             };
         }
 
-        currentPage.games.push(match);
-        if (team1) currentPage.teamsInPage.add(team1);
-        if (team2) currentPage.teamsInPage.add(team2);
+        dayMatches.forEach(match => currentPage.games.push(match));
+        dayTeams.forEach(team => currentPage.teamsInPage.add(team));
         currentPage.endDateKey = dateKey;
     });
 
@@ -9187,6 +9249,8 @@ function updateCalendar() {
             eloDelta2: eloMatch ? eloMatch['Elo Delta 2'] : null
         };
     });
+
+    games.sort(compareCalendarMatchesChronologically);
 
     // Renderizar jogos
     gamesList.innerHTML = '';

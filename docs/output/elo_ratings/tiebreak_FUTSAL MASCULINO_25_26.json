@@ -12,8 +12,8 @@
       "tie_points": 12,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Biomédica",
-        "Eng. Química"
+        "Eng. Química",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -188,8 +188,8 @@
       "tie_points": 9,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. do Ambiente",
         "Línguas e Relações Empresariais",
+        "Eng. do Ambiente",
         "Matemática"
       ],
       "criteria_order": [
@@ -301,8 +301,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Biomédica",
-        "Eng. Química"
+        "Eng. Química",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -332,8 +332,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Biomédica",
-        "Eng. Química"
+        "Eng. Química",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -555,8 +555,8 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
-        "Eng. do Ambiente",
         "Línguas e Relações Empresariais",
+        "Eng. do Ambiente",
         "Matemática"
       ],
       "criteria_order": [
@@ -587,8 +587,8 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
-        "Eng. do Ambiente",
         "Línguas e Relações Empresariais",
+        "Eng. do Ambiente",
         "Matemática"
       ],
       "criteria_order": [
@@ -619,8 +619,8 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
-        "Eng. do Ambiente",
         "Línguas e Relações Empresariais",
+        "Eng. do Ambiente",
         "Matemática"
       ],
       "criteria_order": [

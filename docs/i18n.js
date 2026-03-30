@@ -573,6 +573,10 @@ const translations = {
         // === Footer ===
         footerMadeBy: 'Projeto criado por Fábio Matias',
         footerDisclaimer: 'Este projeto não está oficialmente associado à AAUAv e pode conter imprecisões',
+        footerRepositoryAndDocs: 'Repositório e documentação',
+        footerResourcesLabel: 'Repositório e documentação:',
+        footerRepository: 'Repositório',
+        footerDocumentation: 'Documentação',
     },
 
     en: {
@@ -957,6 +961,10 @@ const translations = {
         // === Footer ===
         footerMadeBy: 'Project created by Fábio Matias',
         footerDisclaimer: 'This project is not officially associated with AAUAv and may contain inaccuracies',
+        footerRepositoryAndDocs: 'Repository and documentation',
+        footerResourcesLabel: 'Repository and documentation:',
+        footerRepository: 'Repository',
+        footerDocumentation: 'Documentation',
     }
 };
 
@@ -1333,7 +1341,11 @@ translations.es = {
 
     // === Footer ===
     footerMadeBy: 'Proyecto creado por Fábio Matias',
-    footerDisclaimer: 'Este proyecto no está oficialmente asociado con AAUAv y puede contener imprecisiones'
+    footerDisclaimer: 'Este proyecto no está oficialmente asociado con AAUAv y puede contener imprecisiones',
+    footerRepositoryAndDocs: 'Repositorio y documentación',
+    footerResourcesLabel: 'Repositorio y documentación:',
+    footerRepository: 'Repositorio',
+    footerDocumentation: 'Documentación'
 };
 
 // ==================== FUNÇÕES DO i18n ====================

@@ -1,32 +1,32 @@
 {
   "modalidade": "FUTEBOL DE 7 MASCULINO",
   "num_seasons": 1,
-  "avg_brier_score": 0.018760809677419357,
-  "avg_rmse_place": 12.24150057934866,
-  "avg_rmse_points": 1.6535323436751657,
+  "avg_brier_score": 0.019041877419354834,
+  "avg_rmse_place": 12.24208035188201,
+  "avg_rmse_points": 1.6544572280195482,
   "seasons": [
     {
       "season": "24_25",
       "cutoff_jornada": 8,
       "num_teams": 31,
-      "brier_score_champion": 0.018760809677419357,
-      "rmse_expected_place": 12.24150057934866,
-      "rmse_expected_points": 1.6535323436751657,
+      "brier_score_champion": 0.019041877419354834,
+      "rmse_expected_place": 12.24208035188201,
+      "rmse_expected_points": 1.6544572280195482,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.005988461538461539,
+          "predicted": 0.005969230769230769,
           "observed": 0.0,
           "count": 26,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.13745,
+          "predicted": 0.13874999999999998,
           "observed": 0.0,
           "count": 4,
           "calibrated": true
         },
         "20-30%": {
-          "predicted": 0.2945,
+          "predicted": 0.2898,
           "observed": 1.0,
           "count": 1,
           "calibrated": false
@@ -34,25 +34,25 @@
       },
       "calibration_playoffs": {
         "0-10%": {
-          "predicted": 0.0026636363636363637,
+          "predicted": 0.002659090909090909,
           "observed": 0.045454545454545456,
           "count": 22,
           "calibrated": true
         },
         "90-100%": {
-          "predicted": 0.9935142857142857,
+          "predicted": 0.9935999999999999,
           "observed": 1.0,
           "count": 7,
           "calibrated": true
         },
         "70-80%": {
-          "predicted": 0.7904,
+          "predicted": 0.7931,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
         },
         "10-20%": {
-          "predicted": 0.1964,
+          "predicted": 0.1932,
           "observed": 0.0,
           "count": 1,
           "calibrated": false

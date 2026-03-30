@@ -1,3 +1,4 @@
+import logging
 # -*- coding: utf-8 -*-
 """
 Módulo para extração de calendários de jogos a partir de PDFs da Taça UA.
@@ -442,9 +443,9 @@ def carregar_calendario_epoca(
                     or hora_existente != hora
                     or local_existente != local
                 ):
-                    print(f"      [!] Conflito: {equipa1} vs {equipa2} em {modalidade}")
-                    print(f"          Anterior: {data_existente} {hora_existente}")
-                    print(f"          Nova: {data_formatada} {hora}")
+                    logging.debug(f"      [!] Conflito: {equipa1} vs {equipa2} em {modalidade}")
+                    logging.debug(f"          Anterior: {data_existente} {hora_existente}")
+                    logging.debug(f"          Nova: {data_formatada} {hora}")
                     print(f"          Mantendo a mais recente (PDF mais recente)")
                     # Armazenar (PDF mais recente sobrescreve)
                     calendario_consolidado[modalidade][chave_direta] = (

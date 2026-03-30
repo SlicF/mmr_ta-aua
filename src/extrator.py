@@ -6,6 +6,8 @@ import shutil
 import hashlib
 import json
 import logging
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 from datetime import datetime
 import requests
 from openpyxl import load_workbook
@@ -278,7 +280,7 @@ def validate_and_fix_date_for_season(date_val, season: str) -> datetime:
         return date_val
 
     except Exception as e:
-        print(f"  [!] Erro ao validar data: {e}")
+        logging.error(f"  \[!\] Erro ao validar data: {e}")
         return date_val
 
 
@@ -801,7 +803,7 @@ class ExcelProcessor:
         ]
         combined = combined.drop_duplicates(subset=dup_cols)
         combined.to_csv(target_path, index=False)
-        print(f"  - Playoffs adicionados ao ficheiro: {target_path}")
+        logging.info(f"  - Playoffs adicionados ao ficheiro: {target_path}")
 
     def _extract_playoffs_from_dataframe(
         self, df: pd.DataFrame
@@ -1333,7 +1335,7 @@ class ExcelProcessor:
             return date_map
 
         except Exception as e:
-            print(f"  [!] Erro ao carregar datas antigas: {e}")
+            logging.error(f"  \[!\] Erro ao carregar datas antigas: {e}")
             return {}
 
     def _assign_date_placeholders(
@@ -1371,7 +1373,7 @@ class ExcelProcessor:
             repo_root = Path(__file__).resolve().parents[1]
             calendario = carregar_calendario_epoca("25_26", repo_root=repo_root)
             config_cursos = carregar_config_cursos(repo_root)
-            print(f"[INFO] Calendário PDF carregado para {modality}")
+            logging.debug(f"\[INFO\] Calendário PDF carregado para {modality}")
         except Exception as e:
             print(f"[WARN] Falha ao carregar calendário: {e}")
             calendario = {}
@@ -1447,8 +1449,8 @@ class ExcelProcessor:
         # Games que precisam de placeholder (sem data em nenhuma fonte)
         games_for_placeholder = []
 
-        print(f"[DEBUG] Processando {len(df)} jogos para {modality}")
-        print(f"[DEBUG] Calendário PDF tem modalidades: {list(calendario.keys())}")
+        logging.debug(f"\[DEBUG\] Processando {len(df)} jogos para {modality}")
+        logging.debug(f"\[DEBUG\] Calendário PDF tem modalidades: {list(calendario.keys())}")
 
         # SINGLE LOOP: processar cada jogo uma vez
         for idx, row in df.iterrows():
@@ -1480,7 +1482,7 @@ class ExcelProcessor:
 
             # PRIORIDADE 1: Data Excel existente
             if has_excel_date:
-                print(f"[INFO] {idx}: Data Excel encontrada")
+                logging.debug(f"\[INFO\] {idx}: Data Excel encontrada")
                 df.at[idx, "Data_Placeholder"] = False
                 if not df.at[idx, "Fonte_Data"]:
                     df.at[idx, "Fonte_Data"] = "Excel"
@@ -1493,7 +1495,16 @@ class ExcelProcessor:
                     if pdf_data:
                         excel_date = _parse_date_only(dia)
                         pdf_date = _parse_date_only(pdf_data)
-                        if _is_day_month_swap(excel_date, pdf_date):
+                        if excel_date and excel_date >= datetime.now().date():
+                            print(
+                                f"[CORRECAO] {idx}: Excel {dia} no futuro. A usar PDF {pdf_data} (Prioridade PDF para jogos futuros)."
+                            )
+                            df.at[idx, "Dia"] = pdf_data
+                            df.at[idx, "Hora"] = pdf_hora if pdf_hora else hora
+                            df.at[idx, "Fonte_Data"] = "Calendário PDF (Futuro)"
+                            df.at[idx, "Data_Placeholder"] = False
+                            corrected_from_pdf = True
+                        elif _is_day_month_swap(excel_date, pdf_date):
                             print(
                                 f"[CORRECAO] {idx}: Excel {dia} vs PDF {pdf_data} (dia/mês trocado). A usar PDF."
                             )
@@ -1525,7 +1536,7 @@ class ExcelProcessor:
             # PRIORIDADE 2: Procurar em calendário PDF
             # Skip desistências
             if desistencia == "SIM":
-                print(f"[INFO] {idx}: Desistência detectada, skip PDF lookup")
+                logging.debug(f"\[INFO\] {idx}: Desistência detectada, skip PDF lookup")
                 df.at[idx, "Data_Placeholder"] = False
                 df.at[idx, "Fonte_Data"] = ""
                 continue
@@ -1534,7 +1545,7 @@ class ExcelProcessor:
             pdf_date_found = False
             pdf_data, pdf_hora = _lookup_pdf_date(equipa1, equipa2)
             if pdf_data:
-                print(f"[PDF] Data de calendário: {equipa1} vs {equipa2} -> {pdf_data}")
+                logging.debug(f"\[PDF\] Data de calendário: {equipa1} vs {equipa2} -> {pdf_data}")
                 df.at[idx, "Dia"] = pdf_data
                 df.at[idx, "Hora"] = pdf_hora
                 df.at[idx, "Fonte_Data"] = "Calendário PDF"
@@ -1552,7 +1563,7 @@ class ExcelProcessor:
                 games_for_placeholder.append(idx)
             else:
                 # PRIORIDADE 4: Sem resultado e sem data → manter vazio
-                print(f"[INFO] {idx}: Sem data, sem resultado, mantendo vazio")
+                logging.debug(f"\[INFO\] {idx}: Sem data, sem resultado, mantendo vazio")
                 df.at[idx, "Data_Placeholder"] = False
                 df.at[idx, "Fonte_Data"] = ""
 
@@ -2148,7 +2159,7 @@ class ExcelProcessor:
 
             df_playoffs = self._parse_playoffs_sheet(sheet)
             if df_playoffs is None or df_playoffs.empty:
-                print(f"Aviso: Folha de playoffs '{sheet}' sem linhas válidas.")
+                logging.warning(f"Aviso: Folha de playoffs '{sheet}' sem linhas válidas.")
                 continue
 
             # Garantir colunas esperadas e ordem
@@ -2177,7 +2188,7 @@ def main():
                 cfg = json.load(f)
                 config_url = cfg.get("results_url")
         except Exception as e:
-            print(f"Aviso: Não foi possível ler config.json: {e}")
+            logging.warning(f"Aviso: Não foi possível ler config.json: {e}")
 
     # Variável de ambiente como fallback
     env_url = os.environ.get("RESULTS_URL")
@@ -2231,7 +2242,7 @@ def main():
                         shutil.copy2(downloaded_file, target_path)
                         downloaded_file = target_path
                     except Exception as e2:
-                        print(f"Aviso: Falhou também o fallback de cópia: {e2}")
+                        logging.warning(f"Aviso: Falhou também o fallback de cópia: {e2}")
 
         except Exception as e:
             print(f"Erro ao descarregar o documento: {e}")
@@ -2290,7 +2301,7 @@ def main():
         shutil.copy2(file_path, backup_file)
         print(f"Backup criado: {backup_file}")
     except Exception as e:
-        print(f"Aviso: Não foi possível criar backup: {e}")
+        logging.warning(f"Aviso: Não foi possível criar backup: {e}")
 
     # 5) Selecionar folhas a processar com base na época
     xls_all = pd.ExcelFile(file_path)
