@@ -62,8 +62,8 @@
       "tie_points": 27,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,10 +112,10 @@
       "tie_points": 17,
       "tie_type": "mini_league",
       "tied_teams": [
-        "MTC",
+        "Ciências do Mar",
         "Gestão",
-        "DPT",
-        "Ciências do Mar"
+        "MTC",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -300,8 +300,8 @@
       "tie_type": "head_to_head",
       "tie_points": 27,
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -331,8 +331,8 @@
       "tie_type": "head_to_head",
       "tie_points": 27,
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -362,10 +362,10 @@
       "tie_type": "mini_league",
       "tie_points": 17,
       "tied_teams": [
-        "MTC",
+        "Ciências do Mar",
         "Gestão",
-        "DPT",
-        "Ciências do Mar"
+        "MTC",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -395,10 +395,10 @@
       "tie_type": "mini_league",
       "tie_points": 17,
       "tied_teams": [
-        "MTC",
+        "Ciências do Mar",
         "Gestão",
-        "DPT",
-        "Ciências do Mar"
+        "MTC",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -428,10 +428,10 @@
       "tie_type": "mini_league",
       "tie_points": 17,
       "tied_teams": [
-        "MTC",
+        "Ciências do Mar",
         "Gestão",
-        "DPT",
-        "Ciências do Mar"
+        "MTC",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -461,10 +461,10 @@
       "tie_type": "mini_league",
       "tie_points": 17,
       "tied_teams": [
-        "MTC",
+        "Ciências do Mar",
         "Gestão",
-        "DPT",
-        "Ciências do Mar"
+        "MTC",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",

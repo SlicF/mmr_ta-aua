@@ -62,9 +62,9 @@
       "tie_points": 18,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Ciências Biomédicas",
         "Administração Pública",
-        "Fisioterapia",
-        "Ciências Biomédicas"
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -125,8 +125,8 @@
       "tie_points": 5,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -387,9 +387,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Administração Pública",
-        "Fisioterapia",
-        "Ciências Biomédicas"
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -419,9 +419,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Administração Pública",
-        "Fisioterapia",
-        "Ciências Biomédicas"
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -451,9 +451,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Administração Pública",
-        "Fisioterapia",
-        "Ciências Biomédicas"
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -483,8 +483,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -514,8 +514,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",

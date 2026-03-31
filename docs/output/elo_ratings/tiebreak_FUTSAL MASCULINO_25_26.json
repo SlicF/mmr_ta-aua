@@ -12,8 +12,8 @@
       "tie_points": 12,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Química",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -62,9 +62,9 @@
       "tie_points": 12,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Economia",
         "Eng. Informática",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -188,9 +188,9 @@
       "tie_points": 9,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Matemática",
         "Línguas e Relações Empresariais",
-        "Eng. do Ambiente",
-        "Matemática"
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -301,8 +301,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Química",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -332,8 +332,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Química",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -363,9 +363,9 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Economia",
         "Eng. Informática",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -395,9 +395,9 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Economia",
         "Eng. Informática",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -427,9 +427,9 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Economia",
         "Eng. Informática",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -555,9 +555,9 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
+        "Matemática",
         "Línguas e Relações Empresariais",
-        "Eng. do Ambiente",
-        "Matemática"
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -587,9 +587,9 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
+        "Matemática",
         "Línguas e Relações Empresariais",
-        "Eng. do Ambiente",
-        "Matemática"
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -619,9 +619,9 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
+        "Matemática",
         "Línguas e Relações Empresariais",
-        "Eng. do Ambiente",
-        "Matemática"
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
