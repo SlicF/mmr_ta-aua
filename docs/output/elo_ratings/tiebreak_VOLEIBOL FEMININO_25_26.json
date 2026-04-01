@@ -62,8 +62,8 @@
       "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Ciências Biomédicas",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Geologia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -163,8 +163,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Administração Pública",
-        "Línguas e Relações Empresariais",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -225,8 +225,8 @@
       "tie_points": 16,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão",
-        "Eng. Física"
+        "Eng. Física",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -387,8 +387,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Ciências Biomédicas",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -418,8 +418,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Ciências Biomédicas",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -449,8 +449,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Geologia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -480,8 +480,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Geologia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -512,8 +512,8 @@
       "tie_points": 11,
       "tied_teams": [
         "Administração Pública",
-        "Línguas e Relações Empresariais",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -544,8 +544,8 @@
       "tie_points": 11,
       "tied_teams": [
         "Administração Pública",
-        "Línguas e Relações Empresariais",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -576,8 +576,8 @@
       "tie_points": 11,
       "tied_teams": [
         "Administração Pública",
-        "Línguas e Relações Empresariais",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -607,8 +607,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Gestão",
-        "Eng. Física"
+        "Eng. Física",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -638,8 +638,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Gestão",
-        "Eng. Física"
+        "Eng. Física",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",

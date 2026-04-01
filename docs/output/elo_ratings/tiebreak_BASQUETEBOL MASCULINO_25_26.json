@@ -12,8 +12,8 @@
       "tie_points": 16,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -62,8 +62,8 @@
       "tie_points": 12,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Biologia",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Biologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,8 +162,8 @@
       "tie_points": 6,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Aeroespacial",
-        "Tecnologias de Informação"
+        "Tecnologias de Informação",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -262,8 +262,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Civil",
-        "Contabilidade"
+        "Contabilidade",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -312,8 +312,8 @@
       "tie_points": 6,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
         "Física",
+        "Gestão e Planeamento em Turismo",
         "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
@@ -375,8 +375,8 @@
       "tie_points": 2,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Biologia e Geologia",
-        "Economia"
+        "Economia",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -425,9 +425,9 @@
       "tie_points": 6,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Eng. Física",
         "Ciências do Mar",
-        "Gestão",
-        "Eng. Física"
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -538,8 +538,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -569,8 +569,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -600,8 +600,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -631,8 +631,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -662,8 +662,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Biologia",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Biologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -693,8 +693,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Biologia",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Biologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -724,8 +724,8 @@
       "tie_type": "head_to_head",
       "tie_points": 6,
       "tied_teams": [
-        "Eng. Aeroespacial",
-        "Tecnologias de Informação"
+        "Tecnologias de Informação",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -755,8 +755,8 @@
       "tie_type": "head_to_head",
       "tie_points": 6,
       "tied_teams": [
-        "Eng. Aeroespacial",
-        "Tecnologias de Informação"
+        "Tecnologias de Informação",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -848,8 +848,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. Civil",
-        "Contabilidade"
+        "Contabilidade",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -879,8 +879,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. Civil",
-        "Contabilidade"
+        "Contabilidade",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -910,8 +910,8 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
         "Física",
+        "Gestão e Planeamento em Turismo",
         "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
@@ -942,8 +942,8 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
         "Física",
+        "Gestão e Planeamento em Turismo",
         "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
@@ -974,8 +974,8 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
         "Física",
+        "Gestão e Planeamento em Turismo",
         "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
@@ -1006,8 +1006,8 @@
       "tie_type": "head_to_head",
       "tie_points": 2,
       "tied_teams": [
-        "Biologia e Geologia",
-        "Economia"
+        "Economia",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1037,8 +1037,8 @@
       "tie_type": "head_to_head",
       "tie_points": 2,
       "tied_teams": [
-        "Biologia e Geologia",
-        "Economia"
+        "Economia",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1068,9 +1068,9 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
+        "Eng. Física",
         "Ciências do Mar",
-        "Gestão",
-        "Eng. Física"
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1100,9 +1100,9 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
+        "Eng. Física",
         "Ciências do Mar",
-        "Gestão",
-        "Eng. Física"
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1132,9 +1132,9 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
+        "Eng. Física",
         "Ciências do Mar",
-        "Gestão",
-        "Eng. Física"
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",

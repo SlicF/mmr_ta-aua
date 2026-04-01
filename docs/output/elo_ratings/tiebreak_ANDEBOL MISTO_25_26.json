@@ -62,8 +62,8 @@
       "tie_points": 27,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Biologia e Geologia",
-        "Economia"
+        "Economia",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -109,12 +109,60 @@
         "Grupo": null,
         "ranking_key": "2ª Divisão"
       },
-      "tie_points": 17,
-      "tie_type": "mini_league",
+      "tie_points": 19,
+      "tie_type": "head_to_head",
       "tied_teams": [
-        "Ciências do Mar",
+        "Eng. Biomédica",
+        "Administração Pública"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Administração Pública",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 9,
+            "golos_marcados_h2h": 22,
+            "diferenca_golos": 20,
+            "golos_marcados": 156
+          }
+        },
+        {
+          "team": "Eng. Biomédica",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": -9,
+            "golos_marcados_h2h": 13,
+            "diferenca_golos": -13,
+            "golos_marcados": 137
+          }
+        }
+      ],
+      "event_id": 3
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": null,
+        "ranking_key": "2ª Divisão"
+      },
+      "tie_points": 17,
+      "tie_type": "head_to_head",
+      "tied_teams": [
         "Gestão",
-        "MTC",
         "DPT"
       ],
       "criteria_order": [
@@ -133,9 +181,9 @@
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
-            "pontos_h2h": 7,
-            "diferenca_golos_h2h": 15,
-            "golos_marcados_h2h": 75,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 7,
+            "golos_marcados_h2h": 25,
             "diferenca_golos": 9,
             "golos_marcados": 192
           }
@@ -145,85 +193,11 @@
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
-            "pontos_h2h": 5,
-            "diferenca_golos_h2h": -8,
-            "golos_marcados_h2h": 60,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": -7,
+            "golos_marcados_h2h": 18,
             "diferenca_golos": -6,
             "golos_marcados": 179
-          }
-        },
-        {
-          "team": "Ciências do Mar",
-          "rank_in_tiebreak": 3,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 4,
-            "diferenca_golos_h2h": -3,
-            "golos_marcados_h2h": 40,
-            "diferenca_golos": -10,
-            "golos_marcados": 166
-          }
-        },
-        {
-          "team": "MTC",
-          "rank_in_tiebreak": 4,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 4,
-            "diferenca_golos_h2h": -4,
-            "golos_marcados_h2h": 45,
-            "diferenca_golos": 4,
-            "golos_marcados": 168
-          }
-        }
-      ],
-      "event_id": 3
-    },
-    {
-      "context": {
-        "Divisao": 2,
-        "Grupo": null,
-        "ranking_key": "2ª Divisão"
-      },
-      "tie_points": 11,
-      "tie_type": "head_to_head",
-      "tied_teams": [
-        "Psicologia",
-        "Biologia"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "faltas_comparencia",
-      "used_global_fallback": false,
-      "standings": [
-        {
-          "team": "Psicologia",
-          "rank_in_tiebreak": 1,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 1,
-            "diferenca_golos_h2h": -9,
-            "golos_marcados_h2h": 13,
-            "diferenca_golos": -67,
-            "golos_marcados": 126
-          }
-        },
-        {
-          "team": "Biologia",
-          "rank_in_tiebreak": 2,
-          "criteria_values": {
-            "faltas_comparencia": 1,
-            "pontos_h2h": 3,
-            "diferenca_golos_h2h": 9,
-            "golos_marcados_h2h": 22,
-            "diferenca_golos": -55,
-            "golos_marcados": 113
           }
         }
       ],
@@ -300,8 +274,8 @@
       "tie_type": "head_to_head",
       "tie_points": 27,
       "tied_teams": [
-        "Biologia e Geologia",
-        "Economia"
+        "Economia",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -331,8 +305,8 @@
       "tie_type": "head_to_head",
       "tie_points": 27,
       "tied_teams": [
-        "Biologia e Geologia",
-        "Economia"
+        "Economia",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -355,17 +329,15 @@
       "rank_in_tiebreak": 2,
       "final_position": 2
     },
-    "2ª Divisão::DPT": {
+    "2ª Divisão::Administração Pública": {
       "event_id": 3,
       "ranking_key": "2ª Divisão",
-      "team": "DPT",
-      "tie_type": "mini_league",
-      "tie_points": 17,
+      "team": "Administração Pública",
+      "tie_type": "head_to_head",
+      "tie_points": 19,
       "tied_teams": [
-        "Ciências do Mar",
-        "Gestão",
-        "MTC",
-        "DPT"
+        "Eng. Biomédica",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -379,123 +351,24 @@
       "used_global_fallback": false,
       "criteria_values": {
         "faltas_comparencia": 0,
-        "pontos_h2h": 7,
-        "diferenca_golos_h2h": 15,
-        "golos_marcados_h2h": 75,
-        "diferenca_golos": 9,
-        "golos_marcados": 192
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 9,
+        "golos_marcados_h2h": 22,
+        "diferenca_golos": 20,
+        "golos_marcados": 156
       },
       "rank_in_tiebreak": 1,
-      "final_position": 6
+      "final_position": 5
     },
-    "2ª Divisão::Gestão": {
+    "2ª Divisão::Eng. Biomédica": {
       "event_id": 3,
       "ranking_key": "2ª Divisão",
-      "team": "Gestão",
-      "tie_type": "mini_league",
-      "tie_points": 17,
-      "tied_teams": [
-        "Ciências do Mar",
-        "Gestão",
-        "MTC",
-        "DPT"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "pontos_h2h",
-      "used_global_fallback": false,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 5,
-        "diferenca_golos_h2h": -8,
-        "golos_marcados_h2h": 60,
-        "diferenca_golos": -6,
-        "golos_marcados": 179
-      },
-      "rank_in_tiebreak": 2,
-      "final_position": 7
-    },
-    "2ª Divisão::Ciências do Mar": {
-      "event_id": 3,
-      "ranking_key": "2ª Divisão",
-      "team": "Ciências do Mar",
-      "tie_type": "mini_league",
-      "tie_points": 17,
-      "tied_teams": [
-        "Ciências do Mar",
-        "Gestão",
-        "MTC",
-        "DPT"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "pontos_h2h",
-      "used_global_fallback": false,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 4,
-        "diferenca_golos_h2h": -3,
-        "golos_marcados_h2h": 40,
-        "diferenca_golos": -10,
-        "golos_marcados": 166
-      },
-      "rank_in_tiebreak": 3,
-      "final_position": 8
-    },
-    "2ª Divisão::MTC": {
-      "event_id": 3,
-      "ranking_key": "2ª Divisão",
-      "team": "MTC",
-      "tie_type": "mini_league",
-      "tie_points": 17,
-      "tied_teams": [
-        "Ciências do Mar",
-        "Gestão",
-        "MTC",
-        "DPT"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "pontos_h2h",
-      "used_global_fallback": false,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 4,
-        "diferenca_golos_h2h": -4,
-        "golos_marcados_h2h": 45,
-        "diferenca_golos": 4,
-        "golos_marcados": 168
-      },
-      "rank_in_tiebreak": 4,
-      "final_position": 9
-    },
-    "2ª Divisão::Psicologia": {
-      "event_id": 4,
-      "ranking_key": "2ª Divisão",
-      "team": "Psicologia",
+      "team": "Eng. Biomédica",
       "tie_type": "head_to_head",
-      "tie_points": 11,
+      "tie_points": 19,
       "tied_teams": [
-        "Psicologia",
-        "Biologia"
+        "Eng. Biomédica",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -505,28 +378,28 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "faltas_comparencia",
+      "deciding_criterion": "pontos_h2h",
       "used_global_fallback": false,
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 1,
         "diferenca_golos_h2h": -9,
         "golos_marcados_h2h": 13,
-        "diferenca_golos": -67,
-        "golos_marcados": 126
+        "diferenca_golos": -13,
+        "golos_marcados": 137
       },
-      "rank_in_tiebreak": 1,
-      "final_position": 11
+      "rank_in_tiebreak": 2,
+      "final_position": 6
     },
-    "2ª Divisão::Biologia": {
+    "2ª Divisão::DPT": {
       "event_id": 4,
       "ranking_key": "2ª Divisão",
-      "team": "Biologia",
+      "team": "DPT",
       "tie_type": "head_to_head",
-      "tie_points": 11,
+      "tie_points": 17,
       "tied_teams": [
-        "Psicologia",
-        "Biologia"
+        "Gestão",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -536,18 +409,49 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "faltas_comparencia",
+      "deciding_criterion": "pontos_h2h",
       "used_global_fallback": false,
       "criteria_values": {
-        "faltas_comparencia": 1,
+        "faltas_comparencia": 0,
         "pontos_h2h": 3,
-        "diferenca_golos_h2h": 9,
-        "golos_marcados_h2h": 22,
-        "diferenca_golos": -55,
-        "golos_marcados": 113
+        "diferenca_golos_h2h": 7,
+        "golos_marcados_h2h": 25,
+        "diferenca_golos": 9,
+        "golos_marcados": 192
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 8
+    },
+    "2ª Divisão::Gestão": {
+      "event_id": 4,
+      "ranking_key": "2ª Divisão",
+      "team": "Gestão",
+      "tie_type": "head_to_head",
+      "tie_points": 17,
+      "tied_teams": [
+        "Gestão",
+        "DPT"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": -7,
+        "golos_marcados_h2h": 18,
+        "diferenca_golos": -6,
+        "golos_marcados": 179
       },
       "rank_in_tiebreak": 2,
-      "final_position": 12
+      "final_position": 9
     }
   }
 }
