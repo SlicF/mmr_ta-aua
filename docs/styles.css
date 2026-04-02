@@ -572,6 +572,17 @@ body {
 }
 
 /* Controles de seleção rápida */
+.quick-selection-controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+}
+
 .quick-control-btn {
   padding: 6px 12px;
   border: 2px solid #2a5298;
@@ -594,6 +605,61 @@ body {
   outline: 3px solid #2a5298;
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.2);
+}
+
+.team-count-indicator {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 15;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: 500;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.team-count-indicator--header {
+  position: static;
+}
+
+.season-nav-btn {
+  color: white;
+  padding: 6px 16px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  pointer-events: auto;
+  background: rgba(102, 126, 234, 0.9);
+}
+
+.season-nav-btn--prev,
+.season-nav-btn--next {
+  box-shadow: 0 4px 12px rgba(42, 82, 152, 0.4);
+}
+
+.season-nav-btn--next {
+  margin-left: auto;
+}
+
+.season-nav-btn:hover {
+  transform: scale(1.05);
+}
+
+.season-nav-btn:active {
+  transform: scale(0.98);
+}
+
+.season-nav-btn--prev:hover,
+.season-nav-btn--next:hover {
+  background: rgba(102, 126, 234, 1);
+  box-shadow: 0 6px 16px rgba(42, 82, 152, 0.6);
 }
 
 /* Labels dinâmicos posicionados no final das linhas */

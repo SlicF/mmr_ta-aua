@@ -8,9 +8,64 @@ const SPARKLINE_POINTS = 10; // número de pontos mais recentes
  * Detecta se o dispositivo é móvel
  * @returns {boolean} true se for dispositivo móvel
  */
+let cachedIsMobileDevice = null;
 function isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-        || window.innerWidth <= 768;
+    if (cachedIsMobileDevice === null) {
+        cachedIsMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || window.innerWidth <= 768;
+    }
+    return cachedIsMobileDevice;
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('resize', () => {
+        cachedIsMobileDevice = null;
+    });
+    window.addEventListener('orientationchange', () => {
+        cachedIsMobileDevice = null;
+    });
+}
+
+function getLastValidElo(teamName) {
+    if (sampleData && sampleData.eloHistory && sampleData.eloHistory[teamName]) {
+        const history = sampleData.eloHistory[teamName];
+        for (let i = history.length - 1; i >= 0; i--) {
+            if (history[i] !== null && history[i] !== undefined && !isNaN(history[i])) {
+                return history[i];
+            }
+        }
+    }
+    return 0;
+}
+
+function compareByPointsThenGoalDifference(a, b) {
+    if (b.points !== a.points) return b.points - a.points;
+    const diffA = (a.goals || 0) - (a.conceded || 0);
+    const diffB = (b.goals || 0) - (b.conceded || 0);
+    return diffB - diffA;
+}
+
+function setPredictionsTooltipVisibility(isVisible) {
+    if (!predictionsTooltipEl) return;
+
+    predictionsTooltipEl.style.display = isVisible ? 'block' : 'none';
+    predictionsTooltipEl.style.visibility = isVisible ? 'visible' : 'hidden';
+    predictionsTooltipEl.style.pointerEvents = isVisible ? 'auto' : 'none';
+    predictionsTooltipVisible = isVisible;
+}
+
+function syncTeamCheckboxState(checkbox, isActive) {
+    const label = checkbox.parentElement;
+    checkbox.checked = isActive;
+    if (label) {
+        label.classList.toggle('active', isActive);
+    }
+}
+
+function applyTeamSelectionChanges() {
+    updateEloChart();
+    updateTeamCountIndicator();
+    reorderTeamSelector();
 }
 
 let compactModeEnabled = false; // Modo compacto da tabela (sem emblemas e ELO Trend)
@@ -142,9 +197,31 @@ function showNotification(message) {
     }
 
     toast.textContent = message;
-    toast.className = 'show';
+    toast.classList.add('show');
 
-    setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+    setTimeout(() => { toast.classList.remove('show'); }, 3000);
+}
+
+function renderFormBadges(form) {
+    if (!Array.isArray(form) || form.length === 0) {
+        return '';
+    }
+
+    const validForm = form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
+    if (validForm.length === 0) {
+        return '';
+    }
+
+    const badgeMap = {
+        V: { cls: 'win', letter: 'V', text: t('formWin') },
+        E: { cls: 'draw', letter: 'E', text: t('formDraw') },
+        D: { cls: 'loss', letter: 'D', text: t('formLoss') }
+    };
+
+    return `<div class="form-badges">${validForm.map(outcome => {
+        const meta = badgeMap[outcome] || { cls: 'draw', letter: outcome || '-', text: t('formUnknown') };
+        return `<span class="form-badge ${meta.cls}" title="${meta.text}">${meta.letter}</span>`;
+    }).join('')}</div>`;
 }
 
 // ==================== SISTEMA DE COLAPSÁVEIS ====================
@@ -158,26 +235,16 @@ function initializeCollapsibles() {
 
     if (!toggleBtn || !chartContent) return;
 
-    // Carregar preferência do localStorage
     const isCollapsed = localStorage.getItem('eloChartCollapsed') === 'true';
-
-    if (isCollapsed) {
-        chartContent.classList.add('collapsed');
-        toggleBtn.setAttribute('aria-expanded', 'false');
-    }
+    chartContent.classList.toggle('collapsed', isCollapsed);
+    toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
 
     toggleBtn.addEventListener('click', () => {
         const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-
-        if (expanded) {
-            chartContent.classList.add('collapsed');
-            toggleBtn.setAttribute('aria-expanded', 'false');
-            localStorage.setItem('eloChartCollapsed', 'true');
-        } else {
-            chartContent.classList.remove('collapsed');
-            toggleBtn.setAttribute('aria-expanded', 'true');
-            localStorage.setItem('eloChartCollapsed', 'false');
-        }
+        const nowCollapsed = !expanded;
+        chartContent.classList.toggle('collapsed', nowCollapsed);
+        toggleBtn.setAttribute('aria-expanded', String(!nowCollapsed));
+        localStorage.setItem('eloChartCollapsed', String(nowCollapsed));
     });
 }
 
@@ -659,33 +726,17 @@ function addQuickSelectionControls(selector) {
 function selectAllTeams(select) {
     const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
-        const label = checkbox.parentElement;
-        checkbox.checked = select;
-        if (select) {
-            label.classList.add('active');
-        } else {
-            label.classList.remove('active');
-        }
+        syncTeamCheckboxState(checkbox, select);
     });
-    updateEloChart();
-    updateTeamCountIndicator();
-    reorderTeamSelector();
+    applyTeamSelectionChanges();
 }
 
 function toggleAllTeams() {
     const checkboxes = document.querySelectorAll('#teamSelector input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
-        const label = checkbox.parentElement;
-        checkbox.checked = !checkbox.checked;
-        if (checkbox.checked) {
-            label.classList.add('active');
-        } else {
-            label.classList.remove('active');
-        }
+        syncTeamCheckboxState(checkbox, !checkbox.checked);
     });
-    updateEloChart();
-    updateTeamCountIndicator();
-    reorderTeamSelector();
+    applyTeamSelectionChanges();
 }
 
 function selectDivision(division) {
@@ -693,37 +744,18 @@ function selectDivision(division) {
     checkboxes.forEach(checkbox => {
         const teamName = checkbox.dataset.teamName;
         const team = sampleData.teams.find(t => t.name === teamName);
-        const label = checkbox.parentElement;
-
-        if (team && team.division && team.division.toString() === division) {
-            checkbox.checked = true;
-            label.classList.add('active');
-        } else {
-            checkbox.checked = false;
-            label.classList.remove('active');
-        }
+        syncTeamCheckboxState(checkbox, Boolean(team && team.division && team.division.toString() === division));
     });
-    updateEloChart();
-    updateTeamCountIndicator();
-    reorderTeamSelector();
+    applyTeamSelectionChanges();
 }
 
 // Alternar visibilidade da equipa no gráfico
 function toggleTeam(teamName) {
     const checkbox = event.target;
-    const label = checkbox.parentElement;
-
-    if (checkbox.checked) {
-        label.classList.add('active');
-    } else {
-        label.classList.remove('active');
-    }
-
-    updateEloChart();
-    updateTeamCountIndicator();
+    syncTeamCheckboxState(checkbox, checkbox.checked);
+    applyTeamSelectionChanges();
 
     // Reordenar equipas com animação
-    reorderTeamSelector();
 }
 
 // Função para reordenar equipas no seletor (selecionadas primeiro)
@@ -747,21 +779,10 @@ function reorderTeamSelector() {
             const checkbox = label.querySelector('input[type="checkbox"]');
             const teamName = checkbox.dataset.teamName;
 
-            let currentElo = DEFAULT_ELO;
-            const history = sampleData.eloHistory[teamName];
-            if (history && history.length > 0) {
-                for (let i = history.length - 1; i >= 0; i--) {
-                    if (history[i] !== null && history[i] !== undefined && !isNaN(history[i])) {
-                        currentElo = history[i];
-                        break;
-                    }
-                }
-            }
-
             return {
                 label,
                 isChecked: checkbox.checked,
-                currentElo
+                currentElo: getLastValidElo(teamName) || DEFAULT_ELO
             };
         });
 
@@ -799,8 +820,6 @@ function reorderTeamSelector() {
     });
 }
 
-// Função para atualizar indicador de número de equipas selecionadas
-// Função para atualizar indicador de número de equipas selecionadas
 function updateTeamCountIndicator() {
     const activeCount = document.querySelectorAll('#teamSelector input[type="checkbox"]:checked').length;
     const totalCount = document.querySelectorAll('#teamSelector input[type="checkbox"]').length;
@@ -809,20 +828,7 @@ function updateTeamCountIndicator() {
     if (!indicator) {
         indicator = document.createElement('div');
         indicator.id = 'team-count-indicator';
-        indicator.style.cssText = `
-                    position: absolute;
-                    top: 10px;
-                    left: 10px;
-                    z-index: 15;
-                    background: rgba(102, 126, 234, 0.9);
-                    color: white;
-                    padding: 4px 12px;
-                    border-radius: 15px;
-                    font-size: 0.85em;
-                    font-weight: 500;
-                    display: inline-block;
-                    transition: all 0.3s ease;
-                `;
+        indicator.className = 'team-count-indicator';
 
         // Inserir preferencialmente no container do gráfico (tem position: relative)
         const chartContainer = document.querySelector('.chart-container');
@@ -833,7 +839,7 @@ function updateTeamCountIndicator() {
             const header = document.querySelector('.chart-header');
             if (header) {
                 header.appendChild(indicator);
-                indicator.style.position = 'static';
+                indicator.classList.add('team-count-indicator--header');
             }
         }
     }
@@ -880,29 +886,11 @@ function updateSeasonNavigationButtons() {
     if (!prevBtn) {
         prevBtn = document.createElement('button');
         prevBtn.id = 'season-prev-btn';
-        prevBtn.innerHTML = t('previousSeason');
-        prevBtn.style.cssText = `
-            background: rgba(102, 126, 234, 0.9);
-            color: white;
-            padding: 6px 16px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        `;
-        prevBtn.addEventListener('mouseover', () => {
-            if (prevBtn.style.display !== 'none') {
-                prevBtn.style.background = 'rgba(102, 126, 234, 1)';
-            }
-        });
-        prevBtn.addEventListener('mouseout', () => {
-            prevBtn.style.background = 'rgba(102, 126, 234, 0.9)';
-        });
+        prevBtn.className = 'season-nav-btn season-nav-btn--prev';
+        prevBtn.type = 'button';
         navContainer.appendChild(prevBtn);
     }
-    prevBtn.innerHTML = t('previousSeason');
+    prevBtn.textContent = t('previousSeason');
     // Remover listeners antigos e adicionar novo com currentIndex atualizado
     prevBtn.onclick = () => {
         const epochSel = document.getElementById('epoca');
@@ -921,30 +909,11 @@ function updateSeasonNavigationButtons() {
     if (!nextBtn) {
         nextBtn = document.createElement('button');
         nextBtn.id = 'season-next-btn';
-        nextBtn.innerHTML = t('nextSeason');
-        nextBtn.style.cssText = `
-            background: rgba(102, 126, 234, 0.9);
-            color: white;
-            padding: 6px 16px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-left: auto;
-        `;
-        nextBtn.addEventListener('mouseover', () => {
-            if (nextBtn.style.display !== 'none') {
-                nextBtn.style.background = 'rgba(102, 126, 234, 1)';
-            }
-        });
-        nextBtn.addEventListener('mouseout', () => {
-            nextBtn.style.background = 'rgba(102, 126, 234, 0.9)';
-        });
+        nextBtn.className = 'season-nav-btn season-nav-btn--next';
+        nextBtn.type = 'button';
         navContainer.appendChild(nextBtn);
     }
-    nextBtn.innerHTML = t('nextSeason');
+    nextBtn.textContent = t('nextSeason');
     // Remover listeners antigos e adicionar novo com currentIndex atualizado
     nextBtn.onclick = () => {
         const epochSel = document.getElementById('epoca');
@@ -1412,43 +1381,9 @@ function initEloChart() {
                 }
 
                 // Forma (Últimos 5 jogos) - usar do gameData se disponível
-                if (gameData && gameData.form && gameData.form.length > 0) {
-                    // Filtrar apenas resultados válidos (V, E, D)
-                    const validForm = gameData.form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
-
-                    if (validForm.length > 0) {
-                        html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
-                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">' + t('form') + ':</span>';
-                        validForm.forEach(outcome => {
-                            let color = '#6c757d';
-                            let letter = '-';
-                            if (outcome === 'V') { color = '#28a745'; letter = 'V'; }
-                            else if (outcome === 'D') { color = '#dc3545'; letter = 'D'; }
-                            else if (outcome === 'E') { color = '#ffc107'; letter = 'E'; }
-
-                            html += '<span style="width: 16px; height: 16px; border-radius: 50%; background-color: ' + color + '; display: inline-flex; justify-content: center; align-items: center; color: #fff; font-size: 10px; font-weight: bold;" title="' + outcome + '">' + letter + '</span>';
-                        });
-                        html += '</div>';
-                    }
-                } else if (extraData.form && extraData.form.length > 0) {
-                    // Fallback para forma atual se não há gameData
-                    const validForm = extraData.form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
-
-                    if (validForm.length > 0) {
-                        html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
-                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">' + t('form') + ':</span>';
-                        validForm.forEach(outcome => {
-                            let color = '#6c757d';
-                            let letter = '-';
-                            if (outcome === 'V') { color = '#28a745'; letter = 'V'; }
-                            else if (outcome === 'D') { color = '#dc3545'; letter = 'D'; }
-                            else if (outcome === 'E') { color = '#ffc107'; letter = 'E'; }
-
-                            html += '<span style="width: 16px; height: 16px; border-radius: 50%; background-color: ' + color + '; display: inline-flex; justify-content: center; align-items: center; color: #fff; font-size: 10px; font-weight: bold;" title="' + outcome + '">' + letter + '</span>';
-                        });
-                        html += '</div>';
-                    }
-                }
+                html += renderFormBadges(
+                    gameData && gameData.form && gameData.form.length > 0 ? gameData.form : extraData.form
+                );
 
                 html += '</div>';
                 return html;
@@ -2168,19 +2103,6 @@ function updateEloChart() {
     // REORDENAR SÉRIES POR ELO FINAL (descending)
     // CRÍTICO: Usar sampleData.eloHistory (valor real final), não s.data (valor intermédio)
     series.sort((a, b) => {
-        const getLastValidElo = (teamName) => {
-            // USAR APENAS eloHistory - é o valor final verdadeiro
-            if (sampleData && sampleData.eloHistory && sampleData.eloHistory[teamName]) {
-                const history = sampleData.eloHistory[teamName];
-                for (let i = history.length - 1; i >= 0; i--) {
-                    if (history[i] !== null && history[i] !== undefined && !isNaN(history[i])) {
-                        return history[i];
-                    }
-                }
-            }
-            return 0;
-        };
-
         const eloA = getLastValidElo(a.name);
         const eloB = getLastValidElo(b.name);
         return eloB - eloA; // Ordenar em ordem descending (maior primeiro)
@@ -2581,42 +2503,9 @@ function updateEloChart() {
                     }
                 }
 
-                if (gameData && gameData.form && gameData.form.length > 0) {
-                    const validForm = gameData.form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
-
-                    if (validForm.length > 0) {
-                        html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
-                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">' + t('form') + ':</span>';
-                        validForm.forEach(outcome => {
-                            let color = '#6c757d';
-                            let letter = '-';
-                            if (outcome === 'V') { color = '#28a745'; letter = 'V'; }
-                            else if (outcome === 'D') { color = '#dc3545'; letter = 'D'; }
-                            else if (outcome === 'E') { color = '#ffc107'; letter = 'E'; }
-
-                            html += '<span style="width: 16px; height: 16px; border-radius: 50%; background-color: ' + color + '; display: inline-flex; justify-content: center; align-items: center; color: #fff; font-size: 10px; font-weight: bold;" title="' + outcome + '">' + letter + '</span>';
-                        });
-                        html += '</div>';
-                    }
-                } else if (extraData && extraData.form && extraData.form.length > 0) {
-                    // console.log('[DEBUG] Renderizando form de extraData:', extraData.form);
-                    const validForm = extraData.form.filter(outcome => outcome === 'V' || outcome === 'E' || outcome === 'D');
-
-                    if (validForm.length > 0) {
-                        html += '<div style="margin-top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">';
-                        html += '<span style="font-size: 0.8em; color: #666; width: 100%; margin-bottom: 2px;">' + t('form') + ':</span>';
-                        validForm.forEach(outcome => {
-                            let color = '#6c757d';
-                            let letter = '-';
-                            if (outcome === 'V') { color = '#28a745'; letter = 'V'; }
-                            else if (outcome === 'D') { color = '#dc3545'; letter = 'D'; }
-                            else if (outcome === 'E') { color = '#ffc107'; letter = 'E'; }
-
-                            html += '<span style="width: 16px; height: 16px; border-radius: 50%; background-color: ' + color + '; display: inline-flex; justify-content: center; align-items: center; color: #fff; font-size: 10px; font-weight: bold;" title="' + outcome + '">' + letter + '</span>';
-                        });
-                        html += '</div>';
-                    }
-                }
+                html += renderFormBadges(
+                    gameData && gameData.form && gameData.form.length > 0 ? gameData.form : extraData.form
+                );
 
                 html += '</div>';
                 return html;
@@ -3416,12 +3305,7 @@ function getQualifiedTeams(forceRefresh = false) {
         const ranking = sampleData.rankings['geral'] || [];
 
         // Os rankings já vêm ordenados do CSV, mas garantir ordenação por pontos
-        ranking.sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            const diffA = (a.goals || 0) - (a.conceded || 0);
-            const diffB = (b.goals || 0) - (b.conceded || 0);
-            return diffB - diffA;
-        });
+        ranking.sort(compareByPointsThenGoalDifference);
 
         qualified.playoffs = ranking.slice(0, 8).map(team => team.team);
 
@@ -3573,20 +3457,9 @@ function getQualifiedTeams(forceRefresh = false) {
         });
 
         // Ordenar por pontos (não por ELO que pode não existir ainda)
-        div1Teams.sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            // Desempate por diferença de golos
-            const diffA = (a.goals || 0) - (a.conceded || 0);
-            const diffB = (b.goals || 0) - (b.conceded || 0);
-            return diffB - diffA;
-        });
+        div1Teams.sort(compareByPointsThenGoalDifference);
 
-        div2Teams.sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            const diffA = (a.goals || 0) - (a.conceded || 0);
-            const diffB = (b.goals || 0) - (b.conceded || 0);
-            return diffB - diffA;
-        });
+        div2Teams.sort(compareByPointsThenGoalDifference);
 
         DebugUtils.debugQualification('teams_sorted', { div1: div1Teams.map(t => `${t.team} (${t.points}pts)`), div2: div2Teams.map(t => `${t.team} (${t.points}pts)`) });
 
@@ -12329,9 +12202,7 @@ function createPredictionsTooltip() {
 
             if (!isTooltipClick && !isTableCellClick) {
                 predictionsTooltipFixed = false;
-                tooltip.style.display = 'none';
-                tooltip.style.visibility = 'hidden';
-                tooltip.style.pointerEvents = 'none';
+                setPredictionsTooltipVisibility(false);
                 // Destruir gráfico para liberar memória
                 if (predictionsTooltipChart) {
                     try { predictionsTooltipChart.destroy(); } catch (e) { }
@@ -12343,7 +12214,6 @@ function createPredictionsTooltip() {
     });
 
     document.body.appendChild(tooltip);
-    return tooltip;
     return tooltip;
 }
 
@@ -12636,10 +12506,7 @@ function handlePredictionRowHover(e) {
     renderPredictionsTooltip(distribution, isTeamA, teamShortName, opponentShortName);
 
     if (predictionsTooltipEl && predictionsTooltipLastCell === cell) {
-        predictionsTooltipEl.style.display = 'block';
-        predictionsTooltipEl.style.visibility = 'visible';
-        predictionsTooltipEl.style.pointerEvents = 'auto';
-        predictionsTooltipVisible = true;
+        setPredictionsTooltipVisibility(true);
         updateTooltipPosition({ currentTarget: cell });
     }
 }
@@ -12661,16 +12528,10 @@ function handlePredictionRowClick(e) {
 
         if (predictionsTooltipFixed) {
             // Tooltip fica fixo
-            predictionsTooltipEl.style.display = 'block';
-            predictionsTooltipEl.style.visibility = 'visible';
-            predictionsTooltipEl.style.pointerEvents = 'auto';
-            predictionsTooltipVisible = true;
+            setPredictionsTooltipVisibility(true);
         } else {
             // Desafixar e esconder
-            predictionsTooltipEl.style.display = 'none';
-            predictionsTooltipEl.style.visibility = 'hidden';
-            predictionsTooltipEl.style.pointerEvents = 'none';
-            predictionsTooltipVisible = false;
+            setPredictionsTooltipVisibility(false);
             // Destruir gráfico para liberar memória
             if (predictionsTooltipChart) {
                 try { predictionsTooltipChart.destroy(); } catch (e) { }
@@ -12694,12 +12555,7 @@ function handleTooltipLeave() {
     if (predictionsTooltipFixed) return;
 
     // Esconder quando o rato sai do tooltip
-    if (predictionsTooltipEl) {
-        predictionsTooltipEl.style.display = 'none';
-        predictionsTooltipEl.style.visibility = 'hidden';
-        predictionsTooltipEl.style.pointerEvents = 'none';
-        predictionsTooltipVisible = false;
-    }
+    setPredictionsTooltipVisibility(false);
 }
 
 function handlePredictionRowLeave() {
@@ -12717,11 +12573,8 @@ function handlePredictionRowLeave() {
 
     // Usar pequeno debounce (50ms) para evitar flicker ao passar entre células próximas
     predictionsTooltipTimer = setTimeout(() => {
-        if (predictionsTooltipEl && !predictionsTooltipFixed) {
-            predictionsTooltipEl.style.display = 'none';
-            predictionsTooltipEl.style.visibility = 'hidden';
-            predictionsTooltipEl.style.pointerEvents = 'none';
-            predictionsTooltipVisible = false;
+        if (!predictionsTooltipFixed) {
+            setPredictionsTooltipVisibility(false);
         }
         predictionsTooltipTimer = null;
     }, 50);
@@ -12739,12 +12592,7 @@ function handlePredictionTableLeave() {
     }
 
     // Esconder quando sai da tabela (se não está sobre o tooltip, vai ser tratado no mouseleave do tooltip)
-    if (predictionsTooltipEl) {
-        predictionsTooltipEl.style.display = 'none';
-        predictionsTooltipEl.style.visibility = 'hidden';
-        predictionsTooltipEl.style.pointerEvents = 'none';
-        predictionsTooltipVisible = false;
-    }
+    setPredictionsTooltipVisibility(false);
     predictionsTooltipLastCell = null;
 }
 
