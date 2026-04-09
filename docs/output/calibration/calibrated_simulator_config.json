@@ -1,19 +1,19 @@
 {
   "ANDEBOL MISTO": {
     "sport_type": "andebol",
-    "base_goals": 20.38,
-    "base_goals_std": 6.903464508652321,
-    "dispersion_k": 15.226450140203434,
-    "base_draw_rate": 0.04888888888888889,
-    "draw_elo_sensitivity": 0.0046448544839203625,
+    "base_goals": 20.583333333333332,
+    "base_goals_std": 6.820278858206877,
+    "dispersion_k": 16.337320360617692,
+    "base_draw_rate": 0.05092592592592592,
+    "draw_elo_sensitivity": 0.003164223238062504,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.4009741488237797,
-      "coef_linear": -0.0046448544839203625,
-      "coef_quadratic": -5.728825983842372e-06
+      "intercept": -2.4171771332340315,
+      "coef_linear": -0.003164223238062504,
+      "coef_quadratic": -1.0765195687928927e-05
     },
-    "margin_elo_slope": 0.01207940244110854,
-    "margin_elo_intercept": 5.8143027119496455,
+    "margin_elo_slope": 0.012099032061538907,
+    "margin_elo_intercept": 5.745992907971726,
     "elo_adjustment_limit": 0.45,
     "division_params": {
       "1": {
@@ -22,9 +22,9 @@
         "base_draw_rate": 0.07339449541284404
       },
       "2": {
-        "base_goals": 18.362068965517242,
-        "dispersion_k": 14.238861619192289,
-        "base_draw_rate": 0.02586206896551724
+        "base_goals": 18.602803738317757,
+        "dispersion_k": 15.729399551194314,
+        "base_draw_rate": 0.028037383177570093
       }
     }
   },
@@ -41,8 +41,8 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.018786863446218806,
-    "margin_elo_intercept": 6.282510355408951,
+    "margin_elo_slope": 0.011905243138932,
+    "margin_elo_intercept": 6.66944157532932,
     "elo_adjustment_limit": 0.5,
     "base_score": 8.702380952380953,
     "sigma": 6.060763274862573,
@@ -58,7 +58,7 @@
     "sport_type": "basquete",
     "base_goals": 9.601626016260163,
     "base_goals_std": 4.609092881844485,
-    "dispersion_k": 7.918771840677665,
+    "dispersion_k": 7.9187718406776675,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
     "draw_multiplier": 1.0,
@@ -67,15 +67,15 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0020353446595346818,
-    "margin_elo_intercept": 5.177820395978797,
+    "margin_elo_slope": 0.004401423447778185,
+    "margin_elo_intercept": 4.906309155850424,
     "elo_adjustment_limit": 0.5,
     "base_score": 9.601626016260163,
     "sigma": 4.609092881844485,
     "division_params": {
       "1": {
         "base_goals": 10.154205607476635,
-        "dispersion_k": 11.534821173384014,
+        "dispersion_k": 11.53482117338402,
         "base_draw_rate": 0.0
       },
       "2": {
@@ -91,15 +91,15 @@
     "base_goals_std": 2.108467082661489,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.1059322033898305,
-    "draw_elo_sensitivity": 0.00010112574866321191,
+    "draw_elo_sensitivity": 0.002214856116387817,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.8512745642285773,
-      "coef_linear": -0.00010112574866321191,
-      "coef_quadratic": -1.4684600313029577e-05
+      "intercept": -2.0874940528448835,
+      "coef_linear": 0.002214856116387817,
+      "coef_quadratic": -1.3130697017051503e-05
     },
-    "margin_elo_slope": 0.0022648248990198732,
-    "margin_elo_intercept": 2.7004562318487597,
+    "margin_elo_slope": 0.002329217566702262,
+    "margin_elo_intercept": 2.677964767973008,
     "elo_adjustment_limit": 1.0,
     "division_params": {
       "1": {
@@ -116,10 +116,10 @@
   },
   "FUTSAL FEMININO": {
     "sport_type": "futsal",
-    "base_goals": 3.721590909090909,
-    "base_goals_std": 3.7014723380039274,
+    "base_goals": 3.768292682926829,
+    "base_goals_std": 3.7976205017500515,
     "dispersion_k": 3.0,
-    "base_draw_rate": 0.03409090909090909,
+    "base_draw_rate": 0.036585365853658534,
     "draw_elo_sensitivity": 0.001,
     "draw_multiplier": 1.4,
     "draw_model": {
@@ -127,37 +127,37 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.008979191345949492,
-    "margin_elo_intercept": 4.2375475027942,
+    "margin_elo_slope": -0.0006727349121972155,
+    "margin_elo_intercept": 5.471234266863413,
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
-        "base_goals": 3.721590909090909,
+        "base_goals": 3.768292682926829,
         "dispersion_k": 3.0,
-        "base_draw_rate": 0.03409090909090909
+        "base_draw_rate": 0.036585365853658534
       }
     }
   },
   "FUTSAL MASCULINO": {
     "sport_type": "futsal",
     "base_goals": 3.263235294117647,
-    "base_goals_std": 2.7132249322295365,
+    "base_goals_std": 2.713224932229536,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.11176470588235295,
-    "draw_elo_sensitivity": 0.002001416148608341,
+    "draw_elo_sensitivity": 0.0030016893817353804,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.7099913542948808,
-      "coef_linear": -0.002001416148608341,
-      "coef_quadratic": -1.0508267274422937e-05
+      "intercept": -1.6641770654191892,
+      "coef_linear": -0.0030016893817353804,
+      "coef_quadratic": -4.751729900936209e-06
     },
-    "margin_elo_slope": 0.0035641393811819064,
-    "margin_elo_intercept": 3.160646701435297,
+    "margin_elo_slope": 0.004620522003025207,
+    "margin_elo_intercept": 2.983777025958687,
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
         "base_goals": 3.096,
-        "dispersion_k": 4.14803633745084,
+        "dispersion_k": 4.148036337450838,
         "base_draw_rate": 0.104
       },
       "2": {
@@ -180,7 +180,7 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0008860565296498981,
+    "margin_elo_slope": 0.0008860565296498989,
     "margin_elo_intercept": 1.607501184906628,
     "elo_adjustment_limit": 0.5,
     "p_sweep_base": 0.713,
@@ -210,7 +210,7 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0003745452004474326,
+    "margin_elo_slope": 0.00037454520044743247,
     "margin_elo_intercept": 1.6562143788330308,
     "elo_adjustment_limit": 0.5,
     "p_sweep_base": 0.706,

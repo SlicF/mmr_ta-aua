@@ -12,8 +12,8 @@
       "tie_points": 17,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -59,11 +59,11 @@
         "Grupo": null,
         "ranking_key": "2ª Divisão"
       },
-      "tie_points": 27,
+      "tie_points": 24,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -84,8 +84,8 @@
             "pontos_h2h": 0,
             "diferenca_golos_h2h": 0,
             "golos_marcados_h2h": 0,
-            "diferenca_golos": 85,
-            "golos_marcados": 227
+            "diferenca_golos": 76,
+            "golos_marcados": 205
           }
         },
         {
@@ -96,8 +96,8 @@
             "pontos_h2h": 0,
             "diferenca_golos_h2h": 0,
             "golos_marcados_h2h": 0,
-            "diferenca_golos": 55,
-            "golos_marcados": 199
+            "diferenca_golos": 40,
+            "golos_marcados": 184
           }
         }
       ],
@@ -109,61 +109,11 @@
         "Grupo": null,
         "ranking_key": "2ª Divisão"
       },
-      "tie_points": 19,
+      "tie_points": 14,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Biomédica",
-        "Administração Pública"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "pontos_h2h",
-      "used_global_fallback": false,
-      "standings": [
-        {
-          "team": "Administração Pública",
-          "rank_in_tiebreak": 1,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 3,
-            "diferenca_golos_h2h": 9,
-            "golos_marcados_h2h": 22,
-            "diferenca_golos": 20,
-            "golos_marcados": 156
-          }
-        },
-        {
-          "team": "Eng. Biomédica",
-          "rank_in_tiebreak": 2,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 1,
-            "diferenca_golos_h2h": -9,
-            "golos_marcados_h2h": 13,
-            "diferenca_golos": -13,
-            "golos_marcados": 137
-          }
-        }
-      ],
-      "event_id": 3
-    },
-    {
-      "context": {
-        "Divisao": 2,
-        "Grupo": null,
-        "ranking_key": "2ª Divisão"
-      },
-      "tie_points": 17,
-      "tie_type": "head_to_head",
-      "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -184,8 +134,8 @@
             "pontos_h2h": 3,
             "diferenca_golos_h2h": 7,
             "golos_marcados_h2h": 25,
-            "diferenca_golos": 9,
-            "golos_marcados": 192
+            "diferenca_golos": -2,
+            "golos_marcados": 168
           }
         },
         {
@@ -196,12 +146,12 @@
             "pontos_h2h": 1,
             "diferenca_golos_h2h": -7,
             "golos_marcados_h2h": 18,
-            "diferenca_golos": -6,
-            "golos_marcados": 179
+            "diferenca_golos": -21,
+            "golos_marcados": 164
           }
         }
       ],
-      "event_id": 4
+      "event_id": 3
     }
   ],
   "indexByContextTeam": {
@@ -212,8 +162,8 @@
       "tie_type": "head_to_head",
       "tie_points": 17,
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -243,8 +193,8 @@
       "tie_type": "head_to_head",
       "tie_points": 17,
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -272,10 +222,10 @@
       "ranking_key": "2ª Divisão",
       "team": "Biologia e Geologia",
       "tie_type": "head_to_head",
-      "tie_points": 27,
+      "tie_points": 24,
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -292,8 +242,8 @@
         "pontos_h2h": 0,
         "diferenca_golos_h2h": 0,
         "golos_marcados_h2h": 0,
-        "diferenca_golos": 85,
-        "golos_marcados": 227
+        "diferenca_golos": 76,
+        "golos_marcados": 205
       },
       "rank_in_tiebreak": 1,
       "final_position": 1
@@ -303,10 +253,10 @@
       "ranking_key": "2ª Divisão",
       "team": "Economia",
       "tie_type": "head_to_head",
-      "tie_points": 27,
+      "tie_points": 24,
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -323,83 +273,21 @@
         "pontos_h2h": 0,
         "diferenca_golos_h2h": 0,
         "golos_marcados_h2h": 0,
-        "diferenca_golos": 55,
-        "golos_marcados": 199
+        "diferenca_golos": 40,
+        "golos_marcados": 184
       },
       "rank_in_tiebreak": 2,
       "final_position": 2
     },
-    "2ª Divisão::Administração Pública": {
-      "event_id": 3,
-      "ranking_key": "2ª Divisão",
-      "team": "Administração Pública",
-      "tie_type": "head_to_head",
-      "tie_points": 19,
-      "tied_teams": [
-        "Eng. Biomédica",
-        "Administração Pública"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "pontos_h2h",
-      "used_global_fallback": false,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 3,
-        "diferenca_golos_h2h": 9,
-        "golos_marcados_h2h": 22,
-        "diferenca_golos": 20,
-        "golos_marcados": 156
-      },
-      "rank_in_tiebreak": 1,
-      "final_position": 5
-    },
-    "2ª Divisão::Eng. Biomédica": {
-      "event_id": 3,
-      "ranking_key": "2ª Divisão",
-      "team": "Eng. Biomédica",
-      "tie_type": "head_to_head",
-      "tie_points": 19,
-      "tied_teams": [
-        "Eng. Biomédica",
-        "Administração Pública"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "pontos_h2h",
-      "used_global_fallback": false,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 1,
-        "diferenca_golos_h2h": -9,
-        "golos_marcados_h2h": 13,
-        "diferenca_golos": -13,
-        "golos_marcados": 137
-      },
-      "rank_in_tiebreak": 2,
-      "final_position": 6
-    },
     "2ª Divisão::DPT": {
-      "event_id": 4,
+      "event_id": 3,
       "ranking_key": "2ª Divisão",
       "team": "DPT",
       "tie_type": "head_to_head",
-      "tie_points": 17,
+      "tie_points": 14,
       "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -416,21 +304,21 @@
         "pontos_h2h": 3,
         "diferenca_golos_h2h": 7,
         "golos_marcados_h2h": 25,
-        "diferenca_golos": 9,
-        "golos_marcados": 192
+        "diferenca_golos": -2,
+        "golos_marcados": 168
       },
       "rank_in_tiebreak": 1,
       "final_position": 8
     },
     "2ª Divisão::Gestão": {
-      "event_id": 4,
+      "event_id": 3,
       "ranking_key": "2ª Divisão",
       "team": "Gestão",
       "tie_type": "head_to_head",
-      "tie_points": 17,
+      "tie_points": 14,
       "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -447,8 +335,8 @@
         "pontos_h2h": 1,
         "diferenca_golos_h2h": -7,
         "golos_marcados_h2h": 18,
-        "diferenca_golos": -6,
-        "golos_marcados": 179
+        "diferenca_golos": -21,
+        "golos_marcados": 164
       },
       "rank_in_tiebreak": 2,
       "final_position": 9

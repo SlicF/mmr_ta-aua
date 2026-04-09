@@ -62,9 +62,9 @@
       "tie_points": 18,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Administração Pública",
+        "Ciências Biomédicas",
         "Fisioterapia",
-        "Ciências Biomédicas"
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -225,8 +225,8 @@
       "tie_points": 11,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Matemática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -275,8 +275,8 @@
       "tie_points": 6,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. Eletrónica e Telecomunicações B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -387,9 +387,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "Administração Pública",
+        "Ciências Biomédicas",
         "Fisioterapia",
-        "Ciências Biomédicas"
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -419,9 +419,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "Administração Pública",
+        "Ciências Biomédicas",
         "Fisioterapia",
-        "Ciências Biomédicas"
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -451,9 +451,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "Administração Pública",
+        "Ciências Biomédicas",
         "Fisioterapia",
-        "Ciências Biomédicas"
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -607,8 +607,8 @@
       "tie_type": "head_to_head",
       "tie_points": 11,
       "tied_teams": [
-        "Matemática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -638,8 +638,8 @@
       "tie_type": "head_to_head",
       "tie_points": 11,
       "tied_teams": [
-        "Matemática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -669,8 +669,8 @@
       "tie_type": "head_to_head",
       "tie_points": 6,
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. Eletrónica e Telecomunicações B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -700,8 +700,8 @@
       "tie_type": "head_to_head",
       "tie_points": 6,
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. Eletrónica e Telecomunicações B"
       ],
       "criteria_order": [
         "faltas_comparencia",
