@@ -59,6 +59,10 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Fonte_Data,Fonte_Local,
 7,,,,Educação Básica,,,Economia,,,False,False,Educação Básica
 8,,,,Biologia,,,Música,,,False,False,
 9,,,,Eng. Informática,,,Educação Básica,,,False,False,Educação Básica
+10,,,,Biologia,,,Matemática,,,False,False,
+10,,,,Economia,,,Eng. Informática,,,False,False,
+10,,,,Fisioterapia,,,Eng. Biomédica,,,False,False,
+10,,,,Música,,,Contabilidade,,,False,False,
 E1,,,,1º Class. 1ª Div.,,,8º Class. 1ª Div.,,,,,
 E1,,,,2º Class. 1ª Div.,,,7º Class. 1ª Div.,,,,,
 E1,,,,3º Class. 1ª Div.,,,6º Class. 1ª Div.,,,,,
