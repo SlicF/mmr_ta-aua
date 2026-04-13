@@ -12,8 +12,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. e Gestão Industrial",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 7,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Informática",
-        "Tecnologias de Informação"
+        "Tecnologias de Informação",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,8 +162,8 @@
       "tie_points": 0,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Biologia",
-        "Eng. Física"
+        "Eng. Física",
+        "Biologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -312,8 +312,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -343,8 +343,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -436,8 +436,8 @@
       "tie_type": "head_to_head",
       "tie_points": 7,
       "tied_teams": [
-        "Eng. Informática",
-        "Tecnologias de Informação"
+        "Tecnologias de Informação",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -467,8 +467,8 @@
       "tie_type": "head_to_head",
       "tie_points": 7,
       "tied_teams": [
-        "Eng. Informática",
-        "Tecnologias de Informação"
+        "Tecnologias de Informação",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -498,8 +498,8 @@
       "tie_type": "head_to_head",
       "tie_points": 0,
       "tied_teams": [
-        "Biologia",
-        "Eng. Física"
+        "Eng. Física",
+        "Biologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -529,8 +529,8 @@
       "tie_type": "head_to_head",
       "tie_points": 0,
       "tied_teams": [
-        "Biologia",
-        "Eng. Física"
+        "Eng. Física",
+        "Biologia"
       ],
       "criteria_order": [
         "faltas_comparencia",

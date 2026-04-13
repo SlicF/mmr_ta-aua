@@ -62,9 +62,9 @@
       "tie_points": 12,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Informática",
+        "Economia",
         "Música",
-        "Economia"
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -126,8 +126,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Biologia e Geologia",
-        "Automação e Sistemas de Produção",
-        "Design"
+        "Design",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -188,9 +188,9 @@
       "tie_points": 9,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. do Ambiente",
         "Línguas e Relações Empresariais",
-        "Matemática"
+        "Matemática",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -251,8 +251,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Mecânica B",
-        "Administração Pública"
+        "Administração Pública",
+        "Eng. Mecânica B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -363,9 +363,9 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Informática",
+        "Economia",
         "Música",
-        "Economia"
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -395,9 +395,9 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Informática",
+        "Economia",
         "Música",
-        "Economia"
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -427,9 +427,9 @@
       "tie_type": "mini_league",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Informática",
+        "Economia",
         "Música",
-        "Economia"
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -460,8 +460,8 @@
       "tie_points": 4,
       "tied_teams": [
         "Biologia e Geologia",
-        "Automação e Sistemas de Produção",
-        "Design"
+        "Design",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -492,8 +492,8 @@
       "tie_points": 4,
       "tied_teams": [
         "Biologia e Geologia",
-        "Automação e Sistemas de Produção",
-        "Design"
+        "Design",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -524,8 +524,8 @@
       "tie_points": 4,
       "tied_teams": [
         "Biologia e Geologia",
-        "Automação e Sistemas de Produção",
-        "Design"
+        "Design",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -555,9 +555,9 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
-        "Eng. do Ambiente",
         "Línguas e Relações Empresariais",
-        "Matemática"
+        "Matemática",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -587,9 +587,9 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
-        "Eng. do Ambiente",
         "Línguas e Relações Empresariais",
-        "Matemática"
+        "Matemática",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -619,9 +619,9 @@
       "tie_type": "mini_league",
       "tie_points": 9,
       "tied_teams": [
-        "Eng. do Ambiente",
         "Línguas e Relações Empresariais",
-        "Matemática"
+        "Matemática",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -651,8 +651,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. Mecânica B",
-        "Administração Pública"
+        "Administração Pública",
+        "Eng. Mecânica B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -682,8 +682,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. Mecânica B",
-        "Administração Pública"
+        "Administração Pública",
+        "Eng. Mecânica B"
       ],
       "criteria_order": [
         "faltas_comparencia",

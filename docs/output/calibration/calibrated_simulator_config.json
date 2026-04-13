@@ -116,10 +116,10 @@
   },
   "FUTSAL FEMININO": {
     "sport_type": "futsal",
-    "base_goals": 3.768292682926829,
-    "base_goals_std": 3.7976205017500515,
+    "base_goals": 3.7901234567901234,
+    "base_goals_std": 3.8158734397533696,
     "dispersion_k": 3.0,
-    "base_draw_rate": 0.036585365853658534,
+    "base_draw_rate": 0.024691358024691357,
     "draw_elo_sensitivity": 0.001,
     "draw_multiplier": 1.4,
     "draw_model": {
@@ -132,9 +132,9 @@
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
-        "base_goals": 3.768292682926829,
+        "base_goals": 3.7901234567901234,
         "dispersion_k": 3.0,
-        "base_draw_rate": 0.036585365853658534
+        "base_draw_rate": 0.024691358024691357
       }
     }
   },
