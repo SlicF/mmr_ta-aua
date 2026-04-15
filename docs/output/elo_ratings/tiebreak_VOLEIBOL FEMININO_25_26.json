@@ -112,8 +112,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Geologia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,9 +162,9 @@
       "tie_points": 11,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Línguas e Relações Empresariais",
         "Administração Pública",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -275,8 +275,8 @@
       "tie_points": 5,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Ciências Biomédicas B",
-        "Economia"
+        "Economia",
+        "Ciências Biomédicas B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -449,8 +449,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Geologia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -480,8 +480,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Geologia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -511,9 +511,9 @@
       "tie_type": "mini_league",
       "tie_points": 11,
       "tied_teams": [
-        "Línguas e Relações Empresariais",
         "Administração Pública",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -543,9 +543,9 @@
       "tie_type": "mini_league",
       "tie_points": 11,
       "tied_teams": [
-        "Línguas e Relações Empresariais",
         "Administração Pública",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -575,9 +575,9 @@
       "tie_type": "mini_league",
       "tie_points": 11,
       "tied_teams": [
-        "Línguas e Relações Empresariais",
         "Administração Pública",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -669,8 +669,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Ciências Biomédicas B",
-        "Economia"
+        "Economia",
+        "Ciências Biomédicas B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -700,8 +700,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Ciências Biomédicas B",
-        "Economia"
+        "Economia",
+        "Ciências Biomédicas B"
       ],
       "criteria_order": [
         "faltas_comparencia",
