@@ -12,8 +12,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Mecânica B",
-        "Geologia"
+        "Geologia",
+        "Eng. Mecânica B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -62,8 +62,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Química",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. Mecânica B",
-        "Geologia"
+        "Geologia",
+        "Eng. Mecânica B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -143,8 +143,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. Mecânica B",
-        "Geologia"
+        "Geologia",
+        "Eng. Mecânica B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -174,8 +174,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. Química",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -205,8 +205,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. Química",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",

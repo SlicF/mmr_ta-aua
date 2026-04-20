@@ -62,8 +62,8 @@
       "tie_points": 12,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -262,8 +262,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Contabilidade",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -313,8 +313,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Física",
-        "Gestão e Planeamento em Turismo",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -426,8 +426,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Ciências do Mar",
-        "Gestão",
-        "Eng. Física"
+        "Eng. Física",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -600,8 +600,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -631,8 +631,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -848,8 +848,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Contabilidade",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -879,8 +879,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Contabilidade",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -911,8 +911,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Física",
-        "Gestão e Planeamento em Turismo",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -943,8 +943,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Física",
-        "Gestão e Planeamento em Turismo",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -975,8 +975,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Física",
-        "Gestão e Planeamento em Turismo",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1069,8 +1069,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Ciências do Mar",
-        "Gestão",
-        "Eng. Física"
+        "Eng. Física",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1101,8 +1101,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Ciências do Mar",
-        "Gestão",
-        "Eng. Física"
+        "Eng. Física",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1133,8 +1133,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Ciências do Mar",
-        "Gestão",
-        "Eng. Física"
+        "Eng. Física",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
