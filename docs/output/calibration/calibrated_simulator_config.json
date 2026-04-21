@@ -91,15 +91,15 @@
     "base_goals_std": 2.1680926528851394,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.10699588477366255,
-    "draw_elo_sensitivity": 0.01281998365914133,
+    "draw_elo_sensitivity": 0.01253968254792491,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.5508560529563504,
-      "coef_linear": 0.01281998365914133,
-      "coef_quadratic": -5.077040608522247e-05
+      "intercept": -2.5108904524335802,
+      "coef_linear": 0.01253968254792491,
+      "coef_quadratic": -5.0516347317274606e-05
     },
-    "margin_elo_slope": 0.0028037184833764753,
-    "margin_elo_intercept": 2.6702596453056375,
+    "margin_elo_slope": 0.0022199896970498444,
+    "margin_elo_intercept": 2.7369743444134693,
     "elo_adjustment_limit": 1.0,
     "division_params": {
       "1": {
@@ -116,10 +116,10 @@
   },
   "FUTSAL FEMININO": {
     "sport_type": "futsal",
-    "base_goals": 3.7901234567901234,
-    "base_goals_std": 3.8158734397533696,
+    "base_goals": 3.8035714285714284,
+    "base_goals_std": 3.8595258291466763,
     "dispersion_k": 3.0,
-    "base_draw_rate": 0.024691358024691357,
+    "base_draw_rate": 0.023809523809523808,
     "draw_elo_sensitivity": 0.001,
     "draw_multiplier": 1.4,
     "draw_model": {
@@ -127,38 +127,38 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": -0.0006727349121972155,
-    "margin_elo_intercept": 5.471234266863413,
+    "margin_elo_slope": 0.0007634463642645012,
+    "margin_elo_intercept": 5.3843034329958295,
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
-        "base_goals": 3.7901234567901234,
+        "base_goals": 3.8035714285714284,
         "dispersion_k": 3.0,
-        "base_draw_rate": 0.024691358024691357
+        "base_draw_rate": 0.023809523809523808
       }
     }
   },
   "FUTSAL MASCULINO": {
     "sport_type": "futsal",
-    "base_goals": 3.2938718662952646,
-    "base_goals_std": 2.7603926278529425,
+    "base_goals": 3.3069444444444445,
+    "base_goals_std": 2.769668371087497,
     "dispersion_k": 3.0,
-    "base_draw_rate": 0.11420612813370473,
-    "draw_elo_sensitivity": 0.0027868905690066697,
+    "base_draw_rate": 0.11388888888888889,
+    "draw_elo_sensitivity": 0.0027583966309502757,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.6228848321895062,
-      "coef_linear": -0.0027868905690066697,
-      "coef_quadratic": -6.2999012696664505e-06
+      "intercept": -1.6284895184848296,
+      "coef_linear": -0.0027583966309502757,
+      "coef_quadratic": -6.124074559635861e-06
     },
-    "margin_elo_slope": 0.004655177234195773,
-    "margin_elo_intercept": 3.029649120275696,
+    "margin_elo_slope": 0.004628111939591454,
+    "margin_elo_intercept": 3.0317214251618645,
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
-        "base_goals": 3.064885496183206,
-        "dispersion_k": 4.222192392564119,
-        "base_draw_rate": 0.11450381679389313
+        "base_goals": 3.102272727272727,
+        "dispersion_k": 4.076707083599233,
+        "base_draw_rate": 0.11363636363636363
       },
       "2": {
         "base_goals": 3.425438596491228,

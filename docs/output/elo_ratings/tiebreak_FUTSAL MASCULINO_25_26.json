@@ -112,8 +112,8 @@
       "tie_points": 4,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Automação e Sistemas de Produção",
-        "Design"
+        "Design",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -297,7 +297,7 @@
         "golos_marcados": 29
       },
       "rank_in_tiebreak": 1,
-      "final_position": 4
+      "final_position": 5
     },
     "1ª Divisão::Bioquímica": {
       "event_id": 1,
@@ -328,7 +328,7 @@
         "golos_marcados": 32
       },
       "rank_in_tiebreak": 2,
-      "final_position": 5
+      "final_position": 6
     },
     "2ª Divisão - Grupo A::Eng. Informática": {
       "event_id": 2,
@@ -399,8 +399,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "Automação e Sistemas de Produção",
-        "Design"
+        "Design",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -430,8 +430,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "Automação e Sistemas de Produção",
-        "Design"
+        "Design",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",

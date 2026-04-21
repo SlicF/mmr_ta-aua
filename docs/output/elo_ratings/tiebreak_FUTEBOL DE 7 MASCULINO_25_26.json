@@ -62,8 +62,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Ciências Biomédicas",
-        "Eng. Química"
+        "Eng. Química",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -73,19 +73,19 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
       "standings": [
         {
-          "team": "Ciências Biomédicas",
+          "team": "Gestão",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 15,
-            "golos_marcados": 32
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 3,
+            "golos_marcados_h2h": 4,
+            "diferenca_golos": 19,
+            "golos_marcados": 30
           }
         },
         {
@@ -94,8 +94,8 @@
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
+            "diferenca_golos_h2h": -3,
+            "golos_marcados_h2h": 1,
             "diferenca_golos": 12,
             "golos_marcados": 25
           }
@@ -167,15 +167,15 @@
       "rank_in_tiebreak": 2,
       "final_position": 5
     },
-    "2ª Divisão - Grupo B::Ciências Biomédicas": {
+    "2ª Divisão - Grupo B::Gestão": {
       "event_id": 2,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Ciências Biomédicas",
+      "team": "Gestão",
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Ciências Biomédicas",
-        "Eng. Química"
+        "Eng. Química",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -185,15 +185,15 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
       "criteria_values": {
         "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 15,
-        "golos_marcados": 32
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 3,
+        "golos_marcados_h2h": 4,
+        "diferenca_golos": 19,
+        "golos_marcados": 30
       },
       "rank_in_tiebreak": 1,
       "final_position": 3
@@ -205,8 +205,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Ciências Biomédicas",
-        "Eng. Química"
+        "Eng. Química",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -216,13 +216,13 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
+        "diferenca_golos_h2h": -3,
+        "golos_marcados_h2h": 1,
         "diferenca_golos": 12,
         "golos_marcados": 25
       },
