@@ -1,0 +1,187 @@
+﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
+Administração Pública,LM1:Línguas e Relações Empresariais|LM2:Física,LM1,Línguas e Relações Empresariais,37.7181,0.0000,62.2819,LM2,Física,71.1821,0.0000,28.8179,51.0100,34.8951
+Administração Pública,LM1:Eng. Biomédica|LM2:Física,LM1,Eng. Biomédica,65.5738,0.0000,34.4262,LM2,Física,69.8957,0.0000,30.1043,6.7100,54.3964
+Administração Pública,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,56.4103,0.0000,43.5897,LM2,Física,67.3077,0.0000,32.6923,4.6800,45.0855
+Administração Pública,LM1:Tecnologias de Informação|LM2:Física,LM1,Tecnologias de Informação,41.3994,0.0000,58.6006,LM2,Física,62.3907,0.0000,37.6093,3.4300,33.8192
+Administração Pública,LM1:Ciências do Mar|LM2:Física,LM1,Ciências do Mar,39.5498,0.0000,60.4502,LM2,Física,66.2379,0.0000,33.7621,3.1100,33.7621
+Administração Pública,LM1:Línguas e Relações Empresariais|LM2:Eng. Física,LM1,Línguas e Relações Empresariais,32.8125,0.0000,67.1875,LM2,Eng. Física,82.2917,0.0000,17.7083,1.9200,35.4167
+Administração Pública,LM1:Gestão e Planeamento em Turismo|LM2:Física,LM1,Gestão e Planeamento em Turismo,44.4444,0.0000,55.5556,LM2,Física,68.5185,0.0000,31.4815,0.5400,38.8889
+Administração Pública,LM1:Línguas e Relações Empresariais|LM2:Eng. Civil,LM1,Línguas e Relações Empresariais,38.2353,0.0000,61.7647,LM2,Eng. Civil,94.1176,0.0000,5.8824,0.3400,44.1176
+Administração Pública,LM1:Eng. Biomédica|LM2:Eng. Física,LM1,Eng. Biomédica,60.7143,0.0000,39.2857,LM2,Eng. Física,85.7143,0.0000,14.2857,0.2800,57.1429
+Administração Pública,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,42.1053,0.0000,57.8947,LM2,Eng. Física,89.4737,0.0000,10.5263,0.1900,42.1053
+Administração Pública,LM1:Línguas e Relações Empresariais|LM2:Contabilidade,LM1,Línguas e Relações Empresariais,35.2941,0.0000,64.7059,LM2,Contabilidade,94.1176,0.0000,5.8824,0.1700,35.2941
+Administração Pública,LM1:Eng. Computadores e Telemática|LM2:Eng. Física,LM1,Eng. Computadores e Telemática,64.2857,0.0000,35.7143,LM2,Eng. Física,92.8571,0.0000,7.1429,0.1400,64.2857
+Administração Pública,LM1:Ciências do Mar|LM2:Eng. Física,LM1,Ciências do Mar,46.1538,0.0000,53.8462,LM2,Eng. Física,92.3077,0.0000,7.6923,0.1300,46.1538
+Administração Pública,LM1:Tecnologias de Informação|LM2:Eng. Civil,LM1,Tecnologias de Informação,75.0000,0.0000,25.0000,LM2,Eng. Civil,100.0000,0.0000,0.0000,0.0400,75.0000
+Administração Pública,LM1:Eng. Computadores e Telemática|LM2:Eng. Civil,LM1,Eng. Computadores e Telemática,33.3333,0.0000,66.6667,LM2,Eng. Civil,66.6667,0.0000,33.3333,0.0300,33.3333
+Administração Pública,LM1:Ciências do Mar|LM2:Contabilidade,LM1,Ciências do Mar,0.0000,0.0000,100.0000,LM2,Contabilidade,100.0000,0.0000,0.0000,0.0200,0.0000
+Administração Pública,LM1:Gestão e Planeamento em Turismo|LM2:Contabilidade,LM1,Gestão e Planeamento em Turismo,0.0000,0.0000,100.0000,LM2,Contabilidade,100.0000,0.0000,0.0000,0.0100,0.0000
+Administração Pública,LM1:Eng. Biomédica|LM2:Eng. Civil,LM1,Eng. Biomédica,0.0000,0.0000,100.0000,LM2,Eng. Civil,100.0000,0.0000,0.0000,0.0100,0.0000
+Administração Pública,LM1:Tecnologias de Informação|LM2:Contabilidade,LM1,Tecnologias de Informação,0.0000,0.0000,100.0000,LM2,Contabilidade,100.0000,0.0000,0.0000,0.0100,0.0000
+Administração Pública,LM1:Gestão e Planeamento em Turismo|LM2:Eng. Física,LM1,Gestão e Planeamento em Turismo,100.0000,0.0000,0.0000,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0100,100.0000
+Administração Pública,LM1:Eng. Biomédica|LM2:Contabilidade,LM1,Eng. Biomédica,0.0000,0.0000,100.0000,LM2,Contabilidade,100.0000,0.0000,0.0000,0.0100,0.0000
+Administração Pública,LM1:Música|LM2:Física,LM1,Música,100.0000,0.0000,0.0000,LM2,Física,100.0000,0.0000,0.0000,0.0100,100.0000
+Bioquímica,LM1:Línguas e Relações Empresariais|LM2:Física,LM1,Línguas e Relações Empresariais,46.8278,0.0000,53.1722,LM2,Física,75.2266,0.0000,24.7734,3.3100,43.2024
+Bioquímica,LM1:Eng. Biomédica|LM2:Física,LM1,Eng. Biomédica,68.5185,0.0000,31.4815,LM2,Física,81.4815,0.0000,18.5185,0.5400,66.6667
+Bioquímica,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,80.5556,0.0000,19.4444,LM2,Física,83.3333,0.0000,16.6667,0.3600,69.4444
+Bioquímica,LM1:Tecnologias de Informação|LM2:Física,LM1,Tecnologias de Informação,52.0000,0.0000,48.0000,LM2,Física,88.0000,0.0000,12.0000,0.2500,52.0000
+Bioquímica,LM1:Ciências do Mar|LM2:Física,LM1,Ciências do Mar,40.9091,0.0000,59.0909,LM2,Física,63.6364,0.0000,36.3636,0.2200,27.2727
+Bioquímica,LM1:Línguas e Relações Empresariais|LM2:Eng. Física,LM1,Línguas e Relações Empresariais,53.8462,0.0000,46.1538,LM2,Eng. Física,100.0000,0.0000,0.0000,0.1300,53.8462
+Bioquímica,LM1:Eng. Computadores e Telemática|LM2:Eng. Física,LM1,Eng. Computadores e Telemática,66.6667,0.0000,33.3333,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0300,66.6667
+Bioquímica,LM1:Línguas e Relações Empresariais|LM2:Contabilidade,LM1,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,LM2,Contabilidade,100.0000,0.0000,0.0000,0.0200,0.0000
+Bioquímica,LM1:Eng. Biomédica|LM2:Eng. Física,LM1,Eng. Biomédica,100.0000,0.0000,0.0000,LM2,Eng. Física,50.0000,0.0000,50.0000,0.0200,50.0000
+Bioquímica,LM1:Gestão e Planeamento em Turismo|LM2:Física,LM1,Gestão e Planeamento em Turismo,100.0000,0.0000,0.0000,LM2,Física,50.0000,0.0000,50.0000,0.0200,50.0000
+Bioquímica,LM1:Ciências do Mar|LM2:Eng. Física,LM1,Ciências do Mar,100.0000,0.0000,0.0000,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0100,100.0000
+Bioquímica,LM1:Tecnologias de Informação|LM2:Eng. Civil,LM1,Tecnologias de Informação,100.0000,0.0000,0.0000,LM2,Eng. Civil,100.0000,0.0000,0.0000,0.0100,100.0000
+Bioquímica,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,0.0000,0.0000,100.0000,LM2,Eng. Física,0.0000,0.0000,100.0000,0.0100,0.0000
+Bioquímica,LM1:Línguas e Relações Empresariais|LM2:Eng. Civil,LM1,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,LM2,Eng. Civil,100.0000,0.0000,0.0000,0.0100,0.0000
+Ciências Biomédicas,LM1:Línguas e Relações Empresariais|LM2:Física,LM1,Línguas e Relações Empresariais,29.4574,0.0000,70.5426,LM2,Física,67.0543,0.0000,32.9457,2.5800,26.3566
+Ciências Biomédicas,LM1:Eng. Biomédica|LM2:Física,LM1,Eng. Biomédica,50.0000,0.0000,50.0000,LM2,Física,53.1250,0.0000,46.8750,0.3200,46.8750
+Ciências Biomédicas,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,44.4444,0.0000,55.5556,LM2,Física,81.4815,0.0000,18.5185,0.2700,51.8519
+Ciências Biomédicas,LM1:Tecnologias de Informação|LM2:Física,LM1,Tecnologias de Informação,33.3333,0.0000,66.6667,LM2,Física,50.0000,0.0000,50.0000,0.1800,22.2222
+Ciências Biomédicas,LM1:Ciências do Mar|LM2:Física,LM1,Ciências do Mar,40.0000,0.0000,60.0000,LM2,Física,73.3333,0.0000,26.6667,0.1500,40.0000
+Ciências Biomédicas,LM1:Eng. Biomédica|LM2:Eng. Civil,LM1,Eng. Biomédica,60.0000,0.0000,40.0000,LM2,Eng. Civil,60.0000,0.0000,40.0000,0.0500,60.0000
+Ciências Biomédicas,LM1:Gestão e Planeamento em Turismo|LM2:Física,LM1,Gestão e Planeamento em Turismo,25.0000,0.0000,75.0000,LM2,Física,50.0000,0.0000,50.0000,0.0400,25.0000
+Ciências Biomédicas,LM1:Línguas e Relações Empresariais|LM2:Eng. Física,LM1,Línguas e Relações Empresariais,25.0000,0.0000,75.0000,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0400,25.0000
+Ciências Biomédicas,LM1:Línguas e Relações Empresariais|LM2:Eng. Civil,LM1,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,LM2,Eng. Civil,100.0000,0.0000,0.0000,0.0200,0.0000
+Ciências Biomédicas,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,100.0000,0.0000,0.0000,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0200,100.0000
+Ciências do Mar,LM1:Administração Pública|LM3:Física,LM1,Administração Pública,60.4502,0.0000,39.5498,LM3,Física,77.4920,0.0000,22.5080,3.1100,50.8039
+Ciências do Mar,LM1:Fisioterapia|LM3:Física,LM1,Fisioterapia,46.6667,0.0000,53.3333,LM3,Física,85.3333,0.0000,14.6667,0.7500,45.3333
+Ciências do Mar,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,59.0909,0.0000,40.9091,LM3,Física,81.8182,0.0000,18.1818,0.2200,54.5455
+Ciências do Mar,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,60.0000,0.0000,40.0000,LM3,Física,66.6667,0.0000,33.3333,0.1500,46.6667
+Ciências do Mar,LM1:Administração Pública|LM3:Eng. Física,LM1,Administração Pública,53.8462,0.0000,46.1538,LM3,Eng. Física,100.0000,0.0000,0.0000,0.1300,53.8462
+Ciências do Mar,LM1:Fisioterapia|LM3:Eng. Física,LM1,Fisioterapia,25.0000,0.0000,75.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0400,25.0000
+Ciências do Mar,LM1:Administração Pública|LM3:Contabilidade,LM1,Administração Pública,100.0000,0.0000,0.0000,LM3,Contabilidade,100.0000,0.0000,0.0000,0.0200,100.0000
+Ciências do Mar,LM1:Bioquímica|LM3:Eng. Física,LM1,Bioquímica,0.0000,0.0000,100.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0100,0.0000
+Contabilidade,LM2:Administração Pública|LM3:Línguas e Relações Empresariais,LM2,Administração Pública,5.8824,0.0000,94.1176,LM3,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,0.1700,0.0000
+Contabilidade,LM2:Bioquímica|LM3:Línguas e Relações Empresariais,LM2,Bioquímica,0.0000,0.0000,100.0000,LM3,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,0.0200,0.0000
+Contabilidade,LM2:Fisioterapia|LM3:Línguas e Relações Empresariais,LM2,Fisioterapia,0.0000,0.0000,100.0000,LM3,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,0.0200,0.0000
+Contabilidade,LM2:Administração Pública|LM3:Ciências do Mar,LM2,Administração Pública,0.0000,0.0000,100.0000,LM3,Ciências do Mar,0.0000,0.0000,100.0000,0.0200,0.0000
+Contabilidade,LM2:Administração Pública|LM3:Gestão e Planeamento em Turismo,LM2,Administração Pública,0.0000,0.0000,100.0000,LM3,Gestão e Planeamento em Turismo,0.0000,0.0000,100.0000,0.0100,0.0000
+Contabilidade,LM2:Fisioterapia|LM3:Eng. Biomédica,LM2,Fisioterapia,0.0000,0.0000,100.0000,LM3,Eng. Biomédica,0.0000,0.0000,100.0000,0.0100,0.0000
+Contabilidade,LM2:Administração Pública|LM3:Tecnologias de Informação,LM2,Administração Pública,0.0000,0.0000,100.0000,LM3,Tecnologias de Informação,0.0000,0.0000,100.0000,0.0100,0.0000
+Contabilidade,LM2:Administração Pública|LM3:Eng. Biomédica,LM2,Administração Pública,0.0000,0.0000,100.0000,LM3,Eng. Biomédica,0.0000,0.0000,100.0000,0.0100,0.0000
+Eng. Biomédica,LM1:Administração Pública|LM3:Física,LM1,Administração Pública,34.4262,0.0000,65.5738,LM3,Física,52.9061,0.0000,47.0939,6.7100,22.6528
+Eng. Biomédica,LM1:Fisioterapia|LM3:Física,LM1,Fisioterapia,19.6721,0.0000,80.3279,LM3,Física,50.8197,0.0000,49.1803,1.8300,16.3934
+Eng. Biomédica,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,31.4815,0.0000,68.5185,LM3,Física,50.0000,0.0000,50.0000,0.5400,16.6667
+Eng. Biomédica,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,50.0000,0.0000,50.0000,LM3,Física,43.7500,0.0000,56.2500,0.3200,25.0000
+Eng. Biomédica,LM1:Administração Pública|LM3:Eng. Física,LM1,Administração Pública,39.2857,0.0000,60.7143,LM3,Eng. Física,75.0000,0.0000,25.0000,0.2800,32.1429
+Eng. Biomédica,LM1:Fisioterapia|LM3:Eng. Física,LM1,Fisioterapia,33.3333,0.0000,66.6667,LM3,Eng. Física,77.7778,0.0000,22.2222,0.0900,33.3333
+Eng. Biomédica,LM1:Ciências Biomédicas|LM3:Eng. Civil,LM1,Ciências Biomédicas,40.0000,0.0000,60.0000,LM3,Eng. Civil,80.0000,0.0000,20.0000,0.0500,40.0000
+Eng. Biomédica,LM1:Fisioterapia|LM3:Eng. Civil,LM1,Fisioterapia,0.0000,0.0000,100.0000,LM3,Eng. Civil,100.0000,0.0000,0.0000,0.0200,0.0000
+Eng. Biomédica,LM1:Bioquímica|LM3:Eng. Física,LM1,Bioquímica,0.0000,0.0000,100.0000,LM3,Eng. Física,50.0000,0.0000,50.0000,0.0200,0.0000
+Eng. Biomédica,LM1:Administração Pública|LM3:Eng. Civil,LM1,Administração Pública,100.0000,0.0000,0.0000,LM3,Eng. Civil,100.0000,0.0000,0.0000,0.0100,100.0000
+Eng. Biomédica,LM1:Fisioterapia|LM3:Contabilidade,LM1,Fisioterapia,100.0000,0.0000,0.0000,LM3,Contabilidade,100.0000,0.0000,0.0000,0.0100,100.0000
+Eng. Biomédica,LM1:Administração Pública|LM3:Contabilidade,LM1,Administração Pública,100.0000,0.0000,0.0000,LM3,Contabilidade,100.0000,0.0000,0.0000,0.0100,100.0000
+Eng. Civil,LM2:Administração Pública|LM3:Línguas e Relações Empresariais,LM2,Administração Pública,5.8824,0.0000,94.1176,LM3,Línguas e Relações Empresariais,20.5882,0.0000,79.4118,0.3400,2.9412
+Eng. Civil,LM2:Fisioterapia|LM3:Línguas e Relações Empresariais,LM2,Fisioterapia,10.0000,0.0000,90.0000,LM3,Línguas e Relações Empresariais,10.0000,0.0000,90.0000,0.1000,10.0000
+Eng. Civil,LM2:Ciências Biomédicas|LM3:Eng. Biomédica,LM2,Ciências Biomédicas,40.0000,0.0000,60.0000,LM3,Eng. Biomédica,20.0000,0.0000,80.0000,0.0500,0.0000
+Eng. Civil,LM2:Administração Pública|LM3:Tecnologias de Informação,LM2,Administração Pública,0.0000,0.0000,100.0000,LM3,Tecnologias de Informação,0.0000,0.0000,100.0000,0.0400,0.0000
+Eng. Civil,LM2:Administração Pública|LM3:Eng. Computadores e Telemática,LM2,Administração Pública,33.3333,0.0000,66.6667,LM3,Eng. Computadores e Telemática,0.0000,0.0000,100.0000,0.0300,0.0000
+Eng. Civil,LM2:Fisioterapia|LM3:Eng. Biomédica,LM2,Fisioterapia,0.0000,0.0000,100.0000,LM3,Eng. Biomédica,0.0000,0.0000,100.0000,0.0200,0.0000
+Eng. Civil,LM2:Ciências Biomédicas|LM3:Línguas e Relações Empresariais,LM2,Ciências Biomédicas,0.0000,0.0000,100.0000,LM3,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,0.0200,0.0000
+Eng. Civil,LM2:Bioquímica|LM3:Tecnologias de Informação,LM2,Bioquímica,0.0000,0.0000,100.0000,LM3,Tecnologias de Informação,0.0000,0.0000,100.0000,0.0100,0.0000
+Eng. Civil,LM2:Administração Pública|LM3:Eng. Biomédica,LM2,Administração Pública,0.0000,0.0000,100.0000,LM3,Eng. Biomédica,0.0000,0.0000,100.0000,0.0100,0.0000
+Eng. Civil,LM2:Bioquímica|LM3:Línguas e Relações Empresariais,LM2,Bioquímica,0.0000,0.0000,100.0000,LM3,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,0.0100,0.0000
+Eng. Civil,LM2:Fisioterapia|LM3:Eng. Computadores e Telemática,LM2,Fisioterapia,0.0000,0.0000,100.0000,LM3,Eng. Computadores e Telemática,0.0000,0.0000,100.0000,0.0100,0.0000
+Eng. Computadores e Telemática,LM1:Administração Pública|LM3:Física,LM1,Administração Pública,43.5897,0.0000,56.4103,LM3,Física,67.7350,0.0000,32.2650,4.6800,34.8291
+Eng. Computadores e Telemática,LM1:Fisioterapia|LM3:Física,LM1,Fisioterapia,28.5714,0.0000,71.4286,LM3,Física,69.6429,0.0000,30.3571,1.1200,26.7857
+Eng. Computadores e Telemática,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,19.4444,0.0000,80.5556,LM3,Física,61.1111,0.0000,38.8889,0.3600,13.8889
+Eng. Computadores e Telemática,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,55.5556,0.0000,44.4444,LM3,Física,74.0741,0.0000,25.9259,0.2700,44.4444
+Eng. Computadores e Telemática,LM1:Administração Pública|LM3:Eng. Física,LM1,Administração Pública,35.7143,0.0000,64.2857,LM3,Eng. Física,85.7143,0.0000,14.2857,0.1400,35.7143
+Eng. Computadores e Telemática,LM1:Fisioterapia|LM3:Eng. Física,LM1,Fisioterapia,0.0000,0.0000,100.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0600,0.0000
+Eng. Computadores e Telemática,LM1:Administração Pública|LM3:Eng. Civil,LM1,Administração Pública,66.6667,0.0000,33.3333,LM3,Eng. Civil,100.0000,0.0000,0.0000,0.0300,66.6667
+Eng. Computadores e Telemática,LM1:Bioquímica|LM3:Eng. Física,LM1,Bioquímica,33.3333,0.0000,66.6667,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0300,33.3333
+Eng. Computadores e Telemática,LM1:Fisioterapia|LM3:Eng. Civil,LM1,Fisioterapia,0.0000,0.0000,100.0000,LM3,Eng. Civil,100.0000,0.0000,0.0000,0.0100,0.0000
+Eng. Física,LM2:Administração Pública|LM3:Línguas e Relações Empresariais,LM2,Administração Pública,17.7083,0.0000,82.2917,LM3,Línguas e Relações Empresariais,11.9792,0.0000,88.0208,1.9200,2.6042
+Eng. Física,LM2:Fisioterapia|LM3:Línguas e Relações Empresariais,LM2,Fisioterapia,14.0000,0.0000,86.0000,LM3,Línguas e Relações Empresariais,14.0000,0.0000,86.0000,0.5000,6.0000
+Eng. Física,LM2:Administração Pública|LM3:Eng. Biomédica,LM2,Administração Pública,14.2857,0.0000,85.7143,LM3,Eng. Biomédica,25.0000,0.0000,75.0000,0.2800,10.7143
+Eng. Física,LM2:Administração Pública|LM3:Tecnologias de Informação,LM2,Administração Pública,10.5263,0.0000,89.4737,LM3,Tecnologias de Informação,10.5263,0.0000,89.4737,0.1900,5.2632
+Eng. Física,LM2:Administração Pública|LM3:Eng. Computadores e Telemática,LM2,Administração Pública,7.1429,0.0000,92.8571,LM3,Eng. Computadores e Telemática,14.2857,0.0000,85.7143,0.1400,0.0000
+Eng. Física,LM2:Administração Pública|LM3:Ciências do Mar,LM2,Administração Pública,7.6923,0.0000,92.3077,LM3,Ciências do Mar,0.0000,0.0000,100.0000,0.1300,0.0000
+Eng. Física,LM2:Bioquímica|LM3:Línguas e Relações Empresariais,LM2,Bioquímica,0.0000,0.0000,100.0000,LM3,Línguas e Relações Empresariais,7.6923,0.0000,92.3077,0.1300,0.0000
+Eng. Física,LM2:Fisioterapia|LM3:Eng. Biomédica,LM2,Fisioterapia,0.0000,0.0000,100.0000,LM3,Eng. Biomédica,22.2222,0.0000,77.7778,0.0900,0.0000
+Eng. Física,LM2:Fisioterapia|LM3:Tecnologias de Informação,LM2,Fisioterapia,0.0000,0.0000,100.0000,LM3,Tecnologias de Informação,0.0000,0.0000,100.0000,0.0600,0.0000
+Eng. Física,LM2:Fisioterapia|LM3:Eng. Computadores e Telemática,LM2,Fisioterapia,0.0000,0.0000,100.0000,LM3,Eng. Computadores e Telemática,0.0000,0.0000,100.0000,0.0600,0.0000
+Eng. Física,LM2:Ciências Biomédicas|LM3:Línguas e Relações Empresariais,LM2,Ciências Biomédicas,0.0000,0.0000,100.0000,LM3,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,0.0400,0.0000
+Eng. Física,LM2:Fisioterapia|LM3:Ciências do Mar,LM2,Fisioterapia,0.0000,0.0000,100.0000,LM3,Ciências do Mar,0.0000,0.0000,100.0000,0.0400,0.0000
+Eng. Física,LM2:Bioquímica|LM3:Eng. Computadores e Telemática,LM2,Bioquímica,0.0000,0.0000,100.0000,LM3,Eng. Computadores e Telemática,0.0000,0.0000,100.0000,0.0300,0.0000
+Eng. Física,LM2:Bioquímica|LM3:Eng. Biomédica,LM2,Bioquímica,50.0000,0.0000,50.0000,LM3,Eng. Biomédica,50.0000,0.0000,50.0000,0.0200,50.0000
+Eng. Física,LM2:Ciências Biomédicas|LM3:Tecnologias de Informação,LM2,Ciências Biomédicas,0.0000,0.0000,100.0000,LM3,Tecnologias de Informação,0.0000,0.0000,100.0000,0.0200,0.0000
+Eng. Física,LM2:Bioquímica|LM3:Ciências do Mar,LM2,Bioquímica,0.0000,0.0000,100.0000,LM3,Ciências do Mar,0.0000,0.0000,100.0000,0.0100,0.0000
+Eng. Física,LM2:Bioquímica|LM3:Tecnologias de Informação,LM2,Bioquímica,100.0000,0.0000,0.0000,LM3,Tecnologias de Informação,0.0000,0.0000,100.0000,0.0100,0.0000
+Eng. Física,LM2:Administração Pública|LM3:Gestão e Planeamento em Turismo,LM2,Administração Pública,0.0000,0.0000,100.0000,LM3,Gestão e Planeamento em Turismo,0.0000,0.0000,100.0000,0.0100,0.0000
+Fisioterapia,LM1:Línguas e Relações Empresariais|LM2:Física,LM1,Línguas e Relações Empresariais,54.2270,0.0000,45.7730,LM2,Física,81.4166,0.0000,18.5834,13.1300,50.4950
+Fisioterapia,LM1:Eng. Biomédica|LM2:Física,LM1,Eng. Biomédica,80.3279,0.0000,19.6721,LM2,Física,84.1530,0.0000,15.8470,1.8300,69.9454
+Fisioterapia,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,71.4286,0.0000,28.5714,LM2,Física,91.0714,0.0000,8.9286,1.1200,66.9643
+Fisioterapia,LM1:Ciências do Mar|LM2:Física,LM1,Ciências do Mar,53.3333,0.0000,46.6667,LM2,Física,74.6667,0.0000,25.3333,0.7500,45.3333
+Fisioterapia,LM1:Tecnologias de Informação|LM2:Física,LM1,Tecnologias de Informação,57.5342,0.0000,42.4658,LM2,Física,87.6712,0.0000,12.3288,0.7300,54.7945
+Fisioterapia,LM1:Línguas e Relações Empresariais|LM2:Eng. Física,LM1,Línguas e Relações Empresariais,46.0000,0.0000,54.0000,LM2,Eng. Física,86.0000,0.0000,14.0000,0.5000,44.0000
+Fisioterapia,LM1:Gestão e Planeamento em Turismo|LM2:Física,LM1,Gestão e Planeamento em Turismo,75.0000,0.0000,25.0000,LM2,Física,83.3333,0.0000,16.6667,0.1200,66.6667
+Fisioterapia,LM1:Línguas e Relações Empresariais|LM2:Eng. Civil,LM1,Línguas e Relações Empresariais,70.0000,0.0000,30.0000,LM2,Eng. Civil,90.0000,0.0000,10.0000,0.1000,60.0000
+Fisioterapia,LM1:Eng. Biomédica|LM2:Eng. Física,LM1,Eng. Biomédica,66.6667,0.0000,33.3333,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0900,66.6667
+Fisioterapia,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,66.6667,0.0000,33.3333,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0600,66.6667
+Fisioterapia,LM1:Eng. Computadores e Telemática|LM2:Eng. Física,LM1,Eng. Computadores e Telemática,100.0000,0.0000,0.0000,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0600,100.0000
+Fisioterapia,LM1:Ciências do Mar|LM2:Eng. Física,LM1,Ciências do Mar,75.0000,0.0000,25.0000,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0400,75.0000
+Fisioterapia,LM1:Eng. Biomédica|LM2:Eng. Civil,LM1,Eng. Biomédica,100.0000,0.0000,0.0000,LM2,Eng. Civil,100.0000,0.0000,0.0000,0.0200,100.0000
+Fisioterapia,LM1:Línguas e Relações Empresariais|LM2:Contabilidade,LM1,Línguas e Relações Empresariais,0.0000,0.0000,100.0000,LM2,Contabilidade,100.0000,0.0000,0.0000,0.0200,0.0000
+Fisioterapia,LM1:Eng. Biomédica|LM2:Contabilidade,LM1,Eng. Biomédica,0.0000,0.0000,100.0000,LM2,Contabilidade,100.0000,0.0000,0.0000,0.0100,0.0000
+Fisioterapia,LM1:Eng. Computadores e Telemática|LM2:Eng. Civil,LM1,Eng. Computadores e Telemática,100.0000,0.0000,0.0000,LM2,Eng. Civil,100.0000,0.0000,0.0000,0.0100,100.0000
+Física,LM2:Administração Pública|LM3:Línguas e Relações Empresariais,LM2,Administração Pública,28.8179,0.0000,71.1821,LM3,Línguas e Relações Empresariais,20.6038,0.0000,79.3962,51.0100,9.3119
+Física,LM2:Fisioterapia|LM3:Línguas e Relações Empresariais,LM2,Fisioterapia,18.5834,0.0000,81.4166,LM3,Línguas e Relações Empresariais,23.1531,0.0000,76.8469,13.1300,7.3115
+Física,LM2:Administração Pública|LM3:Eng. Biomédica,LM2,Administração Pública,30.1043,0.0000,69.8957,LM3,Eng. Biomédica,47.0939,0.0000,52.9061,6.7100,22.9508
+Física,LM2:Administração Pública|LM3:Eng. Computadores e Telemática,LM2,Administração Pública,32.6923,0.0000,67.3077,LM3,Eng. Computadores e Telemática,32.2650,0.0000,67.7350,4.6800,20.0855
+Física,LM2:Administração Pública|LM3:Tecnologias de Informação,LM2,Administração Pública,37.6093,0.0000,62.3907,LM3,Tecnologias de Informação,27.9883,0.0000,72.0117,3.4300,14.2857
+Física,LM2:Bioquímica|LM3:Línguas e Relações Empresariais,LM2,Bioquímica,24.7734,0.0000,75.2266,LM3,Línguas e Relações Empresariais,22.9607,0.0000,77.0393,3.3100,8.7613
+Física,LM2:Administração Pública|LM3:Ciências do Mar,LM2,Administração Pública,33.7621,0.0000,66.2379,LM3,Ciências do Mar,22.5080,0.0000,77.4920,3.1100,15.4341
+Física,LM2:Ciências Biomédicas|LM3:Línguas e Relações Empresariais,LM2,Ciências Biomédicas,32.9457,0.0000,67.0543,LM3,Línguas e Relações Empresariais,21.7054,0.0000,78.2946,2.5800,12.0155
+Física,LM2:Fisioterapia|LM3:Eng. Biomédica,LM2,Fisioterapia,15.8470,0.0000,84.1530,LM3,Eng. Biomédica,49.1803,0.0000,50.8197,1.8300,13.6612
+Física,LM2:Fisioterapia|LM3:Eng. Computadores e Telemática,LM2,Fisioterapia,8.9286,0.0000,91.0714,LM3,Eng. Computadores e Telemática,30.3571,0.0000,69.6429,1.1200,6.2500
+Física,LM2:Fisioterapia|LM3:Ciências do Mar,LM2,Fisioterapia,25.3333,0.0000,74.6667,LM3,Ciências do Mar,14.6667,0.0000,85.3333,0.7500,9.3333
+Física,LM2:Fisioterapia|LM3:Tecnologias de Informação,LM2,Fisioterapia,12.3288,0.0000,87.6712,LM3,Tecnologias de Informação,23.2877,0.0000,76.7123,0.7300,4.1096
+Física,LM2:Administração Pública|LM3:Gestão e Planeamento em Turismo,LM2,Administração Pública,31.4815,0.0000,68.5185,LM3,Gestão e Planeamento em Turismo,24.0741,0.0000,75.9259,0.5400,12.9630
+Física,LM2:Bioquímica|LM3:Eng. Biomédica,LM2,Bioquímica,18.5185,0.0000,81.4815,LM3,Eng. Biomédica,50.0000,0.0000,50.0000,0.5400,16.6667
+Física,LM2:Bioquímica|LM3:Eng. Computadores e Telemática,LM2,Bioquímica,16.6667,0.0000,83.3333,LM3,Eng. Computadores e Telemática,38.8889,0.0000,61.1111,0.3600,16.6667
+Física,LM2:Ciências Biomédicas|LM3:Eng. Biomédica,LM2,Ciências Biomédicas,46.8750,0.0000,53.1250,LM3,Eng. Biomédica,56.2500,0.0000,43.7500,0.3200,28.1250
+Física,LM2:Ciências Biomédicas|LM3:Eng. Computadores e Telemática,LM2,Ciências Biomédicas,18.5185,0.0000,81.4815,LM3,Eng. Computadores e Telemática,25.9259,0.0000,74.0741,0.2700,3.7037
+Física,LM2:Bioquímica|LM3:Tecnologias de Informação,LM2,Bioquímica,12.0000,0.0000,88.0000,LM3,Tecnologias de Informação,24.0000,0.0000,76.0000,0.2500,0.0000
+Física,LM2:Bioquímica|LM3:Ciências do Mar,LM2,Bioquímica,36.3636,0.0000,63.6364,LM3,Ciências do Mar,18.1818,0.0000,81.8182,0.2200,18.1818
+Física,LM2:Ciências Biomédicas|LM3:Tecnologias de Informação,LM2,Ciências Biomédicas,50.0000,0.0000,50.0000,LM3,Tecnologias de Informação,27.7778,0.0000,72.2222,0.1800,22.2222
+Física,LM2:Ciências Biomédicas|LM3:Ciências do Mar,LM2,Ciências Biomédicas,26.6667,0.0000,73.3333,LM3,Ciências do Mar,33.3333,0.0000,66.6667,0.1500,13.3333
+Física,LM2:Fisioterapia|LM3:Gestão e Planeamento em Turismo,LM2,Fisioterapia,16.6667,0.0000,83.3333,LM3,Gestão e Planeamento em Turismo,33.3333,0.0000,66.6667,0.1200,8.3333
+Física,LM2:Ciências Biomédicas|LM3:Gestão e Planeamento em Turismo,LM2,Ciências Biomédicas,50.0000,0.0000,50.0000,LM3,Gestão e Planeamento em Turismo,0.0000,0.0000,100.0000,0.0400,0.0000
+Física,LM2:Bioquímica|LM3:Gestão e Planeamento em Turismo,LM2,Bioquímica,50.0000,0.0000,50.0000,LM3,Gestão e Planeamento em Turismo,100.0000,0.0000,0.0000,0.0200,50.0000
+Física,LM2:Administração Pública|LM3:Música,LM2,Administração Pública,0.0000,0.0000,100.0000,LM3,Música,0.0000,0.0000,100.0000,0.0100,0.0000
+Gestão e Planeamento em Turismo,LM1:Administração Pública|LM3:Física,LM1,Administração Pública,55.5556,0.0000,44.4444,LM3,Física,75.9259,0.0000,24.0741,0.5400,48.1481
+Gestão e Planeamento em Turismo,LM1:Fisioterapia|LM3:Física,LM1,Fisioterapia,25.0000,0.0000,75.0000,LM3,Física,66.6667,0.0000,33.3333,0.1200,25.0000
+Gestão e Planeamento em Turismo,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,75.0000,0.0000,25.0000,LM3,Física,100.0000,0.0000,0.0000,0.0400,75.0000
+Gestão e Planeamento em Turismo,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,0.0000,0.0000,100.0000,LM3,Física,0.0000,0.0000,100.0000,0.0200,0.0000
+Gestão e Planeamento em Turismo,LM1:Administração Pública|LM3:Contabilidade,LM1,Administração Pública,100.0000,0.0000,0.0000,LM3,Contabilidade,100.0000,0.0000,0.0000,0.0100,100.0000
+Gestão e Planeamento em Turismo,LM1:Administração Pública|LM3:Eng. Física,LM1,Administração Pública,0.0000,0.0000,100.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0100,0.0000
+Línguas e Relações Empresariais,LM1:Administração Pública|LM3:Física,LM1,Administração Pública,62.2819,0.0000,37.7181,LM3,Física,79.3962,0.0000,20.6038,51.0100,55.7930
+Línguas e Relações Empresariais,LM1:Fisioterapia|LM3:Física,LM1,Fisioterapia,45.7730,0.0000,54.2270,LM3,Física,76.8469,0.0000,23.1531,13.1300,42.1935
+Línguas e Relações Empresariais,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,53.1722,0.0000,46.8278,LM3,Física,77.0393,0.0000,22.9607,3.3100,48.0363
+Línguas e Relações Empresariais,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,70.5426,0.0000,29.4574,LM3,Física,78.2946,0.0000,21.7054,2.5800,61.6279
+Línguas e Relações Empresariais,LM1:Administração Pública|LM3:Eng. Física,LM1,Administração Pública,67.1875,0.0000,32.8125,LM3,Eng. Física,88.0208,0.0000,11.9792,1.9200,61.9792
+Línguas e Relações Empresariais,LM1:Fisioterapia|LM3:Eng. Física,LM1,Fisioterapia,54.0000,0.0000,46.0000,LM3,Eng. Física,86.0000,0.0000,14.0000,0.5000,50.0000
+Línguas e Relações Empresariais,LM1:Administração Pública|LM3:Eng. Civil,LM1,Administração Pública,61.7647,0.0000,38.2353,LM3,Eng. Civil,79.4118,0.0000,20.5882,0.3400,52.9412
+Línguas e Relações Empresariais,LM1:Administração Pública|LM3:Contabilidade,LM1,Administração Pública,64.7059,0.0000,35.2941,LM3,Contabilidade,100.0000,0.0000,0.0000,0.1700,64.7059
+Línguas e Relações Empresariais,LM1:Bioquímica|LM3:Eng. Física,LM1,Bioquímica,46.1538,0.0000,53.8462,LM3,Eng. Física,92.3077,0.0000,7.6923,0.1300,46.1538
+Línguas e Relações Empresariais,LM1:Fisioterapia|LM3:Eng. Civil,LM1,Fisioterapia,30.0000,0.0000,70.0000,LM3,Eng. Civil,90.0000,0.0000,10.0000,0.1000,30.0000
+Línguas e Relações Empresariais,LM1:Ciências Biomédicas|LM3:Eng. Física,LM1,Ciências Biomédicas,75.0000,0.0000,25.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0400,75.0000
+Línguas e Relações Empresariais,LM1:Bioquímica|LM3:Contabilidade,LM1,Bioquímica,100.0000,0.0000,0.0000,LM3,Contabilidade,100.0000,0.0000,0.0000,0.0200,100.0000
+Línguas e Relações Empresariais,LM1:Ciências Biomédicas|LM3:Eng. Civil,LM1,Ciências Biomédicas,100.0000,0.0000,0.0000,LM3,Eng. Civil,100.0000,0.0000,0.0000,0.0200,100.0000
+Línguas e Relações Empresariais,LM1:Fisioterapia|LM3:Contabilidade,LM1,Fisioterapia,100.0000,0.0000,0.0000,LM3,Contabilidade,100.0000,0.0000,0.0000,0.0200,100.0000
+Línguas e Relações Empresariais,LM1:Bioquímica|LM3:Eng. Civil,LM1,Bioquímica,100.0000,0.0000,0.0000,LM3,Eng. Civil,100.0000,0.0000,0.0000,0.0100,100.0000
+Música,LM1:Administração Pública|LM3:Física,LM1,Administração Pública,0.0000,0.0000,100.0000,LM3,Física,100.0000,0.0000,0.0000,0.0100,0.0000
+Tecnologias de Informação,LM1:Administração Pública|LM3:Física,LM1,Administração Pública,58.6006,0.0000,41.3994,LM3,Física,72.0117,0.0000,27.9883,3.4300,51.8950
+Tecnologias de Informação,LM1:Fisioterapia|LM3:Física,LM1,Fisioterapia,42.4658,0.0000,57.5342,LM3,Física,76.7123,0.0000,23.2877,0.7300,41.0959
+Tecnologias de Informação,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,48.0000,0.0000,52.0000,LM3,Física,76.0000,0.0000,24.0000,0.2500,48.0000
+Tecnologias de Informação,LM1:Administração Pública|LM3:Eng. Física,LM1,Administração Pública,57.8947,0.0000,42.1053,LM3,Eng. Física,89.4737,0.0000,10.5263,0.1900,52.6316
+Tecnologias de Informação,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,66.6667,0.0000,33.3333,LM3,Física,72.2222,0.0000,27.7778,0.1800,55.5556
+Tecnologias de Informação,LM1:Fisioterapia|LM3:Eng. Física,LM1,Fisioterapia,33.3333,0.0000,66.6667,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0600,33.3333
+Tecnologias de Informação,LM1:Administração Pública|LM3:Eng. Civil,LM1,Administração Pública,25.0000,0.0000,75.0000,LM3,Eng. Civil,100.0000,0.0000,0.0000,0.0400,25.0000
+Tecnologias de Informação,LM1:Ciências Biomédicas|LM3:Eng. Física,LM1,Ciências Biomédicas,0.0000,0.0000,100.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0200,0.0000
+Tecnologias de Informação,LM1:Bioquímica|LM3:Eng. Civil,LM1,Bioquímica,0.0000,0.0000,100.0000,LM3,Eng. Civil,100.0000,0.0000,0.0000,0.0100,0.0000
+Tecnologias de Informação,LM1:Administração Pública|LM3:Contabilidade,LM1,Administração Pública,100.0000,0.0000,0.0000,LM3,Contabilidade,100.0000,0.0000,0.0000,0.0100,100.0000
+Tecnologias de Informação,LM1:Bioquímica|LM3:Eng. Física,LM1,Bioquímica,100.0000,0.0000,0.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0100,100.0000

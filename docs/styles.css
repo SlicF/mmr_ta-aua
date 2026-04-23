@@ -1314,7 +1314,7 @@ body {
 
 /* Ajuste específico do EGI para emblemas pequenos nos seletores */
 .team-checkbox .team-emblem[src*="EGI-07.png"] {
-  padding: 6px;
+  padding: 7px;
 }
 
 .team-color-indicator {
@@ -1416,7 +1416,7 @@ body {
 
 .bracket-container {
   overflow-x: auto;
-  padding: 20px;
+  padding: 0px;
   background: white;
   border-radius: 8px;
   margin-top: 20px;
@@ -1424,7 +1424,7 @@ body {
 
 .bracket {
   display: flex;
-  gap: 120px;
+  gap: 50px;
   min-width: 900px;
   position: relative;
   padding: 10px;
@@ -1433,16 +1433,16 @@ body {
 .bracket-round {
   display: flex;
   flex-direction: column;
-  gap: 40px;
-  min-width: 280px;
+  gap: 10px;
+  min-width: 320px;
   position: relative;
 }
 
 .bracket-round h3 {
   text-align: center;
   color: #475569;
-  margin-bottom: 30px;
-  padding: 10px;
+  margin-bottom: 0px;
+  padding: 0px;
   background: transparent;
   border-radius: 0;
   box-shadow: none;
@@ -1468,7 +1468,7 @@ body {
 }
 
 .bracket-team {
-  padding: 10px 12px;
+  padding: 5px;
   margin: 2px 0;
   border-radius: 4px;
   background: #f9fafb;
@@ -1538,15 +1538,15 @@ body {
 }
 
 .bracket-team-emblem {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 58px;
   border-radius: 6px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .bracket-team-emblem[src*="EGI-07.png"] {
-  padding: 10px;
+  padding: 11px;
   box-sizing: border-box;
 }
 
@@ -1734,8 +1734,8 @@ body {
 }
 
 .maintenance-league-table .team-emblem {
-  width: 40px;
-  height: 40px;
+  width: 64px;
+  height: 58px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -3252,13 +3252,15 @@ body {
   border: 2px solid rgba(42, 82, 152, 0.1);
   border-radius: 12px;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
   box-shadow: 0 6px 20px rgba(42, 82, 152, 0.15);
   border-color: rgba(42, 82, 152, 0.3);
 }
@@ -4638,39 +4640,37 @@ body {
   text-transform: uppercase;
   letter-spacing: 2px;
   position: relative;
-  padding-bottom: 12px;
-}
-
-.predictions-section-title::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #2a5298, transparent);
 }
 
 .predictions-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 5px 15px;
-  padding: 0px 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .predictions-stats-grid {
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    overflow-x: auto;
+  }
 }
 
 .stat-card {
   background: white;
   border: 2px solid rgba(42, 82, 152, 0.1);
   border-radius: 12px;
-  padding: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
   box-shadow: 0 6px 20px rgba(42, 82, 152, 0.15);
   border-color: rgba(42, 82, 152, 0.3);
 }
@@ -4695,11 +4695,6 @@ body {
   font-size: 0.75em;
   color: #999;
   font-style: italic;
-}
-
-/* Tabela de Previsões */
-.predictions-table-section {
-  margin-top: -20px;
 }
 
 .team-history-section {
@@ -4940,6 +4935,410 @@ body {
   border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
+/* Cenários de Playoffs e Liguilha */
+.playoff-scenarios-section {
+  margin-top: 14px;
+}
+
+#playoffScenariosContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.playoff-stage-group {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 60, 114, 0.04),
+    rgba(42, 82, 152, 0.02)
+  );
+  border: 1px solid rgba(42, 82, 152, 0.16);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.playoff-stage-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.playoff-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.82em;
+  letter-spacing: 0.2px;
+  color: #0f172a;
+  border: 1px solid rgba(42, 82, 152, 0.25);
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+}
+
+.playoff-badge.badge-gold {
+  color: #78350f;
+  border-color: rgba(245, 158, 11, 0.45);
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+}
+
+.playoff-badge.badge-silver {
+  color: #334155;
+  border-color: rgba(148, 163, 184, 0.45);
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+}
+
+.playoff-stage-prob {
+  color: #475569;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.playoff-matchups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+#playoffScenariosSection {
+  overflow-x: hidden;
+}
+
+#playoffScenariosSection .playoff-scenarios-container {
+  overflow-x: hidden;
+}
+
+#playoffScenariosSection .liguilla-matchups-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+#playoffScenariosSection .liguilla-matchups-grid > .playoff-matchup-card {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.playoff-matchup-card {
+  background: #ffffff;
+  border: 1px solid #dbe4f3;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.07);
+}
+
+.playoff-opponent-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #1e293b;
+  font-size: 0.95em;
+}
+
+.liguilla-scenario-headline {
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.liguilla-scenario-stage {
+  font-size: 0.85em;
+  font-weight: 800;
+  color: #0f172a;
+  padding: 2px 0;
+}
+
+.liguilla-scenario-prob {
+  font-size: 0.8em;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.liguilla-scenario-prob-row {
+  margin-bottom: 8px;
+}
+
+.matchup-likelihood {
+  margin-bottom: 8px;
+}
+
+.matchup-stats-text {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #475569;
+  font-size: 0.86em;
+  margin-bottom: 5px;
+}
+
+.playoff-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.playoff-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1d4ed8, #2563eb, #38bdf8);
+}
+
+.win-prob-line {
+  color: #334155;
+  font-size: 0.9em;
+  line-height: 1.2;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.playoff-scenarios-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px 0;
+  padding: 8px 10px;
+  border: 1px dashed rgba(42, 82, 152, 0.28);
+  border-radius: 999px;
+  color: #1e3a8a;
+  font-size: 0.84em;
+  font-weight: 700;
+  background: rgba(219, 234, 254, 0.55);
+}
+
+.liguilla-scenarios-group {
+  border-color: rgba(22, 163, 74, 0.22);
+  background: linear-gradient(
+    135deg,
+    rgba(22, 163, 74, 0.05),
+    rgba(34, 197, 94, 0.02)
+  );
+}
+
+.liguilla-compact-game-row {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 8px;
+  padding: 7px;
+  margin-top: 6px;
+}
+
+.liguilla-game-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74em;
+  font-weight: 700;
+  color: #1e40af;
+  background: rgba(191, 219, 254, 0.75);
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  border-radius: 999px;
+  padding: 2px 9px;
+  margin-bottom: 5px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.liguilla-game-submeta {
+  font-size: 0.78em;
+  font-weight: 600;
+  color: #475569;
+}
+
+.liguilla-stat-pill-goals {
+  color: #0f172a;
+  background: rgba(219, 234, 254, 0.95);
+  border-color: rgba(96, 165, 250, 0.4);
+  min-width: 0;
+}
+
+.liguilla-stat-pill-goals strong,
+.liguilla-stat-pill-goals span {
+  white-space: nowrap;
+}
+
+.liguilla-game-teams {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.liguilla-game-teams--opponent-only {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.liguilla-team-chip {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.78em;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.liguilla-team-chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.liguilla-team-emblem {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.liguilla-vs {
+  font-size: 0.72em;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.liguilla-game-teams--opponent-only .liguilla-vs {
+  display: none;
+}
+
+.liguilla-game-stats-compact {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.liguilla-game-probs-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.liguilla-game-goals-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.liguilla-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7em;
+  font-weight: 700;
+  color: #1e293b;
+  background: rgba(226, 232, 240, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.playoff-matchup-card .prediction-opponent-emblem {
+  width: 50px;
+  height: 46px;
+}
+
+.playoff-matchup-card .prediction-prob {
+  min-width: 52px;
+  padding: 3px 7px;
+  font-size: 0.78em;
+}
+
+@media (max-width: 768px) {
+  .playoff-stage-group {
+    padding: 10px;
+  }
+
+  .playoff-matchups-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  #playoffScenariosSection .liguilla-matchups-grid {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .playoff-matchup-card {
+    padding: 10px;
+  }
+
+  .playoff-opponent-info {
+    font-size: 0.9em;
+  }
+
+  .liguilla-scenario-headline {
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .liguilla-scenario-prob {
+    white-space: normal;
+  }
+
+  .liguilla-game-teams {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .liguilla-game-teams--opponent-only {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .liguilla-vs {
+    justify-self: center;
+  }
+
+  .liguilla-team-chip {
+    font-size: 0.74em;
+    padding: 4px 5px;
+  }
+
+  .liguilla-game-label {
+    padding: 3px 8px 2px;
+  }
+
+  .liguilla-game-submeta {
+    font-size: 0.72em;
+  }
+
+  .liguilla-team-emblem {
+    width: 18px;
+    height: 18px;
+  }
+
+  .liguilla-stat-pill {
+    font-size: 0.68em;
+    padding: 2px 6px;
+  }
+
+  .matchup-stats-text,
+  .win-prob-line,
+  .playoff-stage-prob {
+    font-size: 0.82em;
+  }
+}
+
 .no-predictions-message {
   text-align: center;
   padding: 40px 20px;
@@ -5135,7 +5534,7 @@ body {
   }
 
   .stat-card {
-    padding: 15px;
+    padding: 10px;
   }
 
   .stat-value {
@@ -5285,9 +5684,7 @@ body {
   }
 
   .predictions-stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 5px 15px;
-    padding: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 
   .stat-value {

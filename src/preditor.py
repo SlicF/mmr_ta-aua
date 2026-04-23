@@ -31,6 +31,7 @@ MELHORIAS FUTURAS SUGERIDAS:
 → Benchmark: Comparar tempos antes/depois com timeit ou time.perf_counter()
 → Tuning: Ajustar max_workers baseado no tipo de CPU (P-cores vs E-cores)
 """
+
 import math
 import random
 import json
@@ -150,6 +151,8 @@ class SimulationResult(TypedDict):
     champion_count: Dict[str, int]
     promotion_count: Dict[str, int]
     relegation_count: Dict[str, int]
+    liguilla_stats: Dict[str, Dict[str, int]]
+    liguilla_scenarios: Dict[str, Dict[str, Dict[str, Any]]]
     match_stats: Dict[str, Dict[str, int]]
     match_elo_sum: Dict[str, Dict[str, float]]
     match_score_stats: Dict[str, Dict[str, int]]
@@ -1120,7 +1123,7 @@ def parse_playoff_slots(csv_rows: List[Dict]) -> Tuple[Dict[Tuple[int, str], int
 
     slots = defaultdict(int)
     pattern = re.compile(
-        r"(\d+)[ºo]?\s*Class\.\s*(\d+)[ªa]?\s*Div\.?(?:\s*Gr\.\s*([A-Za-z0-9]+))?",
+        r"(\d+)[ºo]?\s*Class\.\s*(\d+)[ªa]?\s*Div\.?\s*(?:Gr\.\s*)?([A-Za-z0-9]+)?",
         re.IGNORECASE,
     )
 
@@ -1142,6 +1145,123 @@ def parse_playoff_slots(csv_rows: List[Dict]) -> Tuple[Dict[Tuple[int, str], int
 
     total_slots = sum(slots.values())
     return slots, total_slots
+
+
+def parse_secondary_playoff_structure(
+    csv_rows: List[Dict],
+) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
+    """Extrai os confrontos PM1 definidos no CSV.
+
+    Cada confronto é devolvido como dois descritores de slot:
+    - {"kind": "slot", "pos": <int>, "div": <int>, "grp": <str>}
+    - {"kind": "team", "name": <str>} para nomes explícitos.
+
+    Ignora placeholders de vencedor/perdedor (ex.: "Vencedor MF1"),
+    pois esses são simulados dinamicamente a partir das meias PM1.
+    """
+    pattern = re.compile(
+        r"(\d+)[ºo]?\s*Class\.\s*(\d+)[ªa]?\s*Div\.?\s*(?:Gr\.\s*)?([A-Za-z0-9]+)?",
+        re.IGNORECASE,
+    )
+
+    def parse_entry(raw_value: Any) -> Dict[str, Any] | None:
+        raw = str(raw_value or "").strip()
+        if not raw:
+            return None
+
+        upper = raw.upper()
+        if (
+            upper.startswith("VENCEDOR")
+            or upper.startswith("PERDEDOR")
+            or upper.startswith("VENCIDO")
+        ):
+            return None
+
+        match = pattern.search(raw)
+        if match:
+            return {
+                "kind": "slot",
+                "pos": int(match.group(1)),
+                "div": int(match.group(2)),
+                "grp": (match.group(3) or "").upper(),
+            }
+
+        return {"kind": "team", "name": raw}
+
+    pm1_pairs: List[Tuple[Dict[str, Any], Dict[str, Any]]] = []
+    for row in csv_rows:
+        jornada_val = str(row.get(COL_JORNADA, "")).strip().upper()
+        if not jornada_val.startswith("PM1"):
+            continue
+
+        entry_a = parse_entry(row.get(COL_EQUIPA_1, ""))
+        entry_b = parse_entry(row.get(COL_EQUIPA_2, ""))
+        if entry_a and entry_b:
+            pm1_pairs.append((entry_a, entry_b))
+
+    return pm1_pairs
+
+
+def parse_secondary_liguilla_structure(
+    csv_rows: List[Dict],
+) -> List[Dict[str, Any]]:
+    """Extrai os jogos da liguilha (LM) definidos no CSV.
+
+    A liguilha é tratada como uma mini-liga: as linhas LM do calendário são
+    convertidas em confrontos que serão simulados com empates permitidos e
+    classificação por pontos + desempates do campeonato normal.
+    """
+    pattern = re.compile(
+        r"(\d+)[ºo]?\s*Class\.\s*(\d+)[ªa]?\s*Div\.?\s*(?:Gr\.\s*)?([A-Za-z0-9]+)?",
+        re.IGNORECASE,
+    )
+
+    def parse_entry(raw_value: Any) -> Dict[str, Any] | None:
+        raw = str(raw_value or "").strip()
+        if not raw:
+            return None
+
+        upper = raw.upper()
+        if (
+            upper.startswith("VENCEDOR")
+            or upper.startswith("PERDEDOR")
+            or upper.startswith("VENCIDO")
+        ):
+            return None
+
+        match = pattern.search(raw)
+        if match:
+            return {
+                "kind": "slot",
+                "pos": int(match.group(1)),
+                "div": int(match.group(2)),
+                "grp": (match.group(3) or "").upper(),
+            }
+
+        return {"kind": "team", "name": raw}
+
+    liguilla_matches: List[Dict[str, Any]] = []
+    for row in csv_rows:
+        jornada_val = str(row.get(COL_JORNADA, "")).strip().upper()
+        if not jornada_val.startswith("LM"):
+            continue
+
+        entry_a = parse_entry(row.get(COL_EQUIPA_1, ""))
+        entry_b = parse_entry(row.get(COL_EQUIPA_2, ""))
+        if not entry_a or not entry_b:
+            continue
+
+        jornada_num = re.search(r"\d+", jornada_val)
+        liguilla_matches.append(
+            {
+                "jornada": str(row.get(COL_JORNADA, "")).strip(),
+                "order": int(jornada_num.group(0)) if jornada_num else 0,
+                "a": entry_a,
+                "b": entry_b,
+            }
+        )
+
+    return liguilla_matches
 
 
 # Normalizar nome do curso usando o mapeamento
@@ -1204,12 +1324,16 @@ def base_team(name: str) -> str:
 def calculate_real_points(
     past_matches_rows: List[Dict],
     course_mapping: Dict[str, str],
+    withdrawn_teams: Set[str] = None,
 ) -> Dict[str, int]:
     """
     Calcula os pontos reais já alcançados pelas equipas na época regular.
 
     Retorna dicionário: {team_name: real_points}
+    Jogos contra equipas desistentes são ignorados.
     """
+    if withdrawn_teams is None:
+        withdrawn_teams = set()
     real_points = defaultdict(int)
 
     for row in past_matches_rows:
@@ -1221,6 +1345,10 @@ def calculate_real_points(
 
         team_a = normalize_team_name(team_a_raw, course_mapping)
         team_b = normalize_team_name(team_b_raw, course_mapping)
+
+        # Ignorar jogos que envolvam equipas desistentes
+        if team_a in withdrawn_teams or team_b in withdrawn_teams:
+            continue
 
         golos_1_str = row.get(COL_GOLOS_1, "").strip()
         golos_2_str = row.get(COL_GOLOS_2, "").strip()
@@ -1246,6 +1374,44 @@ def calculate_real_points(
             real_points[team_b] += 1
 
     return dict(real_points)
+
+
+def extract_played_matches_for_tiebreak(
+    past_matches_rows: List[Dict],
+    course_mapping: Dict[str, str],
+    withdrawn_teams: Set[str] = None,
+) -> List[Tuple[str, str, int, int]]:
+    """Extrai jogos concluídos para desempates (h2h e critérios gerais)."""
+    if withdrawn_teams is None:
+        withdrawn_teams = set()
+
+    played_matches: List[Tuple[str, str, int, int]] = []
+
+    for row in past_matches_rows:
+        team_a_raw = row.get(COL_EQUIPA_1, "").strip()
+        team_b_raw = row.get(COL_EQUIPA_2, "").strip()
+        if not is_valid_team(team_a_raw) or not is_valid_team(team_b_raw):
+            continue
+
+        team_a = normalize_team_name(team_a_raw, course_mapping)
+        team_b = normalize_team_name(team_b_raw, course_mapping)
+        if team_a in withdrawn_teams or team_b in withdrawn_teams:
+            continue
+
+        score_a_raw = row.get(COL_GOLOS_1, "").strip()
+        score_b_raw = row.get(COL_GOLOS_2, "").strip()
+        if not score_a_raw or not score_b_raw:
+            continue
+
+        try:
+            score_a = int(float(score_a_raw))
+            score_b = int(float(score_b_raw))
+        except ValueError:
+            continue
+
+        played_matches.append((team_a, team_b, score_a, score_b))
+
+    return played_matches
 
 
 def separate_past_and_future_matches(
@@ -1490,11 +1656,11 @@ def simulate_playoffs(
     ranking: List[Tuple[str, int]],
     elo_system: CompleteTacauaEloSystem,
     score_simulator: SportScoreSimulator,
-) -> Tuple[str, List[str], List[str]]:
+) -> Tuple[str, List[str], List[str], List[Dict]]:
     """
     Simula playoffs com árvore de eliminatória.
     Top 8 entram nos playoffs (quartos, semifinais e final).
-    Retorna (campeão, [semifinalistas], [finalistas]).
+    Retorna (campeão, [semifinalistas], [finalistas], list_of_playoff_matches).
 
     IMPORTANTE: Os ELOs dos teams são MODIFICADOS durante os playoffs.
     Para não contaminar as simulações seguintes, este método deve ser chamado
@@ -1511,11 +1677,15 @@ def simulate_playoffs(
 
     if len(eligible_ranking) < 2:
         champion = eligible_ranking[0][0] if eligible_ranking else None
-        return (champion, [], [champion] if champion else [])
+        return (champion, [], [champion] if champion else [], [])
+
+    playoff_matches = []
 
     # Helper para simular jogo eliminatório com vencedor garantido
-    def resolve_match(team_a_name: str, team_b_name: str) -> str:
-        winner, _, _, _ = simulate_match(
+    def resolve_match(team_a_name: str, team_b_name: str, stage: str) -> str:
+        elo_a = teams[team_a_name].elo
+        elo_b = teams[team_b_name].elo
+        winner, _margin, score_a, score_b = simulate_match(
             teams[team_a_name],
             teams[team_b_name],
             elo_system,
@@ -1523,10 +1693,28 @@ def simulate_playoffs(
             is_playoff=True,  # CRUCIAL: força vencedor
             division=None,
         )
+        t1, t2 = sorted([team_a_name, team_b_name])
+        match_id = f"PLAYOFF_STAGE|{stage}|{t1}|{t2}"
+        playoff_matches.append(
+            {
+                "id": match_id,
+                "a": t1,
+                "b": t2,
+                "winner": winner,
+                "score_a": score_a if t1 == team_a_name else score_b,
+                "score_b": score_b if t1 == team_a_name else score_a,
+                "elo_a": elo_a if t1 == team_a_name else elo_b,
+                "elo_b": elo_b if t1 == team_a_name else elo_a,
+                "stage": stage,
+            }
+        )
         return winner
 
     # Determinar quantas equipas estão disponíveis para playoffs (apenas não-B)
     num_teams_for_playoffs = min(8, len(eligible_ranking))
+
+    loser_sf1 = None
+    loser_sf2 = None
 
     if num_teams_for_playoffs < 4:
         # Se menos de 4, fazer semifinal entre 1º e 2º
@@ -1543,11 +1731,13 @@ def simulate_playoffs(
 
         semifinalists = [semi1_a, semi1_b, semi2_a, semi2_b]
 
-        winner_sf1 = resolve_match(semi1_a, semi1_b)
-        winner_sf2 = resolve_match(semi2_a, semi2_b)
+        winner_sf1 = resolve_match(semi1_a, semi1_b, "Semifinais")
+        winner_sf2 = resolve_match(semi2_a, semi2_b, "Semifinais")
 
         finalist_a = winner_sf1
         finalist_b = winner_sf2
+        loser_sf1 = semi1_a if finalist_a == semi1_b else semi1_b
+        loser_sf2 = semi2_a if finalist_b == semi2_b else semi2_b
     else:
         # 8 equipas: quartos (1v8, 2v7, 3v6, 4v5), depois semifinais
         qf1_a = eligible_ranking[0][0]  # 1º
@@ -1563,24 +1753,134 @@ def simulate_playoffs(
         qf4_b = eligible_ranking[4][0]  # 5º
 
         # Simulação dos quartos
-        winner_qf1 = resolve_match(qf1_a, qf1_b)
-        winner_qf2 = resolve_match(qf2_a, qf2_b)
-        winner_qf3 = resolve_match(qf3_a, qf3_b)
-        winner_qf4 = resolve_match(qf4_a, qf4_b)
+        winner_qf1 = resolve_match(qf1_a, qf1_b, "Quartos")
+        winner_qf2 = resolve_match(qf2_a, qf2_b, "Quartos")
+        winner_qf3 = resolve_match(qf3_a, qf3_b, "Quartos")
+        winner_qf4 = resolve_match(qf4_a, qf4_b, "Quartos")
 
         semifinalists = [winner_qf1, winner_qf2, winner_qf3, winner_qf4]
 
         # Simulação das semifinais
-        winner_sf1 = resolve_match(winner_qf1, winner_qf2)
-        winner_sf2 = resolve_match(winner_qf3, winner_qf4)
+        winner_sf1 = resolve_match(winner_qf1, winner_qf2, "Semifinais")
+        winner_sf2 = resolve_match(winner_qf3, winner_qf4, "Semifinais")
 
         finalist_a = winner_sf1
         finalist_b = winner_sf2
+        loser_sf1 = winner_qf1 if finalist_a == winner_qf2 else winner_qf2
+        loser_sf2 = winner_qf3 if finalist_b == winner_qf4 else winner_qf4
 
-    # Final
+    # Final e 3º Lugar
     finalists = [finalist_a, finalist_b]
-    champion = resolve_match(finalist_a, finalist_b)
-    return (champion, semifinalists, finalists)
+    champion = resolve_match(finalist_a, finalist_b, "Final")
+    if loser_sf1 and loser_sf2:
+        resolve_match(loser_sf1, loser_sf2, "3º Lugar")
+
+    return (champion, semifinalists, finalists, playoff_matches)
+
+
+def _points_from_score(score_a: int, score_b: int) -> Tuple[int, int]:
+    """Regra de pontos atualmente usada no preditor (3/1/0)."""
+    if score_a > score_b:
+        return 3, 0
+    if score_b > score_a:
+        return 0, 3
+    return 1, 1
+
+
+def _rank_group_with_tiebreak(
+    group_teams: List[str],
+    points: Dict[str, int],
+    played_matches: List[Tuple[str, str, int, int]],
+) -> List[str]:
+    """Ordena equipas de um grupo com critérios de desempate do mmr_taçaua."""
+    if not group_teams:
+        return []
+
+    team_set = set(group_teams)
+    global_stats = {t: {"gf": 0, "ga": 0} for t in group_teams}
+
+    for team_a, team_b, score_a, score_b in played_matches:
+        if team_a in team_set:
+            global_stats[team_a]["gf"] += score_a
+            global_stats[team_a]["ga"] += score_b
+        if team_b in team_set:
+            global_stats[team_b]["gf"] += score_b
+            global_stats[team_b]["ga"] += score_a
+
+    base_sorted = sorted(group_teams, key=lambda t: (-points.get(t, 0), t))
+    resolved: List[str] = []
+    idx = 0
+
+    while idx < len(base_sorted):
+        tie_points = points.get(base_sorted[idx], 0)
+        tied = [base_sorted[idx]]
+        idx += 1
+
+        while idx < len(base_sorted) and points.get(base_sorted[idx], 0) == tie_points:
+            tied.append(base_sorted[idx])
+            idx += 1
+
+        if len(tied) == 1:
+            resolved.extend(tied)
+            continue
+
+        tied_set = set(tied)
+        h2h_stats = {t: {"points": 0, "gf": 0, "ga": 0} for t in tied}
+
+        for team_a, team_b, score_a, score_b in played_matches:
+            if team_a not in tied_set or team_b not in tied_set:
+                continue
+
+            p_a, p_b = _points_from_score(score_a, score_b)
+            h2h_stats[team_a]["points"] += p_a
+            h2h_stats[team_b]["points"] += p_b
+            h2h_stats[team_a]["gf"] += score_a
+            h2h_stats[team_a]["ga"] += score_b
+            h2h_stats[team_b]["gf"] += score_b
+            h2h_stats[team_b]["ga"] += score_a
+
+        # Ordem equivalente ao mmr_taçaua para critérios disponíveis aqui:
+        # faltas gerais (não modeladas no preditor) -> h2h pontos -> h2h diff ->
+        # h2h golos -> diff geral -> golos gerais.
+        tied_sorted = sorted(
+            tied,
+            key=lambda t: (
+                -h2h_stats[t]["points"],
+                -(h2h_stats[t]["gf"] - h2h_stats[t]["ga"]),
+                -h2h_stats[t]["gf"],
+                -(global_stats[t]["gf"] - global_stats[t]["ga"]),
+                -global_stats[t]["gf"],
+                t,
+            ),
+        )
+        resolved.extend(tied_sorted)
+
+    return resolved
+
+
+def build_ranking_with_tiebreak(
+    points: Dict[str, int],
+    team_division: Dict[str, Tuple[int, str]],
+    played_matches: List[Tuple[str, str, int, int]],
+) -> Tuple[List[Tuple[str, int]], Dict[Tuple[int, str], List[str]]]:
+    """Constrói ranking global e por grupo/divisão já com desempate aplicado."""
+    if not team_division:
+        teams = list(points.keys())
+        ordered = _rank_group_with_tiebreak(teams, points, played_matches)
+        return [(t, points.get(t, 0)) for t in ordered], {(1, ""): ordered}
+
+    groups: Dict[Tuple[int, str], List[str]] = defaultdict(list)
+    for team in points:
+        groups[team_division.get(team, (1, ""))].append(team)
+
+    ranked_by_group: Dict[Tuple[int, str], List[str]] = {}
+    ranking: List[Tuple[str, int]] = []
+    for group_key in sorted(groups.keys(), key=lambda k: (k[0], k[1])):
+        ordered = _rank_group_with_tiebreak(groups[group_key], points, played_matches)
+        ranked_by_group[group_key] = ordered
+        ranking.extend((t, points.get(t, 0)) for t in ordered)
+
+    return ranking, ranked_by_group
 
 
 def calculate_promotions_relegations(
@@ -1588,24 +1888,32 @@ def calculate_promotions_relegations(
     team_division: Dict[str, Tuple[int, str]],
     sim_teams: Dict[str, Team],
     has_liguilla: bool,
+    ranked_by_group: Dict[Tuple[int, str], List[str]] = None,
+    withdrawn_teams: Set[str] = None,
+    secondary_liguilla_top_team: str | None = None,
 ) -> Tuple[Set[str], Set[str]]:
     if not team_division:
         return set(), set()
 
-    # Construir standings por divisão/grupo
+    # Construir standings por divisão/grupo (com desempate quando já disponível)
     div_points: Dict[int, Dict[str, List[Tuple[str, int]]]] = defaultdict(
         lambda: defaultdict(list)
     )
-    for team, pts in points.items():
-        div, grp = team_division.get(team, (1, ""))
-        div_points[div][grp].append((team, pts))
+    if ranked_by_group:
+        for (div, grp), ordered_teams in ranked_by_group.items():
+            div_points[div][grp] = [
+                (team, points.get(team, 0)) for team in ordered_teams
+            ]
+    else:
+        for team, pts in points.items():
+            div, grp = team_division.get(team, (1, ""))
+            div_points[div][grp].append((team, pts))
 
-    # Ordenar standings
-    for div in div_points:
-        for grp in div_points[div]:
-            div_points[div][grp] = sorted(
-                div_points[div][grp], key=lambda x: x[1], reverse=True
-            )
+        for div in div_points:
+            for grp in div_points[div]:
+                div_points[div][grp] = sorted(
+                    div_points[div][grp], key=lambda x: x[1], reverse=True
+                )
 
     # Detectar grupos na 2ª divisão
     div2_groups = div_points.get(2, {})
@@ -1618,6 +1926,17 @@ def calculate_promotions_relegations(
     protected_as = set()
     promoted = set()
     relegated = set()
+
+    # Equipas desistentes da 1ª divisão já desceram automaticamente.
+    # Cada desistente "ocupa" uma vaga de descida, reduzindo as vagas
+    # disponíveis para as equipas que completaram a época.
+    withdrawn_div1: Set[str] = set()
+    if withdrawn_teams:
+        for t in withdrawn_teams:
+            div, _ = team_division.get(t, (None, ""))
+            if div == 1:
+                withdrawn_div1.add(t)
+    n_withdrawn_div1 = len(withdrawn_div1)
 
     # Helper para escolher próximo não-B
     def next_non_b(lst):
@@ -1638,12 +1957,13 @@ def calculate_promotions_relegations(
         for t in promo:
             if is_b_team(t):
                 protected_as.add(base_team(t))
-        # relegar 2 últimos não protegidos
+        # relegar os últimos não protegidos (2 vagas menos as já ocupadas por desistentes)
+        max_relegations = max(0, 2 - n_withdrawn_div1)
         down_list = [t for t, _ in reversed(ranking_div1)]
         for t in down_list:
             if t in protected_as:
                 continue
-            if len(relegated) < 2:
+            if len(relegated) < max_relegations:
                 relegated.add(t)
         # Se B promove, protege A
     elif num_groups_div2 == 2:
@@ -1651,10 +1971,12 @@ def calculate_promotions_relegations(
         if has_liguilla:
             down_list = [t for t, _ in reversed(ranking_div1)]
             # Descem diretos os 3 ultimos (4o a contar do fim vai a liguilha)
+            # Deduzir vagas já ocupadas por desistentes da 1ª divisão
+            max_direct_rel = max(0, 3 - n_withdrawn_div1)
             for t in down_list:
                 if t in protected_as:
                     continue
-                if len(relegated) < 3:
+                if len(relegated) < max_direct_rel:
                     relegated.add(t)
 
             grp_keys = list(div2_groups.keys())
@@ -1690,11 +2012,14 @@ def calculate_promotions_relegations(
             candidates = [c for c in [second_a, second_b, fourth_worst] if c]
 
             if candidates:
-                # Escolhe vencedor por ELO (regra de desempate simplificada)
-                winner = max(
-                    candidates,
-                    key=lambda t: sim_teams.get(t, Team(t, 750)).elo,
-                )
+                # Usa o resultado simulado da liguilha quando disponível.
+                # Fallback por ELO mantém compatibilidade com execuções antigas.
+                winner = secondary_liguilla_top_team
+                if not winner or winner not in candidates:
+                    winner = max(
+                        candidates,
+                        key=lambda t: sim_teams.get(t, Team(t, 750)).elo,
+                    )
                 # So ha promocao se o vencedor for da 2a divisao
                 if winner != fourth_worst:
                     promoted.add(winner)
@@ -1702,7 +2027,7 @@ def calculate_promotions_relegations(
                         relegated.add(fourth_worst)
                 # Se o 4o a contar do fim vencer, mantém-se e nao ha promocao extra
         else:
-            # Sem liguilha: sobem 2 por grupo, descem 4
+            # Sem liguilha: sobem 2 por grupo, descem 4 (menos desistentes da 1ª)
             for grp_list in div2_groups.values():
                 promo_grp = []
                 for t, _ in grp_list:
@@ -1711,11 +2036,12 @@ def calculate_promotions_relegations(
                     if len(promo_grp) == 2:
                         break
                 promoted.update(promo_grp)
+            max_relegations = max(0, 4 - n_withdrawn_div1)
             down_list = [t for t, _ in reversed(ranking_div1)]
             for t in down_list:
                 if t in protected_as:
                     continue
-                if len(relegated) < 4:
+                if len(relegated) < max_relegations:
                     relegated.add(t)
     elif num_groups_div2 == 3:
         # 3 sobem diretos (1º de cada grupo)
@@ -1732,15 +2058,18 @@ def calculate_promotions_relegations(
             )
             if sec:
                 seconds.append(sec)
-        # descem 3 diretos
+        # descem os últimos diretos (3 vagas menos as já ocupadas por desistentes da 1ª)
+        max_direct_rel = max(0, 3 - n_withdrawn_div1)
         down_list = [t for t, _ in reversed(ranking_div1)]
-        for t in down_list[:3]:
+        for t in down_list[:max_direct_rel]:
             if t in protected_as:
                 continue
             relegated.add(t)
-        # playoff dos segundos com 4º pior da 1ª
-        if len(ranking_div1) >= 4:
-            fourth_worst = down_list[3]
+        # playoff dos segundos com (max_direct_rel+1)º pior da 1ª
+        # (a posição do "4º pior" desloca-se se houver desistentes)
+        playoff_pos = max_direct_rel  # índice do elemento após os descidos diretos
+        if len(ranking_div1) > playoff_pos:
+            fourth_worst = down_list[playoff_pos]
             candidates = seconds + [fourth_worst]
             # Escolhe melhor por ELO
             winner = max(candidates, key=lambda t: sim_teams.get(t, Team(t, 750)).elo)
@@ -1869,7 +2198,11 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         real_points,
         playoff_slots,
         total_playoff_slots,
+        secondary_playoff_pm1,
+        secondary_liguilla_rows,
+        past_played_matches,
         hardset_manager,
+        withdrawn_teams,
     ) = args_tuple
 
     sim_teams = {
@@ -1888,7 +2221,24 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         team: points_future.get(team, 0) + real_points.get(team, 0) for team in teams
     }
 
-    ranking = sorted(points.items(), key=lambda x: x[1], reverse=True)
+    simulated_played_matches: List[Tuple[str, str, int, int]] = []
+    for (a, b, mid, _div, is_future, _tg, *_rest) in preprocessed_fixtures:
+        if not is_future or not mid:
+            continue
+        res = season_results.get(mid)
+        if not res:
+            continue
+        _winner, score_a, score_b, _elo_a, _elo_b = res
+        simulated_played_matches.append((a, b, score_a, score_b))
+
+    played_matches_for_tiebreak = (
+        list(past_played_matches or []) + simulated_played_matches
+    )
+    ranking, ranked_by_group = build_ranking_with_tiebreak(
+        points,
+        team_division,
+        played_matches_for_tiebreak,
+    )
     playoff_teams = {name: Team(name, final_elos[name]) for name in final_elos}
 
     # Acumular estatísticas apenas de jogos futuros
@@ -1953,12 +2303,7 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
 
     standings_by_group_for_places: Dict = {}
     if team_division:
-        for team, pts in ranking:
-            div, grp = team_division.get(team, (1, ""))
-            key = (div, grp)
-            if key not in standings_by_group_for_places:
-                standings_by_group_for_places[key] = []
-            standings_by_group_for_places[key].append(team)
+        standings_by_group_for_places = ranked_by_group
 
         for group_key, group_teams in standings_by_group_for_places.items():
             for place, team in enumerate(group_teams, 1):
@@ -1968,42 +2313,393 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
             regular_season_places_sim[team] = place
 
     playoff_count_sim: Dict = {}
-    if playoff_slots:
-        standings_by_group: Dict = {}
-        for team, pts in ranking:
-            div, grp = team_division.get(team, (1, ""))
-            key = (div, grp)
-            if key not in standings_by_group:
-                standings_by_group[key] = []
-            standings_by_group[key].append(team)
+    playoff_bracket_ranking: List[Tuple[str, int]] = []
 
-        for group_key, slots in playoff_slots.items():
+    if playoff_slots:
+        # Necessitamos do dictionary em points para mapear ranking original
+        points_map = {t: pts for t, pts in ranking}
+
+        # Sort group slots deterministically (e.g. A->B->C) to pair them systematically
+        for group_key in sorted(playoff_slots.keys(), key=lambda k: (k[0], k[1])):
+            slots = playoff_slots[group_key]
             placed = 0
-            for team in standings_by_group.get(group_key, []):
+            for team in ranked_by_group.get(group_key, []):
                 if is_b_team(team):
                     continue
                 playoff_count_sim[team] = 1
+                playoff_bracket_ranking.append((team, points_map[team]))
                 placed += 1
                 if placed >= slots:
                     break
     else:
         playoff_qualifiers = 0
-        for team, _ in ranking:
+        for team, pts in ranking:
             if playoff_qualifiers >= total_playoff_slots:
                 break
             if not is_b_team(team):
                 playoff_count_sim[team] = 1
+                playoff_bracket_ranking.append((team, pts))
                 playoff_qualifiers += 1
 
-    champion, semifinalists, finalists = simulate_playoffs(
-        playoff_teams, ranking, elo_system, score_simulator
+    champion, semifinalists, finalists, playoff_matches = simulate_playoffs(
+        playoff_teams, playoff_bracket_ranking, elo_system, score_simulator
     )
+
+    secondary_liguilla_top_team: str | None = None
+
+    def _resolve_secondary_slot(
+        entry: Dict[str, Any], standings: Dict[Tuple[int, str], List[str]]
+    ) -> str | None:
+        if entry.get("kind") == "team":
+            name = str(entry.get("name", "")).strip()
+            return name if name in sim_teams and not is_b_team(name) else None
+
+        if entry.get("kind") != "slot":
+            return None
+
+        div = int(entry.get("div", 1))
+        grp = str(entry.get("grp", "")).upper()
+        pos = int(entry.get("pos", 0))
+        if pos <= 0:
+            return None
+
+        candidates = [
+            team_name
+            for team_name in standings.get((div, grp), [])
+            if not is_b_team(team_name)
+        ]
+        if len(candidates) < pos:
+            return None
+        return candidates[pos - 1]
+
+    def _accumulate_simulated_match(
+        mid: str,
+        a: str,
+        b: str,
+        winner: str,
+        score_a: int,
+        score_b: int,
+        elo_a: float,
+        elo_b: float,
+    ) -> None:
+        if mid not in match_stats_sim:
+            match_stats_sim[mid] = {"1": 0, "X": 0, "2": 0, "total": 0}
+        ms = match_stats_sim[mid]
+        if winner == a:
+            ms["1"] += 1
+        elif winner == b:
+            ms["2"] += 1
+        else:
+            ms["X"] += 1
+        ms["total"] += 1
+
+        if mid not in match_elo_sum_sim:
+            match_elo_sum_sim[mid] = {
+                "a_sum": 0.0,
+                "a_sq": 0.0,
+                "b_sum": 0.0,
+                "b_sq": 0.0,
+                "count": 0,
+            }
+        me = match_elo_sum_sim[mid]
+        me["a_sum"] += elo_a
+        me["a_sq"] += elo_a * elo_a
+        me["b_sum"] += elo_b
+        me["b_sq"] += elo_b * elo_b
+        me["count"] += 1
+
+        score_key = f"{score_a}-{score_b}"
+        if mid not in match_score_stats_sim:
+            match_score_stats_sim[mid] = {}
+        sc = match_score_stats_sim[mid]
+        sc[score_key] = sc.get(score_key, 0) + 1
+
+    liguilla_stats_sim: Dict[str, Dict[str, int]] = {}
+    liguilla_scenarios_sim: Dict[str, Dict[str, Dict[str, Any]]] = {}
+
+    if secondary_liguilla_rows and team_division:
+        standings_by_group: Dict[Tuple[int, str], List[str]] = defaultdict(list)
+        for team, _pts in ranking:
+            div, grp = team_division.get(team, (1, ""))
+            standings_by_group[(div, grp)].append(team)
+
+        liguilla_points: Dict[str, int] = defaultdict(int)
+        liguilla_played_matches: List[Tuple[str, str, int, int]] = []
+        liguilla_participants: List[str] = []
+        liguilla_stats: Dict[str, Dict[str, int]] = defaultdict(
+            lambda: {
+                "lm1_participated": 0,
+                "lm1_won": 0,
+                "lm2_participated": 0,
+                "lm2_won": 0,
+                "lm3_participated": 0,
+                "lm3_won": 0,
+                "promoted": 0,
+            }
+        )
+        team_liguilla_games_sim: Dict[str, List[Tuple[str, str, str]]] = defaultdict(
+            list
+        )
+
+        ordered_rows = sorted(
+            secondary_liguilla_rows, key=lambda item: item.get("order", 0)
+        )
+        for idx, match_row in enumerate(ordered_rows, start=1):
+            team_a_name = _resolve_secondary_slot(
+                match_row.get("a", {}), standings_by_group
+            )
+            team_b_name = _resolve_secondary_slot(
+                match_row.get("b", {}), standings_by_group
+            )
+
+            if not team_a_name or not team_b_name or team_a_name == team_b_name:
+                continue
+
+            if team_a_name not in liguilla_participants:
+                liguilla_participants.append(team_a_name)
+            if team_b_name not in liguilla_participants:
+                liguilla_participants.append(team_b_name)
+
+            # Registar participação na ronda correcta
+            liguilla_stats[team_a_name][f"lm{idx}_participated"] += 1
+            liguilla_stats[team_b_name][f"lm{idx}_participated"] += 1
+
+            elo_a = sim_teams[team_a_name].elo
+            elo_b = sim_teams[team_b_name].elo
+            winner, _margin, score_a_raw, score_b_raw = simulate_match(
+                sim_teams[team_a_name],
+                sim_teams[team_b_name],
+                elo_system,
+                score_simulator,
+                is_playoff=False,
+                division=int(team_division.get(team_a_name, (1, ""))[0] or 1),
+            )
+
+            t1, t2 = sorted([team_a_name, team_b_name])
+            score_a = score_a_raw if t1 == team_a_name else score_b_raw
+            score_b = score_b_raw if t1 == team_a_name else score_a_raw
+            elo_t1 = elo_a if t1 == team_a_name else elo_b
+            elo_t2 = elo_b if t1 == team_a_name else elo_a
+
+            # Registar vitória na ronda correcta
+            liguilla_stats[winner][f"lm{idx}_won"] += 1
+
+            stage_label = str(match_row.get("jornada", f"LM{idx}")).upper().strip()
+            team_liguilla_games_sim[team_a_name].append(
+                (
+                    stage_label,
+                    team_b_name,
+                    (
+                        "W"
+                        if winner == team_a_name
+                        else ("L" if winner == team_b_name else "D")
+                    ),
+                )
+            )
+            team_liguilla_games_sim[team_b_name].append(
+                (
+                    stage_label,
+                    team_a_name,
+                    (
+                        "W"
+                        if winner == team_b_name
+                        else ("L" if winner == team_a_name else "D")
+                    ),
+                )
+            )
+
+            mid = f"SECONDARY_STAGE|{match_row.get('jornada', 'LM')}|L{idx}|{t1}|{t2}"
+            _accumulate_simulated_match(
+                mid, t1, t2, winner, score_a, score_b, elo_t1, elo_t2
+            )
+
+            liguilla_played_matches.append((team_a_name, team_b_name, score_a, score_b))
+            if winner == team_a_name:
+                liguilla_points[team_a_name] += 3
+            elif winner == team_b_name:
+                liguilla_points[team_b_name] += 3
+            else:
+                liguilla_points[team_a_name] += 1
+                liguilla_points[team_b_name] += 1
+
+        if liguilla_participants:
+            liguilla_ranking = _rank_group_with_tiebreak(
+                liguilla_participants,
+                liguilla_points,
+                liguilla_played_matches,
+            )
+            if liguilla_ranking:
+                secondary_liguilla_top_team = liguilla_ranking[0]
+                # Registar promoção do vencedor da liguilha
+                liguilla_stats[secondary_liguilla_top_team]["promoted"] += 1
+
+        # Copiar para liguilla_stats_sim para retorno
+        liguilla_stats_sim = dict(liguilla_stats)
+
+        for team_name in liguilla_participants:
+            games_for_team = team_liguilla_games_sim.get(team_name, [])
+            if len(games_for_team) < 2:
+                continue
+
+            def _stage_order(value: str) -> int:
+                match = re.search(r"(\d+)", str(value))
+                return int(match.group(1)) if match else 99
+
+            sorted_games = sorted(
+                games_for_team, key=lambda item: _stage_order(item[0])
+            )
+            stage_1, opponent_1, result_1 = sorted_games[0]
+            stage_2, opponent_2, result_2 = sorted_games[1]
+
+            scenario_key = f"{stage_1}:{opponent_1}|{stage_2}:{opponent_2}"
+            team_scenarios = liguilla_scenarios_sim.setdefault(team_name, {})
+            scenario_stats = team_scenarios.setdefault(
+                scenario_key,
+                {
+                    "stage_game1": stage_1,
+                    "opponent_game1": opponent_1,
+                    "stage_game2": stage_2,
+                    "opponent_game2": opponent_2,
+                    "scenario_count": 0,
+                    "promoted_count": 0,
+                    "game1_wins": 0,
+                    "game1_draws": 0,
+                    "game1_losses": 0,
+                    "game2_wins": 0,
+                    "game2_draws": 0,
+                    "game2_losses": 0,
+                },
+            )
+
+            scenario_stats["scenario_count"] += 1
+            if secondary_liguilla_top_team == team_name:
+                scenario_stats["promoted_count"] += 1
+
+            if result_1 == "W":
+                scenario_stats["game1_wins"] += 1
+            elif result_1 == "D":
+                scenario_stats["game1_draws"] += 1
+            else:
+                scenario_stats["game1_losses"] += 1
+
+            if result_2 == "W":
+                scenario_stats["game2_wins"] += 1
+            elif result_2 == "D":
+                scenario_stats["game2_draws"] += 1
+            else:
+                scenario_stats["game2_losses"] += 1
+
+    # Simular playoff secundário de manutenção (PM1 -> PM2) quando configurado no CSV.
+    if secondary_playoff_pm1 and team_division:
+        standings_by_group: Dict[Tuple[int, str], List[str]] = defaultdict(list)
+        for team, _pts in ranking:
+            div, grp = team_division.get(team, (1, ""))
+            standings_by_group[(div, grp)].append(team)
+
+        def resolve_slot(entry: Dict[str, Any]) -> str | None:
+            if entry.get("kind") == "team":
+                name = str(entry.get("name", "")).strip()
+                return name if name in sim_teams and not is_b_team(name) else None
+
+            if entry.get("kind") != "slot":
+                return None
+
+            div = int(entry.get("div", 1))
+            grp = str(entry.get("grp", "")).upper()
+            pos = int(entry.get("pos", 0))
+            if pos <= 0:
+                return None
+
+            candidates = [
+                team_name
+                for team_name in standings_by_group.get((div, grp), [])
+                if not is_b_team(team_name)
+            ]
+            if len(candidates) < pos:
+                return None
+            return candidates[pos - 1]
+
+        pm1_winners: List[str] = []
+        for idx, (slot_a, slot_b) in enumerate(secondary_playoff_pm1, start=1):
+            team_a_name = resolve_slot(slot_a)
+            team_b_name = resolve_slot(slot_b)
+
+            if not team_a_name or not team_b_name or team_a_name == team_b_name:
+                continue
+
+            elo_a = sim_teams[team_a_name].elo
+            elo_b = sim_teams[team_b_name].elo
+            winner, _margin, score_a_raw, score_b_raw = simulate_match(
+                sim_teams[team_a_name],
+                sim_teams[team_b_name],
+                elo_system,
+                score_simulator,
+                is_playoff=True,
+                division=None,
+            )
+
+            t1, t2 = sorted([team_a_name, team_b_name])
+            score_a = score_a_raw if t1 == team_a_name else score_b_raw
+            score_b = score_b_raw if t1 == team_a_name else score_a_raw
+            elo_t1 = elo_a if t1 == team_a_name else elo_b
+            elo_t2 = elo_b if t1 == team_a_name else elo_a
+
+            mid = f"SECONDARY_STAGE|1ºFase|MF{idx}|{t1}|{t2}"
+            _accumulate_simulated_match(
+                mid, t1, t2, winner, score_a, score_b, elo_t1, elo_t2
+            )
+            pm1_winners.append(winner)
+
+        if len(pm1_winners) >= 2:
+            finalist_a = pm1_winners[0]
+            finalist_b = pm1_winners[1]
+            if finalist_a != finalist_b:
+                elo_a = sim_teams[finalist_a].elo
+                elo_b = sim_teams[finalist_b].elo
+                winner, _margin, score_a_raw, score_b_raw = simulate_match(
+                    sim_teams[finalist_a],
+                    sim_teams[finalist_b],
+                    elo_system,
+                    score_simulator,
+                    is_playoff=True,
+                    division=None,
+                )
+
+                t1, t2 = sorted([finalist_a, finalist_b])
+                score_a = score_a_raw if t1 == finalist_a else score_b_raw
+                score_b = score_b_raw if t1 == finalist_a else score_a_raw
+                elo_t1 = elo_a if t1 == finalist_a else elo_b
+                elo_t2 = elo_b if t1 == finalist_a else elo_a
+
+                mid = f"SECONDARY_STAGE|Fase final|F|{t1}|{t2}"
+                _accumulate_simulated_match(
+                    mid, t1, t2, winner, score_a, score_b, elo_t1, elo_t2
+                )
+
+    for pm in playoff_matches:
+        mid = pm["id"]
+        a = pm["a"]
+        b = pm["b"]
+        winner = pm["winner"]
+        score_a = pm["score_a"]
+        score_b = pm["score_b"]
+        elo_a = pm["elo_a"]
+        elo_b = pm["elo_b"]
+
+        _accumulate_simulated_match(mid, a, b, winner, score_a, score_b, elo_a, elo_b)
 
     promotion_count_sim: Dict = {}
     relegation_count_sim: Dict = {}
+
     if team_division:
         promoted, relegated = calculate_promotions_relegations(
-            points, team_division, sim_teams, has_liguilla
+            points,
+            team_division,
+            sim_teams,
+            has_liguilla,
+            ranked_by_group=ranked_by_group,
+            withdrawn_teams=withdrawn_teams,
+            secondary_liguilla_top_team=secondary_liguilla_top_team,
         )
         for t in promoted:
             promotion_count_sim[t] = 1
@@ -2020,6 +2716,8 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         "champion_count": {champion: 1} if champion else {},
         "promotion_count": promotion_count_sim,
         "relegation_count": relegation_count_sim,
+        "liguilla_stats": dict(liguilla_stats_sim),
+        "liguilla_scenarios": liguilla_scenarios_sim,
         "match_stats": match_stats_sim,
         "match_elo_sum": match_elo_sum_sim,
         "match_score_stats": match_score_stats_sim,
@@ -2037,12 +2735,17 @@ def monte_carlo_forecast(
     real_points: Dict[str, int] = None,
     playoff_slots: Dict[Tuple[int, str], int] = None,
     total_playoff_slots: int = 8,
+    secondary_playoff_pm1: List[Tuple[Dict[str, Any], Dict[str, Any]]] = None,
+    secondary_liguilla_rows: List[Dict[str, Any]] = None,
+    past_played_matches: List[Tuple[str, str, int, int]] = None,
     hardset_manager: "HardsetManager | None" = None,
+    withdrawn_teams: Set[str] = None,
 ) -> Tuple[
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, int]],
+    Dict[str, Dict[str, Dict[str, Any]]],
 ]:
     """Monte Carlo com suporte opcional a resultados fixados (hardset).
 
@@ -2053,12 +2756,21 @@ def monte_carlo_forecast(
     if real_points is None:
         real_points = {}
 
+    if withdrawn_teams is None:
+        withdrawn_teams = set()
+
+    if secondary_playoff_pm1 is None:
+        secondary_playoff_pm1 = []
+    if secondary_liguilla_rows is None:
+        secondary_liguilla_rows = []
+    if past_played_matches is None:
+        past_played_matches = []
+
     if hardset_manager and hardset_manager.fixed_results:
         print(f"\n{'='*60}")
         print(hardset_manager.summary())
         print(f"{'='*60}\n")
 
-    # Pré-processar fixtures UMA vez — elimina O(N_teams × N_fixtures) por simulação
     preprocessed_fixtures = _preprocess_fixtures(fixtures, teams)
 
     playoff_count = defaultdict(int)
@@ -2067,6 +2779,18 @@ def monte_carlo_forecast(
     champion_count = defaultdict(int)
     promotion_count = defaultdict(int)
     relegation_count = defaultdict(int)
+    liguilla_stats_agg: Dict[str, Dict[str, int]] = defaultdict(
+        lambda: {
+            "lm1_participated": 0,
+            "lm1_won": 0,
+            "lm2_participated": 0,
+            "lm2_won": 0,
+            "lm3_participated": 0,
+            "lm3_won": 0,
+            "promoted": 0,
+        }
+    )
+    liguilla_scenarios_agg: Dict[str, Dict[str, Dict[str, Any]]] = defaultdict(dict)
 
     expected_points_sum = defaultdict(float)
     expected_points_sq_sum = defaultdict(float)
@@ -2109,22 +2833,27 @@ def monte_carlo_forecast(
             simulation_args = []
             for sim_idx in range(batch_start, batch_end):
                 worker_id = sim_idx % num_workers
-                args_tuple = (
-                    sim_idx,
-                    worker_id,
-                    teams,
-                    preprocessed_fixtures,
-                    elo_system,
-                    score_simulator,
-                    n_simulations,
-                    team_division,
-                    has_liguilla,
-                    real_points,
-                    playoff_slots,
-                    total_playoff_slots,
-                    hardset_manager,
+                simulation_args.append(
+                    (
+                        sim_idx,
+                        worker_id,
+                        teams,
+                        preprocessed_fixtures,
+                        elo_system,
+                        score_simulator,
+                        n_simulations,
+                        team_division,
+                        has_liguilla,
+                        real_points,
+                        playoff_slots,
+                        total_playoff_slots,
+                        secondary_playoff_pm1,
+                        secondary_liguilla_rows,
+                        past_played_matches,
+                        hardset_manager,
+                        withdrawn_teams,
+                    )
                 )
-                simulation_args.append(args_tuple)
 
             for sim_result in executor.map(
                 _run_single_simulation_worker, simulation_args, chunksize=chunksize
@@ -2157,6 +2886,46 @@ def monte_carlo_forecast(
                     promotion_count[team] += count
                 for team, count in sim_result["relegation_count"].items():
                     relegation_count[team] += count
+
+                for team, team_lm_stats in sim_result.get("liguilla_stats", {}).items():
+                    for stat_key, count in team_lm_stats.items():
+                        liguilla_stats_agg[team][stat_key] += count
+
+                for team, scenarios in sim_result.get("liguilla_scenarios", {}).items():
+                    team_agg = liguilla_scenarios_agg[team]
+                    for scenario_key, scenario_stats in scenarios.items():
+                        if scenario_key not in team_agg:
+                            team_agg[scenario_key] = {
+                                "stage_game1": scenario_stats.get("stage_game1", ""),
+                                "opponent_game1": scenario_stats.get(
+                                    "opponent_game1", ""
+                                ),
+                                "stage_game2": scenario_stats.get("stage_game2", ""),
+                                "opponent_game2": scenario_stats.get(
+                                    "opponent_game2", ""
+                                ),
+                                "scenario_count": 0,
+                                "promoted_count": 0,
+                                "game1_wins": 0,
+                                "game1_draws": 0,
+                                "game1_losses": 0,
+                                "game2_wins": 0,
+                                "game2_draws": 0,
+                                "game2_losses": 0,
+                            }
+
+                        agg_stats = team_agg[scenario_key]
+                        for key in [
+                            "scenario_count",
+                            "promoted_count",
+                            "game1_wins",
+                            "game1_draws",
+                            "game1_losses",
+                            "game2_wins",
+                            "game2_draws",
+                            "game2_losses",
+                        ]:
+                            agg_stats[key] += int(scenario_stats.get(key, 0) or 0)
 
                 for mid, stats in sim_result["match_stats"].items():
                     for key in ["1", "X", "2", "total"]:
@@ -2232,6 +3001,7 @@ def monte_carlo_forecast(
                 "p_win_a": stats["1"] / total,
                 "p_draw": stats["X"] / total,
                 "p_win_b": stats["2"] / total,
+                "ocorrencias": total,
             }
 
     match_elo_forecast = {}
@@ -2255,7 +3025,14 @@ def monte_carlo_forecast(
 
     progress_tracker.print_summary()
 
-    return results, match_forecasts, match_elo_forecast, match_score_stats
+    return (
+        results,
+        match_forecasts,
+        match_elo_forecast,
+        match_score_stats,
+        dict(liguilla_stats_agg),
+        {team: dict(scenarios) for team, scenarios in liguilla_scenarios_agg.items()},
+    )
 
 
 # ============================================================================
@@ -2569,11 +3346,22 @@ def detect_withdrawn_teams_from_csv(
 
         # Verificar coluna de falta de comparência (única coluna partilhada por ambas as equipas)
         falta_valor = row.get(COL_FALTA_COMPARENCIA)
+        has_falta = bool(falta_valor and str(falta_valor).strip())
 
         golos_1_raw = row.get(COL_GOLOS_1)
         golos_2_raw = row.get(COL_GOLOS_2)
-        resultado1_absent = golos_1_raw is None or str(golos_1_raw).strip() == ""
-        resultado2_absent = golos_2_raw is None or str(golos_2_raw).strip() == ""
+        g1_empty = golos_1_raw is None or str(golos_1_raw).strip() == ""
+        g2_empty = golos_2_raw is None or str(golos_2_raw).strip() == ""
+
+        # Se AMBOS os scores estão vazios E não há falta de comparência registada,
+        # é um jogo futuro (ainda não realizado) — NÃO conta como ausência.
+        # Slots de playoff (ex: "1º Class. 1ª Div.", "Vencedor QF1") só aparecem
+        # neste tipo de linhas e NÃO devem ser detectados como desistentes.
+        if g1_empty and g2_empty and not has_falta:
+            continue
+
+        resultado1_absent = g1_empty
+        resultado2_absent = g2_empty
 
         # Normalizar nomes
         team_a = normalize_team_name(team_a_raw, course_mapping)
@@ -2749,11 +3537,11 @@ def _build_teams_and_fixtures(
     course_mapping_short: Dict[str, str],
     initial_elos: Dict[str, float],
     modalidade: str,
-) -> Tuple[Dict[str, Team], List[Dict], Set[str], Dict[str, Tuple[int, str]]]:
-    """Constrói teams, fixtures, all_teams_in_epoch e team_division.
+) -> Tuple[Dict[str, Team], List[Dict], Set[str], Dict[str, Tuple[int, str]], Set[str]]:
+    """Constrói teams, fixtures, all_teams_in_epoch, team_division e withdrawn_teams.
 
     Retorna:
-        (teams, fixtures, all_teams_in_epoch, team_division)
+        (teams, fixtures, all_teams_in_epoch, team_division, withdrawn_teams)
     """
     teams: Dict[str, Team] = {}
     fixtures: List[Dict] = []
@@ -2847,7 +3635,7 @@ def _build_teams_and_fixtures(
         _register_team(team_a)
         _register_team(team_b)
 
-    return teams, fixtures, all_teams_in_epoch, team_division
+    return teams, fixtures, all_teams_in_epoch, team_division, withdrawn_teams
 
 
 def _export_results(
@@ -2866,8 +3654,34 @@ def _export_results(
     match_forecasts: Dict,
     match_elo_forecast: Dict,
     match_score_stats: Dict,
+    liguilla_stats: Dict[str, Dict[str, int]],
+    liguilla_scenarios: Dict[str, Dict[str, Dict[str, Any]]],
 ) -> None:
     """Escreve os dois CSVs de output: forecast de equipas e previsões de jogos."""
+
+    def _format_prediction_jornada(jornada_value: str) -> str:
+        """Normaliza labels de jornada para o CSV de previsões.
+
+        Regras específicas pedidas para fases secundárias:
+        - PM1 -> 1ºFase
+        - PM2 -> Fase final
+        - LM<n> -> Liguilha <n>
+        """
+        jornada_str = str(jornada_value or "").strip()
+        jornada_upper = jornada_str.upper()
+
+        if jornada_upper.startswith("PM1"):
+            return "1ºFase"
+        if jornada_upper.startswith("PM2"):
+            return "Fase final"
+        if jornada_upper.startswith("LM"):
+            lm_match = re.match(r"LM\s*(\d+)", jornada_upper)
+            if lm_match:
+                return f"Liguilha {int(lm_match.group(1))}"
+            return "Liguilha"
+
+        return jornada_str
+
     is_hardset = bool(hardset_manager and hardset_manager.fixed_results)
     subfolder = "cenarios" if is_hardset else "previsoes"
     suffix = "_hardset" if is_hardset else ""
@@ -2959,14 +3773,67 @@ def _export_results(
             "expected_goals_a_std",
             "expected_goals_b",
             "expected_goals_b_std",
-            "distribuicao_placares",
+            "ocorrencias",
             "divisao",
             "grupo",
+            "distribuicao_placares",
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
-        for match in fixtures:
+        playoff_fixtures = []
+        for mid in match_forecasts:
+            mid_str = str(mid)
+            if mid_str.startswith("PLAYOFF_STAGE|"):
+                parts = str(mid).split("|")
+                if len(parts) >= 4:
+                    playoff_fixtures.append(
+                        {
+                            "id": mid,
+                            "a": parts[2],
+                            "b": parts[3],
+                            "is_future": True,
+                            "jornada": parts[1],
+                            "dia": "-",
+                            "hora": "-",
+                            "divisao": "1",
+                            "grupo": "",
+                        }
+                    )
+            elif mid_str.startswith("SECONDARY_STAGE|"):
+                parts = mid_str.split("|")
+                if len(parts) >= 5:
+                    playoff_fixtures.append(
+                        {
+                            "id": mid,
+                            "a": parts[3],
+                            "b": parts[4],
+                            "is_future": True,
+                            "jornada": parts[1],
+                            "dia": "-",
+                            "hora": "-",
+                            "divisao": "1",
+                            "grupo": "",
+                        }
+                    )
+
+        # O utilizador pediu uma ordenação estrita das fases de playoff: Quartos, Meias, 3º Lugar, Final
+        def get_playoff_order(match):
+            jornada = str(match.get("jornada", ""))
+            stage_order = {
+                "1ºFase": 1,
+                "Fase final": 2,
+                "Quartos": 1,
+                "Semifinais": 2,
+                "3º Lugar": 3,
+                "Final": 4,
+            }
+            return stage_order.get(jornada, 99)
+
+        playoff_fixtures.sort(key=get_playoff_order)
+        all_matches_to_export = fixtures + playoff_fixtures
+
+        for match in all_matches_to_export:
             if not (match.get("is_future") and match.get("id") in match_forecasts):
                 continue
 
@@ -3013,7 +3880,7 @@ def _export_results(
 
             writer.writerow(
                 {
-                    "jornada": match.get("jornada", ""),
+                    "jornada": _format_prediction_jornada(match.get("jornada", "")),
                     "dia": match.get("dia", ""),
                     "hora": match.get("hora", ""),
                     "team_a": match["a"],
@@ -3029,12 +3896,145 @@ def _export_results(
                     "expected_goals_a_std": f"{variance_a ** 0.5:.2f}",
                     "expected_goals_b": f"{expected_goals_b:.2f}",
                     "expected_goals_b_std": f"{variance_b ** 0.5:.2f}",
-                    "distribuicao_placares": distribuicao_str,
+                    "ocorrencias": fc.get("ocorrencias", n_simulations),
                     "divisao": match.get("divisao", ""),
                     "grupo": match.get("grupo", ""),
+                    "distribuicao_placares": distribuicao_str,
                 }
             )
             future_count += 1
+    # --- CSV 3: Estatísticas de Liguilha (se houver) ---
+    if liguilla_stats:
+        liguilla_file = (
+            out_dir / f"liguilla_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv"
+        )
+        with open(liguilla_file, "w", newline="", encoding="utf-8-sig") as csvfile:
+            fieldnames = [
+                "team",
+                "p_disputa_lm1",
+                "p_ganho_lm1_cond",
+                "p_disputa_lm2_cond",
+                "p_ganho_lm2_cond",
+                "p_disputa_lm3_cond",
+                "p_ganho_lm3_cond",
+                "p_promocao",
+            ]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for team in sorted(all_teams_in_epoch):
+                if team not in liguilla_stats:
+                    continue
+
+                stats = liguilla_stats[team]
+                n = n_simulations
+
+                # Probabilidades
+                p_lm1 = stats["lm1_participated"] / n
+                p_lm1_won = (
+                    stats["lm1_won"] / stats["lm1_participated"]
+                    if stats["lm1_participated"] > 0
+                    else 0
+                )
+                p_lm2 = stats["lm2_participated"] / n
+                p_lm2_won = (
+                    stats["lm2_won"] / stats["lm2_participated"]
+                    if stats["lm2_participated"] > 0
+                    else 0
+                )
+                p_lm3 = stats["lm3_participated"] / n
+                p_lm3_won = (
+                    stats["lm3_won"] / stats["lm3_participated"]
+                    if stats["lm3_participated"] > 0
+                    else 0
+                )
+                p_promoted = stats["promoted"] / n
+
+                writer.writerow(
+                    {
+                        "team": team,
+                        "p_disputa_lm1": f"{p_lm1 * 100:.4f}",
+                        "p_ganho_lm1_cond": f"{p_lm1_won * 100:.4f}",
+                        "p_disputa_lm2_cond": (
+                            f"{p_lm2 / n * 100:.4f}" if n > 0 else "0.0000"
+                        ),
+                        "p_ganho_lm2_cond": f"{p_lm2_won * 100:.4f}",
+                        "p_disputa_lm3_cond": (
+                            f"{p_lm3 / n * 100:.4f}" if n > 0 else "0.0000"
+                        ),
+                        "p_ganho_lm3_cond": f"{p_lm3_won * 100:.4f}",
+                        "p_promocao": f"{p_promoted * 100:.4f}",
+                    }
+                )
+        print(f"Estatísticas de liguilha guardadas em {liguilla_file}\n")
+
+    # --- CSV 4: Cenários agregados de Liguilha (se houver) ---
+    if liguilla_scenarios:
+        liguilla_scenarios_file = (
+            out_dir
+            / f"liguilla_scenarios_{modalidade}_{ano_atual}_{n_simulations}{suffix}.csv"
+        )
+        with open(
+            liguilla_scenarios_file, "w", newline="", encoding="utf-8-sig"
+        ) as csvfile:
+            fieldnames = [
+                "team",
+                "scenario_key",
+                "stage_game1",
+                "opponent_game1",
+                "p_win_game1",
+                "p_draw_game1",
+                "p_loss_game1",
+                "stage_game2",
+                "opponent_game2",
+                "p_win_game2",
+                "p_draw_game2",
+                "p_loss_game2",
+                "p_cenario",
+                "p_passa_cenario_cond",
+            ]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for team in sorted(liguilla_scenarios.keys()):
+                scenarios = liguilla_scenarios.get(team, {})
+                ordered_scenarios = sorted(
+                    scenarios.items(),
+                    key=lambda item: int(item[1].get("scenario_count", 0)),
+                    reverse=True,
+                )
+                for scenario_key, stats in ordered_scenarios:
+                    scenario_count = int(stats.get("scenario_count", 0) or 0)
+                    if scenario_count <= 0:
+                        continue
+
+                    p_cenario = (
+                        scenario_count / n_simulations if n_simulations > 0 else 0
+                    )
+                    p_passa_cenario_cond = (
+                        int(stats.get("promoted_count", 0) or 0) / scenario_count
+                    )
+
+                    writer.writerow(
+                        {
+                            "team": team,
+                            "scenario_key": scenario_key,
+                            "stage_game1": stats.get("stage_game1", ""),
+                            "opponent_game1": stats.get("opponent_game1", ""),
+                            "p_win_game1": f"{(int(stats.get('game1_wins', 0) or 0) / scenario_count) * 100:.4f}",
+                            "p_draw_game1": f"{(int(stats.get('game1_draws', 0) or 0) / scenario_count) * 100:.4f}",
+                            "p_loss_game1": f"{(int(stats.get('game1_losses', 0) or 0) / scenario_count) * 100:.4f}",
+                            "stage_game2": stats.get("stage_game2", ""),
+                            "opponent_game2": stats.get("opponent_game2", ""),
+                            "p_win_game2": f"{(int(stats.get('game2_wins', 0) or 0) / scenario_count) * 100:.4f}",
+                            "p_draw_game2": f"{(int(stats.get('game2_draws', 0) or 0) / scenario_count) * 100:.4f}",
+                            "p_loss_game2": f"{(int(stats.get('game2_losses', 0) or 0) / scenario_count) * 100:.4f}",
+                            "p_cenario": f"{p_cenario * 100:.4f}",
+                            "p_passa_cenario_cond": f"{p_passa_cenario_cond * 100:.4f}",
+                        }
+                    )
+
+        print(f"Cenários de liguilha guardados em {liguilla_scenarios_file}\n")
 
     if future_count > 0:
         print(
@@ -3172,7 +4172,13 @@ def main(
         )
 
         # --- Construir equipas e fixtures ---
-        teams, fixtures, all_teams_in_epoch, team_division = _build_teams_and_fixtures(
+        (
+            teams,
+            fixtures,
+            all_teams_in_epoch,
+            team_division,
+            withdrawn_teams,
+        ) = _build_teams_and_fixtures(
             all_csv_rows,
             past_matches_rows,
             future_matches_rows,
@@ -3181,6 +4187,12 @@ def main(
             initial_elos,
             modalidade,
         )
+
+        if withdrawn_teams:
+            print(
+                f"  ⚠️  Equipas desistentes detectadas (excluídas da simulação e com descida garantida): "
+                f"{', '.join(sorted(withdrawn_teams))}"
+            )
 
         if not fixtures:
             print(f"Nenhum fixture encontrado para {modalidade}\n")
@@ -3194,26 +4206,44 @@ def main(
             for row in all_csv_rows
         )
         playoff_slots, total_playoff_slots = parse_playoff_slots(all_csv_rows)
-        real_points = calculate_real_points(past_matches_rows, course_mapping)
+        secondary_playoff_pm1 = parse_secondary_playoff_structure(all_csv_rows)
+        secondary_liguilla_rows = parse_secondary_liguilla_structure(all_csv_rows)
+        real_points = calculate_real_points(
+            past_matches_rows, course_mapping, withdrawn_teams=withdrawn_teams
+        )
+        past_played_matches = extract_played_matches_for_tiebreak(
+            past_matches_rows,
+            course_mapping,
+            withdrawn_teams=withdrawn_teams,
+        )
 
-        results, match_forecasts, match_elo_forecast, match_score_stats = (
-            monte_carlo_forecast(
-                teams_with_fixtures,
-                fixtures,
-                elo_system,
-                score_simulator,
-                n_simulations=n_simulations,
-                team_division=team_division,
-                has_liguilla=has_liguilla,
-                real_points=real_points,
-                playoff_slots=playoff_slots,
-                total_playoff_slots=(
-                    total_playoff_slots
-                    if total_playoff_slots > 0
-                    else PLAYOFF_SLOTS_DEFAULT
-                ),
-                hardset_manager=hardset_manager,
-            )
+        (
+            results,
+            match_forecasts,
+            match_elo_forecast,
+            match_score_stats,
+            liguilla_stats,
+            liguilla_scenarios,
+        ) = monte_carlo_forecast(
+            teams_with_fixtures,
+            fixtures,
+            elo_system,
+            score_simulator,
+            n_simulations=n_simulations,
+            team_division=team_division,
+            has_liguilla=has_liguilla,
+            real_points=real_points,
+            playoff_slots=playoff_slots,
+            total_playoff_slots=(
+                total_playoff_slots
+                if total_playoff_slots > 0
+                else PLAYOFF_SLOTS_DEFAULT
+            ),
+            secondary_playoff_pm1=secondary_playoff_pm1,
+            secondary_liguilla_rows=secondary_liguilla_rows,
+            past_played_matches=past_played_matches,
+            hardset_manager=hardset_manager,
+            withdrawn_teams=withdrawn_teams,
         )
 
         # --- Diagnóstico de baselines ---
@@ -3275,6 +4305,8 @@ def main(
             match_forecasts,
             match_elo_forecast,
             match_score_stats,
+            liguilla_stats,
+            liguilla_scenarios,
         )
 
 

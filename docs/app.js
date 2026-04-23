@@ -4192,10 +4192,13 @@ function processSecondaryMatches(secondaryMatches) {
     if (hasPM) {
         sampleData.secondaryBracketType = isPromotion ? 'promotion-playoff' : 'maintenance-playoff';
 
+        const firstPhaseLabel = t('maintenanceFirstPhase');
+        const finalPhaseLabel = t('maintenanceFinalPhase');
+
         // PM1 (similar a quartos)
         const pm1 = secondaryMatches.filter(m => m.Jornada && m.Jornada.startsWith('PM1'));
         if (pm1.length > 0) {
-            bracketData["1ª Fase"] = pm1.map(match => {
+            bracketData[firstPhaseLabel] = pm1.map(match => {
                 const team1 = match['Equipa 1'];
                 const team2 = match['Equipa 2'];
                 // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
@@ -4228,7 +4231,7 @@ function processSecondaryMatches(secondaryMatches) {
         // PM2 (similar a meias/final)
         const pm2 = secondaryMatches.filter(m => m.Jornada && m.Jornada.startsWith('PM2'));
         if (pm2.length > 0) {
-            bracketData["Final"] = pm2.map(match => {
+            bracketData[finalPhaseLabel] = pm2.map(match => {
                 const team1 = match['Equipa 1'];
                 const team2 = match['Equipa 2'];
                 // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
@@ -4262,7 +4265,7 @@ function processSecondaryMatches(secondaryMatches) {
         DebugUtils.debugSecondaryBracket('before_assign', {
             hasPM: hasPM,
             hasStandings: false,
-            matchesCount: (bracketData["1ª Fase"]?.length || 0) + (bracketData["Final"]?.length || 0)
+            matchesCount: (bracketData[firstPhaseLabel]?.length || 0) + (bracketData[finalPhaseLabel]?.length || 0)
         });
 
         sampleData.secondaryBracket = bracketData;
@@ -4909,7 +4912,7 @@ function createSecondaryBracket() {
     } else if (bracketType === 'promotion-league') {
         title.textContent = t('promotionLeague');
     } else {
-        title.textContent = t('playoffLiguilha');
+        title.textContent = t('secondaryBracketTitle');
     }
 
     card.style.display = 'block';
@@ -6299,6 +6302,15 @@ function translateBracketRound(roundLabel) {
             return t('finals');
         case '3º Lugar':
             return t('thirdPlace');
+        case '1ºFase':
+        case '1ª Fase':
+            return t('maintenanceFirstPhase');
+        case 'Fase final':
+            return t('maintenanceFinalPhase');
+        case 'Liguilha 1':
+            return t('liguilhaRound1');
+        case 'Liguilha 2':
+            return t('liguilhaRound2');
         default:
             return roundLabel;
     }
@@ -10784,6 +10796,8 @@ document.addEventListener('DOMContentLoaded', function () {
 const PredictionsState = {
     forecastData: null,      // Dados do forecast (estatísticas gerais)
     predictionsData: null,   // Dados das previsões jogo a jogo
+    liguillaData: null,      // Dados da liguilha (probabilidades condicionais)
+    liguillaScenariosData: null, // Cenários agregados da liguilha
     availableTeams: [],      // Lista de equipas disponíveis
     currentTeamIndex: 0,     // Índice da equipa atual no slider
     selectedTeam: null,      // Nome da equipa selecionada
@@ -10962,16 +10976,17 @@ function updatePredictionsSelectors() {
 }
 
 let previsoesFilesCache = null;
+let predictionsLoadToken = 0;
 
 /**
  * Carrega um ficheiro de previsões com simulações fixas
- * @param {string} fileType - "forecast" ou "previsoes"
+ * @param {string} fileType - "forecast", "previsoes" ou "liguilla"
  * @param {string} modalidadeBase - Nome da modalidade
  * @param {string} anoCompleto - Ano completo (ex: "2026")
  * @returns {Promise<{data: string, sims: number}|null>} - Conteudo do ficheiro CSV e num simulacoes ou null se nao encontrar
  */
 async function tryLoadWithSimulations(fileType, modalidadeBase, anoCompleto) {
-    // GitHub Pages não suporta directory listing, por isso usamos simulações fixas
+    // Tentar primeiro o ficheiro mais comum neste workspace para evitar 404s no console
     const simulations = [1000000, 100000, 10000];
 
     for (const sims of simulations) {
@@ -10996,10 +11011,23 @@ async function tryLoadWithSimulations(fileType, modalidadeBase, anoCompleto) {
  * Carrega os dados de previsões baseado na época e modalidade selecionadas
  */
 async function loadPredictionsData() {
+    predictionsLoadToken += 1;
+    const loadToken = predictionsLoadToken;
+
     const epoca = document.getElementById('epoca').value;
     const modalidade = document.getElementById('modalidade').value;
 
+    const isStaleLoad = () => {
+        const epocaEl = document.getElementById('epoca');
+        const modalidadeEl = document.getElementById('modalidade');
+        return loadToken !== predictionsLoadToken ||
+            !epocaEl || !modalidadeEl ||
+            epocaEl.value !== epoca ||
+            modalidadeEl.value !== modalidade;
+    };
+
     if (!epoca || !modalidade) {
+        if (isStaleLoad()) return;
         setPredictionsCardVisible(true);
         clearPredictionsDisplay();
         return;
@@ -11009,6 +11037,7 @@ async function loadPredictionsData() {
         const modalidadeMatch = modalidade.match(/^(.+)_(\d{2})_(\d{2})$/);
         if (!modalidadeMatch) {
             console.error('Formato de modalidade inválido:', modalidade);
+            if (isStaleLoad()) return;
             setPredictionsCardVisible(true);
             clearPredictionsDisplay();
             return;
@@ -11019,6 +11048,7 @@ async function loadPredictionsData() {
         const anoCompleto = `20${anoFinal}`;
 
         const forecastResult = await tryLoadWithSimulations('forecast', modalidadeBase, anoCompleto);
+        if (isStaleLoad()) return;
         if (!forecastResult) {
             handleMissingPredictionsFiles();
             return;
@@ -11032,6 +11062,7 @@ async function loadPredictionsData() {
         }).data;
 
         const predictionsResult = await tryLoadWithSimulations('previsoes', modalidadeBase, anoCompleto);
+        if (isStaleLoad()) return;
         if (!predictionsResult) {
             handleMissingPredictionsFiles();
             return;
@@ -11043,6 +11074,28 @@ async function loadPredictionsData() {
             skipEmptyLines: true
         }).data;
 
+        // CSV de liguilha é opcional (só existe em modalidades com LM)
+        const liguillaResult = await tryLoadWithSimulations('liguilla', modalidadeBase, anoCompleto);
+        if (isStaleLoad()) return;
+        PredictionsState.liguillaData = liguillaResult
+            ? Papa.parse(liguillaResult.data, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true
+            }).data
+            : [];
+
+        const liguillaScenariosResult = await tryLoadWithSimulations('liguilla_scenarios', modalidadeBase, anoCompleto);
+        if (isStaleLoad()) return;
+        PredictionsState.liguillaScenariosData = liguillaScenariosResult
+            ? Papa.parse(liguillaScenariosResult.data, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true
+            }).data
+            : [];
+
+        if (isStaleLoad()) return;
         setPredictionsCardVisible(true);
         updatePredictionsSimulationsCount();
         updatePredictionsSelectors();
@@ -11055,6 +11108,7 @@ async function loadPredictionsData() {
         }
 
     } catch (error) {
+        if (isStaleLoad()) return;
         console.error('Erro ao carregar previsões:', error);
         setPredictionsCardVisible(true);
         clearPredictionsDisplay('erro ao carregar previsões');
@@ -11109,6 +11163,8 @@ function handleMissingPredictionsFiles() {
             if (epocaTerminou) {
                 PredictionsState.forecastData = null;
                 PredictionsState.predictionsData = null;
+                PredictionsState.liguillaData = null;
+                PredictionsState.liguillaScenariosData = null;
                 PredictionsState.availableTeams = [];
                 PredictionsState.simulations = null;
                 setPredictionsCardVisible(true);
@@ -11126,6 +11182,8 @@ function handleMissingPredictionsFiles() {
     if (!hasPendingMatches) {
         PredictionsState.forecastData = null;
         PredictionsState.predictionsData = null;
+        PredictionsState.liguillaData = null;
+        PredictionsState.liguillaScenariosData = null;
         PredictionsState.availableTeams = [];
         PredictionsState.simulations = null;
         setPredictionsCardVisible(true);
@@ -11139,6 +11197,8 @@ function handleMissingPredictionsFiles() {
     setPredictionsCardVisible(true);
     PredictionsState.forecastData = null;
     PredictionsState.predictionsData = null;
+    PredictionsState.liguillaData = null;
+    PredictionsState.liguillaScenariosData = null;
     PredictionsState.simulations = null;
     updatePredictionsSimulationsCount();
     updatePredictionsSelectors();
@@ -11159,6 +11219,9 @@ function clearPredictionsDisplay(customMessage = null) {
     document.getElementById('predictionsTableBody').innerHTML = `<tr><td colspan="${colspan}" class="no-predictions-message">${message}</td></tr>`;
     document.getElementById('teamHistoryTableBody').innerHTML = `<tr><td colspan="6" class="no-predictions-message">${message}</td></tr>`;
 
+    const regularTableSection = document.getElementById('matchdayPredictionsSection');
+    if (regularTableSection) regularTableSection.style.display = '';
+
     document.getElementById('prevTeamBtn').disabled = true;
     document.getElementById('nextTeamBtn').disabled = true;
 
@@ -11167,6 +11230,8 @@ function clearPredictionsDisplay(customMessage = null) {
 
     PredictionsState.forecastData = null;
     PredictionsState.predictionsData = null;
+    PredictionsState.liguillaData = null;
+    PredictionsState.liguillaScenariosData = null;
     PredictionsState.availableTeams = [];
     PredictionsState.simulations = null;
 }
@@ -11637,6 +11702,7 @@ function updatePredictionsStats() {
         row.team === teamName
     );
 
+
     if (!teamData) {
         document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${t('noStatsAvailable')}</div>`;
         return;
@@ -11789,50 +11855,119 @@ function updatePredictionsTable() {
         return teamA === teamName || teamB === teamName;
     });
 
-    const tbody = document.getElementById('predictionsTableBody');
+    const isPlayoffStage = (jornada) => {
+        if (!jornada) return false;
 
-    if (teamGames.length === 0) {
-        const colspan = modalityAllowsDraws() ? 7 : 6; // 6 colunas se não houver empates
-        tbody.innerHTML = `<tr><td colspan="${colspan}" class="no-predictions-message">${t('noGamesForTeam')}</td></tr>`;
-        return;
+        const normalized = String(jornada)
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, '');
+
+        return normalized.startsWith('e') ||
+            normalized.startsWith('pm') ||
+            normalized.startsWith('lm') ||
+            normalized.includes('quarto') ||
+            normalized.includes('semifinais') ||
+            normalized.includes('final') ||
+            normalized.includes('lugar') ||
+            normalized.includes('playoff') ||
+            normalized.includes('liguilha') ||
+            normalized.includes('1ºfase') ||
+            normalized.includes('1ªfase') ||
+            normalized.includes('fasfinal') ||
+            normalized.includes('fasefinal');
+    };
+
+    const regularGames = teamGames.filter(g => !isPlayoffStage(g.jornada));
+    const playoffGames = teamGames.filter(g => isPlayoffStage(g.jornada));
+
+    const normalizeRoundKey = (round) => String(round ?? '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+
+    // Mostrar previsões jornada-a-jornada apenas para jogos futuros reais do calendário
+    let regularFutureGames = regularGames;
+    if (Array.isArray(sampleData.matches) && sampleData.matches.length > 0) {
+        const normalizedSelectedTeam = normalizeTeamName(teamName);
+        const pendingRegularMatchKeys = new Set(
+            sampleData.matches
+                .filter(match => {
+                    if (!match || !match.team1 || !match.team2) return false;
+                    if (isPlayoffStage(match.jornada)) return false;
+
+                    const isTeamMatch = match.team1 === normalizedSelectedTeam || match.team2 === normalizedSelectedTeam;
+                    if (!isTeamMatch) return false;
+
+                    const score1Missing = match.score1 === null || Number.isNaN(match.score1);
+                    const score2Missing = match.score2 === null || Number.isNaN(match.score2);
+                    return score1Missing || score2Missing;
+                })
+                .map(match => {
+                    const opponent = match.team1 === normalizedSelectedTeam ? match.team2 : match.team1;
+                    return `${normalizeRoundKey(match.jornada)}|${normalizeTeamName(opponent)}`;
+                })
+        );
+
+        regularFutureGames = regularGames.filter(game => {
+            const teamA = normalizeTeamName(game.team_a || '');
+            const teamB = normalizeTeamName(game.team_b || '');
+            const opponent = teamA === normalizedSelectedTeam ? teamB : teamA;
+            const gameKey = `${normalizeRoundKey(game.jornada)}|${normalizeTeamName(opponent)}`;
+            return pendingRegularMatchKeys.has(gameKey);
+        });
     }
 
-    // Ordenar por jornada
-    teamGames.sort((a, b) => (a.jornada || 0) - (b.jornada || 0));
+    const tbody = document.getElementById('predictionsTableBody');
 
-    // Gerar linhas da tabela
-    tbody.innerHTML = teamGames.map(game => {
-        const teamA = game.team_a || '';
-        const teamB = game.team_b || '';
-        const isTeamA = teamA === teamName;
+    // Encontrar o bloco da tabela das previsões jornada a jornada (que não seja a de históricos ou de playoffs)
+    const predictionsCard = document.getElementById('predictions');
+    const allTableSections = Array.from(predictionsCard.querySelectorAll('.predictions-table-section'));
+    const regularTableSection = document.getElementById('matchdayPredictionsSection') || allTableSections.find(s => !s.classList.contains('playoff-scenarios-section') && !s.classList.contains('team-history-section'));
 
-        const opponent = isTeamA ? teamB : teamA;
-        const teamInfo = getCourseInfo(teamName);
-        const opponentInfo = getCourseInfo(opponent);
+    if (regularFutureGames.length === 0) {
+        if (regularTableSection) regularTableSection.style.display = 'none';
+        tbody.innerHTML = '';
+    } else {
+        if (regularTableSection) regularTableSection.style.display = 'block';
+        // Ordenar por jornada
+        regularFutureGames.sort((a, b) => (a.jornada || 0) - (b.jornada || 0));
 
-        // Probabilidades do ponto de vista da equipa selecionada
-        const probWin = isTeamA ? (game.prob_vitoria_a || 0) : (game.prob_vitoria_b || 0);
-        const probDraw = game.prob_empate || 0;
-        const probLoss = isTeamA ? (game.prob_vitoria_b || 0) : (game.prob_vitoria_a || 0);
+        // Gerar linhas da tabela
+        tbody.innerHTML = regularFutureGames.map(game => {
+            const teamA = game.team_a || '';
+            const teamB = game.team_b || '';
+            const isTeamA = teamA === teamName;
 
-        // Golos esperados
-        const expectedGoals = isTeamA ? (game.expected_goals_a || 0) : (game.expected_goals_b || 0);
-        const opponentExpectedGoals = isTeamA ? (game.expected_goals_b || 0) : (game.expected_goals_a || 0);
+            const opponent = isTeamA ? teamB : teamA;
+            const teamInfo = getCourseInfo(teamName);
+            const opponentInfo = getCourseInfo(opponent);
 
-        // Data formatada
-        const dateStr = game.dia ? formatPredictionDate(game.dia) : '-';
-        const distribution = game.distribuicao_placares || '';
-        const encodedDistribution = distribution ? encodeURIComponent(distribution) : '';
+            // Probabilidades do ponto de vista da equipa selecionada
+            const probWin = isTeamA ? (game.prob_vitoria_a || 0) : (game.prob_vitoria_b || 0);
+            const probDraw = game.prob_empate || 0;
+            const probLoss = isTeamA ? (game.prob_vitoria_b || 0) : (game.prob_vitoria_a || 0);
 
-        // Verificar se o adversário é a equipa favorita
-        const isFavoriteOpponent = isTeamFavorite(opponent);
-        const favoriteClass = isFavoriteOpponent ? ' favorite-team-prediction' : '';
+            // Golos esperados
+            const expectedGoals = isTeamA ? (game.expected_goals_a || 0) : (game.expected_goals_b || 0);
+            const opponentExpectedGoals = isTeamA ? (game.expected_goals_b || 0) : (game.expected_goals_a || 0);
 
-        // Nomes curtos das equipas para o tooltip
-        const teamShortName = getTranslatedTeamLabel(teamInfo, teamName);
-        const opponentShortName = getTranslatedTeamLabel(opponentInfo, opponent);
+            // Data formatada
+            const dateStr = game.dia ? formatPredictionDate(game.dia) : '-';
+            const distribution = game.distribuicao_placares || '';
+            const encodedDistribution = distribution ? encodeURIComponent(distribution) : '';
 
-        return `
+            // Verificar se o adversário é a equipa favorita
+            const isFavoriteOpponent = isTeamFavorite(opponent);
+            const favoriteClass = isFavoriteOpponent ? ' favorite-team-prediction' : '';
+
+            // Nomes curtos das equipas para o tooltip
+            const teamShortName = getTranslatedTeamLabel(teamInfo, teamName);
+            const opponentShortName = getTranslatedTeamLabel(opponentInfo, opponent);
+
+            return `
             <tr>
                 <td>${game.jornada || '-'}</td>
                 <td>${dateStr}</td>
@@ -11850,7 +11985,316 @@ function updatePredictionsTable() {
                 </td>
             </tr>
         `;
-    }).join('');
+        }).join('');
+    }
+
+    // Renderizar secção de playoffs
+    const playoffContainer = document.getElementById('playoffScenariosContainer');
+    const playoffSection = document.getElementById('playoffScenariosSection');
+
+    if (playoffContainer && playoffSection) {
+        if (playoffGames.length === 0) {
+            playoffSection.style.display = 'none';
+            playoffContainer.innerHTML = '';
+        } else {
+            playoffSection.style.display = 'block';
+
+            // Extrair o número máximo de ocorrências que funciona como total de simulações
+            const totalSims = PredictionsState.simulations || Math.max(...PredictionsState.predictionsData.map(g => parseInt(g.ocorrencias) || 0), 1);
+
+            // Agrupar jogos de playoff por fase
+            const stages = {};
+            playoffGames.forEach(game => {
+                const s = game.jornada || 'Playoffs';
+                if (!stages[s]) stages[s] = [];
+                stages[s].push(game);
+            });
+
+            // Ordenar as fases (Quartos -> Semifinais -> 3º Lugar -> Final)
+            const stageOrder = ["Quartos", "Semifinais", "3º Lugar", "Final", "Liguilha 1", "Liguilha 2", "Liguilha 3", "1ºFase", "1ª Fase", "Fase final", "PM1", "PM2", "LM1", "LM2", "LM3"];
+            const sortedStages = Object.keys(stages).sort((a, b) => {
+                const idxA = stageOrder.indexOf(a) !== -1 ? stageOrder.indexOf(a) : 99;
+                const idxB = stageOrder.indexOf(b) !== -1 ? stageOrder.indexOf(b) : 99;
+                return idxA - idxB;
+            });
+
+            const playoffTitle = playoffSection.querySelector('.predictions-section-title');
+            const isSecondaryStage = (stage) => {
+                if (!stage) return false;
+
+                const normalized = String(stage)
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, '');
+
+                return normalized.startsWith('pm') ||
+                    normalized.startsWith('lm') ||
+                    normalized.includes('liguilha') ||
+                    normalized.includes('1ºfase') ||
+                    normalized.includes('1ªfase') ||
+                    normalized.includes('fasefinal');
+            };
+
+            const hasSecondaryStage = sortedStages.some(stage => isSecondaryStage(stage));
+            const hasPrimaryStage = sortedStages.some(stage => !isSecondaryStage(stage));
+            if (playoffTitle) {
+                playoffTitle.textContent = (hasPrimaryStage && hasSecondaryStage)
+                    ? t('playoffScenariosTitle')
+                    : (hasSecondaryStage ? t('maintenanceLiguillaScenariosTitle') : t('playoffScenariosTitle'));
+            }
+
+            const primaryStages = sortedStages.filter(stage => !isSecondaryStage(stage));
+            const secondaryStages = sortedStages.filter(stage => isSecondaryStage(stage));
+
+            const normalizeScenarioStageKey = (stageLabel) => {
+                const normalized = String(stageLabel || '')
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, '');
+
+                if (normalized.startsWith('lm')) {
+                    return `liguilha${normalized.slice(2)}`;
+                }
+
+                return normalized;
+            };
+
+            const findLiguillaPredictionRow = (stageLabel, opponentName) => {
+                if (!Array.isArray(PredictionsState.predictionsData)) return null;
+
+                const normalizedStage = normalizeScenarioStageKey(stageLabel);
+                const normalizedTeam = normalizeTeamName(teamName);
+                const normalizedOpponent = normalizeTeamName(opponentName || '');
+
+                return PredictionsState.predictionsData.find(row => {
+                    const rowStage = normalizeScenarioStageKey(row.jornada || '');
+                    if (rowStage !== normalizedStage) return false;
+
+                    const rowTeamA = normalizeTeamName(row.team_a || '');
+                    const rowTeamB = normalizeTeamName(row.team_b || '');
+
+                    return (
+                        (rowTeamA === normalizedTeam && rowTeamB === normalizedOpponent) ||
+                        (rowTeamA === normalizedOpponent && rowTeamB === normalizedTeam)
+                    );
+                }) || null;
+            };
+
+            const renderLiguillaScenarios = () => {
+                if (!Array.isArray(PredictionsState.liguillaScenariosData)) return '';
+
+                const teamScenarios = PredictionsState.liguillaScenariosData
+                    .filter(row => row.team === teamName)
+                    .sort((a, b) => (Number(b.p_cenario) || 0) - (Number(a.p_cenario) || 0));
+                const selectedTeamInfo = getCourseInfo(teamName);
+                const selectedTeamShort = getTranslatedTeamLabel(selectedTeamInfo, teamName);
+                const selectedDivisionRaw = String(selectedTeamInfo?.division || currentDivision || '').trim().toLowerCase();
+                const isFirstDivision = /^1\b|^1ª|^1a|primeira/.test(selectedDivisionRaw);
+                const passProbabilityLabel = isFirstDivision
+                    ? t('scenarioStayProbability')
+                    : t('scenarioPromotionProbability');
+
+                if (teamScenarios.length === 0) return '';
+
+                return `
+                    <div class="playoff-stage-group liguilla-scenarios-group">
+                        <h4 class="playoff-stage-header">
+                            <span class="playoff-badge badge-default">${t('liguillaScenariosGroupedTitle')}</span>
+                        </h4>
+                        <div class="playoff-matchups-grid liguilla-matchups-grid">
+                            ${teamScenarios.map((scenario) => {
+                    const pScenario = Number(scenario.p_cenario) || 0;
+                    const pPass = Number(scenario.p_passa_cenario_cond) || 0;
+                    const game1Stage = scenario.stage_game1 || 'LM1';
+                    const game2Stage = scenario.stage_game2 || 'LM2';
+                    const opp1 = scenario.opponent_game1 || t('unknown');
+                    const opp2 = scenario.opponent_game2 || t('unknown');
+                    const opp1Info = getCourseInfo(opp1);
+                    const opp2Info = getCourseInfo(opp2);
+                    const opp1Display = opp1Info?.fullName || opp1Info?.shortName || opp1;
+                    const opp2Display = opp2Info?.fullName || opp2Info?.shortName || opp2;
+                    const predRow1 = findLiguillaPredictionRow(game1Stage, opp1);
+                    const predRow2 = findLiguillaPredictionRow(game2Stage, opp2);
+
+                    const scenarioGoalsText = (predRow, opponentName) => {
+                        if (!predRow) return null;
+
+                        const selectedIsA = normalizeTeamName(predRow.team_a || '') === normalizeTeamName(teamName);
+                        const selectedGoals = selectedIsA ? predRow.expected_goals_a : predRow.expected_goals_b;
+                        const opponentGoals = selectedIsA ? predRow.expected_goals_b : predRow.expected_goals_a;
+                        const opponentInfo = getCourseInfo(opponentName);
+                        const opponentDisplay = opponentInfo?.fullName || opponentInfo?.shortName || opponentName;
+                        const distribution = predRow.distribuicao_placares || '';
+                        return {
+                            text: `${Number(selectedGoals || 0).toFixed(1)} - ${Number(opponentGoals || 0).toFixed(1)}`,
+                            distribution,
+                            opponentDisplay,
+                            isTeamA: selectedIsA,
+                        };
+                    };
+
+                    const game1Goals = scenarioGoalsText(predRow1, opp1);
+                    const game2Goals = scenarioGoalsText(predRow2, opp2);
+                    const scenarioTitle = `${opp1Display} e ${opp2Display}`;
+
+                    return `
+                                    <div class="playoff-matchup-card">
+                                        <div class="playoff-opponent-info liguilla-scenario-headline">
+                                            <span class="liguilla-scenario-stage">${scenarioTitle}</span>
+                                        </div>
+                                        <div class="liguilla-scenario-prob-row">
+                                            <span class="liguilla-scenario-prob">${t('scenarioProbability')}: <strong>${pScenario.toFixed(1)}%</strong></span>
+                                        </div>
+                                        <div class="matchup-likelihood">
+                                            <div class="playoff-progress-bar">
+                                                <div class="playoff-progress-fill" style="width: ${Math.max(0, Math.min(100, pScenario))}%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="liguilla-compact-game-row">
+                                            <div class="liguilla-game-label">Jogo 1 x ${opp1Display}</div>
+                                            <div class="liguilla-game-stats-compact">
+                                                <div class="liguilla-game-probs-line">
+                                                    <span class="liguilla-stat-pill">${t('predWinProb')} ${(Number(scenario.p_win_game1) || 0).toFixed(1)}%</span>
+                                                    <span class="liguilla-stat-pill">${t('predDrawProb')} ${(Number(scenario.p_draw_game1) || 0).toFixed(1)}%</span>
+                                                    <span class="liguilla-stat-pill">${t('predLossProb')} ${(Number(scenario.p_loss_game1) || 0).toFixed(1)}%</span>
+                                                </div>
+                                                <div class="liguilla-game-goals-line">
+                                                    <span class="liguilla-stat-pill liguilla-stat-pill-goals expected-goals-cell" ${game1Goals ? `data-distribution="${encodeURIComponent(game1Goals.distribution || '')}" data-isteama="${game1Goals.isTeamA ? '1' : '0'}" data-team-short="${selectedTeamShort}" data-opponent-short="${getTranslatedTeamLabel(opp1Info, opp1)}"` : ''}>${t('goalsExpected') || 'Golos Esp.'} ${game1Goals ? game1Goals.text : '—'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="liguilla-compact-game-row">
+                                            <div class="liguilla-game-label">Jogo 2 x ${opp2Display}</div>
+                                            <div class="liguilla-game-stats-compact">
+                                                <div class="liguilla-game-probs-line">
+                                                    <span class="liguilla-stat-pill">${t('predWinProb')} ${(Number(scenario.p_win_game2) || 0).toFixed(1)}%</span>
+                                                    <span class="liguilla-stat-pill">${t('predDrawProb')} ${(Number(scenario.p_draw_game2) || 0).toFixed(1)}%</span>
+                                                    <span class="liguilla-stat-pill">${t('predLossProb')} ${(Number(scenario.p_loss_game2) || 0).toFixed(1)}%</span>
+                                                </div>
+                                                <div class="liguilla-game-goals-line">
+                                                    <span class="liguilla-stat-pill liguilla-stat-pill-goals expected-goals-cell" ${game2Goals ? `data-distribution="${encodeURIComponent(game2Goals.distribution || '')}" data-isteama="${game2Goals.isTeamA ? '1' : '0'}" data-team-short="${selectedTeamShort}" data-opponent-short="${getTranslatedTeamLabel(opp2Info, opp2)}"` : ''}>${t('goalsExpected') || 'Golos Esp.'} ${game2Goals ? game2Goals.text : '—'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="win-prob-line">
+                                            ${passProbabilityLabel}: <span class="prediction-prob ${getProbClass(pPass)}">${pPass.toFixed(1)}%</span>
+                                        </div>
+                                    </div>
+                                `;
+                }).join('')}
+                        </div>
+                    </div>
+                `;
+            };
+
+            const renderStageGroups = (stageList) => {
+                let html = '';
+
+                stageList.forEach(stage => {
+                    const stageGames = stages[stage];
+                    // Ordenar por probabilidade de encontro (decrescente)
+                    stageGames.sort((a, b) => parseInt(b.ocorrencias || 0) - parseInt(a.ocorrencias || 0));
+
+                    // Calcular a probabilidade de chegar a esta fase (soma das ocorrências dos matchups desta equipa)
+                    let stageProb = 0;
+                    stageGames.forEach(g => stageProb += (parseInt(g.ocorrencias || 0) / totalSims));
+                    const stageProbDisplay = Math.min(stageProb * 100, 100).toFixed(1);
+
+                    let badgeClass = 'badge-default';
+                    if (stage === 'Final') badgeClass = 'badge-gold';
+                    if (stage === '3º Lugar' || stage === 'Semifinais') badgeClass = 'badge-silver';
+
+                    html += `<div class="playoff-stage-group">
+                        <h4 class="playoff-stage-header">
+                            <span class="playoff-badge ${badgeClass}">${stage}</span> 
+                            <span class="playoff-stage-prob">(Disputa esta fase em ~${stageProbDisplay}% dos cenários)</span>
+                        </h4>
+                        <div class="playoff-matchups-grid liguilla-matchups-grid">
+                    `;
+
+                    stageGames.forEach(game => {
+                        const teamA = game.team_a || '';
+                        const teamB = game.team_b || '';
+                        const isTeamA = teamA === teamName;
+                        const opponent = isTeamA ? teamB : teamA;
+                        const teamInfo = getCourseInfo(teamName);
+                        const opponentInfo = getCourseInfo(opponent);
+
+                        const probWin = isTeamA ? (game.prob_vitoria_a || 0) : (game.prob_vitoria_b || 0);
+                        const occurrences = parseInt(game.ocorrencias || 0);
+                        const matchupProb = (occurrences / totalSims) * 100;
+
+                        // Golos esperados e distribuição
+                        const expectedGoals = isTeamA ? (game.expected_goals_a || 0) : (game.expected_goals_b || 0);
+                        const opponentExpectedGoals = isTeamA ? (game.expected_goals_b || 0) : (game.expected_goals_a || 0);
+                        const distribution = game.distribuicao_placares || '';
+                        const encodedDistribution = distribution ? encodeURIComponent(distribution) : '';
+                        const teamShortName = getTranslatedTeamLabel(teamInfo, teamName);
+                        const opponentShortName = getTranslatedTeamLabel(opponentInfo, opponent);
+
+                        // Se a probabilidade for muito baixa, não carregar o ecrã
+                        if (matchupProb < 0.1) return;
+
+                        html += `
+                        <div class="playoff-matchup-card">
+                            <div class="playoff-opponent-info">
+                                ${opponentInfo.emblemPath ? `<img src="${opponentInfo.emblemPath}" alt="${translateTeamName(opponentInfo.shortName)}" class="prediction-opponent-emblem">` : ''}
+                                <span>vs <strong>${translateTeamName(opponentInfo.fullName || opponentInfo.shortName || opponent)}</strong></span>
+                            </div>
+                            <div class="matchup-likelihood">
+                                <div class="matchup-stats-text">
+                                    <span>Probabilidade de Confronto:</span>
+                                    <strong>${matchupProb.toFixed(1)}%</strong>
+                                </div>
+                                <div class="playoff-progress-bar">
+                                    <div class="playoff-progress-fill" style="width: ${matchupProb}%"></div>
+                                </div>
+                            </div>
+                            <div class="win-prob-line">
+                                Hipótese de Vitória: <span class="prediction-prob ${getProbClass(probWin)}">${probWin.toFixed(1)}%</span>
+                            </div>
+                            <div class="win-prob-line expected-goals-cell" style="cursor: help;" data-distribution="${encodedDistribution}" data-isteama="${isTeamA ? '1' : '0'}" data-team-short="${teamShortName}" data-opponent-short="${opponentShortName}">
+                                Golos Esp.: <strong>${expectedGoals.toFixed(1)} - ${opponentExpectedGoals.toFixed(1)}</strong>
+                            </div>
+                        </div>
+                    `;
+                    });
+
+                    html += `</div></div>`;
+                });
+
+                return html;
+            };
+
+            let playoffHtml = '';
+
+            if (primaryStages.length > 0) {
+                playoffHtml += renderStageGroups(primaryStages);
+            }
+
+            if (primaryStages.length > 0 && secondaryStages.length > 0) {
+                playoffHtml += `
+                    <div class="playoff-scenarios-divider" aria-hidden="true">
+                        <span>${t('maintenanceLiguillaScenariosTitle')}</span>
+                    </div>
+                `;
+            }
+
+            const secondaryNonLiguillaStages = secondaryStages.filter(stage => !normalizeScenarioStageKey(stage).startsWith('liguilha'));
+
+            if (Array.isArray(PredictionsState.liguillaScenariosData) && PredictionsState.liguillaScenariosData.length > 0) {
+                playoffHtml += renderLiguillaScenarios();
+            }
+
+            if (secondaryNonLiguillaStages.length > 0) {
+                playoffHtml += renderStageGroups(secondaryNonLiguillaStages);
+            }
+
+            playoffContainer.innerHTML = playoffHtml;
+        }
+    }
 
     attachPredictionsTooltipHandlers();
     updatePredictionsDrawsColumnVisibility();
@@ -12443,7 +12887,7 @@ function attachPredictionsTooltipHandlers() {
         predictionsTooltipEl = createPredictionsTooltip();
     }
 
-    const cells = document.querySelectorAll('.predictions-table tbody td.expected-goals-cell');
+    const cells = document.querySelectorAll('.expected-goals-cell');
 
     cells.forEach(cell => {
         // Remove event listeners anteriores
@@ -12604,24 +13048,28 @@ function updateTooltipPosition(e) {
     const rect = e.currentTarget.getBoundingClientRect();
     const tooltipRect = predictionsTooltipEl.getBoundingClientRect();
     const tooltipWidth = 300;
-    const padding = 10; // Espaço mínimo da borda da viewport
+    const padding = 10;
 
-    // Encontra a tabela de previsões para alinhar a direita
-    const table = document.querySelector('.predictions-table');
     let left;
+    let top;
 
-    if (table) {
-        const tableRect = table.getBoundingClientRect();
-        // Alinha a direita do tooltip com a direita da tabela
-        left = tableRect.right - tooltipWidth;
+    const isPlayoffCard = e.currentTarget.closest('.playoff-matchup-card');
+
+    if (isPlayoffCard) {
+        // Alinhamento relativo ao centro da carta do playoff
+        left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        top = rect.top - 350; // altura tipica do componente 
     } else {
-        // Fallback: centra na viewport
-        left = (window.innerWidth - tooltipWidth) / 2;
+        const table = document.querySelector('.predictions-table');
+        if (table) {
+            const tableRect = table.getBoundingClientRect();
+            left = tableRect.right - tooltipWidth;
+        } else {
+            left = (window.innerWidth - tooltipWidth) / 2;
+        }
+        top = rect.top - 350;
     }
 
-    let top = rect.top - 350;
-
-    // Garante margens mínimas na horizontal
     if (left < padding) {
         left = padding;
     }

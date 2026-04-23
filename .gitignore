@@ -9,3 +9,6 @@ cenarios/
 
 # backups de reprocessamento
 docs/output/backups/
+
+# pasta de migração para react
+web/
