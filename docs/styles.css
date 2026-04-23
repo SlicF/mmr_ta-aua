@@ -182,6 +182,10 @@ body {
     transform 0.3s ease,
     box-shadow 0.3s ease;
   border: 1px solid rgba(42, 82, 152, 0.1);
+  /* Mitigar CLS: reserva espaço mínimo para o card */
+  min-height: 200px;
+  contain: content;
+  contain-intrinsic-size: auto 400px;
 }
 
 /* Card discreto para a Liguinha de Manutenção */

@@ -1,9 +1,4 @@
 
-// ==================== CONSTANTES GLOBAIS ====================
-const DEFAULT_ELO = 750;
-const ENABLE_RANKING_SPARKLINES = true; // Mostrar micro-tendência de ELO na tabela
-const SPARKLINE_POINTS = 10; // número de pontos mais recentes
-
 /**
  * Detecta se o dispositivo é móvel
  * @returns {boolean} true se for dispositivo móvel
@@ -25,6 +20,23 @@ if (typeof window !== 'undefined') {
         cachedIsMobileDevice = null;
     });
 }
+
+/**
+ * Converte um caminho relativo para um URL absoluto
+ * Necessário para PapaParse workers, que não resolvem caminhos relativos corretamente (Blob context)
+ * @param {string} path Caminho relativo
+ * @returns {string} URL absoluto
+ */
+function toAbsoluteUrl(path) {
+    if (!path) return path;
+    if (path.startsWith('http') || path.startsWith('//')) return path;
+    return new URL(path, window.location.href).href;
+}
+
+// ==================== CONSTANTES GLOBAIS ====================
+const DEFAULT_ELO = 750;
+const ENABLE_RANKING_SPARKLINES = !isMobileDevice(); // Desativar em mobile para performance
+const SPARKLINE_POINTS = 10; // número de pontos mais recentes
 
 function getLastValidElo(teamName) {
     if (sampleData && sampleData.eloHistory && sampleData.eloHistory[teamName]) {
@@ -293,17 +305,42 @@ function initializeCollapsibles() {
 
     if (!toggleBtn || !chartContent) return;
 
-    const isCollapsed = localStorage.getItem('eloChartCollapsed') === 'true';
+    // Default to collapsed if not set (Performance optimization)
+    const storedState = localStorage.getItem('eloChartCollapsed');
+    const isCollapsed = storedState === null ? true : storedState === 'true';
+    
     chartContent.classList.toggle('collapsed', isCollapsed);
     toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
 
     toggleBtn.addEventListener('click', () => {
-        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-        const nowCollapsed = !expanded;
+        const wasExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        const nowExpanded = !wasExpanded;
+        const nowCollapsed = !nowExpanded;
+
         chartContent.classList.toggle('collapsed', nowCollapsed);
-        toggleBtn.setAttribute('aria-expanded', String(!nowCollapsed));
+        toggleBtn.setAttribute('aria-expanded', String(nowExpanded));
         localStorage.setItem('eloChartCollapsed', String(nowCollapsed));
+
+        // Se expandiu e o gráfico ainda não foi inicializado, inicializar agora
+        if (nowExpanded && !eloChart) {
+            initEloChart();
+            updateEloChart();
+        }
     });
+}
+
+
+let calendarSortModeDebounceTimer = null;
+function setCalendarSortModeWithDebounce(mode) {
+    if (calendarSortModeDebounceTimer) clearTimeout(calendarSortModeDebounceTimer);
+    
+    // Feedback visual imediato
+    calendarSortMode = mode;
+    updateCalendarSortControls();
+    
+    calendarSortModeDebounceTimer = setTimeout(() => {
+        setCalendarSortMode(mode);
+    }, 50);
 }
 
 function initializeCalendarSortControls() {
@@ -314,17 +351,17 @@ function initializeCalendarSortControls() {
     if (!dateTimeBtn || !matchdayBtn || !teamBtn) return;
 
     if (!dateTimeBtn.dataset.bound) {
-        dateTimeBtn.addEventListener('click', () => setCalendarSortMode(CALENDAR_SORT_MODE_DATE_TIME));
+        dateTimeBtn.addEventListener('click', () => setCalendarSortModeWithDebounce(CALENDAR_SORT_MODE_DATE_TIME));
         dateTimeBtn.dataset.bound = 'true';
     }
 
     if (!matchdayBtn.dataset.bound) {
-        matchdayBtn.addEventListener('click', () => setCalendarSortMode(CALENDAR_SORT_MODE_MATCHDAY));
+        matchdayBtn.addEventListener('click', () => setCalendarSortModeWithDebounce(CALENDAR_SORT_MODE_MATCHDAY));
         matchdayBtn.dataset.bound = 'true';
     }
 
     if (!teamBtn.dataset.bound) {
-        teamBtn.addEventListener('click', () => setCalendarSortMode(CALENDAR_SORT_MODE_TEAM));
+        teamBtn.addEventListener('click', () => setCalendarSortModeWithDebounce(CALENDAR_SORT_MODE_TEAM));
         teamBtn.dataset.bound = 'true';
     }
 
@@ -425,8 +462,8 @@ async function initApp() {
     document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="13" style="text-align: center; color: #666;">' + t('selectModality') + '</td></tr>';
     document.getElementById('bracketContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">' + t('selectModalityBracket') + '</p>';
 
-    // Inicializar gráfico vazio
-    initEloChart();
+    // Inicializar gráfico vazio - agora com lazy loading
+    lazyInitEloChart();
 
     // Disparar evento de mudança na modalidade para carregar dados iniciais (User Feedback: Render on Load)
     requestAnimationFrame(() => {
@@ -435,6 +472,41 @@ async function initApp() {
             modalitySelector.dispatchEvent(new Event('change'));
         }
     });
+}
+
+/**
+ * Inicializa o gráfico ELO com lazy loading
+ */
+function lazyInitEloChart() {
+    const chartSection = document.getElementById('elo');
+    const toggleBtn = document.getElementById('toggleEloChart');
+    const isExpanded = toggleBtn ? toggleBtn.getAttribute('aria-expanded') === 'true' : true;
+
+    if (!chartSection) {
+        initEloChart();
+        return;
+    }
+
+    // Se estiver colapsado, não inicializar pelo observer (esperar clique no botão)
+    if (!isExpanded) {
+        return;
+    }
+
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                observer.disconnect();
+                if (!eloChart) {
+                    initEloChart();
+                    updateEloChart();
+                }
+            }
+        }, { rootMargin: '200px' });
+        observer.observe(chartSection);
+    } else {
+        // Fallback para browsers antigos
+        initEloChart();
+    }
 }
 
 // Criar seletor de equipas
@@ -460,10 +532,10 @@ function createTeamSelector() {
             }
             #teamSelector label.team-checkbox {
                 transition: transform 0.3s ease, opacity 0.3s ease;
-                will-change: transform;
             }
             #teamSelector label.team-checkbox.moving {
                 z-index: 10;
+                will-change: transform;
             }
         `;
         document.head.appendChild(style);
@@ -606,6 +678,7 @@ function createTeamSelector() {
                 if (team.emblemPath) {
                     const emblem = document.createElement('img');
                     emblem.src = team.emblemPath;
+                    emblem.loading = 'lazy';
                     emblem.alt = team.name;
                     emblem.className = 'team-emblem';
                     emblem.style.marginRight = '4px';
@@ -3058,7 +3131,7 @@ function updateRankingsTable() {
 
     // Helper para sparkline de ELO (tendência curta)
     const buildEloSparkline = (teamName) => {
-        if (!ENABLE_RANKING_SPARKLINES) return '';
+        if (!ENABLE_RANKING_SPARKLINES || isMobileDevice()) return '';
         const history = sampleData.eloHistory?.[teamName] || [];
         const valid = history.filter(v => v !== null && v !== undefined && !isNaN(v));
         if (!valid.length) return '<span class="sparkline-empty">—</span>';
@@ -3122,8 +3195,8 @@ function updateRankingsTable() {
         // Tabela usa nome curto em modo compacto, nome completo caso contrário
         const baseTeamName = compactModeEnabled ? courseInfo.shortName : courseInfo.fullName;
         const displayTeamName = translateTeamName(baseTeamName);
-        const emblemHtml = (!compactModeEnabled && courseInfo.emblemPath) ?
-            `<img src="${courseInfo.emblemPath}" alt="${normalizedTeamName}" class="team-emblem-table" onerror="this.style.display='none'">` :
+        const emblemHtml = (!compactModeEnabled && !isMobileDevice() && courseInfo.emblemPath) ?
+            `<img src="${courseInfo.emblemPath}" alt="${normalizedTeamName}" class="team-emblem-table" loading="lazy" onerror="this.style.display='none'">` :
             '';
 
         // Criar indicador de progressão
@@ -3175,8 +3248,8 @@ function updateRankingsTable() {
                     <td>${team.goals || 0}</td>
                     <td>${team.conceded || 0}</td>
                     <td style="color: ${goalDiff > 0 ? '#28a745' : goalDiff < 0 ? '#dc3545' : '#666'}">${goalDiffText}</td>
-                    <td class="sparkline-cell" style="display: ${compactModeEnabled ? 'none' : ''}">${buildEloSparkline(team.team)}</td>
-                    <td class="form-column" style="display: ${compactModeEnabled ? 'none' : ''}">${formBadgesHtml}</td>
+                    <td class="sparkline-cell" style="display: ${(compactModeEnabled || isMobileDevice()) ? 'none' : ''}">${buildEloSparkline(team.team)}</td>
+                    <td class="form-column" style="display: ${(compactModeEnabled || isMobileDevice()) ? 'none' : ''}">${formBadgesHtml}</td>
                 `;
         row.classList.add(zoneClass);
 
@@ -3863,9 +3936,10 @@ function createRealBracket() {
 
     const jogosPath = `output/csv_modalidades/${modalidade}.csv`;
 
-    Papa.parse(jogosPath, {
+    Papa.parse(toAbsoluteUrl(jogosPath), {
         download: true,
         header: true,
+        worker: true,
         complete: results => {
             if (requestedModalidade !== currentModalidade) return;
             // Salvar dados do calendário para verificação de resultados desconhecidos
@@ -6230,6 +6304,81 @@ function parseDateWithTime(dateStr, timeStr) {
     return new Date(year, month, day, hours, minutes);
 }
 
+/**
+ * Normaliza a chave de uma jornada ou fase (para indexação e comparação)
+ */
+function normalizeScenarioStageKey(stageLabel) {
+    const normalized = String(stageLabel || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+
+    if (normalized.startsWith('lm')) {
+        return `liguilha${normalized.slice(2)}`;
+    }
+
+    return normalized;
+}
+
+/**
+ * Normaliza a chave de uma jornada numérica ou curta
+ */
+function normalizeRoundKey(round) {
+    return String(round ?? '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+}
+
+/**
+ * Verifica se uma jornada/fase é de playoff
+ */
+function isPlayoffStage(jornada) {
+    if (!jornada) return false;
+
+    const normalized = String(jornada)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+
+    return normalized.startsWith('e') ||
+        normalized.startsWith('pm') ||
+        normalized.startsWith('lm') ||
+        normalized.includes('quarto') ||
+        normalized.includes('semifinais') ||
+        normalized.includes('final') ||
+        normalized.includes('lugar') ||
+        normalized.includes('playoff') ||
+        normalized.includes('liguilha') ||
+        normalized.includes('1ºfase') ||
+        normalized.includes('1ªfase') ||
+        normalized.includes('fasfinal') ||
+        normalized.includes('fasefinal');
+}
+
+/**
+ * Verifica se é uma fase secundária (manutenção/liguilha)
+ */
+function isSecondaryStage(stage) {
+    if (!stage) return false;
+
+    const normalized = String(stage)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+
+    return normalized.startsWith('pm') ||
+        normalized.startsWith('lm') ||
+        normalized.includes('liguilha') ||
+        normalized.includes('1ºfase') ||
+        normalized.includes('1ªfase') ||
+        normalized.includes('fasefinal');
+}
+
 function normalizeTeamName(teamName) {
     if (!teamName) return teamName;
 
@@ -6859,13 +7008,18 @@ function updateSelectorLabels() {
 // Função para trocar época
 function changeEpoca(epoca) {
     if (!epoca || epoca === currentEpoca) return;
-
-    currentEpoca = epoca;
-
+    
+    // Feedback imediato
+    document.getElementById('rankingsBody').innerHTML = `<tr><td colspan="11" class="loading">${t('loadingData')}</td></tr>`;
+    
     // Salvar época selecionada no cache
     localStorage.setItem('mmr_selectedEpoca', epoca);
+    currentEpoca = epoca;
 
-    updateModalidadeSelector();
+    // Yield para permitir que o browser mostre o feedback visual antes do pesado processamento do seletor
+    setTimeout(() => {
+        updateModalidadeSelector();
+    }, 10);
 }
 
 /**
@@ -7744,9 +7898,10 @@ async function loadHistoricalData(modalidade) {
 
         // Carregar classificações
         const classPromise = new Promise((resolve) => {
-            Papa.parse(classificacaoPath, {
+            Papa.parse(toAbsoluteUrl(classificacaoPath), {
                 download: true,
                 header: true,
+                worker: true,
                 complete: (results) => {
                     resolve({ epoca, tipo: 'classificacoes', data: results.data });
                 },
@@ -7758,9 +7913,10 @@ async function loadHistoricalData(modalidade) {
 
         // Carregar detalhes
         const detPromise = new Promise((resolve) => {
-            Papa.parse(detalhePath, {
+            Papa.parse(toAbsoluteUrl(detalhePath), {
                 download: true,
                 header: true,
+                worker: true,
                 complete: (results) => {
                     resolve({ epoca, tipo: 'detalhes', data: results.data });
                 },
@@ -7772,9 +7928,10 @@ async function loadHistoricalData(modalidade) {
 
         // Carregar ELO
         const eloPromise = new Promise((resolve) => {
-            Papa.parse(eloPath, {
+            Papa.parse(toAbsoluteUrl(eloPath), {
                 download: true,
                 header: true,
+                worker: true,
                 complete: (results) => {
                     resolve({ epoca, tipo: 'elo', data: results.data });
                 },
@@ -8078,57 +8235,49 @@ function changeModalidade(mod) {
                     }
                 }
 
-                // ===== PASSO 2: Renderizar seletores (que vão respeitar appState.view já definido) =====
+                // ===== PASSO 2: Renderizar seletores prioritários =====
                 createTeamSelector();
                 createDivisionSelector();
-                updateGroupSelector(); // Garantir que seletor de grupos é renderizado
+                updateGroupSelector();
                 updateRankingsTable();
-                initializeCalendarSelectors(); // Inicializar calendário
-                // Brackets serão carregados depois de processar rankings
 
-                // ===== PASSO 3: Sincronizar gráfico com a vista final =====
-                if (appState.view.group) {
-                    // Seletor de grupo já trata da lógica de filtrar
-                    const groupLetter = appState.view.group.replace('Grupo ', '');
-                    filterGroup(groupLetter);
-                } else if (appState.view.division) {
-                    filterDivision(appState.view.division);
-                } else {
-                }
-
-                // Disparar evento indicando que os dados foram carregados
-                document.dispatchEvent(new CustomEvent('data:loaded'));
-
-                // Trabalhos pesados em segundo plano: primeiro histórico, gráfico por último
+                // ===== PASSO 3: Renderizar componentes secundários em background =====
                 scheduleLowPriorityTask(() => {
                     if (loadToken !== currentLoadToken) return;
-
+                    
+                    initializeCalendarSelectors();
                     updateQuickFilters();
 
-                    loadHistoricalData(mod).catch(err => {
-                        console.error('Erro ao carregar dados históricos:', err);
-                    });
+                    if (appState.view.group) {
+                        const groupLetter = appState.view.group.replace('Grupo ', '');
+                        filterGroup(groupLetter);
+                    } else if (appState.view.division) {
+                        filterDivision(appState.view.division);
+                    }
 
+                    // Disparar evento indicando que os dados básicos foram carregados
+                    document.dispatchEvent(new CustomEvent('data:loaded'));
+
+                    // Trabalhos pesados por último
                     scheduleLowPriorityTask(() => {
                         if (loadToken !== currentLoadToken) return;
 
-                        if (eloChart) {
-                            try {
-                                updateEloChart();
-                            } catch (error) {
-                                console.error('Erro ao atualizar gráfico ELO:', error);
-                            }
-                        }
-                    }, 1500);
-                }, 500);
+                        loadHistoricalData(mod).catch(err => {
+                            console.error('Erro ao carregar dados históricos:', err);
+                        });
+
+                        // updateEloChart já é tratado pelo IntersectionObserver
+                    }, 500);
+                }, 100);
             });
         }
     }
 
-    // Carregar CSVs
-    Papa.parse(classificacaoPath, {
+    // Carregar CSVs com Web Worker
+    Papa.parse(toAbsoluteUrl(classificacaoPath), {
         download: true,
         header: true,
+        worker: true,
         complete: results => {
             if (loadToken !== currentLoadToken) return;
             processRankings(results.data);
@@ -8141,9 +8290,10 @@ function changeModalidade(mod) {
         }
     });
 
-    Papa.parse(jogosPath, {
+    Papa.parse(toAbsoluteUrl(jogosPath), {
         download: true,
         header: true,
+        worker: true,
         complete: results => {
             if (loadToken !== currentLoadToken) return;
             processMatches(results.data);
@@ -8175,9 +8325,10 @@ function changeModalidade(mod) {
         });
 
     // Carregar ficheiro elo_*.csv com ELOs iniciais PRIMEIRO
-    Papa.parse(eloPath, {
+    Papa.parse(toAbsoluteUrl(eloPath), {
         download: true,
-        header: false, // Sem cabeçalho - primeira linha é nomes, segunda é valores
+        header: false,
+        worker: true, // Sem cabeçalho - primeira linha é nomes, segunda é valores
         complete: results => {
             if (loadToken !== currentLoadToken) return;
             if (results.data && results.data.length >= 2) {
@@ -8205,9 +8356,10 @@ function changeModalidade(mod) {
                     const previousEpoch = availableEpocas[previousEpochIndex];
                     const previousEloPath = `output/elo_ratings/elo_${mod.replace(currentEpoch, previousEpoch)}.csv`;
 
-                    Papa.parse(previousEloPath, {
+                    Papa.parse(toAbsoluteUrl(previousEloPath), {
                         download: true,
                         header: false,
+                        worker: true,
                         complete: prevResults => {
                             if (loadToken !== currentLoadToken) return;
                             if (prevResults.data && prevResults.data.length >= 1) {
@@ -8237,9 +8389,10 @@ function changeModalidade(mod) {
                 checkAllLoaded();
 
                 // AGORA SIM carregar detalhe (só depois de ter os ELOs iniciais)
-                Papa.parse(detalhePath, {
+                Papa.parse(toAbsoluteUrl(detalhePath), {
                     download: true,
                     header: true,
+                    worker: true,
                     skipEmptyLines: true,
                     complete: results => {
                         if (loadToken !== currentLoadToken) return;
@@ -9103,8 +9256,22 @@ function switchCalendarGroup(group) {
     updatePredictionsDisplay();
 }
 
-// Mudar jornada (navegação com setas)
+let changeJornadaDebounceTimer = null;
 function changeJornada(direction) {
+    if (changeJornadaDebounceTimer) return; // Ignorar cliques múltiplos ultra-rápidos
+
+    // Yield imediato
+    requestAnimationFrame(() => {
+        _changeJornadaImpl(direction);
+        
+        // Bloqueio temporário para evitar "clique-frenzy" em CPUs lentas
+        changeJornadaDebounceTimer = setTimeout(() => {
+            changeJornadaDebounceTimer = null;
+        }, 100);
+    });
+}
+
+function _changeJornadaImpl(direction) {
     if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
         if (availableCalendarTeamPages.length === 0) return;
 
@@ -9257,7 +9424,7 @@ function updateJornadaDisplay() {
         if (emblemPath) {
             jornadaTitle.innerHTML = `
                 <span class="jornada-team-title">
-                    <img src="${emblemPath}" alt="${escapeHtmlAttribute(teamLabel)}" class="jornada-team-emblem" onerror="this.style.display='none'">
+                    <img src="${emblemPath}" alt="${escapeHtmlAttribute(teamLabel)}" class="jornada-team-emblem" loading="lazy" onerror="this.style.display='none'">
                     <span>${escapeHtml(teamLabel)}</span>
                 </span>
             `;
@@ -9408,14 +9575,28 @@ function updateCalendar() {
         games.sort(compareCalendarMatchesChronologically);
     }
 
-    // Renderizar jogos
+    // Renderizar jogos em CHUNKS para evitar bloquear a main thread (INP fix)
     gamesList.innerHTML = '';
-    const fragment = document.createDocumentFragment();
-    games.forEach(game => {
-        const gameItem = createGameItem(game);
-        fragment.appendChild(gameItem);
-    });
-    gamesList.appendChild(fragment);
+    const CHUNK_SIZE = 15;
+    let index = 0;
+
+    function renderNextChunk() {
+        const fragment = document.createDocumentFragment();
+        const end = Math.min(index + CHUNK_SIZE, games.length);
+        
+        for (; index < end; index++) {
+            const gameItem = createGameItem(games[index]);
+            fragment.appendChild(gameItem);
+        }
+        
+        gamesList.appendChild(fragment);
+
+        if (index < games.length) {
+            scheduleLowPriorityTask(renderNextChunk, 100);
+        }
+    }
+
+    renderNextChunk();
 }
 
 // Criar elemento HTML de um jogo
@@ -9500,9 +9681,9 @@ function createGameItem(game) {
 
     // Emblemas
     const emblem1Html = team1Info.emblemPath ?
-        `<img src="${team1Info.emblemPath}" class="game-team-emblem" alt="${displayTeam1}" onerror="this.style.display='none'">` : '';
+        `<img src="${team1Info.emblemPath}" class="game-team-emblem" alt="${displayTeam1}" loading="lazy" onerror="this.style.display='none'">` : '';
     const emblem2Html = team2Info.emblemPath ?
-        `<img src="${team2Info.emblemPath}" class="game-team-emblem" alt="${displayTeam2}" onerror="this.style.display='none'">` : '';
+        `<img src="${team2Info.emblemPath}" class="game-team-emblem" alt="${displayTeam2}" loading="lazy" onerror="this.style.display='none'">` : '';
 
     div.innerHTML = `
                 <div class="game-meta">
@@ -10991,6 +11172,18 @@ eventManager.init();
 
 // Seletores de época e modalidade
 eventManager.on('#epoca', 'change', (e) => changeEpoca(e.target.value));
+
+// Listener para scroll: processar updates pendentes (INP optimization)
+window.addEventListener('scroll', () => {
+    const predictionsCard = document.getElementById('predictions');
+    if (predictionsCard && predictionsCard.dataset.pendingUpdate === 'true') {
+        const rect = predictionsCard.getBoundingClientRect();
+        const isVisible = (rect.top < window.innerHeight + 1000) && (rect.bottom > -1000);
+        if (isVisible) {
+            updatePredictionsDisplay();
+        }
+    }
+}, { passive: true });
 eventManager.on('#modalidade', 'change', (e) => changeModalidade(e.target.value));
 
 // Botões de zoom
@@ -11281,6 +11474,43 @@ async function tryLoadWithSimulations(fileType, modalidadeBase, anoCompleto) {
     return null;
 }
 
+function parseCSVInWorker(csvData) {
+    return new Promise((resolve, reject) => {
+        if (!csvData) {
+            resolve([]);
+            return;
+        }
+        Papa.parse(csvData, {
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+            worker: true, // Processamento em background
+            complete: (results) => resolve(results.data),
+            error: (err) => reject(err)
+        });
+    });
+}
+
+// Map para busca ultra-rápida de previsões (O(1) em vez de O(N))
+let predictionsLookup = new Map();
+function buildPredictionsLookup() {
+    predictionsLookup = new Map();
+    if (!Array.isArray(PredictionsState.predictionsData)) return;
+
+    PredictionsState.predictionsData.forEach(row => {
+        const teamA = normalizeTeamName(row.team_a || '');
+        const teamB = normalizeTeamName(row.team_b || '');
+        const jornada = normalizeScenarioStageKey(row.jornada || '');
+        
+        // Indexar por ambas as equipas e jornada
+        const key1 = `${teamA}|${teamB}|${jornada}`;
+        const key2 = `${teamB}|${teamA}|${jornada}`;
+        
+        predictionsLookup.set(key1, row);
+        predictionsLookup.set(key2, row);
+    });
+}
+
 /**
  * Carrega os dados de previsões baseado na época e modalidade selecionadas
  */
@@ -11335,35 +11565,24 @@ async function loadPredictionsData() {
         }
 
         PredictionsState.simulations = forecastResult.sims;
-        PredictionsState.forecastData = Papa.parse(forecastResult.data, {
-            header: true,
-            dynamicTyping: true,
-            skipEmptyLines: true
-        }).data;
-
-        PredictionsState.predictionsData = Papa.parse(predictionsResult.data, {
-            header: true,
-            dynamicTyping: true,
-            skipEmptyLines: true
-        }).data;
-
-        // CSV de liguilha é opcional (só existe em modalidades com LM)
-        PredictionsState.liguillaData = liguillaResult
-            ? Papa.parse(liguillaResult.data, {
-                header: true,
-                dynamicTyping: true,
-                skipEmptyLines: true
-            }).data
-            : [];
+        
+        // Parsing paralelo em background (INP fix)
+        const [forecastParsed, predictionsParsed, liguillaParsed, liguillaScenariosParsed] = await Promise.all([
+            parseCSVInWorker(forecastResult.data),
+            parseCSVInWorker(predictionsResult.data),
+            parseCSVInWorker(liguillaResult?.data),
+            parseCSVInWorker(liguillaScenariosResult?.data)
+        ]);
 
         if (isStaleLoad()) return;
-        PredictionsState.liguillaScenariosData = liguillaScenariosResult
-            ? Papa.parse(liguillaScenariosResult.data, {
-                header: true,
-                dynamicTyping: true,
-                skipEmptyLines: true
-            }).data
-            : [];
+
+        PredictionsState.forecastData = forecastParsed;
+        PredictionsState.predictionsData = predictionsParsed;
+        PredictionsState.liguillaData = liguillaParsed;
+        PredictionsState.liguillaScenariosData = liguillaScenariosParsed;
+
+        // Construir index para busca rápida (O(1))
+        buildPredictionsLookup();
 
         if (isStaleLoad()) return;
         setPredictionsCardVisible(true);
@@ -11539,6 +11758,19 @@ function updatePredictionsDisplay() {
     if (!PredictionsState.selectedTeam) {
         clearPredictionsDisplay(t('selectModalityFirst'));
         return;
+    }
+
+    const predictionsCard = document.getElementById('predictions');
+    if (predictionsCard) {
+        // Se o card não estiver visível (ou quase visível), adiar o update (INP fix)
+        const rect = predictionsCard.getBoundingClientRect();
+        const isVisible = (rect.top < window.innerHeight + 1000) && (rect.bottom > -1000);
+        
+        if (!isVisible) {
+            predictionsCard.dataset.pendingUpdate = 'true';
+            return;
+        }
+        predictionsCard.dataset.pendingUpdate = 'false';
     }
 
     const prevBtn = document.getElementById('prevTeamBtn');
@@ -12170,38 +12402,10 @@ function updatePredictionsTable() {
         return teamA === teamName || teamB === teamName;
     });
 
-    const isPlayoffStage = (jornada) => {
-        if (!jornada) return false;
-
-        const normalized = String(jornada)
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/\s+/g, '');
-
-        return normalized.startsWith('e') ||
-            normalized.startsWith('pm') ||
-            normalized.startsWith('lm') ||
-            normalized.includes('quarto') ||
-            normalized.includes('semifinais') ||
-            normalized.includes('final') ||
-            normalized.includes('lugar') ||
-            normalized.includes('playoff') ||
-            normalized.includes('liguilha') ||
-            normalized.includes('1ºfase') ||
-            normalized.includes('1ªfase') ||
-            normalized.includes('fasfinal') ||
-            normalized.includes('fasefinal');
-    };
 
     const regularGames = teamGames.filter(g => !isPlayoffStage(g.jornada));
     const playoffGames = teamGames.filter(g => isPlayoffStage(g.jornada));
 
-    const normalizeRoundKey = (round) => String(round ?? '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s+/g, '');
 
     // Mostrar previsões jornada-a-jornada apenas para jogos futuros reais do calendário
     let regularFutureGames = regularGames;
@@ -12341,22 +12545,6 @@ function updatePredictionsTable() {
             });
 
             const playoffTitle = playoffSection.querySelector('.predictions-section-title');
-            const isSecondaryStage = (stage) => {
-                if (!stage) return false;
-
-                const normalized = String(stage)
-                    .toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .replace(/\s+/g, '');
-
-                return normalized.startsWith('pm') ||
-                    normalized.startsWith('lm') ||
-                    normalized.includes('liguilha') ||
-                    normalized.includes('1ºfase') ||
-                    normalized.includes('1ªfase') ||
-                    normalized.includes('fasefinal');
-            };
 
             const hasSecondaryStage = sortedStages.some(stage => isSecondaryStage(stage));
             const hasPrimaryStage = sortedStages.some(stage => !isSecondaryStage(stage));
@@ -12369,39 +12557,15 @@ function updatePredictionsTable() {
             const primaryStages = sortedStages.filter(stage => !isSecondaryStage(stage));
             const secondaryStages = sortedStages.filter(stage => isSecondaryStage(stage));
 
-            const normalizeScenarioStageKey = (stageLabel) => {
-                const normalized = String(stageLabel || '')
-                    .toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .replace(/\s+/g, '');
 
-                if (normalized.startsWith('lm')) {
-                    return `liguilha${normalized.slice(2)}`;
-                }
-
-                return normalized;
-            };
-
-            const findLiguillaPredictionRow = (stageLabel, opponentName) => {
-                if (!Array.isArray(PredictionsState.predictionsData)) return null;
-
-                const normalizedStage = normalizeScenarioStageKey(stageLabel);
+            const findLiguillaPredictionRow = (stage, opponent) => {
+                const normalizedStage = normalizeScenarioStageKey(stage);
                 const normalizedTeam = normalizeTeamName(teamName);
-                const normalizedOpponent = normalizeTeamName(opponentName || '');
+                const normalizedOpponent = normalizeTeamName(opponent);
 
-                return PredictionsState.predictionsData.find(row => {
-                    const rowStage = normalizeScenarioStageKey(row.jornada || '');
-                    if (rowStage !== normalizedStage) return false;
-
-                    const rowTeamA = normalizeTeamName(row.team_a || '');
-                    const rowTeamB = normalizeTeamName(row.team_b || '');
-
-                    return (
-                        (rowTeamA === normalizedTeam && rowTeamB === normalizedOpponent) ||
-                        (rowTeamA === normalizedOpponent && rowTeamB === normalizedTeam)
-                    );
-                }) || null;
+                // Usar lookup indexado em vez de .find (O(1) vs O(N))
+                const key = `${normalizedTeam}|${normalizedOpponent}|${normalizedStage}`;
+                return predictionsLookup.get(key) || null;
             };
 
             const renderLiguillaScenarios = () => {
@@ -12562,7 +12726,7 @@ function updatePredictionsTable() {
                         html += `
                         <div class="playoff-matchup-card">
                             <div class="playoff-opponent-info">
-                                ${opponentInfo.emblemPath ? `<img src="${opponentInfo.emblemPath}" alt="${translateTeamName(opponentInfo.shortName)}" class="prediction-opponent-emblem">` : ''}
+                                ${opponentInfo.emblemPath ? `<img src="${opponentInfo.emblemPath}" alt="${translateTeamName(opponentInfo.shortName)}" class="prediction-opponent-emblem" loading="lazy">` : ''}
                                 <span>vs <strong>${translateTeamName(opponentInfo.fullName || opponentInfo.shortName || opponent)}</strong></span>
                             </div>
                             <div class="matchup-likelihood">
@@ -12741,7 +12905,7 @@ function updateTeamHistoryTable() {
                 <td class="team-history-location">${locationLabel}</td>
                 <td>
                     <div class="prediction-opponent">
-                        ${opponentInfo.emblemPath ? `<img src="${opponentInfo.emblemPath}" alt="${opponentInfo.fullName || game.opponent}" class="prediction-opponent-emblem">` : ''}
+                        ${opponentInfo.emblemPath ? `<img src="${opponentInfo.emblemPath}" alt="${opponentInfo.fullName || game.opponent}" class="prediction-opponent-emblem" loading="lazy">` : ''}
                         <span class="prediction-opponent-name">${translatedOpponent}</span>
                     </div>
                 </td>
