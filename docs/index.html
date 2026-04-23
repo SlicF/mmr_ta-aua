@@ -9,8 +9,8 @@
     <title data-i18n="pageTitle">Dashboard da Taça UA</title>
     <link rel="icon" type="image/png" href="assets/taça_ua.png">
     <link rel="icon" type="image/png" href="assets/taça_ua.png">
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js" defer></script>
     <script>
         // Verificar se ApexCharts foi carregado
         window.addEventListener('DOMContentLoaded', function () {
@@ -19,7 +19,7 @@
             }
         });
     </script>
-    <script src="debug.js"></script>
+    <script src="debug.js" defer></script>
     <link rel="stylesheet" href="styles.css?v=18">
 </head>
 
@@ -253,6 +253,8 @@
 
                 <div class="calendar-sort-toggle" role="group" data-i18n-aria="calendarSortAria"
                     aria-label="Ordenação do calendário">
+                    <button type="button" class="calendar-sort-btn" id="calendarSortTeamBtn"
+                        data-i18n="calendarSortTeam">Por Equipa</button>
                     <button type="button" class="calendar-sort-btn" id="calendarSortDateTimeBtn"
                         data-i18n="calendarSortDateTime">Por Data/Hora</button>
                     <button type="button" class="calendar-sort-btn" id="calendarSortMatchdayBtn"
