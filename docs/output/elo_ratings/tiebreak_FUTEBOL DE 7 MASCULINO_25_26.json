@@ -6,64 +6,14 @@
     {
       "context": {
         "Divisao": 2,
-        "Grupo": "A",
-        "ranking_key": "2ª Divisão - Grupo A"
-      },
-      "tie_points": 8,
-      "tie_type": "head_to_head",
-      "tied_teams": [
-        "Geologia",
-        "Eng. Mecânica B"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "standings": [
-        {
-          "team": "Eng. Mecânica B",
-          "rank_in_tiebreak": 1,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 1,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 3,
-            "diferenca_golos": 8,
-            "golos_marcados": 16
-          }
-        },
-        {
-          "team": "Geologia",
-          "rank_in_tiebreak": 2,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 1,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 3,
-            "diferenca_golos": -9,
-            "golos_marcados": 17
-          }
-        }
-      ],
-      "event_id": 1
-    },
-    {
-      "context": {
-        "Divisao": 2,
         "Grupo": "B",
         "ranking_key": "2ª Divisão - Grupo B"
       },
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Química",
-        "Gestão"
+        "Gestão",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -101,81 +51,19 @@
           }
         }
       ],
-      "event_id": 2
+      "event_id": 1
     }
   ],
   "indexByContextTeam": {
-    "2ª Divisão - Grupo A::Eng. Mecânica B": {
-      "event_id": 1,
-      "ranking_key": "2ª Divisão - Grupo A",
-      "team": "Eng. Mecânica B",
-      "tie_type": "head_to_head",
-      "tie_points": 8,
-      "tied_teams": [
-        "Geologia",
-        "Eng. Mecânica B"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 1,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 3,
-        "diferenca_golos": 8,
-        "golos_marcados": 16
-      },
-      "rank_in_tiebreak": 1,
-      "final_position": 4
-    },
-    "2ª Divisão - Grupo A::Geologia": {
-      "event_id": 1,
-      "ranking_key": "2ª Divisão - Grupo A",
-      "team": "Geologia",
-      "tie_type": "head_to_head",
-      "tie_points": 8,
-      "tied_teams": [
-        "Geologia",
-        "Eng. Mecânica B"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 1,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 3,
-        "diferenca_golos": -9,
-        "golos_marcados": 17
-      },
-      "rank_in_tiebreak": 2,
-      "final_position": 5
-    },
     "2ª Divisão - Grupo B::Gestão": {
-      "event_id": 2,
+      "event_id": 1,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Gestão",
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. Química",
-        "Gestão"
+        "Gestão",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -199,14 +87,14 @@
       "final_position": 3
     },
     "2ª Divisão - Grupo B::Eng. Química": {
-      "event_id": 2,
+      "event_id": 1,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Química",
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. Química",
-        "Gestão"
+        "Gestão",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",

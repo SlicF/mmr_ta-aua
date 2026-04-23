@@ -112,8 +112,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Administração Pública",
-        "MTC"
+        "MTC",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -262,8 +262,8 @@
       "tie_points": 5,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -436,8 +436,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Administração Pública",
-        "MTC"
+        "MTC",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -467,8 +467,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Administração Pública",
-        "MTC"
+        "MTC",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -622,8 +622,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -653,8 +653,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
