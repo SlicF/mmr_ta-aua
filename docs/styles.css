@@ -182,10 +182,6 @@ body {
     transform 0.3s ease,
     box-shadow 0.3s ease;
   border: 1px solid rgba(42, 82, 152, 0.1);
-  /* Mitigar CLS: reserva espaço mínimo para o card */
-  min-height: 200px;
-  contain: content;
-  contain-intrinsic-size: auto 400px;
 }
 
 /* Card discreto para a Liguinha de Manutenção */
@@ -1925,6 +1921,11 @@ body {
     height: 42px !important;
   }
 
+  .jornada-team-emblem {
+    width: 42px;
+    height: 42px;
+  }
+
   .game-team-emblem[src*="EGI-07.png"] {
     width: 40px !important;
     height: 40px !important;
@@ -2404,6 +2405,11 @@ body {
     min-width: 0;
   }
 
+  .jornada-team-emblem {
+    width: 34px;
+    height: 34px;
+  }
+
   .jornada-arrow-container {
     flex-shrink: 0;
     justify-content: center;
@@ -2631,10 +2637,15 @@ body {
 
 .calendar-sort-toggle {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 10px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  padding-inline: 2px;
+  scroll-padding-inline: 2px;
 }
 
 .calendar-sort-btn {
@@ -2647,6 +2658,8 @@ body {
   font-size: 0.85em;
   cursor: pointer;
   transition: all 0.25s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .calendar-sort-btn:hover {
@@ -2745,6 +2758,26 @@ body {
   color: #333;
   min-width: 180px;
   text-align: center;
+}
+
+.jornada-team-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+}
+
+.jornada-team-title > span {
+  text-align: center;
+}
+
+.jornada-team-emblem {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .games-list {
@@ -3402,6 +3435,11 @@ body {
   .game-team-emblem {
     width: 28px;
     height: 28px;
+  }
+
+  .jornada-team-emblem {
+    width: 40px;
+    height: 40px;
   }
 
   .game-team-emblem[src*="EGI-07.png"] {
@@ -4617,7 +4655,7 @@ body {
 
 .favorite-star-btn {
   position: absolute;
-  right: -20px;
+  right: -25px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -5047,6 +5085,11 @@ body {
   font-size: 0.95em;
 }
 
+#playoffScenariosSection .playoff-matchup-card .playoff-opponent-info {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
 .liguilla-scenario-headline {
   justify-content: flex-start;
   gap: 12px;
@@ -5277,13 +5320,15 @@ body {
   }
 
   #playoffScenariosSection .liguilla-matchups-grid {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    gap: 8px;
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    overflow-x: auto;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .playoff-matchup-card {
-    padding: 10px;
+    padding: 12px 14px;
   }
 
   .playoff-opponent-info {
@@ -5405,10 +5450,11 @@ body {
 
   .calendar-sort-toggle {
     gap: 8px;
+    padding-inline: 6px;
+    scroll-padding-inline: 6px;
   }
 
   .calendar-sort-btn {
-    width: calc(50% - 6px);
     min-width: 150px;
   }
 
@@ -5496,11 +5542,11 @@ body {
   }
 
   .slider-prev {
-    left: calc(50% - 140px);
+    left: calc(50% - 160px);
   }
 
   .slider-next {
-    right: calc(50% - 140px);
+    right: calc(50% - 160px);
   }
 
   /* Animações ajustadas para tablet */
@@ -5716,17 +5762,23 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2em;
+  font-size: 1.5em;
   color: #cbd5e1;
   transition: all 0.2s ease;
-  padding: 0 4px;
+  padding: 0 8px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-right: 4px;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .favorite-btn:hover {
   color: #fbbf24;
-  transform: scale(1.2);
+  transform: scale(1.12);
 }
 
 .favorite-btn.active {

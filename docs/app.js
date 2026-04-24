@@ -76,6 +76,7 @@ let predictionsTooltipTimer = null; // Timer para debounce do hover
 let predictionsTooltipLastCell = null; // Última célula onde o tooltip estava visível
 let predictionsTooltipVisible = false; // Flag para rastrear se o tooltip está visível (evita flicker)
 let favoriteTeam = localStorage.getItem('favoriteTeam'); // Equipa favorita do utilizador
+let favoriteUiUpdateToken = 0;
 
 function applyCompactModeClass() {
     if (!document.body) return;
@@ -85,18 +86,61 @@ function applyCompactModeClass() {
 const CALENDAR_SORT_MODE_KEY = 'mmr_calendarSortMode';
 const CALENDAR_SORT_MODE_MATCHDAY = 'matchday';
 const CALENDAR_SORT_MODE_DATE_TIME = 'date_time';
+const CALENDAR_SORT_MODE_TEAM = 'team';
 
 function getSavedCalendarSortMode() {
     const savedMode = localStorage.getItem(CALENDAR_SORT_MODE_KEY);
-    if (savedMode === CALENDAR_SORT_MODE_MATCHDAY || savedMode === CALENDAR_SORT_MODE_DATE_TIME) {
+    if (savedMode === CALENDAR_SORT_MODE_MATCHDAY || savedMode === CALENDAR_SORT_MODE_DATE_TIME || savedMode === CALENDAR_SORT_MODE_TEAM) {
         return savedMode;
     }
-    return CALENDAR_SORT_MODE_MATCHDAY;
+    return CALENDAR_SORT_MODE_TEAM;
 }
 
 let calendarSortMode = getSavedCalendarSortMode();
 let availableCalendarDatePages = [];
 let currentCalendarDatePageIndex = 0;
+let availableCalendarTeamPages = [];
+let currentCalendarTeamPageIndex = 0;
+let currentCalendarTeam = null;
+let calendarEloLookup = new Map();
+let isSyncingCalendarAndPredictions = false;
+
+function scheduleLowPriorityTask(task, timeout = 1000) {
+    if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(() => task(), { timeout });
+        return;
+    }
+
+    setTimeout(task, 0);
+}
+
+function buildCalendarEloLookup() {
+    calendarEloLookup = new Map();
+
+    if (!Array.isArray(sampleData.rawEloData) || sampleData.rawEloData.length === 0) {
+        return;
+    }
+
+    sampleData.rawEloData.forEach(match => {
+        const jornada = parseInt(match.Jornada, 10);
+        if (!Number.isFinite(jornada)) return;
+
+        const team1 = normalizeTeamName(match['Equipa 1']);
+        const team2 = normalizeTeamName(match['Equipa 2']);
+        if (!team1 || !team2) return;
+
+        const key = `${jornada}|${team1}|${team2}`;
+        calendarEloLookup.set(key, match);
+    });
+}
+
+function getCalendarEloMatch(jornada, team1, team2) {
+    const jornadaInt = parseInt(jornada, 10);
+    if (!Number.isFinite(jornadaInt)) return null;
+
+    const key = `${jornadaInt}|${normalizeTeamName(team1)}|${normalizeTeamName(team2)}`;
+    return calendarEloLookup.get(key) || null;
+}
 
 // Mostrar painel de debug com Ctrl+Shift+D
 document.addEventListener('keydown', function (e) {
@@ -137,26 +181,46 @@ function toggleFavorite(teamName) {
  * Atualizar UI com a nova equipa favorita
  */
 function updateFavoriteUI() {
-    // Atualizar Tabela
-    updateRankingsTable();
+    const updateToken = ++favoriteUiUpdateToken;
 
-    // Atualizar Gráfico (re-render para destacar linha/pontos)
-    updateEloChart();
+    syncFavoriteVisualState();
 
-    // Atualizar Calendário
-    updateCalendar();
+    scheduleLowPriorityTask(() => {
+        if (updateToken !== favoriteUiUpdateToken) return;
 
-    // Atualizar Previsões
-    updatePredictionsDisplay();
+        updateRankingsTable();
+        updateCalendar();
+        updatePredictionsDisplay();
 
-    // Atualizar Selector de equipas no gráfico
-    // Não precisa de re-render total, apenas classes
+        scheduleLowPriorityTask(() => {
+            if (updateToken !== favoriteUiUpdateToken) return;
+            updateEloChart();
+        }, 600);
+    }, 0);
+}
+
+function syncFavoriteVisualState() {
+    const favoriteCanonical = favoriteTeam ? resolveCanonicalCourseKey(favoriteTeam) : null;
+
+    document.querySelectorAll('.favorite-btn').forEach(button => {
+        const teamName = button.dataset.team || '';
+        const isFavorite = favoriteCanonical && resolveCanonicalCourseKey(teamName) === favoriteCanonical;
+        button.classList.toggle('active', Boolean(isFavorite));
+        button.textContent = isFavorite ? '★' : '☆';
+        button.setAttribute('aria-label', isFavorite ? t('removeFavorite') : t('markFavorite'));
+    });
+
+    document.querySelectorAll('.team-cell[data-team]').forEach(cell => {
+        const teamName = cell.dataset.team || '';
+        const isFavorite = favoriteCanonical && resolveCanonicalCourseKey(teamName) === favoriteCanonical;
+        cell.classList.toggle('favorite-team-row', Boolean(isFavorite));
+    });
+
     document.querySelectorAll('.team-checkbox').forEach(label => {
         const input = label.querySelector('input');
         if (input && favoriteTeam) {
             const teamInCheckbox = input.dataset.teamName;
             const teamCanonical = resolveCanonicalCourseKey(teamInCheckbox);
-            const favoriteCanonical = resolveCanonicalCourseKey(favoriteTeam);
 
             if (teamCanonical === favoriteCanonical) {
                 label.classList.add('favorite-team-selected');
@@ -167,12 +231,6 @@ function updateFavoriteUI() {
             label.classList.remove('favorite-team-selected');
         }
     });
-
-    // Se a equipa favorita existe na modalidade atual, forçar visualização
-    if (favoriteTeam) {
-        // Verificar se equipa existe na modalidade atual
-        // (Isto será tratado na lógica de navegação, aqui é só update visual)
-    }
 }
 
 /**
@@ -251,8 +309,9 @@ function initializeCollapsibles() {
 function initializeCalendarSortControls() {
     const dateTimeBtn = document.getElementById('calendarSortDateTimeBtn');
     const matchdayBtn = document.getElementById('calendarSortMatchdayBtn');
+    const teamBtn = document.getElementById('calendarSortTeamBtn');
 
-    if (!dateTimeBtn || !matchdayBtn) return;
+    if (!dateTimeBtn || !matchdayBtn || !teamBtn) return;
 
     if (!dateTimeBtn.dataset.bound) {
         dateTimeBtn.addEventListener('click', () => setCalendarSortMode(CALENDAR_SORT_MODE_DATE_TIME));
@@ -264,27 +323,39 @@ function initializeCalendarSortControls() {
         matchdayBtn.dataset.bound = 'true';
     }
 
+    if (!teamBtn.dataset.bound) {
+        teamBtn.addEventListener('click', () => setCalendarSortMode(CALENDAR_SORT_MODE_TEAM));
+        teamBtn.dataset.bound = 'true';
+    }
+
     updateCalendarSortControls();
 }
 
 function updateCalendarSortControls() {
     const dateTimeBtn = document.getElementById('calendarSortDateTimeBtn');
     const matchdayBtn = document.getElementById('calendarSortMatchdayBtn');
+    const teamBtn = document.getElementById('calendarSortTeamBtn');
 
-    if (!dateTimeBtn || !matchdayBtn) return;
+    if (!dateTimeBtn || !matchdayBtn || !teamBtn) return;
 
     const isDateTime = calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME;
+    const isTeam = calendarSortMode === CALENDAR_SORT_MODE_TEAM;
 
     dateTimeBtn.classList.toggle('active', isDateTime);
-    matchdayBtn.classList.toggle('active', !isDateTime);
+    matchdayBtn.classList.toggle('active', calendarSortMode === CALENDAR_SORT_MODE_MATCHDAY);
+    teamBtn.classList.toggle('active', isTeam);
     dateTimeBtn.setAttribute('aria-pressed', isDateTime ? 'true' : 'false');
-    matchdayBtn.setAttribute('aria-pressed', !isDateTime ? 'true' : 'false');
+    matchdayBtn.setAttribute('aria-pressed', calendarSortMode === CALENDAR_SORT_MODE_MATCHDAY ? 'true' : 'false');
+    teamBtn.setAttribute('aria-pressed', isTeam ? 'true' : 'false');
 }
 
 function setCalendarSortMode(mode) {
-    const normalizedMode = mode === CALENDAR_SORT_MODE_MATCHDAY
-        ? CALENDAR_SORT_MODE_MATCHDAY
-        : CALENDAR_SORT_MODE_DATE_TIME;
+    const allowedModes = new Set([
+        CALENDAR_SORT_MODE_MATCHDAY,
+        CALENDAR_SORT_MODE_DATE_TIME,
+        CALENDAR_SORT_MODE_TEAM
+    ]);
+    const normalizedMode = allowedModes.has(mode) ? mode : CALENDAR_SORT_MODE_TEAM;
 
     const changed = normalizedMode !== calendarSortMode;
     calendarSortMode = normalizedMode;
@@ -292,6 +363,8 @@ function setCalendarSortMode(mode) {
 
     if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
         updateAvailableJornadas({ anchorLatestResults: true, preserveCurrentPage: false });
+    } else if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+        updateAvailableJornadas({ preserveCurrentPage: true, preferredTeam: PredictionsState.selectedTeam || currentCalendarTeam || favoriteTeam });
     } else {
         updateAvailableJornadas({ preserveCurrentPage: true });
     }
@@ -306,10 +379,18 @@ function setCalendarSortMode(mode) {
 
     if (calendarSortMode === CALENDAR_SORT_MODE_MATCHDAY && !availableJornadas.includes(currentCalendarJornada)) {
         currentCalendarJornada = getCurrentJornada();
+    } else if (calendarSortMode === CALENDAR_SORT_MODE_TEAM && availableCalendarTeamPages.length > 0) {
+        const safeIndex = Math.max(0, Math.min(currentCalendarTeamPageIndex, availableCalendarTeamPages.length - 1));
+        currentCalendarTeamPageIndex = safeIndex;
+        currentCalendarTeam = availableCalendarTeamPages[safeIndex].team;
     }
 
     updateJornadaDisplay();
     updateCalendar();
+
+    if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+        syncPredictionsWithCalendarTeamSelection();
+    }
 }
 
 // Inicializar aplicação
@@ -348,12 +429,12 @@ async function initApp() {
     initEloChart();
 
     // Disparar evento de mudança na modalidade para carregar dados iniciais (User Feedback: Render on Load)
-    setTimeout(() => {
+    requestAnimationFrame(() => {
         const modalitySelector = document.getElementById('modalidade');
         if (modalitySelector && modalitySelector.value) {
             modalitySelector.dispatchEvent(new Event('change'));
         }
-    }, 500);
+    });
 }
 
 // Criar seletor de equipas
@@ -3072,10 +3153,10 @@ function updateRankingsTable() {
                         <span class="rank-badge ${progressionClass}" title="${badgeTitle}">${position}</span>
                         ${tiebreakIndicatorHtml}
                     </td>
-                    <td class="team-cell ${isTeamFavorite(team.team) ? 'favorite-team-row' : ''}">
-                        <button class="favorite-btn ${isTeamFavorite(team.team) ? 'active' : ''}" 
-                                onclick="toggleFavorite('${team.team}')" 
-                                title="${isTeamFavorite(team.team) ? t('removeFavorite') : t('markFavorite')}">
+                    <td class="team-cell ${isTeamFavorite(team.team) ? 'favorite-team-row' : ''}" data-team="${escapeHtmlAttribute(team.team)}">
+                        <button type="button" class="favorite-btn ${isTeamFavorite(team.team) ? 'active' : ''}" 
+                                data-team="${escapeHtmlAttribute(team.team)}"
+                                aria-label="${escapeHtmlAttribute(isTeamFavorite(team.team) ? t('removeFavorite') : t('markFavorite'))}">
                             ${isTeamFavorite(team.team) ? '★' : '☆'}
                         </button>
                         ${emblemHtml}
@@ -3100,20 +3181,29 @@ function updateRankingsTable() {
         row.classList.add(zoneClass);
 
         // Adicionar event listeners para tooltip histórico na célula da equipa
-        const teamCell = row.querySelector('.team-cell');
-        if (teamCell) {
+        const teamInfoContainer = row.querySelector('.team-info-container');
+        if (teamInfoContainer) {
             let tooltipTimer = null;
 
-            teamCell.addEventListener('mouseenter', async () => {
+            teamInfoContainer.addEventListener('mouseenter', async () => {
                 // Delay para evitar mostrar tooltip em passagens rápidas
                 tooltipTimer = setTimeout(async () => {
-                    await showHistoricalTooltip(team.team, teamCell);
+                    await showHistoricalTooltip(team.team, teamInfoContainer);
                 }, 300);
             });
 
-            teamCell.addEventListener('mouseleave', () => {
+            teamInfoContainer.addEventListener('mouseleave', () => {
                 clearTimeout(tooltipTimer);
                 hideHistoricalTooltip();
+            });
+        }
+
+        const favoriteButton = row.querySelector('.favorite-btn');
+        if (favoriteButton) {
+            favoriteButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleFavorite(favoriteButton.dataset.team || team.team);
             });
         }
 
@@ -7937,6 +8027,7 @@ function changeModalidade(mod) {
         totalRegularSeasonGames: 0,  // ← ADICIONADO para número de jornadas do calendário
         teamsFromPreviousSeason: new Set()  // ← ADICIONADO para rastreamento de equipas da época anterior
     };
+    calendarEloLookup = new Map();
     currentModalityHasAdjustments = false;
 
     // Variáveis para guardar ELOs iniciais e equipas da época anterior
@@ -7957,7 +8048,7 @@ function changeModalidade(mod) {
         if (loadedFiles === totalFiles) {
             DebugUtils.debugFileLoading('all_files_loaded', sampleData);
             // Todos os arquivos carregados, atualizar interface
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 if (loadToken !== currentLoadToken) return;
 
                 // ===== PASSO 1: Auto-navegar para a equipa favorita ANTES de renderizar seletores =====
@@ -7991,19 +8082,8 @@ function changeModalidade(mod) {
                 createTeamSelector();
                 createDivisionSelector();
                 updateGroupSelector(); // Garantir que seletor de grupos é renderizado
-                updateQuickFilters(); // Atualizar filtros baseados na estrutura
                 updateRankingsTable();
                 initializeCalendarSelectors(); // Inicializar calendário
-                if (eloChart) {
-                    try {
-                        updateEloChart();
-                    } catch (error) {
-                        console.error('Erro ao atualizar gráfico ELO:', error);
-                        console.error('Stack:', error.stack);
-                        // Limpar seletor para evitar confusão
-                        document.getElementById('teamSelector').innerHTML = '';
-                    }
-                }
                 // Brackets serão carregados depois de processar rankings
 
                 // ===== PASSO 3: Sincronizar gráfico com a vista final =====
@@ -8019,11 +8099,29 @@ function changeModalidade(mod) {
                 // Disparar evento indicando que os dados foram carregados
                 document.dispatchEvent(new CustomEvent('data:loaded'));
 
-                // Carregar dados históricos em background
-                loadHistoricalData(mod).catch(err => {
-                    console.error('Erro ao carregar dados históricos:', err);
-                });
-            }, 500);
+                // Trabalhos pesados em segundo plano: primeiro histórico, gráfico por último
+                scheduleLowPriorityTask(() => {
+                    if (loadToken !== currentLoadToken) return;
+
+                    updateQuickFilters();
+
+                    loadHistoricalData(mod).catch(err => {
+                        console.error('Erro ao carregar dados históricos:', err);
+                    });
+
+                    scheduleLowPriorityTask(() => {
+                        if (loadToken !== currentLoadToken) return;
+
+                        if (eloChart) {
+                            try {
+                                updateEloChart();
+                            } catch (error) {
+                                console.error('Erro ao atualizar gráfico ELO:', error);
+                            }
+                        }
+                    }, 1500);
+                }, 500);
+            });
         }
     }
 
@@ -8058,7 +8156,7 @@ function changeModalidade(mod) {
         }
     });
 
-    fetch(`${tiebreakPath}?t=${Date.now()}`, { cache: 'no-store' })
+    fetch(tiebreakPath, { cache: 'force-cache' })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -8139,9 +8237,7 @@ function changeModalidade(mod) {
                 checkAllLoaded();
 
                 // AGORA SIM carregar detalhe (só depois de ter os ELOs iniciais)
-                // Adicionar timestamp para evitar cache
-                const cacheBuster = '?t=' + Date.now();
-                Papa.parse(detalhePath + cacheBuster, {
+                Papa.parse(detalhePath, {
                     download: true,
                     header: true,
                     skipEmptyLines: true,
@@ -8170,6 +8266,125 @@ function changeModalidade(mod) {
 
 // Variáveis globais para controle do calendário
 let availableJornadas = [];
+
+function getFilteredCalendarMatches() {
+    const { targetDivision, targetGroup } = getCalendarDivisionGroupFilter();
+
+    return (sampleData.matches || []).filter(match => {
+        if (isWithdrawnCalendarMatch(match)) return false;
+        return matchesCalendarDivisionGroup(match, targetDivision, targetGroup);
+    });
+}
+
+function buildCalendarTeamPages(filteredMatches, options = {}) {
+    const { preserveCurrentPage = true, preferredTeam = null } = options;
+
+    const teamSet = new Set();
+
+    if (sampleData.rankings && currentCalendarDivision && sampleData.rankings[currentCalendarDivision]) {
+        sampleData.rankings[currentCalendarDivision].forEach(team => {
+            if (!team || !team.team) return;
+            if (currentCalendarGroup && team.group && team.group !== currentCalendarGroup) return;
+            teamSet.add(normalizeTeamName(team.team));
+        });
+    }
+
+    filteredMatches.forEach(match => {
+        const team1 = normalizeTeamName(match.team1 || match['Equipa 1'] || '');
+        const team2 = normalizeTeamName(match.team2 || match['Equipa 2'] || '');
+        if (team1) teamSet.add(team1);
+        if (team2) teamSet.add(team2);
+    });
+
+    const orderedTeams = Array.from(teamSet)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, 'pt-PT'));
+
+    const pages = orderedTeams.map(teamName => {
+        const courseInfo = getCourseInfo(teamName);
+        const teamLabel = getTranslatedTeamLabel(courseInfo, teamName);
+        const games = filteredMatches
+            .filter(match => {
+                const team1 = normalizeTeamName(match.team1 || match['Equipa 1'] || '');
+                const team2 = normalizeTeamName(match.team2 || match['Equipa 2'] || '');
+                const canonicalTeam = resolveCanonicalCourseKey(teamName);
+                return resolveCanonicalCourseKey(team1) === canonicalTeam || resolveCanonicalCourseKey(team2) === canonicalTeam;
+            })
+            .sort(compareCalendarMatchesChronologically);
+
+        return {
+            team: teamName,
+            label: teamLabel,
+            games
+        };
+    });
+
+    availableCalendarTeamPages = pages;
+
+    if (availableCalendarTeamPages.length === 0) {
+        currentCalendarTeamPageIndex = 0;
+        currentCalendarTeam = null;
+        return;
+    }
+
+    const desiredTeam = preferredTeam || currentCalendarTeam || PredictionsState.selectedTeam || favoriteTeam;
+    const desiredCanonical = desiredTeam ? resolveCanonicalCourseKey(desiredTeam) : null;
+
+    let nextIndex = -1;
+    if (desiredCanonical) {
+        nextIndex = availableCalendarTeamPages.findIndex(page => resolveCanonicalCourseKey(page.team) === desiredCanonical);
+    }
+
+    if (nextIndex < 0 && preserveCurrentPage && currentCalendarTeamPageIndex >= 0 && currentCalendarTeamPageIndex < availableCalendarTeamPages.length) {
+        nextIndex = currentCalendarTeamPageIndex;
+    }
+
+    if (nextIndex < 0) {
+        nextIndex = 0;
+    }
+
+    currentCalendarTeamPageIndex = nextIndex;
+    currentCalendarTeam = availableCalendarTeamPages[nextIndex].team;
+}
+
+function syncPredictionsWithCalendarTeamSelection() {
+    if (calendarSortMode !== CALENDAR_SORT_MODE_TEAM) return;
+    if (isSyncingCalendarAndPredictions) return;
+    if (!availableCalendarTeamPages.length) return;
+
+    const page = availableCalendarTeamPages[currentCalendarTeamPageIndex];
+    if (!page || !page.team) return;
+
+    refreshPredictionsTeamsForSelection();
+    if (!PredictionsState.availableTeams.length) return;
+
+    const targetCanonical = resolveCanonicalCourseKey(page.team);
+    const matchingTeam = PredictionsState.availableTeams.find(team => resolveCanonicalCourseKey(team) === targetCanonical);
+    if (!matchingTeam || matchingTeam === PredictionsState.selectedTeam) return;
+
+    isSyncingCalendarAndPredictions = true;
+    PredictionsState.selectedTeam = matchingTeam;
+    PredictionsState.currentTeamIndex = PredictionsState.availableTeams.indexOf(matchingTeam);
+    updatePredictionsDisplay();
+    isSyncingCalendarAndPredictions = false;
+}
+
+function syncCalendarWithPredictionsSelection() {
+    if (calendarSortMode !== CALENDAR_SORT_MODE_TEAM) return;
+    if (isSyncingCalendarAndPredictions) return;
+    if (!PredictionsState.selectedTeam || !availableCalendarTeamPages.length) return;
+
+    const selectedCanonical = resolveCanonicalCourseKey(PredictionsState.selectedTeam);
+    const targetIndex = availableCalendarTeamPages.findIndex(page => resolveCanonicalCourseKey(page.team) === selectedCanonical);
+    if (targetIndex < 0 || targetIndex === currentCalendarTeamPageIndex) return;
+
+    isSyncingCalendarAndPredictions = true;
+    currentCalendarTeamPageIndex = targetIndex;
+    currentCalendarTeam = availableCalendarTeamPages[targetIndex].team;
+    updateJornadaDisplay();
+    updateCalendar();
+    isSyncingCalendarAndPredictions = false;
+}
 
 function getCalendarDivisionGroupFilter() {
     let targetDivision = null;
@@ -8621,23 +8836,18 @@ function initializeCalendarSelectors() {
 
 // Atualizar jornadas disponíveis para divisão/grupo atual
 function updateAvailableJornadas(options = {}) {
-    const { targetDivision, targetGroup } = getCalendarDivisionGroupFilter();
-
     // Filtrar jornadas para a divisão/grupo atual
-    const filteredMatches = sampleData.matches.filter(match => {
-        if (isWithdrawnCalendarMatch(match)) return false;
-
-        if (!match.jornada || isNaN(parseInt(match.jornada))) return false;
-
-        return matchesCalendarDivisionGroup(match, targetDivision, targetGroup);
-    });
+    const filteredMatches = getFilteredCalendarMatches();
 
     // Obter jornadas únicas e ordenadas
     availableJornadas = [...new Set(
-        filteredMatches.map(match => parseInt(match.jornada))
+        filteredMatches
+            .map(match => parseInt(match.jornada))
+            .filter(jornada => !Number.isNaN(jornada))
     )].sort((a, b) => a - b);
 
     buildCalendarDatePages(filteredMatches, options);
+    buildCalendarTeamPages(filteredMatches, options);
 }
 
 // Encontrar a jornada mais recente com pelo menos um jogo realizado
@@ -8895,6 +9105,20 @@ function switchCalendarGroup(group) {
 
 // Mudar jornada (navegação com setas)
 function changeJornada(direction) {
+    if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+        if (availableCalendarTeamPages.length === 0) return;
+
+        const totalPages = availableCalendarTeamPages.length;
+        const newIndex = (currentCalendarTeamPageIndex + direction + totalPages) % totalPages;
+
+        currentCalendarTeamPageIndex = newIndex;
+        currentCalendarTeam = availableCalendarTeamPages[newIndex].team;
+        updateJornadaDisplay();
+        updateCalendar();
+        syncPredictionsWithCalendarTeamSelection();
+        return;
+    }
+
     if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
         if (availableCalendarDatePages.length === 0) return;
 
@@ -8951,7 +9175,12 @@ function switchToPreviousEpoca() {
 
         // Aguardar carregamento dos dados via evento
         document.addEventListener('data:loaded', function updateJornadaAfterLoad() {
-            if (availableJornadas.length > 0) {
+            if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+                updateAvailableJornadas({ preserveCurrentPage: false, preferredTeam: PredictionsState.selectedTeam || favoriteTeam });
+                updateJornadaDisplay();
+                updateCalendar();
+                syncPredictionsWithCalendarTeamSelection();
+            } else if (availableJornadas.length > 0) {
                 currentCalendarJornada = getCurrentJornada();
                 updateJornadaDisplay();
                 updateCalendar();
@@ -8981,7 +9210,12 @@ function switchToNextEpoca() {
 
         // Aguardar carregamento dos dados via evento
         document.addEventListener('data:loaded', function updateJornadaAfterLoad() {
-            if (availableJornadas.length > 0) {
+            if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+                updateAvailableJornadas({ preserveCurrentPage: false, preferredTeam: PredictionsState.selectedTeam || favoriteTeam });
+                updateJornadaDisplay();
+                updateCalendar();
+                syncPredictionsWithCalendarTeamSelection();
+            } else if (availableJornadas.length > 0) {
                 currentCalendarJornada = getCurrentJornada();
                 updateJornadaDisplay();
                 updateCalendar();
@@ -8997,6 +9231,46 @@ function updateJornadaDisplay() {
     const nextBtn = document.getElementById('nextJornadaBtn');
     const prevEpocaLabel = document.getElementById('prevEpocaLabel');
     const nextEpocaLabel = document.getElementById('nextEpocaLabel');
+
+    if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+        const totalPages = availableCalendarTeamPages.length;
+
+        if (totalPages === 0) {
+            jornadaTitle.textContent = t('noGamesFoundTeamMode');
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            prevEpocaLabel.style.display = 'none';
+            nextEpocaLabel.style.display = 'none';
+            return;
+        }
+
+        const safeIndex = Math.max(0, Math.min(currentCalendarTeamPageIndex, totalPages - 1));
+        currentCalendarTeamPageIndex = safeIndex;
+
+        const page = availableCalendarTeamPages[safeIndex];
+        currentCalendarTeam = page.team;
+
+        const teamInfo = getCourseInfo(currentCalendarTeam);
+        const teamLabel = getTranslatedTeamLabel(teamInfo, page.label || currentCalendarTeam);
+        const emblemPath = teamInfo && teamInfo.emblemPath ? teamInfo.emblemPath : '';
+
+        if (emblemPath) {
+            jornadaTitle.innerHTML = `
+                <span class="jornada-team-title">
+                    <img src="${emblemPath}" alt="${escapeHtmlAttribute(teamLabel)}" class="jornada-team-emblem" onerror="this.style.display='none'">
+                    <span>${escapeHtml(teamLabel)}</span>
+                </span>
+            `;
+        } else {
+            jornadaTitle.textContent = teamLabel;
+        }
+
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        prevEpocaLabel.style.display = 'none';
+        nextEpocaLabel.style.display = 'none';
+        return;
+    }
 
     if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
         const totalPages = availableCalendarDatePages.length;
@@ -9081,52 +9355,47 @@ function updateCalendar() {
         return;
     }
 
-    const { targetDivision, targetGroup } = getCalendarDivisionGroupFilter();
+    if (calendarSortMode === CALENDAR_SORT_MODE_TEAM && availableCalendarTeamPages.length === 0) {
+        gamesList.innerHTML = '<div class="no-games-message">' + t('noGamesFoundTeamMode') + '</div>';
+        return;
+    }
 
     // Usar dados do calendário (csv_modalidades) que tem TODOS os jogos (realizados e futuros)
-    let games = sampleData.matches.filter(match => {
-        if (isWithdrawnCalendarMatch(match)) {
-            return false;
+    let games = getFilteredCalendarMatches();
+
+    if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+        if (availableCalendarTeamPages.length === 0) {
+            buildCalendarTeamPages(games, { preserveCurrentPage: true, preferredTeam: currentCalendarTeam || PredictionsState.selectedTeam || favoriteTeam });
         }
 
-        if (!matchesCalendarDivisionGroup(match, targetDivision, targetGroup)) {
-            return false;
+        const safeIndex = Math.max(0, Math.min(currentCalendarTeamPageIndex, availableCalendarTeamPages.length - 1));
+        currentCalendarTeamPageIndex = safeIndex;
+        const currentPage = availableCalendarTeamPages[safeIndex];
+        currentCalendarTeam = currentPage ? currentPage.team : null;
+        games = currentPage ? [...currentPage.games] : [];
+    } else if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+        if (availableCalendarDatePages.length === 0) {
+            buildCalendarDatePages(games, { preserveCurrentPage: true });
         }
-
-        if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
-            return true;
-        }
-
-        const jornada = parseInt(match.jornada, 10);
-
-        // Filtrar por jornada
-        if (jornada !== currentCalendarJornada) return false;
-
-        return true;
-    });
-
-    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
-        buildCalendarDatePages(games, { preserveCurrentPage: true });
         const currentPage = availableCalendarDatePages[currentCalendarDatePageIndex];
         games = currentPage ? [...currentPage.games] : [];
+    } else {
+        games = games.filter(match => parseInt(match.jornada, 10) === currentCalendarJornada);
     }
 
     if (games.length === 0) {
         const emptyKey = calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME
             ? 'noGamesFoundDateMode'
-            : 'noGamesFound';
+            : calendarSortMode === CALENDAR_SORT_MODE_TEAM
+                ? 'noGamesFoundTeamMode'
+                : 'noGamesFound';
         gamesList.innerHTML = '<div class="no-games-message">' + t(emptyKey) + '</div>';
         return;
     }
 
     // Para cada jogo do calendário, buscar info de ELO do rawEloData
     games = games.map(game => {
-        // Procurar jogo correspondente no rawEloData para pegar info de ELO
-        const eloMatch = sampleData.rawEloData ? sampleData.rawEloData.find(m =>
-            m.Jornada == game.jornada &&
-            normalizeTeamName(m['Equipa 1']) === normalizeTeamName(game.team1) &&
-            normalizeTeamName(m['Equipa 2']) === normalizeTeamName(game.team2)
-        ) : null;
+        const eloMatch = getCalendarEloMatch(game.jornada, game.team1, game.team2);
 
         return {
             ...game,
@@ -9135,14 +9404,18 @@ function updateCalendar() {
         };
     });
 
-    games.sort(compareCalendarMatchesChronologically);
+    if (calendarSortMode === CALENDAR_SORT_MODE_MATCHDAY) {
+        games.sort(compareCalendarMatchesChronologically);
+    }
 
     // Renderizar jogos
     gamesList.innerHTML = '';
+    const fragment = document.createDocumentFragment();
     games.forEach(game => {
         const gameItem = createGameItem(game);
-        gamesList.appendChild(gameItem);
+        fragment.appendChild(gameItem);
     });
+    gamesList.appendChild(fragment);
 }
 
 // Criar elemento HTML de um jogo
@@ -9845,6 +10118,7 @@ class EloHistoryProcessor {
 
         // Guardar dados brutos para processamento do bracket
         sampleData.rawEloData = data;
+        buildCalendarEloLookup();
 
         // Verificar se não há jogos
         if (this._hasNoGames(data, initialElosFromFile, previousSeasonTeams)) {
@@ -11047,9 +11321,15 @@ async function loadPredictionsData() {
         const anoFinal = modalidadeMatch[3];
         const anoCompleto = `20${anoFinal}`;
 
-        const forecastResult = await tryLoadWithSimulations('forecast', modalidadeBase, anoCompleto);
+        const [forecastResult, predictionsResult, liguillaResult, liguillaScenariosResult] = await Promise.all([
+            tryLoadWithSimulations('forecast', modalidadeBase, anoCompleto),
+            tryLoadWithSimulations('previsoes', modalidadeBase, anoCompleto),
+            tryLoadWithSimulations('liguilla', modalidadeBase, anoCompleto),
+            tryLoadWithSimulations('liguilla_scenarios', modalidadeBase, anoCompleto)
+        ]);
+
         if (isStaleLoad()) return;
-        if (!forecastResult) {
+        if (!forecastResult || !predictionsResult) {
             handleMissingPredictionsFiles();
             return;
         }
@@ -11061,13 +11341,6 @@ async function loadPredictionsData() {
             skipEmptyLines: true
         }).data;
 
-        const predictionsResult = await tryLoadWithSimulations('previsoes', modalidadeBase, anoCompleto);
-        if (isStaleLoad()) return;
-        if (!predictionsResult) {
-            handleMissingPredictionsFiles();
-            return;
-        }
-
         PredictionsState.predictionsData = Papa.parse(predictionsResult.data, {
             header: true,
             dynamicTyping: true,
@@ -11075,8 +11348,6 @@ async function loadPredictionsData() {
         }).data;
 
         // CSV de liguilha é opcional (só existe em modalidades com LM)
-        const liguillaResult = await tryLoadWithSimulations('liguilla', modalidadeBase, anoCompleto);
-        if (isStaleLoad()) return;
         PredictionsState.liguillaData = liguillaResult
             ? Papa.parse(liguillaResult.data, {
                 header: true,
@@ -11085,7 +11356,6 @@ async function loadPredictionsData() {
             }).data
             : [];
 
-        const liguillaScenariosResult = await tryLoadWithSimulations('liguilla_scenarios', modalidadeBase, anoCompleto);
         if (isStaleLoad()) return;
         PredictionsState.liguillaScenariosData = liguillaScenariosResult
             ? Papa.parse(liguillaScenariosResult.data, {
@@ -11129,6 +11399,25 @@ function setPredictionsCardVisible(visible) {
     const card = document.querySelector('.predictions-card');
     if (!card) return;
     card.style.display = visible ? '' : 'none';
+}
+
+function shouldShowFuturePredictionsSections() {
+    if (!currentEpoca || !Array.isArray(availableEpocas) || availableEpocas.length === 0) {
+        return true;
+    }
+
+    // Só mostrar previsões futuras para a época mais recente disponível.
+    return currentEpoca === availableEpocas[0];
+}
+
+function getSeasonPredictionsSection() {
+    return document.querySelector('#predictions .predictions-stats-section');
+}
+
+function setSeasonPredictionsSectionVisible(visible) {
+    const section = getSeasonPredictionsSection();
+    if (!section) return;
+    section.style.display = visible ? '' : 'none';
 }
 
 function hasPendingMatchesToSimulate() {
@@ -11211,16 +11500,22 @@ function handleMissingPredictionsFiles() {
  */
 function clearPredictionsDisplay(customMessage = null) {
     const message = customMessage || t('noPredictionsData');
-    const colspan = modalityAllowsDraws() ? 7 : 6; // 6 colunas se não houver empates
 
     document.getElementById('selectedTeamName').textContent = t('dataNotAvailable');
     document.getElementById('selectedTeamEmblem').innerHTML = '';
-    document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${message}</div>`;
-    document.getElementById('predictionsTableBody').innerHTML = `<tr><td colspan="${colspan}" class="no-predictions-message">${message}</td></tr>`;
+    document.getElementById('predictionsStatsGrid').innerHTML = '';
+    setSeasonPredictionsSectionVisible(false);
+    document.getElementById('predictionsTableBody').innerHTML = '';
     document.getElementById('teamHistoryTableBody').innerHTML = `<tr><td colspan="6" class="no-predictions-message">${message}</td></tr>`;
 
     const regularTableSection = document.getElementById('matchdayPredictionsSection');
-    if (regularTableSection) regularTableSection.style.display = '';
+    if (regularTableSection) regularTableSection.style.display = 'none';
+
+    const playoffSection = document.getElementById('playoffScenariosSection');
+    if (playoffSection) playoffSection.style.display = 'none';
+
+    const playoffContainer = document.getElementById('playoffScenariosContainer');
+    if (playoffContainer) playoffContainer.innerHTML = '';
 
     document.getElementById('prevTeamBtn').disabled = true;
     document.getElementById('nextTeamBtn').disabled = true;
@@ -11266,6 +11561,10 @@ function updatePredictionsDisplay() {
 
     // Atualizar histórico real de jogos
     updateTeamHistoryTable();
+
+    if (!isSyncingCalendarAndPredictions) {
+        syncCalendarWithPredictionsSelection();
+    }
 }
 
 /**
@@ -11692,8 +11991,17 @@ function animateTeamSlider(direction) {
  * Atualiza as estatísticas gerais da equipa
  */
 function updatePredictionsStats() {
+    const statsGrid = document.getElementById('predictionsStatsGrid');
+
+    if (!shouldShowFuturePredictionsSections()) {
+        if (statsGrid) statsGrid.innerHTML = '';
+        setSeasonPredictionsSectionVisible(false);
+        return;
+    }
+
     if (!PredictionsState.forecastData) {
-        document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${t('noPredictionsData')}</div>`;
+        if (statsGrid) statsGrid.innerHTML = '';
+        setSeasonPredictionsSectionVisible(false);
         return;
     }
 
@@ -11704,11 +12012,12 @@ function updatePredictionsStats() {
 
 
     if (!teamData) {
-        document.getElementById('predictionsStatsGrid').innerHTML = `<div class="no-predictions-message">${t('noStatsAvailable')}</div>`;
+        if (statsGrid) statsGrid.innerHTML = '';
+        setSeasonPredictionsSectionVisible(false);
         return;
     }
 
-    const statsGrid = document.getElementById('predictionsStatsGrid');
+    setSeasonPredictionsSectionVisible(true);
     const forecastSubset = getForecastDataForCurrentGroup();
     const expectedPlaceSorted = forecastSubset
         .filter(row => row.team)
@@ -11841,10 +12150,16 @@ function updatePredictionsDrawsColumnVisibility() {
  */
 function updatePredictionsTable() {
     const teamName = PredictionsState.selectedTeam;
+    const regularTableSection = document.getElementById('matchdayPredictionsSection');
+    const tbody = document.getElementById('predictionsTableBody');
+    const playoffContainer = document.getElementById('playoffScenariosContainer');
+    const playoffSection = document.getElementById('playoffScenariosSection');
 
     if (!PredictionsState.predictionsData || !teamName) {
-        const colspan = modalityAllowsDraws() ? 7 : 6;
-        document.getElementById('predictionsTableBody').innerHTML = `<tr><td colspan="${colspan}" class="no-predictions-message">${t('noPredictionsData')}</td></tr>`;
+        if (regularTableSection) regularTableSection.style.display = 'none';
+        if (tbody) tbody.innerHTML = '';
+        if (playoffSection) playoffSection.style.display = 'none';
+        if (playoffContainer) playoffContainer.innerHTML = '';
         return;
     }
 
@@ -11920,18 +12235,27 @@ function updatePredictionsTable() {
         });
     }
 
-    const tbody = document.getElementById('predictionsTableBody');
-
     // Encontrar o bloco da tabela das previsões jornada a jornada (que não seja a de históricos ou de playoffs)
     const predictionsCard = document.getElementById('predictions');
     const allTableSections = Array.from(predictionsCard.querySelectorAll('.predictions-table-section'));
-    const regularTableSection = document.getElementById('matchdayPredictionsSection') || allTableSections.find(s => !s.classList.contains('playoff-scenarios-section') && !s.classList.contains('team-history-section'));
+    const resolvedRegularTableSection = regularTableSection || allTableSections.find(s => !s.classList.contains('playoff-scenarios-section') && !s.classList.contains('team-history-section'));
+
+    const showFutureSections = shouldShowFuturePredictionsSections();
+    if (!showFutureSections) {
+        if (resolvedRegularTableSection) resolvedRegularTableSection.style.display = 'none';
+        if (tbody) tbody.innerHTML = '';
+        if (playoffSection) playoffSection.style.display = 'none';
+        if (playoffContainer) playoffContainer.innerHTML = '';
+
+        updatePredictionsDrawsColumnVisibility();
+        return;
+    }
 
     if (regularFutureGames.length === 0) {
-        if (regularTableSection) regularTableSection.style.display = 'none';
+        if (resolvedRegularTableSection) resolvedRegularTableSection.style.display = 'none';
         tbody.innerHTML = '';
     } else {
-        if (regularTableSection) regularTableSection.style.display = 'block';
+        if (resolvedRegularTableSection) resolvedRegularTableSection.style.display = 'block';
         // Ordenar por jornada
         regularFutureGames.sort((a, b) => (a.jornada || 0) - (b.jornada || 0));
 
@@ -11989,8 +12313,6 @@ function updatePredictionsTable() {
     }
 
     // Renderizar secção de playoffs
-    const playoffContainer = document.getElementById('playoffScenariosContainer');
-    const playoffSection = document.getElementById('playoffScenariosSection');
 
     if (playoffContainer && playoffSection) {
         if (playoffGames.length === 0) {
@@ -12532,6 +12854,8 @@ async function navigateToPreviousTeam() {
     updatePredictionsTableHeaders();
     updatePredictionsTable();
     updateTeamHistoryTable();
+
+    syncCalendarWithPredictionsSelection();
 }
 
 /**
@@ -12588,6 +12912,8 @@ async function navigateToNextTeam() {
     updatePredictionsTableHeaders();
     updatePredictionsTable();
     updateTeamHistoryTable();
+
+    syncCalendarWithPredictionsSelection();
 }
 // Event listeners para os botões do slider
 document.getElementById('prevTeamBtn')?.addEventListener('click', navigateToPreviousTeam);
