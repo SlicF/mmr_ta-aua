@@ -1,0 +1,13 @@
+﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
+Bioquímica,LM1:Línguas e Relações Empresariais|LM2:Física,LM1,Línguas e Relações Empresariais,25.2357,0.0000,74.7643,LM2,Física,68.6615,0.0000,31.3385,59.1860,25.3928
+Bioquímica,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,47.5101,0.0000,52.4899,LM2,Física,68.2199,0.0000,31.7801,10.6230,44.1589
+Ciências Biomédicas,LM1:Línguas e Relações Empresariais|LM2:Física,LM1,Línguas e Relações Empresariais,16.7706,0.0000,83.2294,LM2,Física,59.7034,0.0000,40.2966,25.4910,16.1273
+Ciências Biomédicas,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,34.7872,0.0000,65.2128,LM2,Física,59.4043,0.0000,40.5957,4.7000,30.7447
+Eng. Computadores e Telemática,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,52.4899,0.0000,47.5101,LM3,Física,71.0534,0.0000,28.9466,10.6230,42.8881
+Eng. Computadores e Telemática,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,65.2128,0.0000,34.7872,LM3,Física,69.8936,0.0000,30.1064,4.7000,51.4043
+Física,LM2:Bioquímica|LM3:Línguas e Relações Empresariais,LM2,Bioquímica,31.3385,0.0000,68.6615,LM3,Línguas e Relações Empresariais,15.0745,0.0000,84.9255,59.1860,6.7195
+Física,LM2:Ciências Biomédicas|LM3:Línguas e Relações Empresariais,LM2,Ciências Biomédicas,40.2966,0.0000,59.7034,LM3,Línguas e Relações Empresariais,14.4953,0.0000,85.5047,25.4910,8.8188
+Física,LM2:Bioquímica|LM3:Eng. Computadores e Telemática,LM2,Bioquímica,31.7801,0.0000,68.2199,LM3,Eng. Computadores e Telemática,28.9466,0.0000,71.0534,10.6230,12.9530
+Física,LM2:Ciências Biomédicas|LM3:Eng. Computadores e Telemática,LM2,Ciências Biomédicas,40.5957,0.0000,59.4043,LM3,Eng. Computadores e Telemática,30.1064,0.0000,69.8936,4.7000,17.8511
+Línguas e Relações Empresariais,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,74.7643,0.0000,25.2357,LM3,Física,84.9255,0.0000,15.0745,59.1860,67.8877
+Línguas e Relações Empresariais,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,83.2294,0.0000,16.7706,LM3,Física,85.5047,0.0000,14.4953,25.4910,75.0539
