@@ -1,0 +1,658 @@
+﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
+Administração Pública,LM2:Línguas e Relações Empresariais|LM3:Eng. Aeroespacial,LM2,Línguas e Relações Empresariais,45.4539,0.0000,54.5461,LM3,Eng. Aeroespacial,44.7635,0.0000,55.2365,2.8101,33.7888
+Administração Pública,LM2:Eng. Civil|LM3:Eng. Aeroespacial,LM2,Eng. Civil,46.6246,0.0000,53.3754,LM3,Eng. Aeroespacial,45.0185,0.0000,54.9815,2.7271,34.1938
+Administração Pública,LM2:Contabilidade|LM3:Eng. Aeroespacial,LM2,Contabilidade,46.3073,0.0000,53.6927,LM3,Eng. Aeroespacial,44.5738,0.0000,55.4262,2.6363,33.8619
+Administração Pública,LM2:Línguas e Relações Empresariais|LM3:Tecnologias de Informação,LM2,Línguas e Relações Empresariais,45.6724,0.0000,54.3276,LM3,Tecnologias de Informação,44.0193,0.0000,55.9807,2.5950,33.4721
+Administração Pública,LM2:Eng. Civil|LM3:Tecnologias de Informação,LM2,Eng. Civil,46.3677,0.0000,53.6323,LM3,Tecnologias de Informação,44.0258,0.0000,55.9742,2.4681,33.7223
+Administração Pública,LM2:Contabilidade|LM3:Tecnologias de Informação,LM2,Contabilidade,46.1662,0.0000,53.8338,LM3,Tecnologias de Informação,44.2277,0.0000,55.7723,2.4245,33.5409
+Administração Pública,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,45.9062,0.0000,54.0938,LM3,Biotecnologia,44.7829,0.0000,55.2171,2.1899,33.9559
+Administração Pública,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,46.4516,0.0000,53.5484,LM3,Biotecnologia,45.1753,0.0000,54.8247,2.1390,34.3198
+Administração Pública,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,46.1598,0.0000,53.8402,LM3,Biotecnologia,45.3409,0.0000,54.6591,2.0637,33.9294
+Administração Pública,LM2:Línguas e Relações Empresariais|LM3:Matemática,LM2,Línguas e Relações Empresariais,46.1808,0.0000,53.8192,LM3,Matemática,44.7449,0.0000,55.2551,1.8525,33.8300
+Administração Pública,LM2:Eng. Civil|LM3:Matemática,LM2,Eng. Civil,45.9295,0.0000,54.0705,LM3,Matemática,44.8116,0.0000,55.1884,1.8069,34.0196
+Administração Pública,LM2:Contabilidade|LM3:Matemática,LM2,Contabilidade,45.6908,0.0000,54.3092,LM3,Matemática,45.8033,0.0000,54.1967,1.7776,34.6928
+Administração Pública,LM2:Línguas e Relações Empresariais|LM3:Eng. Informática,LM2,Línguas e Relações Empresariais,46.1351,0.0000,53.8649,LM3,Eng. Informática,44.9245,0.0000,55.0755,1.4373,33.4377
+Administração Pública,LM2:Eng. Civil|LM3:Eng. Informática,LM2,Eng. Civil,45.6194,0.0000,54.3806,LM3,Eng. Informática,44.7345,0.0000,55.2655,1.3674,34.0793
+Administração Pública,LM2:Contabilidade|LM3:Eng. Informática,LM2,Contabilidade,45.6926,0.0000,54.3074,LM3,Eng. Informática,44.5693,0.0000,55.4307,1.3442,33.9905
+Administração Pública,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Aeroespacial,LM2,Gestão e Planeamento em Turismo,44.7928,0.0000,55.2072,LM3,Eng. Aeroespacial,45.1751,0.0000,54.8249,1.3078,33.6290
+Administração Pública,LM2:Gestão e Planeamento em Turismo|LM3:Tecnologias de Informação,LM2,Gestão e Planeamento em Turismo,45.2632,0.0000,54.7368,LM3,Tecnologias de Informação,44.8589,0.0000,55.1411,1.1875,33.9537
+Administração Pública,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,44.9484,0.0000,55.0516,LM3,Biotecnologia,43.9659,0.0000,56.0341,1.0076,33.0885
+Administração Pública,LM2:Gestão e Planeamento em Turismo|LM3:Matemática,LM2,Gestão e Planeamento em Turismo,45.0534,0.0000,54.9466,LM3,Matemática,45.1109,0.0000,54.8891,0.8703,33.5402
+Administração Pública,LM2:Línguas e Relações Empresariais|LM3:MTC,LM2,Línguas e Relações Empresariais,46.3707,0.0000,53.6293,LM3,MTC,45.1851,0.0000,54.8149,0.6916,34.4997
+Administração Pública,LM2:Eng. Civil|LM3:MTC,LM2,Eng. Civil,46.4482,0.0000,53.5518,LM3,MTC,43.3169,0.0000,56.6831,0.6898,32.6037
+Administração Pública,LM2:Contabilidade|LM3:MTC,LM2,Contabilidade,46.3239,0.0000,53.6761,LM3,MTC,45.3956,0.0000,54.6044,0.6787,34.6987
+Administração Pública,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Informática,LM2,Gestão e Planeamento em Turismo,43.7319,0.0000,56.2681,LM3,Eng. Informática,45.3313,0.0000,54.6687,0.6565,33.7091
+Administração Pública,LM2:Línguas e Relações Empresariais|LM3:Biologia,LM2,Línguas e Relações Empresariais,44.8644,0.0000,55.1356,LM3,Biologia,44.7001,0.0000,55.2999,0.6085,33.2293
+Administração Pública,LM2:Eng. Civil|LM3:Biologia,LM2,Eng. Civil,46.5136,0.0000,53.4864,LM3,Biologia,45.3144,0.0000,54.6856,0.5837,34.3156
+Administração Pública,LM2:Design|LM3:Eng. Aeroespacial,LM2,Design,44.6893,0.0000,55.3107,LM3,Eng. Aeroespacial,44.3106,0.0000,55.6894,0.5809,34.0850
+Administração Pública,LM2:Contabilidade|LM3:Biologia,LM2,Contabilidade,45.1310,0.0000,54.8690,LM3,Biologia,44.2989,0.0000,55.7011,0.5648,33.2153
+Administração Pública,LM2:Design|LM3:Tecnologias de Informação,LM2,Design,44.8134,0.0000,55.1866,LM3,Tecnologias de Informação,44.4945,0.0000,55.5055,0.5331,33.8773
+Administração Pública,LM2:Design|LM3:Biotecnologia,LM2,Design,46.4570,0.0000,53.5430,LM3,Biotecnologia,45.1432,0.0000,54.8568,0.4643,33.9436
+Administração Pública,LM2:Design|LM3:Matemática,LM2,Design,46.2080,0.0000,53.7920,LM3,Matemática,45.4522,0.0000,54.5478,0.3837,33.4115
+Administração Pública,LM2:Gestão e Planeamento em Turismo|LM3:MTC,LM2,Gestão e Planeamento em Turismo,45.0835,0.0000,54.9165,LM3,MTC,43.0427,0.0000,56.9573,0.3234,31.8491
+Administração Pública,LM2:Design|LM3:Eng. Informática,LM2,Design,44.5918,0.0000,55.4082,LM3,Eng. Informática,44.8011,0.0000,55.1989,0.2866,33.8451
+Administração Pública,LM2:Gestão e Planeamento em Turismo|LM3:Biologia,LM2,Gestão e Planeamento em Turismo,46.8439,0.0000,53.1561,LM3,Biologia,45.3673,0.0000,54.6327,0.2709,34.0716
+Administração Pública,LM2:Design|LM3:MTC,LM2,Design,47.3397,0.0000,52.6603,LM3,MTC,45.5662,0.0000,54.4338,0.1466,34.6521
+Administração Pública,LM2:Design|LM3:Biologia,LM2,Design,47.7987,0.0000,52.2013,LM3,Biologia,47.0126,0.0000,52.9874,0.1272,35.7704
+Administração Pública,LM2:Biologia e Geologia|LM3:Eng. Aeroespacial,LM2,Biologia e Geologia,44.8378,0.0000,55.1622,LM3,Eng. Aeroespacial,46.9027,0.0000,53.0973,0.0339,36.2832
+Administração Pública,LM2:Biologia e Geologia|LM3:Tecnologias de Informação,LM2,Biologia e Geologia,51.1945,0.0000,48.8055,LM3,Tecnologias de Informação,43.0034,0.0000,56.9966,0.0293,35.1536
+Administração Pública,LM2:Biologia e Geologia|LM3:Biotecnologia,LM2,Biologia e Geologia,44.0154,0.0000,55.9846,LM3,Biotecnologia,45.5598,0.0000,54.4402,0.0259,33.2046
+Administração Pública,LM2:Biologia e Geologia|LM3:Matemática,LM2,Biologia e Geologia,46.1905,0.0000,53.8095,LM3,Matemática,46.1905,0.0000,53.8095,0.0210,33.8095
+Administração Pública,LM2:Biologia e Geologia|LM3:Eng. Informática,LM2,Biologia e Geologia,46.1538,0.0000,53.8462,LM3,Eng. Informática,43.7870,0.0000,56.2130,0.0169,36.6864
+Administração Pública,LM2:Biologia e Geologia|LM3:MTC,LM2,Biologia e Geologia,58.8235,0.0000,41.1765,LM3,MTC,37.6471,0.0000,62.3529,0.0085,28.2353
+Administração Pública,LM2:Biologia e Geologia|LM3:Biologia,LM2,Biologia e Geologia,42.8571,0.0000,57.1429,LM3,Biologia,49.2063,0.0000,50.7937,0.0063,38.0952
+Administração Pública,LM2:Economia|LM3:Biotecnologia,LM2,Economia,100.0000,0.0000,0.0000,LM3,Biotecnologia,100.0000,0.0000,0.0000,0.0001,100.0000
+Administração Pública,LM2:Economia|LM3:Biologia,LM2,Economia,100.0000,0.0000,0.0000,LM3,Biologia,0.0000,0.0000,100.0000,0.0001,0.0000
+Administração Pública,LM2:Economia|LM3:Matemática,LM2,Economia,0.0000,0.0000,100.0000,LM3,Matemática,100.0000,0.0000,0.0000,0.0001,0.0000
+Administração Pública,LM2:Economia|LM3:Tecnologias de Informação,LM2,Economia,100.0000,0.0000,0.0000,LM3,Tecnologias de Informação,100.0000,0.0000,0.0000,0.0001,100.0000
+Biologia,LM1:Línguas e Relações Empresariais|LM3:Administração Pública,LM1,Línguas e Relações Empresariais,54.1660,0.0000,45.8340,LM3,Administração Pública,55.2999,0.0000,44.7001,0.6085,30.6327
+Biologia,LM1:Eng. Civil|LM3:Administração Pública,LM1,Eng. Civil,55.2681,0.0000,44.7319,LM3,Administração Pública,54.6856,0.0000,45.3144,0.5837,31.1290
+Biologia,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,55.9136,0.0000,44.0864,LM3,Administração Pública,55.7011,0.0000,44.2989,0.5648,32.3300
+Biologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Biomédica,LM1,Línguas e Relações Empresariais,54.4114,0.0000,45.5886,LM3,Eng. Biomédica,56.4200,0.0000,43.5800,0.3933,43.9614
+Biologia,LM1:Eng. Civil|LM3:Eng. Biomédica,LM1,Eng. Civil,55.9990,0.0000,44.0010,LM3,Eng. Biomédica,56.7409,0.0000,43.2591,0.3909,45.5359
+Biologia,LM1:Contabilidade|LM3:Eng. Biomédica,LM1,Contabilidade,56.7366,0.0000,43.2634,LM3,Eng. Biomédica,57.4010,0.0000,42.5990,0.3763,46.6383
+Biologia,LM1:Gestão e Planeamento em Turismo|LM3:Administração Pública,LM1,Gestão e Planeamento em Turismo,54.5958,0.0000,45.4042,LM3,Administração Pública,54.6327,0.0000,45.3673,0.2709,31.2292
+Biologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Computacional,LM1,Línguas e Relações Empresariais,54.7425,0.0000,45.2575,LM3,Eng. Computacional,56.0524,0.0000,43.9476,0.2214,43.8121
+Biologia,LM1:Eng. Civil|LM3:Eng. Computacional,LM1,Eng. Civil,54.2373,0.0000,45.7627,LM3,Eng. Computacional,55.1789,0.0000,44.8211,0.2124,42.7966
+Biologia,LM1:Contabilidade|LM3:Eng. Computacional,LM1,Contabilidade,59.0140,0.0000,40.9860,LM3,Eng. Computacional,55.4857,0.0000,44.5143,0.2069,45.8676
+Biologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Biomédica,LM1,Gestão e Planeamento em Turismo,53.1250,0.0000,46.8750,LM3,Eng. Biomédica,57.4219,0.0000,42.5781,0.1792,42.0759
+Biologia,LM1:Design|LM3:Administração Pública,LM1,Design,54.8742,0.0000,45.1258,LM3,Administração Pública,52.9874,0.0000,47.0126,0.1272,29.8742
+Biologia,LM1:Contabilidade|LM3:Eng. Física,LM1,Contabilidade,56.8412,0.0000,43.1588,LM3,Eng. Física,56.9257,0.0000,43.0743,0.1184,46.1149
+Biologia,LM1:Eng. Civil|LM3:Eng. Física,LM1,Eng. Civil,57.1429,0.0000,42.8571,LM3,Eng. Física,55.1871,0.0000,44.8129,0.1176,45.7483
+Biologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Física,LM1,Línguas e Relações Empresariais,54.5532,0.0000,45.4468,LM3,Eng. Física,57.5319,0.0000,42.4681,0.1175,44.9362
+Biologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Computacional,LM1,Gestão e Planeamento em Turismo,53.4180,0.0000,46.5820,LM3,Eng. Computacional,57.0312,0.0000,42.9688,0.1024,42.9688
+Biologia,LM1:Design|LM3:Eng. Biomédica,LM1,Design,55.1847,0.0000,44.8153,LM3,Eng. Biomédica,56.3766,0.0000,43.6234,0.0839,45.7688
+Biologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Física,LM1,Gestão e Planeamento em Turismo,49.7382,0.0000,50.2618,LM3,Eng. Física,55.8464,0.0000,44.1536,0.0573,39.6161
+Biologia,LM1:Design|LM3:Eng. Computacional,LM1,Design,58.2949,0.0000,41.7051,LM3,Eng. Computacional,60.1382,0.0000,39.8618,0.0434,49.3088
+Biologia,LM1:Eng. Civil|LM3:Gestão,LM1,Eng. Civil,57.5916,0.0000,42.4084,LM3,Gestão,61.5183,0.0000,38.4817,0.0382,48.9529
+Biologia,LM1:Línguas e Relações Empresariais|LM3:Gestão,LM1,Línguas e Relações Empresariais,55.0265,0.0000,44.9735,LM3,Gestão,57.9365,0.0000,42.0635,0.0378,46.5608
+Biologia,LM1:Contabilidade|LM3:Gestão,LM1,Contabilidade,57.1046,0.0000,42.8954,LM3,Gestão,56.0322,0.0000,43.9678,0.0373,45.0402
+Biologia,LM1:Design|LM3:Eng. Física,LM1,Design,54.6512,0.0000,45.3488,LM3,Eng. Física,54.2636,0.0000,45.7364,0.0258,43.7984
+Biologia,LM1:Gestão e Planeamento em Turismo|LM3:Gestão,LM1,Gestão e Planeamento em Turismo,46.8354,0.0000,53.1646,LM3,Gestão,56.3291,0.0000,43.6709,0.0158,37.3418
+Biologia,LM1:Design|LM3:Gestão,LM1,Design,51.7647,0.0000,48.2353,LM3,Gestão,54.1176,0.0000,45.8824,0.0085,40.0000
+Biologia,LM1:Biologia e Geologia|LM3:Administração Pública,LM1,Biologia e Geologia,60.3175,0.0000,39.6825,LM3,Administração Pública,50.7937,0.0000,49.2063,0.0063,34.9206
+Biologia,LM1:Biologia e Geologia|LM3:Eng. Biomédica,LM1,Biologia e Geologia,74.3590,0.0000,25.6410,LM3,Eng. Biomédica,53.8462,0.0000,46.1538,0.0039,58.9744
+Biologia,LM1:Biologia e Geologia|LM3:Eng. Computacional,LM1,Biologia e Geologia,48.0000,0.0000,52.0000,LM3,Eng. Computacional,60.0000,0.0000,40.0000,0.0025,40.0000
+Biologia,LM1:Biologia e Geologia|LM3:Eng. Física,LM1,Biologia e Geologia,46.6667,0.0000,53.3333,LM3,Eng. Física,53.3333,0.0000,46.6667,0.0015,46.6667
+Biologia,LM1:Biologia e Geologia|LM3:Gestão,LM1,Biologia e Geologia,55.5556,0.0000,44.4444,LM3,Gestão,66.6667,0.0000,33.3333,0.0009,44.4444
+Biologia,LM1:Economia|LM3:Administração Pública,LM1,Economia,0.0000,0.0000,100.0000,LM3,Administração Pública,100.0000,0.0000,0.0000,0.0001,0.0000
+Biologia e Geologia,LM1:Eng. Aeroespacial|LM2:Administração Pública,LM1,Eng. Aeroespacial,44.8378,0.0000,55.1622,LM2,Administração Pública,55.1622,0.0000,44.8378,0.0339,25.0737
+Biologia e Geologia,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,41.2969,0.0000,58.7031,LM2,Administração Pública,48.8055,0.0000,51.1945,0.0293,19.7952
+Biologia e Geologia,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,46.7181,0.0000,53.2819,LM2,Administração Pública,55.9846,0.0000,44.0154,0.0259,27.7992
+Biologia e Geologia,LM1:Eng. Aeroespacial|LM2:Eng. Biomédica,LM1,Eng. Aeroespacial,41.1765,0.0000,58.8235,LM2,Eng. Biomédica,58.8235,0.0000,41.1765,0.0238,36.5546
+Biologia e Geologia,LM1:Matemática|LM2:Administração Pública,LM1,Matemática,41.9048,0.0000,58.0952,LM2,Administração Pública,53.8095,0.0000,46.1905,0.0210,22.3810
+Biologia e Geologia,LM1:Tecnologias de Informação|LM2:Eng. Biomédica,LM1,Tecnologias de Informação,44.0594,0.0000,55.9406,LM2,Eng. Biomédica,49.5050,0.0000,50.4950,0.0202,36.1386
+Biologia e Geologia,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,37.5723,0.0000,62.4277,LM2,Eng. Biomédica,58.3815,0.0000,41.6185,0.0173,36.4162
+Biologia e Geologia,LM1:Eng. Informática|LM2:Administração Pública,LM1,Eng. Informática,44.9704,0.0000,55.0296,LM2,Administração Pública,53.8462,0.0000,46.1538,0.0169,23.0769
+Biologia e Geologia,LM1:Matemática|LM2:Eng. Biomédica,LM1,Matemática,41.4474,0.0000,58.5526,LM2,Eng. Biomédica,55.9211,0.0000,44.0789,0.0152,34.2105
+Biologia e Geologia,LM1:Eng. Aeroespacial|LM2:Eng. Computacional,LM1,Eng. Aeroespacial,44.5378,0.0000,55.4622,LM2,Eng. Computacional,59.6639,0.0000,40.3361,0.0119,38.6555
+Biologia e Geologia,LM1:Tecnologias de Informação|LM2:Eng. Computacional,LM1,Tecnologias de Informação,38.3178,0.0000,61.6822,LM2,Eng. Computacional,53.2710,0.0000,46.7290,0.0107,33.6449
+Biologia e Geologia,LM1:Eng. Informática|LM2:Eng. Biomédica,LM1,Eng. Informática,45.0980,0.0000,54.9020,LM2,Eng. Biomédica,62.7451,0.0000,37.2549,0.0102,45.0980
+Biologia e Geologia,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,49.4845,0.0000,50.5155,LM2,Eng. Computacional,49.4845,0.0000,50.5155,0.0097,38.1443
+Biologia e Geologia,LM1:MTC|LM2:Administração Pública,LM1,MTC,47.0588,0.0000,52.9412,LM2,Administração Pública,41.1765,0.0000,58.8235,0.0085,23.5294
+Biologia e Geologia,LM1:Matemática|LM2:Eng. Computacional,LM1,Matemática,48.7805,0.0000,51.2195,LM2,Eng. Computacional,59.7561,0.0000,40.2439,0.0082,47.5610
+Biologia e Geologia,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,37.0370,0.0000,62.9630,LM2,Eng. Física,56.7901,0.0000,43.2099,0.0081,32.0988
+Biologia e Geologia,LM1:Eng. Aeroespacial|LM2:Eng. Física,LM1,Eng. Aeroespacial,39.4737,0.0000,60.5263,LM2,Eng. Física,56.5789,0.0000,43.4211,0.0076,36.8421
+Biologia e Geologia,LM1:Biologia|LM2:Administração Pública,LM1,Biologia,39.6825,0.0000,60.3175,LM2,Administração Pública,57.1429,0.0000,42.8571,0.0063,26.9841
+Biologia e Geologia,LM1:MTC|LM2:Eng. Biomédica,LM1,MTC,50.0000,0.0000,50.0000,LM2,Eng. Biomédica,48.3871,0.0000,51.6129,0.0062,32.2581
+Biologia e Geologia,LM1:Eng. Informática|LM2:Eng. Computacional,LM1,Eng. Informática,49.1803,0.0000,50.8197,LM2,Eng. Computacional,49.1803,0.0000,50.8197,0.0061,34.4262
+Biologia e Geologia,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,43.1034,0.0000,56.8966,LM2,Eng. Física,51.7241,0.0000,48.2759,0.0058,36.2069
+Biologia e Geologia,LM1:Matemática|LM2:Eng. Física,LM1,Matemática,41.4634,0.0000,58.5366,LM2,Eng. Física,48.7805,0.0000,51.2195,0.0041,31.7073
+Biologia e Geologia,LM1:Biologia|LM2:Eng. Biomédica,LM1,Biologia,25.6410,0.0000,74.3590,LM2,Eng. Biomédica,51.2821,0.0000,48.7179,0.0039,12.8205
+Biologia e Geologia,LM1:Eng. Informática|LM2:Eng. Física,LM1,Eng. Informática,37.5000,0.0000,62.5000,LM2,Eng. Física,46.8750,0.0000,53.1250,0.0032,25.0000
+Biologia e Geologia,LM1:Biologia|LM2:Eng. Computacional,LM1,Biologia,52.0000,0.0000,48.0000,LM2,Eng. Computacional,60.0000,0.0000,40.0000,0.0025,36.0000
+Biologia e Geologia,LM1:MTC|LM2:Eng. Computacional,LM1,MTC,54.1667,0.0000,45.8333,LM2,Eng. Computacional,75.0000,0.0000,25.0000,0.0024,54.1667
+Biologia e Geologia,LM1:Tecnologias de Informação|LM2:Gestão,LM1,Tecnologias de Informação,26.0870,0.0000,73.9130,LM2,Gestão,60.8696,0.0000,39.1304,0.0023,34.7826
+Biologia e Geologia,LM1:Eng. Aeroespacial|LM2:Gestão,LM1,Eng. Aeroespacial,31.8182,0.0000,68.1818,LM2,Gestão,50.0000,0.0000,50.0000,0.0022,36.3636
+Biologia e Geologia,LM1:Biologia|LM2:Eng. Física,LM1,Biologia,53.3333,0.0000,46.6667,LM2,Eng. Física,40.0000,0.0000,60.0000,0.0015,6.6667
+Biologia e Geologia,LM1:Eng. Informática|LM2:Gestão,LM1,Eng. Informática,40.0000,0.0000,60.0000,LM2,Gestão,60.0000,0.0000,40.0000,0.0015,33.3333
+Biologia e Geologia,LM1:Matemática|LM2:Gestão,LM1,Matemática,50.0000,0.0000,50.0000,LM2,Gestão,21.4286,0.0000,78.5714,0.0014,14.2857
+Biologia e Geologia,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,30.7692,0.0000,69.2308,LM2,Gestão,46.1538,0.0000,53.8462,0.0013,23.0769
+Biologia e Geologia,LM1:MTC|LM2:Eng. Física,LM1,MTC,33.3333,0.0000,66.6667,LM2,Eng. Física,41.6667,0.0000,58.3333,0.0012,33.3333
+Biologia e Geologia,LM1:Biologia|LM2:Gestão,LM1,Biologia,44.4444,0.0000,55.5556,LM2,Gestão,66.6667,0.0000,33.3333,0.0009,22.2222
+Biologia e Geologia,LM1:MTC|LM2:Gestão,LM1,MTC,57.1429,0.0000,42.8571,LM2,Gestão,71.4286,0.0000,28.5714,0.0007,57.1429
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Administração Pública,LM1,Línguas e Relações Empresariais,55.2902,0.0000,44.7098,LM3,Administração Pública,55.2171,0.0000,44.7829,2.1899,31.3622
+Biotecnologia,LM1:Eng. Civil|LM3:Administração Pública,LM1,Eng. Civil,56.4843,0.0000,43.5157,LM3,Administração Pública,54.8247,0.0000,45.1753,2.1390,31.8934
+Biotecnologia,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,55.3230,0.0000,44.6770,LM3,Administração Pública,54.6591,0.0000,45.3409,2.0637,31.0559
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Biomédica,LM1,Línguas e Relações Empresariais,55.1109,0.0000,44.8891,LM3,Eng. Biomédica,56.7034,0.0000,43.2966,1.4694,44.3378
+Biotecnologia,LM1:Eng. Civil|LM3:Eng. Biomédica,LM1,Eng. Civil,56.3087,0.0000,43.6913,LM3,Eng. Biomédica,56.8806,0.0000,43.1194,1.4163,45.3859
+Biotecnologia,LM1:Contabilidade|LM3:Eng. Biomédica,LM1,Contabilidade,56.7109,0.0000,43.2891,LM3,Eng. Biomédica,56.1947,0.0000,43.8053,1.3560,45.8260
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Administração Pública,LM1,Gestão e Planeamento em Turismo,54.6943,0.0000,45.3057,LM3,Administração Pública,56.0341,0.0000,43.9659,1.0076,31.5403
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Computacional,LM1,Línguas e Relações Empresariais,54.9244,0.0000,45.0756,LM3,Eng. Computacional,55.1785,0.0000,44.8215,0.7869,44.2115
+Biotecnologia,LM1:Eng. Civil|LM3:Eng. Computacional,LM1,Eng. Civil,56.6057,0.0000,43.3943,LM3,Eng. Computacional,54.8802,0.0000,45.1198,0.7766,44.8107
+Biotecnologia,LM1:Contabilidade|LM3:Eng. Computacional,LM1,Contabilidade,54.3619,0.0000,45.6381,LM3,Eng. Computacional,54.9389,0.0000,45.0611,0.7279,43.3713
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Biomédica,LM1,Gestão e Planeamento em Turismo,54.8073,0.0000,45.1927,LM3,Eng. Biomédica,55.7522,0.0000,44.2478,0.6667,44.5178
+Biotecnologia,LM1:Design|LM3:Administração Pública,LM1,Design,54.5768,0.0000,45.4232,LM3,Administração Pública,54.8568,0.0000,45.1432,0.4643,31.4667
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Física,LM1,Línguas e Relações Empresariais,54.3363,0.0000,45.6637,LM3,Eng. Física,54.3584,0.0000,45.6416,0.4520,43.6062
+Biotecnologia,LM1:Eng. Civil|LM3:Eng. Física,LM1,Eng. Civil,56.4501,0.0000,43.5499,LM3,Eng. Física,55.4060,0.0000,44.5940,0.4310,45.2668
+Biotecnologia,LM1:Contabilidade|LM3:Eng. Física,LM1,Contabilidade,56.7109,0.0000,43.2891,LM3,Eng. Física,54.5243,0.0000,45.4757,0.4299,45.2431
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Computacional,LM1,Gestão e Planeamento em Turismo,54.9735,0.0000,45.0265,LM3,Eng. Computacional,54.3605,0.0000,45.6395,0.3589,43.9955
+Biotecnologia,LM1:Design|LM3:Eng. Biomédica,LM1,Design,55.5069,0.0000,44.4931,LM3,Eng. Biomédica,57.1573,0.0000,42.8427,0.2969,45.8740
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Física,LM1,Gestão e Planeamento em Turismo,53.7002,0.0000,46.2998,LM3,Eng. Física,55.9298,0.0000,44.0702,0.2108,44.1651
+Biotecnologia,LM1:Design|LM3:Eng. Computacional,LM1,Design,53.9889,0.0000,46.0111,LM3,Eng. Computacional,53.9270,0.0000,46.0730,0.1617,41.6203
+Biotecnologia,LM1:Eng. Civil|LM3:Gestão,LM1,Eng. Civil,57.9100,0.0000,42.0900,LM3,Gestão,54.9347,0.0000,45.0653,0.1378,45.9361
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Gestão,LM1,Línguas e Relações Empresariais,55.2790,0.0000,44.7210,LM3,Gestão,55.0528,0.0000,44.9472,0.1326,44.7210
+Biotecnologia,LM1:Contabilidade|LM3:Gestão,LM1,Contabilidade,52.7371,0.0000,47.2629,LM3,Gestão,57.3631,0.0000,42.6369,0.1297,42.1742
+Biotecnologia,LM1:Design|LM3:Eng. Física,LM1,Design,53.4043,0.0000,46.5957,LM3,Eng. Física,54.1489,0.0000,45.8511,0.0940,42.0213
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Gestão,LM1,Gestão e Planeamento em Turismo,52.0325,0.0000,47.9675,LM3,Gestão,57.5610,0.0000,42.4390,0.0615,42.4390
+Biotecnologia,LM1:Design|LM3:Gestão,LM1,Design,54.1045,0.0000,45.8955,LM3,Gestão,58.9552,0.0000,41.0448,0.0268,43.6567
+Biotecnologia,LM1:Biologia e Geologia|LM3:Administração Pública,LM1,Biologia e Geologia,53.2819,0.0000,46.7181,LM3,Administração Pública,54.4402,0.0000,45.5598,0.0259,38.9961
+Biotecnologia,LM1:Biologia e Geologia|LM3:Eng. Biomédica,LM1,Biologia e Geologia,62.4277,0.0000,37.5723,LM3,Eng. Biomédica,57.2254,0.0000,42.7746,0.0173,38.7283
+Biotecnologia,LM1:Biologia e Geologia|LM3:Eng. Computacional,LM1,Biologia e Geologia,50.5155,0.0000,49.4845,LM3,Eng. Computacional,61.8557,0.0000,38.1443,0.0097,26.8041
+Biotecnologia,LM1:Biologia e Geologia|LM3:Eng. Física,LM1,Biologia e Geologia,56.8966,0.0000,43.1034,LM3,Eng. Física,67.2414,0.0000,32.7586,0.0058,36.2069
+Biotecnologia,LM1:Biologia e Geologia|LM3:Gestão,LM1,Biologia e Geologia,69.2308,0.0000,30.7692,LM3,Gestão,61.5385,0.0000,38.4615,0.0013,46.1538
+Biotecnologia,LM1:Economia|LM3:Administração Pública,LM1,Economia,100.0000,0.0000,0.0000,LM3,Administração Pública,0.0000,0.0000,100.0000,0.0001,0.0000
+Biotecnologia,LM1:Economia|LM3:Eng. Biomédica,LM1,Economia,100.0000,0.0000,0.0000,LM3,Eng. Biomédica,100.0000,0.0000,0.0000,0.0001,100.0000
+Contabilidade,LM1:Eng. Aeroespacial|LM2:Administração Pública,LM1,Eng. Aeroespacial,43.8531,0.0000,56.1469,LM2,Administração Pública,53.6927,0.0000,46.3073,2.6363,24.4092
+Contabilidade,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,43.1470,0.0000,56.8530,LM2,Administração Pública,53.8338,0.0000,46.1662,2.4245,24.2689
+Contabilidade,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,44.6770,0.0000,55.3230,LM2,Administração Pública,53.8402,0.0000,46.1598,2.0637,35.0148
+Contabilidade,LM1:Matemática|LM2:Administração Pública,LM1,Matemática,45.1226,0.0000,54.8774,LM2,Administração Pública,54.3092,0.0000,45.6908,1.7776,25.3150
+Contabilidade,LM1:Eng. Aeroespacial|LM2:Eng. Biomédica,LM1,Eng. Aeroespacial,43.8739,0.0000,56.1261,LM2,Eng. Biomédica,56.1033,0.0000,43.8967,1.7507,37.9163
+Contabilidade,LM1:Tecnologias de Informação|LM2:Eng. Biomédica,LM1,Tecnologias de Informação,42.9159,0.0000,57.0841,LM2,Eng. Biomédica,56.2181,0.0000,43.7819,1.6050,37.7882
+Contabilidade,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,43.2891,0.0000,56.7109,LM2,Eng. Biomédica,56.4454,0.0000,43.5546,1.3560,24.5649
+Contabilidade,LM1:Eng. Informática|LM2:Administração Pública,LM1,Eng. Informática,42.8656,0.0000,57.1344,LM2,Administração Pública,54.3074,0.0000,45.6926,1.3442,23.7688
+Contabilidade,LM1:Matemática|LM2:Eng. Biomédica,LM1,Matemática,44.8528,0.0000,55.1472,LM2,Eng. Biomédica,56.0723,0.0000,43.9277,1.1890,39.0244
+Contabilidade,LM1:Eng. Aeroespacial|LM2:Eng. Computacional,LM1,Eng. Aeroespacial,42.9389,0.0000,57.0611,LM2,Eng. Computacional,55.3647,0.0000,44.6353,0.9432,37.8605
+Contabilidade,LM1:Eng. Informática|LM2:Eng. Biomédica,LM1,Eng. Informática,43.6302,0.0000,56.3698,LM2,Eng. Biomédica,56.7182,0.0000,43.2818,0.8611,39.0547
+Contabilidade,LM1:Tecnologias de Informação|LM2:Eng. Computacional,LM1,Tecnologias de Informação,43.6068,0.0000,56.3932,LM2,Eng. Computacional,53.4128,0.0000,46.5872,0.8556,36.8747
+Contabilidade,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,45.6381,0.0000,54.3619,LM2,Eng. Computacional,53.8948,0.0000,46.1052,0.7279,25.0584
+Contabilidade,LM1:MTC|LM2:Administração Pública,LM1,MTC,43.3623,0.0000,56.6377,LM2,Administração Pública,53.6761,0.0000,46.3239,0.6787,23.8839
+Contabilidade,LM1:Matemática|LM2:Eng. Computacional,LM1,Matemática,45.2445,0.0000,54.7555,LM2,Eng. Computacional,53.7518,0.0000,46.2482,0.6277,36.8329
+Contabilidade,LM1:Biologia|LM2:Administração Pública,LM1,Biologia,44.0864,0.0000,55.9136,LM2,Administração Pública,54.8690,0.0000,45.1310,0.5648,34.4547
+Contabilidade,LM1:Eng. Aeroespacial|LM2:Eng. Física,LM1,Eng. Aeroespacial,43.6310,0.0000,56.3690,LM2,Eng. Física,54.1545,0.0000,45.8455,0.5464,37.0791
+Contabilidade,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,43.7193,0.0000,56.2807,LM2,Eng. Física,55.0327,0.0000,44.9673,0.4888,37.9501
+Contabilidade,LM1:Eng. Informática|LM2:Eng. Computacional,LM1,Eng. Informática,44.2395,0.0000,55.7605,LM2,Eng. Computacional,54.8280,0.0000,45.1720,0.4826,37.5052
+Contabilidade,LM1:MTC|LM2:Eng. Biomédica,LM1,MTC,42.6079,0.0000,57.3921,LM2,Eng. Biomédica,56.4080,0.0000,43.5920,0.4471,38.1570
+Contabilidade,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,43.2891,0.0000,56.7109,LM2,Eng. Física,55.0826,0.0000,44.9174,0.4299,24.3080
+Contabilidade,LM1:Biologia|LM2:Eng. Biomédica,LM1,Biologia,43.2634,0.0000,56.7366,LM2,Eng. Biomédica,56.6038,0.0000,43.3962,0.3763,24.6612
+Contabilidade,LM1:Matemática|LM2:Eng. Física,LM1,Matemática,45.1012,0.0000,54.8988,LM2,Eng. Física,53.3873,0.0000,46.6127,0.3705,37.4899
+Contabilidade,LM1:Eng. Informática|LM2:Eng. Física,LM1,Eng. Informática,43.9372,0.0000,56.0628,LM2,Eng. Física,55.5880,0.0000,44.4120,0.2738,38.8970
+Contabilidade,LM1:MTC|LM2:Eng. Computacional,LM1,MTC,43.7219,0.0000,56.2781,LM2,Eng. Computacional,54.1513,0.0000,45.8487,0.2445,38.2004
+Contabilidade,LM1:Biologia|LM2:Eng. Computacional,LM1,Biologia,40.9860,0.0000,59.0140,LM2,Eng. Computacional,51.6675,0.0000,48.3325,0.2069,22.0396
+Contabilidade,LM1:Eng. Aeroespacial|LM2:Gestão,LM1,Eng. Aeroespacial,44.0163,0.0000,55.9837,LM2,Gestão,54.4658,0.0000,45.5342,0.1713,37.4781
+Contabilidade,LM1:Tecnologias de Informação|LM2:Gestão,LM1,Tecnologias de Informação,44.8652,0.0000,55.1348,LM2,Gestão,53.7869,0.0000,46.2131,0.1558,37.1630
+Contabilidade,LM1:MTC|LM2:Eng. Física,LM1,MTC,44.0922,0.0000,55.9078,LM2,Eng. Física,54.5389,0.0000,45.4611,0.1388,38.1844
+Contabilidade,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,47.2629,0.0000,52.7371,LM2,Gestão,56.2837,0.0000,43.7163,0.1297,28.5274
+Contabilidade,LM1:Biologia|LM2:Eng. Física,LM1,Biologia,43.1588,0.0000,56.8412,LM2,Eng. Física,54.5608,0.0000,45.4392,0.1184,25.0845
+Contabilidade,LM1:Matemática|LM2:Gestão,LM1,Matemática,43.9609,0.0000,56.0391,LM2,Gestão,53.6412,0.0000,46.3588,0.1126,38.9876
+Contabilidade,LM1:Eng. Informática|LM2:Gestão,LM1,Eng. Informática,41.0870,0.0000,58.9130,LM2,Gestão,52.7174,0.0000,47.2826,0.0920,35.2174
+Contabilidade,LM1:MTC|LM2:Gestão,LM1,MTC,40.8521,0.0000,59.1479,LM2,Gestão,55.3885,0.0000,44.6115,0.0399,37.3434
+Contabilidade,LM1:Biologia|LM2:Gestão,LM1,Biologia,42.8954,0.0000,57.1046,LM2,Gestão,54.1555,0.0000,45.8445,0.0373,24.1287
+Design,LM1:Eng. Aeroespacial|LM2:Administração Pública,LM1,Eng. Aeroespacial,43.1400,0.0000,56.8600,LM2,Administração Pública,55.3107,0.0000,44.6893,0.5809,24.1005
+Design,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,42.7124,0.0000,57.2876,LM2,Administração Pública,55.1866,0.0000,44.8134,0.5331,24.0855
+Design,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,45.4232,0.0000,54.5768,LM2,Administração Pública,53.5430,0.0000,46.4570,0.4643,34.5897
+Design,LM1:Matemática|LM2:Administração Pública,LM1,Matemática,45.4522,0.0000,54.5478,LM2,Administração Pública,53.7920,0.0000,46.2080,0.3837,25.7493
+Design,LM1:Eng. Aeroespacial|LM2:Eng. Biomédica,LM1,Eng. Aeroespacial,44.2827,0.0000,55.7173,LM2,Eng. Biomédica,55.8232,0.0000,44.1768,0.3778,39.0418
+Design,LM1:Tecnologias de Informação|LM2:Eng. Biomédica,LM1,Tecnologias de Informação,42.7360,0.0000,57.2640,LM2,Eng. Biomédica,58.9316,0.0000,41.0684,0.3538,40.2487
+Design,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,44.4931,0.0000,55.5069,LM2,Eng. Biomédica,56.8205,0.0000,43.1795,0.2969,25.5642
+Design,LM1:Eng. Informática|LM2:Administração Pública,LM1,Eng. Informática,44.2080,0.0000,55.7920,LM2,Administração Pública,55.4082,0.0000,44.5918,0.2866,24.8779
+Design,LM1:Matemática|LM2:Eng. Biomédica,LM1,Matemática,44.9823,0.0000,55.0177,LM2,Eng. Biomédica,56.3558,0.0000,43.6442,0.2541,38.6856
+Design,LM1:Eng. Aeroespacial|LM2:Eng. Computacional,LM1,Eng. Aeroespacial,40.8104,0.0000,59.1896,LM2,Eng. Computacional,54.7998,0.0000,45.2002,0.2073,37.6266
+Design,LM1:Tecnologias de Informação|LM2:Eng. Computacional,LM1,Tecnologias de Informação,41.8947,0.0000,58.1053,LM2,Eng. Computacional,54.1579,0.0000,45.8421,0.1900,36.8421
+Design,LM1:Eng. Informática|LM2:Eng. Biomédica,LM1,Eng. Informática,46.6489,0.0000,53.3511,LM2,Eng. Biomédica,55.5851,0.0000,44.4149,0.1880,39.3085
+Design,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,46.0111,0.0000,53.9889,LM2,Eng. Computacional,55.1639,0.0000,44.8361,0.1617,26.3451
+Design,LM1:MTC|LM2:Administração Pública,LM1,MTC,42.4966,0.0000,57.5034,LM2,Administração Pública,52.6603,0.0000,47.3397,0.1466,23.2606
+Design,LM1:Matemática|LM2:Eng. Computacional,LM1,Matemática,45.1246,0.0000,54.8754,LM2,Eng. Computacional,55.0178,0.0000,44.9822,0.1405,38.7189
+Design,LM1:Biologia|LM2:Administração Pública,LM1,Biologia,45.1258,0.0000,54.8742,LM2,Administração Pública,52.2013,0.0000,47.7987,0.1272,34.3553
+Design,LM1:Eng. Aeroespacial|LM2:Eng. Física,LM1,Eng. Aeroespacial,43.6561,0.0000,56.3439,LM2,Eng. Física,56.5943,0.0000,43.4057,0.1198,39.3990
+Design,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,38.5900,0.0000,61.4100,LM2,Eng. Física,54.4527,0.0000,45.5473,0.1078,34.6939
+Design,LM1:Eng. Informática|LM2:Eng. Computacional,LM1,Eng. Informática,45.1267,0.0000,54.8733,LM2,Eng. Computacional,52.4366,0.0000,47.5634,0.1026,35.9649
+Design,LM1:MTC|LM2:Eng. Biomédica,LM1,MTC,43.1431,0.0000,56.8569,LM2,Eng. Biomédica,57.6577,0.0000,42.3423,0.0999,39.2392
+Design,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,46.5957,0.0000,53.4043,LM2,Eng. Física,54.5745,0.0000,45.4255,0.0940,25.9574
+Design,LM1:Biologia|LM2:Eng. Biomédica,LM1,Biologia,44.8153,0.0000,55.1847,LM2,Eng. Biomédica,58.6412,0.0000,41.3588,0.0839,26.1025
+Design,LM1:Matemática|LM2:Eng. Física,LM1,Matemática,46.2312,0.0000,53.7688,LM2,Eng. Física,52.0101,0.0000,47.9899,0.0796,36.6834
+Design,LM1:Eng. Informática|LM2:Eng. Física,LM1,Eng. Informática,45.0088,0.0000,54.9912,LM2,Eng. Física,50.7881,0.0000,49.2119,0.0571,35.2014
+Design,LM1:MTC|LM2:Eng. Computacional,LM1,MTC,43.5950,0.0000,56.4050,LM2,Eng. Computacional,53.3058,0.0000,46.6942,0.0484,37.8099
+Design,LM1:Biologia|LM2:Eng. Computacional,LM1,Biologia,41.7051,0.0000,58.2949,LM2,Eng. Computacional,55.9908,0.0000,44.0092,0.0434,23.9631
+Design,LM1:Eng. Aeroespacial|LM2:Gestão,LM1,Eng. Aeroespacial,44.3570,0.0000,55.6430,LM2,Gestão,60.3675,0.0000,39.6325,0.0381,40.4199
+Design,LM1:Tecnologias de Informação|LM2:Gestão,LM1,Tecnologias de Informação,41.6168,0.0000,58.3832,LM2,Gestão,56.2874,0.0000,43.7126,0.0334,40.4192
+Design,LM1:MTC|LM2:Eng. Física,LM1,MTC,43.8356,0.0000,56.1644,LM2,Eng. Física,52.0548,0.0000,47.9452,0.0292,36.3014
+Design,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,45.8955,0.0000,54.1045,LM2,Gestão,55.2239,0.0000,44.7761,0.0268,24.6269
+Design,LM1:Biologia|LM2:Eng. Física,LM1,Biologia,45.3488,0.0000,54.6512,LM2,Eng. Física,56.9767,0.0000,43.0233,0.0258,26.3566
+Design,LM1:Matemática|LM2:Gestão,LM1,Matemática,42.7984,0.0000,57.2016,LM2,Gestão,48.1481,0.0000,51.8519,0.0243,31.6872
+Design,LM1:Eng. Informática|LM2:Gestão,LM1,Eng. Informática,43.1138,0.0000,56.8862,LM2,Gestão,61.0778,0.0000,38.9222,0.0167,37.1257
+Design,LM1:Biologia|LM2:Gestão,LM1,Biologia,48.2353,0.0000,51.7647,LM2,Gestão,64.7059,0.0000,35.2941,0.0085,32.9412
+Design,LM1:MTC|LM2:Gestão,LM1,MTC,46.9880,0.0000,53.0120,LM2,Gestão,50.6024,0.0000,49.3976,0.0083,31.3253
+Economia,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,0.0000,0.0000,100.0000,LM2,Administração Pública,0.0000,0.0000,100.0000,0.0001,0.0000
+Economia,LM1:Biologia|LM2:Administração Pública,LM1,Biologia,100.0000,0.0000,0.0000,LM2,Administração Pública,0.0000,0.0000,100.0000,0.0001,100.0000
+Economia,LM1:Matemática|LM2:Administração Pública,LM1,Matemática,100.0000,0.0000,0.0000,LM2,Administração Pública,100.0000,0.0000,0.0000,0.0001,100.0000
+Economia,LM1:MTC|LM2:Eng. Física,LM1,MTC,100.0000,0.0000,0.0000,LM2,Eng. Física,0.0000,0.0000,100.0000,0.0001,0.0000
+Economia,LM1:Tecnologias de Informação|LM2:Eng. Computacional,LM1,Tecnologias de Informação,0.0000,0.0000,100.0000,LM2,Eng. Computacional,100.0000,0.0000,0.0000,0.0001,100.0000
+Economia,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,0.0000,0.0000,100.0000,LM2,Administração Pública,0.0000,0.0000,100.0000,0.0001,0.0000
+Economia,LM1:Eng. Aeroespacial|LM2:Eng. Física,LM1,Eng. Aeroespacial,0.0000,0.0000,100.0000,LM2,Eng. Física,100.0000,0.0000,0.0000,0.0001,0.0000
+Economia,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,0.0000,0.0000,100.0000,LM2,Eng. Biomédica,100.0000,0.0000,0.0000,0.0001,0.0000
+Economia,LM1:Matemática|LM2:Gestão,LM1,Matemática,100.0000,0.0000,0.0000,LM2,Gestão,100.0000,0.0000,0.0000,0.0001,100.0000
+Eng. Aeroespacial,LM1:Línguas e Relações Empresariais|LM3:Administração Pública,LM1,Línguas e Relações Empresariais,55.6955,0.0000,44.3045,LM3,Administração Pública,55.2365,0.0000,44.7635,2.8101,31.6394
+Eng. Aeroespacial,LM1:Eng. Civil|LM3:Administração Pública,LM1,Eng. Civil,55.8322,0.0000,44.1678,LM3,Administração Pública,54.9815,0.0000,45.0185,2.7271,31.5060
+Eng. Aeroespacial,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,56.1469,0.0000,43.8531,LM3,Administração Pública,55.4262,0.0000,44.5738,2.6363,41.7289
+Eng. Aeroespacial,LM1:Línguas e Relações Empresariais|LM3:Eng. Biomédica,LM1,Línguas e Relações Empresariais,55.7884,0.0000,44.2116,LM3,Eng. Biomédica,56.5613,0.0000,43.4387,1.8373,45.6158
+Eng. Aeroespacial,LM1:Eng. Civil|LM3:Eng. Biomédica,LM1,Eng. Civil,56.3698,0.0000,43.6302,LM3,Eng. Biomédica,56.6046,0.0000,43.3954,1.7889,45.5923
+Eng. Aeroespacial,LM1:Contabilidade|LM3:Eng. Biomédica,LM1,Contabilidade,56.1261,0.0000,43.8739,LM3,Eng. Biomédica,56.9372,0.0000,43.0628,1.7507,32.1357
+Eng. Aeroespacial,LM1:Gestão e Planeamento em Turismo|LM3:Administração Pública,LM1,Gestão e Planeamento em Turismo,53.5327,0.0000,46.4673,LM3,Administração Pública,54.8249,0.0000,45.1751,1.3078,30.1269
+Eng. Aeroespacial,LM1:Línguas e Relações Empresariais|LM3:Eng. Computacional,LM1,Línguas e Relações Empresariais,55.6549,0.0000,44.3451,LM3,Eng. Computacional,56.0767,0.0000,43.9233,0.9956,44.3552
+Eng. Aeroespacial,LM1:Eng. Civil|LM3:Eng. Computacional,LM1,Eng. Civil,56.1648,0.0000,43.8352,LM3,Eng. Computacional,54.7299,0.0000,45.2701,0.9757,44.0402
+Eng. Aeroespacial,LM1:Contabilidade|LM3:Eng. Computacional,LM1,Contabilidade,57.0611,0.0000,42.9389,LM3,Eng. Computacional,55.3647,0.0000,44.6353,0.9432,32.6124
+Eng. Aeroespacial,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Biomédica,LM1,Gestão e Planeamento em Turismo,53.8086,0.0000,46.1914,LM3,Eng. Biomédica,56.8674,0.0000,43.1326,0.8402,43.8229
+Eng. Aeroespacial,LM1:Design|LM3:Administração Pública,LM1,Design,56.8600,0.0000,43.1400,LM3,Administração Pública,55.6894,0.0000,44.3106,0.5809,41.8144
+Eng. Aeroespacial,LM1:Línguas e Relações Empresariais|LM3:Eng. Física,LM1,Línguas e Relações Empresariais,56.2555,0.0000,43.7445,LM3,Eng. Física,54.7374,0.0000,45.2626,0.5731,45.0881
+Eng. Aeroespacial,LM1:Eng. Civil|LM3:Eng. Física,LM1,Eng. Civil,54.4604,0.0000,45.5396,LM3,Eng. Física,56.2050,0.0000,43.7950,0.5560,43.5791
+Eng. Aeroespacial,LM1:Contabilidade|LM3:Eng. Física,LM1,Contabilidade,56.3690,0.0000,43.6310,LM3,Eng. Física,56.1676,0.0000,43.8324,0.5464,32.2108
+Eng. Aeroespacial,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Computacional,LM1,Gestão e Planeamento em Turismo,53.3617,0.0000,46.6383,LM3,Eng. Computacional,55.1277,0.0000,44.8723,0.4700,43.0000
+Eng. Aeroespacial,LM1:Design|LM3:Eng. Biomédica,LM1,Design,55.7173,0.0000,44.2827,LM3,Eng. Biomédica,55.0821,0.0000,44.9179,0.3778,30.4394
+Eng. Aeroespacial,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Física,LM1,Gestão e Planeamento em Turismo,52.4101,0.0000,47.5899,LM3,Eng. Física,56.1974,0.0000,43.8026,0.2614,41.7368
+Eng. Aeroespacial,LM1:Design|LM3:Eng. Computacional,LM1,Design,59.1896,0.0000,40.8104,LM3,Eng. Computacional,55.1375,0.0000,44.8625,0.2073,33.1404
+Eng. Aeroespacial,LM1:Línguas e Relações Empresariais|LM3:Gestão,LM1,Línguas e Relações Empresariais,54.9414,0.0000,45.0586,LM3,Gestão,54.5505,0.0000,45.4495,0.1791,43.5511
+Eng. Aeroespacial,LM1:Eng. Civil|LM3:Gestão,LM1,Eng. Civil,54.8424,0.0000,45.1576,LM3,Gestão,56.1032,0.0000,43.8968,0.1745,42.5788
+Eng. Aeroespacial,LM1:Contabilidade|LM3:Gestão,LM1,Contabilidade,55.9837,0.0000,44.0163,LM3,Gestão,55.8085,0.0000,44.1915,0.1713,31.5820
+Eng. Aeroespacial,LM1:Design|LM3:Eng. Física,LM1,Design,56.3439,0.0000,43.6561,LM3,Eng. Física,53.7563,0.0000,46.2437,0.1198,31.3022
+Eng. Aeroespacial,LM1:Gestão e Planeamento em Turismo|LM3:Gestão,LM1,Gestão e Planeamento em Turismo,56.6502,0.0000,43.3498,LM3,Gestão,55.0493,0.0000,44.9507,0.0812,44.7044
+Eng. Aeroespacial,LM1:Design|LM3:Gestão,LM1,Design,55.6430,0.0000,44.3570,LM3,Gestão,58.5302,0.0000,41.4698,0.0381,34.9081
+Eng. Aeroespacial,LM1:Biologia e Geologia|LM3:Administração Pública,LM1,Biologia e Geologia,55.1622,0.0000,44.8378,LM3,Administração Pública,53.0973,0.0000,46.9027,0.0339,38.6431
+Eng. Aeroespacial,LM1:Biologia e Geologia|LM3:Eng. Biomédica,LM1,Biologia e Geologia,58.8235,0.0000,41.1765,LM3,Eng. Biomédica,58.4034,0.0000,41.5966,0.0238,36.9748
+Eng. Aeroespacial,LM1:Biologia e Geologia|LM3:Eng. Computacional,LM1,Biologia e Geologia,55.4622,0.0000,44.5378,LM3,Eng. Computacional,56.3025,0.0000,43.6975,0.0119,31.9328
+Eng. Aeroespacial,LM1:Biologia e Geologia|LM3:Eng. Física,LM1,Biologia e Geologia,60.5263,0.0000,39.4737,LM3,Eng. Física,56.5789,0.0000,43.4211,0.0076,34.2105
+Eng. Aeroespacial,LM1:Biologia e Geologia|LM3:Gestão,LM1,Biologia e Geologia,68.1818,0.0000,31.8182,LM3,Gestão,40.9091,0.0000,59.0909,0.0022,27.2727
+Eng. Aeroespacial,LM1:Economia|LM3:Eng. Física,LM1,Economia,100.0000,0.0000,0.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0001,100.0000
+Eng. Biomédica,LM2:Línguas e Relações Empresariais|LM3:Eng. Aeroespacial,LM2,Línguas e Relações Empresariais,43.1122,0.0000,56.8878,LM3,Eng. Aeroespacial,43.4387,0.0000,56.5613,1.8373,18.7231
+Eng. Biomédica,LM2:Eng. Civil|LM3:Eng. Aeroespacial,LM2,Eng. Civil,43.6469,0.0000,56.3531,LM3,Eng. Aeroespacial,43.3954,0.0000,56.6046,1.7889,19.1403
+Eng. Biomédica,LM2:Contabilidade|LM3:Eng. Aeroespacial,LM2,Contabilidade,43.8967,0.0000,56.1033,LM3,Eng. Aeroespacial,43.0628,0.0000,56.9372,1.7507,29.9480
+Eng. Biomédica,LM2:Línguas e Relações Empresariais|LM3:Tecnologias de Informação,LM2,Línguas e Relações Empresariais,43.2719,0.0000,56.7281,LM3,Tecnologias de Informação,43.3599,0.0000,56.6401,1.7048,32.8426
+Eng. Biomédica,LM2:Eng. Civil|LM3:Tecnologias de Informação,LM2,Eng. Civil,43.6091,0.0000,56.3909,LM3,Tecnologias de Informação,43.1025,0.0000,56.8975,1.6187,32.5508
+Eng. Biomédica,LM2:Contabilidade|LM3:Tecnologias de Informação,LM2,Contabilidade,43.7819,0.0000,56.2181,LM3,Tecnologias de Informação,41.9751,0.0000,58.0249,1.6050,18.5919
+Eng. Biomédica,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,43.5892,0.0000,56.4108,LM3,Biotecnologia,43.2966,0.0000,56.7034,1.4694,19.1166
+Eng. Biomédica,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,43.0700,0.0000,56.9300,LM3,Biotecnologia,43.1194,0.0000,56.8806,1.4163,19.0073
+Eng. Biomédica,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,43.5546,0.0000,56.4454,LM3,Biotecnologia,43.8053,0.0000,56.1947,1.3560,29.6091
+Eng. Biomédica,LM2:Línguas e Relações Empresariais|LM3:Matemática,LM2,Línguas e Relações Empresariais,43.9664,0.0000,56.0336,LM3,Matemática,44.2955,0.0000,55.7045,1.2157,32.7712
+Eng. Biomédica,LM2:Eng. Civil|LM3:Matemática,LM2,Eng. Civil,43.6428,0.0000,56.3572,LM3,Matemática,43.7097,0.0000,56.2903,1.1947,32.0666
+Eng. Biomédica,LM2:Contabilidade|LM3:Matemática,LM2,Contabilidade,43.9277,0.0000,56.0723,LM3,Matemática,44.3566,0.0000,55.6434,1.1890,19.4449
+Eng. Biomédica,LM2:Eng. Civil|LM3:Eng. Informática,LM2,Eng. Civil,44.5095,0.0000,55.4905,LM3,Eng. Informática,42.4371,0.0000,57.5629,0.9216,31.9987
+Eng. Biomédica,LM2:Línguas e Relações Empresariais|LM3:Eng. Informática,LM2,Línguas e Relações Empresariais,41.7441,0.0000,58.2559,LM3,Eng. Informática,42.9680,0.0000,57.0320,0.9151,31.9746
+Eng. Biomédica,LM2:Contabilidade|LM3:Eng. Informática,LM2,Contabilidade,43.2818,0.0000,56.7182,LM3,Eng. Informática,43.3283,0.0000,56.6717,0.8611,18.8712
+Eng. Biomédica,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Aeroespacial,LM2,Gestão e Planeamento em Turismo,43.7158,0.0000,56.2842,LM3,Eng. Aeroespacial,43.1326,0.0000,56.8674,0.8402,19.1145
+Eng. Biomédica,LM2:Gestão e Planeamento em Turismo|LM3:Tecnologias de Informação,LM2,Gestão e Planeamento em Turismo,43.4096,0.0000,56.5904,LM3,Tecnologias de Informação,43.1783,0.0000,56.8217,0.7784,32.6439
+Eng. Biomédica,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,43.1828,0.0000,56.8172,LM3,Biotecnologia,44.2478,0.0000,55.7522,0.6667,19.0640
+Eng. Biomédica,LM2:Gestão e Planeamento em Turismo|LM3:Matemática,LM2,Gestão e Planeamento em Turismo,43.0826,0.0000,56.9174,LM3,Matemática,44.8010,0.0000,55.1990,0.5703,32.9826
+Eng. Biomédica,LM2:Línguas e Relações Empresariais|LM3:MTC,LM2,Línguas e Relações Empresariais,42.1096,0.0000,57.8904,LM3,MTC,42.8513,0.0000,57.1487,0.4854,31.4998
+Eng. Biomédica,LM2:Eng. Civil|LM3:MTC,LM2,Eng. Civil,44.4101,0.0000,55.5899,LM3,MTC,42.8856,0.0000,57.1144,0.4526,31.9929
+Eng. Biomédica,LM2:Contabilidade|LM3:MTC,LM2,Contabilidade,43.5920,0.0000,56.4080,LM3,MTC,43.5026,0.0000,56.4974,0.4471,19.2351
+Eng. Biomédica,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Informática,LM2,Gestão e Planeamento em Turismo,43.6955,0.0000,56.3045,LM3,Eng. Informática,43.5305,0.0000,56.4695,0.4243,32.4770
+Eng. Biomédica,LM2:Línguas e Relações Empresariais|LM3:Biologia,LM2,Línguas e Relações Empresariais,43.3511,0.0000,56.6489,LM3,Biologia,43.5800,0.0000,56.4200,0.3933,19.3999
+Eng. Biomédica,LM2:Eng. Civil|LM3:Biologia,LM2,Eng. Civil,43.7708,0.0000,56.2292,LM3,Biologia,43.2591,0.0000,56.7409,0.3909,18.8028
+Eng. Biomédica,LM2:Design|LM3:Eng. Aeroespacial,LM2,Design,44.1768,0.0000,55.8232,LM3,Eng. Aeroespacial,44.9179,0.0000,55.0821,0.3778,30.5188
+Eng. Biomédica,LM2:Contabilidade|LM3:Biologia,LM2,Contabilidade,43.3962,0.0000,56.6038,LM3,Biologia,42.5990,0.0000,57.4010,0.3763,28.7005
+Eng. Biomédica,LM2:Design|LM3:Tecnologias de Informação,LM2,Design,41.0684,0.0000,58.9316,LM3,Tecnologias de Informação,43.9796,0.0000,56.0204,0.3538,17.8067
+Eng. Biomédica,LM2:Design|LM3:Biotecnologia,LM2,Design,43.1795,0.0000,56.8205,LM3,Biotecnologia,42.8427,0.0000,57.1573,0.2969,28.5618
+Eng. Biomédica,LM2:Design|LM3:Matemática,LM2,Design,43.6442,0.0000,56.3558,LM3,Matemática,44.4313,0.0000,55.5687,0.2541,19.6773
+Eng. Biomédica,LM2:Gestão e Planeamento em Turismo|LM3:MTC,LM2,Gestão e Planeamento em Turismo,43.9001,0.0000,56.0999,LM3,MTC,44.1357,0.0000,55.8643,0.2123,33.1135
+Eng. Biomédica,LM2:Design|LM3:Eng. Informática,LM2,Design,44.4149,0.0000,55.5851,LM3,Eng. Informática,43.6702,0.0000,56.3298,0.1880,19.6277
+Eng. Biomédica,LM2:Gestão e Planeamento em Turismo|LM3:Biologia,LM2,Gestão e Planeamento em Turismo,43.1362,0.0000,56.8638,LM3,Biologia,42.5781,0.0000,57.4219,0.1792,19.0848
+Eng. Biomédica,LM2:Design|LM3:MTC,LM2,Design,42.3423,0.0000,57.6577,LM3,MTC,44.5445,0.0000,55.4555,0.0999,19.1191
+Eng. Biomédica,LM2:Design|LM3:Biologia,LM2,Design,41.3588,0.0000,58.6412,LM3,Biologia,43.6234,0.0000,56.3766,0.0839,28.1287
+Eng. Biomédica,LM2:Biologia e Geologia|LM3:Eng. Aeroespacial,LM2,Biologia e Geologia,41.1765,0.0000,58.8235,LM3,Eng. Aeroespacial,41.5966,0.0000,58.4034,0.0238,26.4706
+Eng. Biomédica,LM2:Biologia e Geologia|LM3:Tecnologias de Informação,LM2,Biologia e Geologia,50.4950,0.0000,49.5050,LM3,Tecnologias de Informação,43.5644,0.0000,56.4356,0.0202,22.7723
+Eng. Biomédica,LM2:Biologia e Geologia|LM3:Biotecnologia,LM2,Biologia e Geologia,41.6185,0.0000,58.3815,LM3,Biotecnologia,42.7746,0.0000,57.2254,0.0173,24.8555
+Eng. Biomédica,LM2:Biologia e Geologia|LM3:Matemática,LM2,Biologia e Geologia,44.0789,0.0000,55.9211,LM3,Matemática,42.1053,0.0000,57.8947,0.0152,22.3684
+Eng. Biomédica,LM2:Biologia e Geologia|LM3:Eng. Informática,LM2,Biologia e Geologia,37.2549,0.0000,62.7451,LM3,Eng. Informática,50.0000,0.0000,50.0000,0.0102,15.6863
+Eng. Biomédica,LM2:Biologia e Geologia|LM3:MTC,LM2,Biologia e Geologia,51.6129,0.0000,48.3871,LM3,MTC,38.7097,0.0000,61.2903,0.0062,19.3548
+Eng. Biomédica,LM2:Biologia e Geologia|LM3:Biologia,LM2,Biologia e Geologia,48.7179,0.0000,51.2821,LM3,Biologia,46.1538,0.0000,53.8462,0.0039,28.2051
+Eng. Biomédica,LM2:Economia|LM3:Biotecnologia,LM2,Economia,0.0000,0.0000,100.0000,LM3,Biotecnologia,0.0000,0.0000,100.0000,0.0001,0.0000
+Eng. Civil,LM1:Eng. Aeroespacial|LM2:Administração Pública,LM1,Eng. Aeroespacial,44.1678,0.0000,55.8322,LM2,Administração Pública,53.3754,0.0000,46.6246,2.7271,34.3002
+Eng. Civil,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,43.1749,0.0000,56.8251,LM2,Administração Pública,53.6323,0.0000,46.3677,2.4681,23.7956
+Eng. Civil,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,43.5157,0.0000,56.4843,LM2,Administração Pública,53.5484,0.0000,46.4516,2.1390,33.7868
+Eng. Civil,LM1:Matemática|LM2:Administração Pública,LM1,Matemática,44.4629,0.0000,55.5371,LM2,Administração Pública,54.0705,0.0000,45.9295,1.8069,24.5116
+Eng. Civil,LM1:Eng. Aeroespacial|LM2:Eng. Biomédica,LM1,Eng. Aeroespacial,43.6302,0.0000,56.3698,LM2,Eng. Biomédica,56.3531,0.0000,43.6469,1.7889,35.2675
+Eng. Civil,LM1:Tecnologias de Informação|LM2:Eng. Biomédica,LM1,Tecnologias de Informação,43.4484,0.0000,56.5516,LM2,Eng. Biomédica,56.3909,0.0000,43.6091,1.6187,24.6185
+Eng. Civil,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,43.6913,0.0000,56.3087,LM2,Eng. Biomédica,56.9300,0.0000,43.0700,1.4163,35.6069
+Eng. Civil,LM1:Eng. Informática|LM2:Administração Pública,LM1,Eng. Informática,44.3104,0.0000,55.6896,LM2,Administração Pública,54.3806,0.0000,45.6194,1.3674,24.4917
+Eng. Civil,LM1:Matemática|LM2:Eng. Biomédica,LM1,Matemática,46.1622,0.0000,53.8378,LM2,Eng. Biomédica,56.3572,0.0000,43.6428,1.1947,26.5757
+Eng. Civil,LM1:Eng. Aeroespacial|LM2:Eng. Computacional,LM1,Eng. Aeroespacial,43.8352,0.0000,56.1648,LM2,Eng. Computacional,53.7460,0.0000,46.2540,0.9757,24.6797
+Eng. Civil,LM1:Eng. Informática|LM2:Eng. Biomédica,LM1,Eng. Informática,44.4661,0.0000,55.5339,LM2,Eng. Biomédica,55.4905,0.0000,44.5095,0.9216,24.6202
+Eng. Civil,LM1:Tecnologias de Informação|LM2:Eng. Computacional,LM1,Tecnologias de Informação,43.1568,0.0000,56.8432,LM2,Eng. Computacional,53.4777,0.0000,46.5223,0.8914,36.8634
+Eng. Civil,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,43.3943,0.0000,56.6057,LM2,Eng. Computacional,54.4682,0.0000,45.5318,0.7766,24.3755
+Eng. Civil,LM1:MTC|LM2:Administração Pública,LM1,MTC,43.0125,0.0000,56.9875,LM2,Administração Pública,53.5518,0.0000,46.4482,0.6898,23.7895
+Eng. Civil,LM1:Matemática|LM2:Eng. Computacional,LM1,Matemática,45.2433,0.0000,54.7567,LM2,Eng. Computacional,53.7961,0.0000,46.2039,0.6454,37.4187
+Eng. Civil,LM1:Biologia|LM2:Administração Pública,LM1,Biologia,44.7319,0.0000,55.2681,LM2,Administração Pública,53.4864,0.0000,46.5136,0.5837,34.5554
+Eng. Civil,LM1:Eng. Aeroespacial|LM2:Eng. Física,LM1,Eng. Aeroespacial,45.5396,0.0000,54.4604,LM2,Eng. Física,53.3273,0.0000,46.6727,0.5560,24.6583
+Eng. Civil,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,43.9960,0.0000,56.0040,LM2,Eng. Física,54.0851,0.0000,45.9149,0.5055,37.4283
+Eng. Civil,LM1:Eng. Informática|LM2:Eng. Computacional,LM1,Eng. Informática,44.3746,0.0000,55.6254,LM2,Eng. Computacional,52.9090,0.0000,47.0910,0.4933,35.9416
+Eng. Civil,LM1:MTC|LM2:Eng. Biomédica,LM1,MTC,43.5042,0.0000,56.4958,LM2,Eng. Biomédica,55.5899,0.0000,44.4101,0.4526,25.2983
+Eng. Civil,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,43.5499,0.0000,56.4501,LM2,Eng. Física,54.1299,0.0000,45.8701,0.4310,23.8515
+Eng. Civil,LM1:Biologia|LM2:Eng. Biomédica,LM1,Biologia,44.0010,0.0000,55.9990,LM2,Eng. Biomédica,56.2292,0.0000,43.7708,0.3909,35.6613
+Eng. Civil,LM1:Matemática|LM2:Eng. Física,LM1,Matemática,44.9645,0.0000,55.0355,LM2,Eng. Física,53.9311,0.0000,46.0689,0.3803,37.8385
+Eng. Civil,LM1:Eng. Informática|LM2:Eng. Física,LM1,Eng. Informática,44.8204,0.0000,55.1796,LM2,Eng. Física,53.9710,0.0000,46.0290,0.2896,38.6395
+Eng. Civil,LM1:MTC|LM2:Eng. Computacional,LM1,MTC,44.0148,0.0000,55.9852,LM2,Eng. Computacional,54.2164,0.0000,45.7836,0.2431,37.1863
+Eng. Civil,LM1:Biologia|LM2:Eng. Computacional,LM1,Biologia,45.7627,0.0000,54.2373,LM2,Eng. Computacional,52.7307,0.0000,47.2693,0.2124,24.8117
+Eng. Civil,LM1:Eng. Aeroespacial|LM2:Gestão,LM1,Eng. Aeroespacial,45.1576,0.0000,54.8424,LM2,Gestão,53.6390,0.0000,46.3610,0.1745,25.5587
+Eng. Civil,LM1:Tecnologias de Informação|LM2:Gestão,LM1,Tecnologias de Informação,43.0616,0.0000,56.9384,LM2,Gestão,55.0716,0.0000,44.9284,0.1607,37.2744
+Eng. Civil,LM1:MTC|LM2:Eng. Física,LM1,MTC,43.6096,0.0000,56.3904,LM2,Eng. Física,53.4410,0.0000,46.5590,0.1424,37.6404
+Eng. Civil,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,42.0900,0.0000,57.9100,LM2,Gestão,57.4020,0.0000,42.5980,0.1378,23.8752
+Eng. Civil,LM1:Matemática|LM2:Gestão,LM1,Matemática,46.4256,0.0000,53.5744,LM2,Gestão,55.5464,0.0000,44.4536,0.1217,37.3048
+Eng. Civil,LM1:Biologia|LM2:Eng. Física,LM1,Biologia,42.8571,0.0000,57.1429,LM2,Eng. Física,54.3367,0.0000,45.6633,0.1176,22.4490
+Eng. Civil,LM1:Eng. Informática|LM2:Gestão,LM1,Eng. Informática,42.4942,0.0000,57.5058,LM2,Gestão,55.7737,0.0000,44.2263,0.0866,36.7206
+Eng. Civil,LM1:MTC|LM2:Gestão,LM1,MTC,41.7808,0.0000,58.2192,LM2,Gestão,56.6210,0.0000,43.3790,0.0438,37.4429
+Eng. Civil,LM1:Biologia|LM2:Gestão,LM1,Biologia,42.4084,0.0000,57.5916,LM2,Gestão,60.2094,0.0000,39.7906,0.0382,25.6545
+Eng. Computacional,LM2:Línguas e Relações Empresariais|LM3:Eng. Aeroespacial,LM2,Línguas e Relações Empresariais,46.0024,0.0000,53.9976,LM3,Eng. Aeroespacial,43.9233,0.0000,56.0767,0.9956,20.8216
+Eng. Computacional,LM2:Eng. Civil|LM3:Eng. Aeroespacial,LM2,Eng. Civil,46.2540,0.0000,53.7460,LM3,Eng. Aeroespacial,45.2701,0.0000,54.7299,0.9757,31.2801
+Eng. Computacional,LM2:Contabilidade|LM3:Eng. Aeroespacial,LM2,Contabilidade,44.6353,0.0000,55.3647,LM3,Eng. Aeroespacial,44.6353,0.0000,55.3647,0.9432,29.5271
+Eng. Computacional,LM2:Línguas e Relações Empresariais|LM3:Tecnologias de Informação,LM2,Línguas e Relações Empresariais,44.9368,0.0000,55.0632,LM3,Tecnologias de Informação,44.4142,0.0000,55.5858,0.9184,33.9068
+Eng. Computacional,LM2:Eng. Civil|LM3:Tecnologias de Informação,LM2,Eng. Civil,46.5223,0.0000,53.4777,LM3,Tecnologias de Informação,44.0543,0.0000,55.9457,0.8914,20.6753
+Eng. Computacional,LM2:Contabilidade|LM3:Tecnologias de Informação,LM2,Contabilidade,46.5872,0.0000,53.4128,LM3,Tecnologias de Informação,44.1445,0.0000,55.8555,0.8556,21.0262
+Eng. Computacional,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,45.3425,0.0000,54.6575,LM3,Biotecnologia,44.8215,0.0000,55.1785,0.7869,20.4219
+Eng. Computacional,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,45.5318,0.0000,54.4682,LM3,Biotecnologia,45.1198,0.0000,54.8802,0.7766,30.8138
+Eng. Computacional,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,46.1052,0.0000,53.8948,LM3,Biotecnologia,45.0611,0.0000,54.9389,0.7279,31.5703
+Eng. Computacional,LM2:Línguas e Relações Empresariais|LM3:Matemática,LM2,Línguas e Relações Empresariais,45.0408,0.0000,54.9592,LM3,Matemática,46.0638,0.0000,53.9362,0.6745,34.2772
+Eng. Computacional,LM2:Eng. Civil|LM3:Matemática,LM2,Eng. Civil,46.2039,0.0000,53.7961,LM3,Matemática,45.0573,0.0000,54.9427,0.6454,21.4596
+Eng. Computacional,LM2:Contabilidade|LM3:Matemática,LM2,Contabilidade,46.2482,0.0000,53.7518,LM3,Matemática,44.7666,0.0000,55.2334,0.6277,21.4593
+Eng. Computacional,LM2:Línguas e Relações Empresariais|LM3:Eng. Informática,LM2,Línguas e Relações Empresariais,46.0583,0.0000,53.9417,LM3,Eng. Informática,44.9941,0.0000,55.0059,0.5074,33.7603
+Eng. Computacional,LM2:Eng. Civil|LM3:Eng. Informática,LM2,Eng. Civil,47.0910,0.0000,52.9090,LM3,Eng. Informática,44.7801,0.0000,55.2199,0.4933,21.3258
+Eng. Computacional,LM2:Contabilidade|LM3:Eng. Informática,LM2,Contabilidade,45.1720,0.0000,54.8280,LM3,Eng. Informática,43.9494,0.0000,56.0506,0.4826,20.9490
+Eng. Computacional,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Aeroespacial,LM2,Gestão e Planeamento em Turismo,44.9362,0.0000,55.0638,LM3,Eng. Aeroespacial,44.8723,0.0000,55.1277,0.4700,20.7872
+Eng. Computacional,LM2:Gestão e Planeamento em Turismo|LM3:Tecnologias de Informação,LM2,Gestão e Planeamento em Turismo,44.2308,0.0000,55.7692,LM3,Tecnologias de Informação,44.0901,0.0000,55.9099,0.4264,33.2083
+Eng. Computacional,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,44.4135,0.0000,55.5865,LM3,Biotecnologia,45.6395,0.0000,54.3605,0.3589,21.0644
+Eng. Computacional,LM2:Gestão e Planeamento em Turismo|LM3:Matemática,LM2,Gestão e Planeamento em Turismo,44.7131,0.0000,55.2869,LM3,Matemática,44.5841,0.0000,55.4159,0.3102,32.5919
+Eng. Computacional,LM2:Línguas e Relações Empresariais|LM3:MTC,LM2,Línguas e Relações Empresariais,42.9021,0.0000,57.0979,LM3,MTC,44.0425,0.0000,55.9575,0.2543,32.9925
+Eng. Computacional,LM2:Contabilidade|LM3:MTC,LM2,Contabilidade,45.8487,0.0000,54.1513,LM3,MTC,45.0307,0.0000,54.9693,0.2445,22.0041
+Eng. Computacional,LM2:Eng. Civil|LM3:MTC,LM2,Eng. Civil,45.7836,0.0000,54.2164,LM3,MTC,45.8248,0.0000,54.1752,0.2431,22.5010
+Eng. Computacional,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Informática,LM2,Gestão e Planeamento em Turismo,44.8594,0.0000,55.1406,LM3,Eng. Informática,44.6076,0.0000,55.3924,0.2383,33.7390
+Eng. Computacional,LM2:Línguas e Relações Empresariais|LM3:Biologia,LM2,Línguas e Relações Empresariais,42.8184,0.0000,57.1816,LM3,Biologia,43.9476,0.0000,56.0524,0.2214,19.7380
+Eng. Computacional,LM2:Eng. Civil|LM3:Biologia,LM2,Eng. Civil,47.2693,0.0000,52.7307,LM3,Biologia,44.8211,0.0000,55.1789,0.2124,32.3917
+Eng. Computacional,LM2:Design|LM3:Eng. Aeroespacial,LM2,Design,45.2002,0.0000,54.7998,LM3,Eng. Aeroespacial,44.8625,0.0000,55.1375,0.2073,29.2330
+Eng. Computacional,LM2:Contabilidade|LM3:Biologia,LM2,Contabilidade,48.3325,0.0000,51.6675,LM3,Biologia,44.5143,0.0000,55.4857,0.2069,32.0928
+Eng. Computacional,LM2:Design|LM3:Tecnologias de Informação,LM2,Design,45.8421,0.0000,54.1579,LM3,Tecnologias de Informação,44.4737,0.0000,55.5263,0.1900,20.6842
+Eng. Computacional,LM2:Design|LM3:Biotecnologia,LM2,Design,44.8361,0.0000,55.1639,LM3,Biotecnologia,46.0730,0.0000,53.9270,0.1617,32.0346
+Eng. Computacional,LM2:Design|LM3:Matemática,LM2,Design,44.9822,0.0000,55.0178,LM3,Matemática,45.1957,0.0000,54.8043,0.1405,21.4947
+Eng. Computacional,LM2:Gestão e Planeamento em Turismo|LM3:MTC,LM2,Gestão e Planeamento em Turismo,43.6411,0.0000,56.3589,LM3,MTC,43.8153,0.0000,56.1847,0.1148,31.7073
+Eng. Computacional,LM2:Design|LM3:Eng. Informática,LM2,Design,47.5634,0.0000,52.4366,LM3,Eng. Informática,43.5673,0.0000,56.4327,0.1026,20.4678
+Eng. Computacional,LM2:Gestão e Planeamento em Turismo|LM3:Biologia,LM2,Gestão e Planeamento em Turismo,42.8711,0.0000,57.1289,LM3,Biologia,42.9688,0.0000,57.0312,0.1024,18.3594
+Eng. Computacional,LM2:Design|LM3:MTC,LM2,Design,46.6942,0.0000,53.3058,LM3,MTC,40.9091,0.0000,59.0909,0.0484,18.1818
+Eng. Computacional,LM2:Design|LM3:Biologia,LM2,Design,44.0092,0.0000,55.9908,LM3,Biologia,39.8618,0.0000,60.1382,0.0434,26.7281
+Eng. Computacional,LM2:Biologia e Geologia|LM3:Eng. Aeroespacial,LM2,Biologia e Geologia,40.3361,0.0000,59.6639,LM3,Eng. Aeroespacial,43.6975,0.0000,56.3025,0.0119,29.4118
+Eng. Computacional,LM2:Biologia e Geologia|LM3:Tecnologias de Informação,LM2,Biologia e Geologia,46.7290,0.0000,53.2710,LM3,Tecnologias de Informação,44.8598,0.0000,55.1402,0.0107,19.6262
+Eng. Computacional,LM2:Biologia e Geologia|LM3:Biotecnologia,LM2,Biologia e Geologia,50.5155,0.0000,49.4845,LM3,Biotecnologia,38.1443,0.0000,61.8557,0.0097,35.0515
+Eng. Computacional,LM2:Biologia e Geologia|LM3:Matemática,LM2,Biologia e Geologia,40.2439,0.0000,59.7561,LM3,Matemática,47.5610,0.0000,52.4390,0.0082,17.0732
+Eng. Computacional,LM2:Biologia e Geologia|LM3:Eng. Informática,LM2,Biologia e Geologia,50.8197,0.0000,49.1803,LM3,Eng. Informática,39.3443,0.0000,60.6557,0.0061,22.9508
+Eng. Computacional,LM2:Biologia e Geologia|LM3:Biologia,LM2,Biologia e Geologia,40.0000,0.0000,60.0000,LM3,Biologia,40.0000,0.0000,60.0000,0.0025,24.0000
+Eng. Computacional,LM2:Biologia e Geologia|LM3:MTC,LM2,Biologia e Geologia,25.0000,0.0000,75.0000,LM3,MTC,54.1667,0.0000,45.8333,0.0024,12.5000
+Eng. Computacional,LM2:Economia|LM3:Tecnologias de Informação,LM2,Economia,0.0000,0.0000,100.0000,LM3,Tecnologias de Informação,100.0000,0.0000,0.0000,0.0001,0.0000
+Eng. Física,LM2:Línguas e Relações Empresariais|LM3:Eng. Aeroespacial,LM2,Línguas e Relações Empresariais,43.2036,0.0000,56.7964,LM3,Eng. Aeroespacial,45.2626,0.0000,54.7374,0.5731,19.5952
+Eng. Física,LM2:Eng. Civil|LM3:Eng. Aeroespacial,LM2,Eng. Civil,46.6727,0.0000,53.3273,LM3,Eng. Aeroespacial,43.7950,0.0000,56.2050,0.5560,31.7626
+Eng. Física,LM2:Contabilidade|LM3:Eng. Aeroespacial,LM2,Contabilidade,45.8455,0.0000,54.1545,LM3,Eng. Aeroespacial,43.8324,0.0000,56.1676,0.5464,30.7101
+Eng. Física,LM2:Línguas e Relações Empresariais|LM3:Tecnologias de Informação,LM2,Línguas e Relações Empresariais,44.5776,0.0000,55.4224,LM3,Tecnologias de Informação,43.9034,0.0000,56.0966,0.5339,33.1148
+Eng. Física,LM2:Eng. Civil|LM3:Tecnologias de Informação,LM2,Eng. Civil,45.9149,0.0000,54.0851,LM3,Tecnologias de Informação,43.7191,0.0000,56.2809,0.5055,19.7428
+Eng. Física,LM2:Contabilidade|LM3:Tecnologias de Informação,LM2,Contabilidade,44.9673,0.0000,55.0327,LM3,Tecnologias de Informação,43.3101,0.0000,56.6899,0.4888,19.5172
+Eng. Física,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,44.6460,0.0000,55.3540,LM3,Biotecnologia,45.6416,0.0000,54.3584,0.4520,20.6858
+Eng. Física,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,45.8701,0.0000,54.1299,LM3,Biotecnologia,44.5940,0.0000,55.4060,0.4310,30.8817
+Eng. Física,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,44.9174,0.0000,55.0826,LM3,Biotecnologia,45.4757,0.0000,54.5243,0.4299,30.4489
+Eng. Física,LM2:Línguas e Relações Empresariais|LM3:Matemática,LM2,Línguas e Relações Empresariais,44.7482,0.0000,55.2518,LM3,Matemática,44.4444,0.0000,55.5556,0.3951,32.7512
+Eng. Física,LM2:Eng. Civil|LM3:Matemática,LM2,Eng. Civil,46.0689,0.0000,53.9311,LM3,Matemática,47.1470,0.0000,52.8530,0.3803,21.9564
+Eng. Física,LM2:Contabilidade|LM3:Matemática,LM2,Contabilidade,46.6127,0.0000,53.3873,LM3,Matemática,45.3981,0.0000,54.6019,0.3705,22.3752
+Eng. Física,LM2:Línguas e Relações Empresariais|LM3:Eng. Informática,LM2,Línguas e Relações Empresariais,44.8240,0.0000,55.1760,LM3,Eng. Informática,43.9268,0.0000,56.0732,0.2898,33.3678
+Eng. Física,LM2:Eng. Civil|LM3:Eng. Informática,LM2,Eng. Civil,46.0290,0.0000,53.9710,LM3,Eng. Informática,45.3039,0.0000,54.6961,0.2896,21.2017
+Eng. Física,LM2:Contabilidade|LM3:Eng. Informática,LM2,Contabilidade,44.4120,0.0000,55.5880,LM3,Eng. Informática,44.4485,0.0000,55.5515,0.2738,20.7451
+Eng. Física,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Aeroespacial,LM2,Gestão e Planeamento em Turismo,43.6496,0.0000,56.3504,LM3,Eng. Aeroespacial,43.8026,0.0000,56.1974,0.2614,20.5050
+Eng. Física,LM2:Gestão e Planeamento em Turismo|LM3:Tecnologias de Informação,LM2,Gestão e Planeamento em Turismo,45.7320,0.0000,54.2680,LM3,Tecnologias de Informação,44.9897,0.0000,55.0103,0.2425,34.3918
+Eng. Física,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,44.2125,0.0000,55.7875,LM3,Biotecnologia,44.0702,0.0000,55.9298,0.2108,19.6869
+Eng. Física,LM2:Gestão e Planeamento em Turismo|LM3:Matemática,LM2,Gestão e Planeamento em Turismo,43.2600,0.0000,56.7400,LM3,Matemática,46.5877,0.0000,53.4123,0.1773,33.8973
+Eng. Física,LM2:Línguas e Relações Empresariais|LM3:MTC,LM2,Línguas e Relações Empresariais,43.5724,0.0000,56.4276,LM3,MTC,44.3166,0.0000,55.6834,0.1478,33.0176
+Eng. Física,LM2:Eng. Civil|LM3:MTC,LM2,Eng. Civil,46.5590,0.0000,53.4410,LM3,MTC,46.1376,0.0000,53.8624,0.1424,21.4888
+Eng. Física,LM2:Contabilidade|LM3:MTC,LM2,Contabilidade,45.4611,0.0000,54.5389,LM3,MTC,43.1556,0.0000,56.8444,0.1388,20.3890
+Eng. Física,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Informática,LM2,Gestão e Planeamento em Turismo,44.9097,0.0000,55.0903,LM3,Eng. Informática,42.5271,0.0000,57.4729,0.1385,31.5523
+Eng. Física,LM2:Design|LM3:Eng. Aeroespacial,LM2,Design,43.4057,0.0000,56.5943,LM3,Eng. Aeroespacial,46.2437,0.0000,53.7563,0.1198,29.2988
+Eng. Física,LM2:Contabilidade|LM3:Biologia,LM2,Contabilidade,45.4392,0.0000,54.5608,LM3,Biologia,43.0743,0.0000,56.9257,0.1184,28.8007
+Eng. Física,LM2:Eng. Civil|LM3:Biologia,LM2,Eng. Civil,45.6633,0.0000,54.3367,LM3,Biologia,44.8129,0.0000,55.1871,0.1176,31.8027
+Eng. Física,LM2:Línguas e Relações Empresariais|LM3:Biologia,LM2,Línguas e Relações Empresariais,43.6596,0.0000,56.3404,LM3,Biologia,42.4681,0.0000,57.5319,0.1175,19.5745
+Eng. Física,LM2:Design|LM3:Tecnologias de Informação,LM2,Design,45.5473,0.0000,54.4527,LM3,Tecnologias de Informação,41.1874,0.0000,58.8126,0.1078,19.6660
+Eng. Física,LM2:Design|LM3:Biotecnologia,LM2,Design,45.4255,0.0000,54.5745,LM3,Biotecnologia,45.8511,0.0000,54.1489,0.0940,32.0213
+Eng. Física,LM2:Design|LM3:Matemática,LM2,Design,47.9899,0.0000,52.0101,LM3,Matemática,45.8543,0.0000,54.1457,0.0796,22.9899
+Eng. Física,LM2:Gestão e Planeamento em Turismo|LM3:MTC,LM2,Gestão e Planeamento em Turismo,44.4606,0.0000,55.5394,LM3,MTC,44.0233,0.0000,55.9767,0.0686,33.6735
+Eng. Física,LM2:Gestão e Planeamento em Turismo|LM3:Biologia,LM2,Gestão e Planeamento em Turismo,41.1867,0.0000,58.8133,LM3,Biologia,44.1536,0.0000,55.8464,0.0573,18.1501
+Eng. Física,LM2:Design|LM3:Eng. Informática,LM2,Design,49.2119,0.0000,50.7881,LM3,Eng. Informática,43.9580,0.0000,56.0420,0.0571,21.7163
+Eng. Física,LM2:Design|LM3:MTC,LM2,Design,47.9452,0.0000,52.0548,LM3,MTC,45.8904,0.0000,54.1096,0.0292,20.5479
+Eng. Física,LM2:Design|LM3:Biologia,LM2,Design,43.0233,0.0000,56.9767,LM3,Biologia,45.7364,0.0000,54.2636,0.0258,29.8450
+Eng. Física,LM2:Biologia e Geologia|LM3:Tecnologias de Informação,LM2,Biologia e Geologia,43.2099,0.0000,56.7901,LM3,Tecnologias de Informação,38.2716,0.0000,61.7284,0.0081,20.9877
+Eng. Física,LM2:Biologia e Geologia|LM3:Eng. Aeroespacial,LM2,Biologia e Geologia,43.4211,0.0000,56.5789,LM3,Eng. Aeroespacial,43.4211,0.0000,56.5789,0.0076,28.9474
+Eng. Física,LM2:Biologia e Geologia|LM3:Biotecnologia,LM2,Biologia e Geologia,48.2759,0.0000,51.7241,LM3,Biotecnologia,32.7586,0.0000,67.2414,0.0058,27.5862
+Eng. Física,LM2:Biologia e Geologia|LM3:Matemática,LM2,Biologia e Geologia,51.2195,0.0000,48.7805,LM3,Matemática,34.1463,0.0000,65.8537,0.0041,14.6341
+Eng. Física,LM2:Biologia e Geologia|LM3:Eng. Informática,LM2,Biologia e Geologia,53.1250,0.0000,46.8750,LM3,Eng. Informática,40.6250,0.0000,59.3750,0.0032,25.0000
+Eng. Física,LM2:Biologia e Geologia|LM3:Biologia,LM2,Biologia e Geologia,60.0000,0.0000,40.0000,LM3,Biologia,46.6667,0.0000,53.3333,0.0015,46.6667
+Eng. Física,LM2:Biologia e Geologia|LM3:MTC,LM2,Biologia e Geologia,58.3333,0.0000,41.6667,LM3,MTC,66.6667,0.0000,33.3333,0.0012,41.6667
+Eng. Física,LM2:Economia|LM3:MTC,LM2,Economia,100.0000,0.0000,0.0000,LM3,MTC,0.0000,0.0000,100.0000,0.0001,0.0000
+Eng. Física,LM2:Economia|LM3:Eng. Aeroespacial,LM2,Economia,0.0000,0.0000,100.0000,LM3,Eng. Aeroespacial,0.0000,0.0000,100.0000,0.0001,0.0000
+Eng. Informática,LM1:Línguas e Relações Empresariais|LM3:Administração Pública,LM1,Línguas e Relações Empresariais,55.0685,0.0000,44.9315,LM3,Administração Pública,55.0755,0.0000,44.9245,1.4373,31.2183
+Eng. Informática,LM1:Eng. Civil|LM3:Administração Pública,LM1,Eng. Civil,55.6896,0.0000,44.3104,LM3,Administração Pública,55.2655,0.0000,44.7345,1.3674,41.4290
+Eng. Informática,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,57.1344,0.0000,42.8656,LM3,Administração Pública,55.4307,0.0000,44.5693,1.3442,42.2407
+Eng. Informática,LM1:Eng. Civil|LM3:Eng. Biomédica,LM1,Eng. Civil,55.5339,0.0000,44.4661,LM3,Eng. Biomédica,57.5629,0.0000,42.4371,0.9216,43.3811
+Eng. Informática,LM1:Línguas e Relações Empresariais|LM3:Eng. Biomédica,LM1,Línguas e Relações Empresariais,54.9230,0.0000,45.0770,LM3,Eng. Biomédica,57.0320,0.0000,42.9680,0.9151,31.0786
+Eng. Informática,LM1:Contabilidade|LM3:Eng. Biomédica,LM1,Contabilidade,56.3698,0.0000,43.6302,LM3,Eng. Biomédica,56.6717,0.0000,43.3283,0.8611,42.0741
+Eng. Informática,LM1:Gestão e Planeamento em Turismo|LM3:Administração Pública,LM1,Gestão e Planeamento em Turismo,54.0289,0.0000,45.9711,LM3,Administração Pública,54.6687,0.0000,45.3313,0.6565,30.2666
+Eng. Informática,LM1:Línguas e Relações Empresariais|LM3:Eng. Computacional,LM1,Línguas e Relações Empresariais,56.1490,0.0000,43.8510,LM3,Eng. Computacional,55.0059,0.0000,44.9941,0.5074,32.2625
+Eng. Informática,LM1:Eng. Civil|LM3:Eng. Computacional,LM1,Eng. Civil,55.6254,0.0000,44.3746,LM3,Eng. Computacional,55.2199,0.0000,44.7801,0.4933,42.7326
+Eng. Informática,LM1:Contabilidade|LM3:Eng. Computacional,LM1,Contabilidade,55.7605,0.0000,44.2395,LM3,Eng. Computacional,56.0506,0.0000,43.9494,0.4826,41.5458
+Eng. Informática,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Biomédica,LM1,Gestão e Planeamento em Turismo,54.9375,0.0000,45.0625,LM3,Eng. Biomédica,56.4695,0.0000,43.5305,0.4243,30.6623
+Eng. Informática,LM1:Línguas e Relações Empresariais|LM3:Eng. Física,LM1,Línguas e Relações Empresariais,55.3830,0.0000,44.6170,LM3,Eng. Física,56.0732,0.0000,43.9268,0.2898,31.2284
+Eng. Informática,LM1:Eng. Civil|LM3:Eng. Física,LM1,Eng. Civil,55.1796,0.0000,44.8204,LM3,Eng. Física,54.6961,0.0000,45.3039,0.2896,40.1588
+Eng. Informática,LM1:Design|LM3:Administração Pública,LM1,Design,55.7920,0.0000,44.2080,LM3,Administração Pública,55.1989,0.0000,44.8011,0.2866,41.2770
+Eng. Informática,LM1:Contabilidade|LM3:Eng. Física,LM1,Contabilidade,56.0628,0.0000,43.9372,LM3,Eng. Física,55.5515,0.0000,44.4485,0.2738,40.3579
+Eng. Informática,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Computacional,LM1,Gestão e Planeamento em Turismo,55.0567,0.0000,44.9433,LM3,Eng. Computacional,55.3924,0.0000,44.6076,0.2383,31.7247
+Eng. Informática,LM1:Design|LM3:Eng. Biomédica,LM1,Design,53.3511,0.0000,46.6489,LM3,Eng. Biomédica,56.3298,0.0000,43.6702,0.1880,41.0638
+Eng. Informática,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Física,LM1,Gestão e Planeamento em Turismo,53.2130,0.0000,46.7870,LM3,Eng. Física,57.4729,0.0000,42.5271,0.1385,30.0361
+Eng. Informática,LM1:Design|LM3:Eng. Computacional,LM1,Design,54.8733,0.0000,45.1267,LM3,Eng. Computacional,56.4327,0.0000,43.5673,0.1026,43.5673
+Eng. Informática,LM1:Línguas e Relações Empresariais|LM3:Gestão,LM1,Línguas e Relações Empresariais,52.3758,0.0000,47.6242,LM3,Gestão,54.8596,0.0000,45.1404,0.0926,42.8726
+Eng. Informática,LM1:Contabilidade|LM3:Gestão,LM1,Contabilidade,58.9130,0.0000,41.0870,LM3,Gestão,56.4130,0.0000,43.5870,0.0920,34.2391
+Eng. Informática,LM1:Eng. Civil|LM3:Gestão,LM1,Eng. Civil,57.5058,0.0000,42.4942,LM3,Gestão,54.5035,0.0000,45.4965,0.0866,33.1409
+Eng. Informática,LM1:Design|LM3:Eng. Física,LM1,Design,54.9912,0.0000,45.0088,LM3,Eng. Física,56.0420,0.0000,43.9580,0.0571,43.0823
+Eng. Informática,LM1:Gestão e Planeamento em Turismo|LM3:Gestão,LM1,Gestão e Planeamento em Turismo,57.8049,0.0000,42.1951,LM3,Gestão,56.0976,0.0000,43.9024,0.0410,46.3415
+Eng. Informática,LM1:Biologia e Geologia|LM3:Administração Pública,LM1,Biologia e Geologia,55.0296,0.0000,44.9704,LM3,Administração Pública,56.2130,0.0000,43.7870,0.0169,40.2367
+Eng. Informática,LM1:Design|LM3:Gestão,LM1,Design,56.8862,0.0000,43.1138,LM3,Gestão,60.4790,0.0000,39.5210,0.0167,36.5269
+Eng. Informática,LM1:Biologia e Geologia|LM3:Eng. Biomédica,LM1,Biologia e Geologia,54.9020,0.0000,45.0980,LM3,Eng. Biomédica,50.0000,0.0000,50.0000,0.0102,39.2157
+Eng. Informática,LM1:Biologia e Geologia|LM3:Eng. Computacional,LM1,Biologia e Geologia,50.8197,0.0000,49.1803,LM3,Eng. Computacional,60.6557,0.0000,39.3443,0.0061,42.6230
+Eng. Informática,LM1:Biologia e Geologia|LM3:Eng. Física,LM1,Biologia e Geologia,62.5000,0.0000,37.5000,LM3,Eng. Física,59.3750,0.0000,40.6250,0.0032,50.0000
+Eng. Informática,LM1:Biologia e Geologia|LM3:Gestão,LM1,Biologia e Geologia,60.0000,0.0000,40.0000,LM3,Gestão,60.0000,0.0000,40.0000,0.0015,46.6667
+Gestão,LM2:Línguas e Relações Empresariais|LM3:Eng. Aeroespacial,LM2,Línguas e Relações Empresariais,44.9470,0.0000,55.0530,LM3,Eng. Aeroespacial,45.4495,0.0000,54.5505,0.1791,19.8213
+Gestão,LM2:Eng. Civil|LM3:Eng. Aeroespacial,LM2,Eng. Civil,46.3610,0.0000,53.6390,LM3,Eng. Aeroespacial,43.8968,0.0000,56.1032,0.1745,31.8625
+Gestão,LM2:Contabilidade|LM3:Eng. Aeroespacial,LM2,Contabilidade,45.5342,0.0000,54.4658,LM3,Eng. Aeroespacial,44.1915,0.0000,55.8085,0.1713,30.9399
+Gestão,LM2:Línguas e Relações Empresariais|LM3:Tecnologias de Informação,LM2,Línguas e Relações Empresariais,43.6852,0.0000,56.3148,LM3,Tecnologias de Informação,42.1599,0.0000,57.8401,0.1639,31.7877
+Gestão,LM2:Eng. Civil|LM3:Tecnologias de Informação,LM2,Eng. Civil,44.9284,0.0000,55.0716,LM3,Tecnologias de Informação,44.3062,0.0000,55.6938,0.1607,20.3485
+Gestão,LM2:Contabilidade|LM3:Tecnologias de Informação,LM2,Contabilidade,46.2131,0.0000,53.7869,LM3,Tecnologias de Informação,43.5173,0.0000,56.4827,0.1558,20.5392
+Gestão,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,42.5980,0.0000,57.4020,LM3,Biotecnologia,45.0653,0.0000,54.9347,0.1378,30.1887
+Gestão,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,44.0422,0.0000,55.9578,LM3,Biotecnologia,44.9472,0.0000,55.0528,0.1326,21.3424
+Gestão,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,43.7163,0.0000,56.2837,LM3,Biotecnologia,42.6369,0.0000,57.3631,0.1297,29.2984
+Gestão,LM2:Eng. Civil|LM3:Matemática,LM2,Eng. Civil,44.4536,0.0000,55.5464,LM3,Matemática,43.0567,0.0000,56.9433,0.1217,20.6245
+Gestão,LM2:Línguas e Relações Empresariais|LM3:Matemática,LM2,Línguas e Relações Empresariais,44.1900,0.0000,55.8100,LM3,Matemática,46.1408,0.0000,53.8592,0.1179,34.3511
+Gestão,LM2:Contabilidade|LM3:Matemática,LM2,Contabilidade,46.3588,0.0000,53.6412,LM3,Matemática,48.1350,0.0000,51.8650,0.1126,21.9361
+Gestão,LM2:Línguas e Relações Empresariais|LM3:Eng. Informática,LM2,Línguas e Relações Empresariais,42.0086,0.0000,57.9914,LM3,Eng. Informática,45.1404,0.0000,54.8596,0.0926,19.2225
+Gestão,LM2:Contabilidade|LM3:Eng. Informática,LM2,Contabilidade,47.2826,0.0000,52.7174,LM3,Eng. Informática,43.5870,0.0000,56.4130,0.0920,30.5435
+Gestão,LM2:Eng. Civil|LM3:Eng. Informática,LM2,Eng. Civil,44.2263,0.0000,55.7737,LM3,Eng. Informática,45.4965,0.0000,54.5035,0.0866,30.1386
+Gestão,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Aeroespacial,LM2,Gestão e Planeamento em Turismo,43.9655,0.0000,56.0345,LM3,Eng. Aeroespacial,44.9507,0.0000,55.0493,0.0812,21.7980
+Gestão,LM2:Gestão e Planeamento em Turismo|LM3:Tecnologias de Informação,LM2,Gestão e Planeamento em Turismo,45.1398,0.0000,54.8602,LM3,Tecnologias de Informação,43.4088,0.0000,56.5912,0.0751,33.8216
+Gestão,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,42.4390,0.0000,57.5610,LM3,Biotecnologia,42.4390,0.0000,57.5610,0.0615,17.7236
+Gestão,LM2:Gestão e Planeamento em Turismo|LM3:Matemática,LM2,Gestão e Planeamento em Turismo,46.6912,0.0000,53.3088,LM3,Matemática,44.8529,0.0000,55.1471,0.0544,32.1691
+Gestão,LM2:Línguas e Relações Empresariais|LM3:MTC,LM2,Línguas e Relações Empresariais,45.8918,0.0000,54.1082,LM3,MTC,41.8838,0.0000,58.1162,0.0499,33.6673
+Gestão,LM2:Eng. Civil|LM3:MTC,LM2,Eng. Civil,43.3790,0.0000,56.6210,LM3,MTC,40.8676,0.0000,59.1324,0.0438,16.6667
+Gestão,LM2:Gestão e Planeamento em Turismo|LM3:Eng. Informática,LM2,Gestão e Planeamento em Turismo,43.9024,0.0000,56.0976,LM3,Eng. Informática,43.9024,0.0000,56.0976,0.0410,20.7317
+Gestão,LM2:Contabilidade|LM3:MTC,LM2,Contabilidade,44.6115,0.0000,55.3885,LM3,MTC,43.3584,0.0000,56.6416,0.0399,18.5464
+Gestão,LM2:Eng. Civil|LM3:Biologia,LM2,Eng. Civil,39.7906,0.0000,60.2094,LM3,Biologia,38.4817,0.0000,61.5183,0.0382,25.3927
+Gestão,LM2:Design|LM3:Eng. Aeroespacial,LM2,Design,39.6325,0.0000,60.3675,LM3,Eng. Aeroespacial,41.4698,0.0000,58.5302,0.0381,24.6719
+Gestão,LM2:Línguas e Relações Empresariais|LM3:Biologia,LM2,Línguas e Relações Empresariais,40.7407,0.0000,59.2593,LM3,Biologia,42.0635,0.0000,57.9365,0.0378,16.6667
+Gestão,LM2:Contabilidade|LM3:Biologia,LM2,Contabilidade,45.8445,0.0000,54.1555,LM3,Biologia,43.9678,0.0000,56.0322,0.0373,30.8311
+Gestão,LM2:Design|LM3:Tecnologias de Informação,LM2,Design,43.7126,0.0000,56.2874,LM3,Tecnologias de Informação,45.5090,0.0000,54.4910,0.0334,20.9581
+Gestão,LM2:Design|LM3:Biotecnologia,LM2,Design,44.7761,0.0000,55.2239,LM3,Biotecnologia,41.0448,0.0000,58.9552,0.0268,31.7164
+Gestão,LM2:Design|LM3:Matemática,LM2,Design,51.8519,0.0000,48.1481,LM3,Matemática,43.2099,0.0000,56.7901,0.0243,23.8683
+Gestão,LM2:Gestão e Planeamento em Turismo|LM3:MTC,LM2,Gestão e Planeamento em Turismo,42.0000,0.0000,58.0000,LM3,MTC,35.5000,0.0000,64.5000,0.0200,26.5000
+Gestão,LM2:Design|LM3:Eng. Informática,LM2,Design,38.9222,0.0000,61.0778,LM3,Eng. Informática,39.5210,0.0000,60.4790,0.0167,26.3473
+Gestão,LM2:Gestão e Planeamento em Turismo|LM3:Biologia,LM2,Gestão e Planeamento em Turismo,49.3671,0.0000,50.6329,LM3,Biologia,43.6709,0.0000,56.3291,0.0158,24.6835
+Gestão,LM2:Design|LM3:Biologia,LM2,Design,35.2941,0.0000,64.7059,LM3,Biologia,45.8824,0.0000,54.1176,0.0085,27.0588
+Gestão,LM2:Design|LM3:MTC,LM2,Design,49.3976,0.0000,50.6024,LM3,MTC,39.7590,0.0000,60.2410,0.0083,21.6867
+Gestão,LM2:Biologia e Geologia|LM3:Tecnologias de Informação,LM2,Biologia e Geologia,39.1304,0.0000,60.8696,LM3,Tecnologias de Informação,30.4348,0.0000,69.5652,0.0023,8.6957
+Gestão,LM2:Biologia e Geologia|LM3:Eng. Aeroespacial,LM2,Biologia e Geologia,50.0000,0.0000,50.0000,LM3,Eng. Aeroespacial,59.0909,0.0000,40.9091,0.0022,36.3636
+Gestão,LM2:Biologia e Geologia|LM3:Eng. Informática,LM2,Biologia e Geologia,40.0000,0.0000,60.0000,LM3,Eng. Informática,40.0000,0.0000,60.0000,0.0015,20.0000
+Gestão,LM2:Biologia e Geologia|LM3:Matemática,LM2,Biologia e Geologia,78.5714,0.0000,21.4286,LM3,Matemática,35.7143,0.0000,64.2857,0.0014,28.5714
+Gestão,LM2:Biologia e Geologia|LM3:Biotecnologia,LM2,Biologia e Geologia,53.8462,0.0000,46.1538,LM3,Biotecnologia,38.4615,0.0000,61.5385,0.0013,30.7692
+Gestão,LM2:Biologia e Geologia|LM3:Biologia,LM2,Biologia e Geologia,33.3333,0.0000,66.6667,LM3,Biologia,33.3333,0.0000,66.6667,0.0009,33.3333
+Gestão,LM2:Biologia e Geologia|LM3:MTC,LM2,Biologia e Geologia,28.5714,0.0000,71.4286,LM3,MTC,28.5714,0.0000,71.4286,0.0007,14.2857
+Gestão,LM2:Economia|LM3:Matemática,LM2,Economia,0.0000,0.0000,100.0000,LM3,Matemática,100.0000,0.0000,0.0000,0.0001,0.0000
+Gestão e Planeamento em Turismo,LM1:Eng. Aeroespacial|LM2:Administração Pública,LM1,Eng. Aeroespacial,46.4673,0.0000,53.5327,LM2,Administração Pública,55.2072,0.0000,44.7928,1.3078,36.2441
+Gestão e Planeamento em Turismo,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,44.0842,0.0000,55.9158,LM2,Administração Pública,54.7368,0.0000,45.2632,1.1875,24.6316
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,45.3057,0.0000,54.6943,LM2,Administração Pública,55.0516,0.0000,44.9484,1.0076,35.3712
+Gestão e Planeamento em Turismo,LM1:Matemática|LM2:Administração Pública,LM1,Matemática,46.9493,0.0000,53.0507,LM2,Administração Pública,54.9466,0.0000,45.0534,0.8703,26.6115
+Gestão e Planeamento em Turismo,LM1:Eng. Aeroespacial|LM2:Eng. Biomédica,LM1,Eng. Aeroespacial,46.1914,0.0000,53.8086,LM2,Eng. Biomédica,56.2842,0.0000,43.7158,0.8402,37.0626
+Gestão e Planeamento em Turismo,LM1:Tecnologias de Informação|LM2:Eng. Biomédica,LM1,Tecnologias de Informação,43.2939,0.0000,56.7061,LM2,Eng. Biomédica,56.5904,0.0000,43.4096,0.7784,24.8587
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,45.1927,0.0000,54.8073,LM2,Eng. Biomédica,56.8172,0.0000,43.1828,0.6667,36.4182
+Gestão e Planeamento em Turismo,LM1:Eng. Informática|LM2:Administração Pública,LM1,Eng. Informática,45.9711,0.0000,54.0289,LM2,Administração Pública,56.2681,0.0000,43.7319,0.6565,36.0244
+Gestão e Planeamento em Turismo,LM1:Matemática|LM2:Eng. Biomédica,LM1,Matemática,46.3616,0.0000,53.6384,LM2,Eng. Biomédica,56.9174,0.0000,43.0826,0.5703,26.4948
+Gestão e Planeamento em Turismo,LM1:Eng. Aeroespacial|LM2:Eng. Computacional,LM1,Eng. Aeroespacial,46.6383,0.0000,53.3617,LM2,Eng. Computacional,55.0638,0.0000,44.9362,0.4700,36.2128
+Gestão e Planeamento em Turismo,LM1:Tecnologias de Informação|LM2:Eng. Computacional,LM1,Tecnologias de Informação,43.9962,0.0000,56.0038,LM2,Eng. Computacional,55.7692,0.0000,44.2308,0.4264,24.4841
+Gestão e Planeamento em Turismo,LM1:Eng. Informática|LM2:Eng. Biomédica,LM1,Eng. Informática,45.0625,0.0000,54.9375,LM2,Eng. Biomédica,56.3045,0.0000,43.6955,0.4243,36.8607
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,45.0265,0.0000,54.9735,LM2,Eng. Computacional,55.5865,0.0000,44.4135,0.3589,34.9401
+Gestão e Planeamento em Turismo,LM1:MTC|LM2:Administração Pública,LM1,MTC,44.8980,0.0000,55.1020,LM2,Administração Pública,54.9165,0.0000,45.0835,0.3234,25.5720
+Gestão e Planeamento em Turismo,LM1:Matemática|LM2:Eng. Computacional,LM1,Matemática,47.5177,0.0000,52.4823,LM2,Eng. Computacional,55.2869,0.0000,44.7131,0.3102,26.6280
+Gestão e Planeamento em Turismo,LM1:Biologia|LM2:Administração Pública,LM1,Biologia,45.4042,0.0000,54.5958,LM2,Administração Pública,53.1561,0.0000,46.8439,0.2709,34.6992
+Gestão e Planeamento em Turismo,LM1:Eng. Aeroespacial|LM2:Eng. Física,LM1,Eng. Aeroespacial,47.5899,0.0000,52.4101,LM2,Eng. Física,56.3504,0.0000,43.6496,0.2614,37.7582
+Gestão e Planeamento em Turismo,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,42.4742,0.0000,57.5258,LM2,Eng. Física,54.2680,0.0000,45.7320,0.2425,22.7629
+Gestão e Planeamento em Turismo,LM1:Eng. Informática|LM2:Eng. Computacional,LM1,Eng. Informática,44.9433,0.0000,55.0567,LM2,Eng. Computacional,55.1406,0.0000,44.8594,0.2383,34.5363
+Gestão e Planeamento em Turismo,LM1:MTC|LM2:Eng. Biomédica,LM1,MTC,46.4908,0.0000,53.5092,LM2,Eng. Biomédica,56.0999,0.0000,43.9001,0.2123,26.4249
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,46.2998,0.0000,53.7002,LM2,Eng. Física,55.7875,0.0000,44.2125,0.2108,36.1480
+Gestão e Planeamento em Turismo,LM1:Biologia|LM2:Eng. Biomédica,LM1,Biologia,46.8750,0.0000,53.1250,LM2,Eng. Biomédica,56.8638,0.0000,43.1362,0.1792,38.8393
+Gestão e Planeamento em Turismo,LM1:Matemática|LM2:Eng. Física,LM1,Matemática,48.4490,0.0000,51.5510,LM2,Eng. Física,56.7400,0.0000,43.2600,0.1773,28.0880
+Gestão e Planeamento em Turismo,LM1:Eng. Informática|LM2:Eng. Física,LM1,Eng. Informática,46.7870,0.0000,53.2130,LM2,Eng. Física,55.0903,0.0000,44.9097,0.1385,38.4116
+Gestão e Planeamento em Turismo,LM1:MTC|LM2:Eng. Computacional,LM1,MTC,43.9024,0.0000,56.0976,LM2,Eng. Computacional,56.3589,0.0000,43.6411,0.1148,25.8711
+Gestão e Planeamento em Turismo,LM1:Biologia|LM2:Eng. Computacional,LM1,Biologia,46.5820,0.0000,53.4180,LM2,Eng. Computacional,57.1289,0.0000,42.8711,0.1024,38.6719
+Gestão e Planeamento em Turismo,LM1:Eng. Aeroespacial|LM2:Gestão,LM1,Eng. Aeroespacial,43.3498,0.0000,56.6502,LM2,Gestão,56.0345,0.0000,43.9655,0.0812,33.4975
+Gestão e Planeamento em Turismo,LM1:Tecnologias de Informação|LM2:Gestão,LM1,Tecnologias de Informação,44.7403,0.0000,55.2597,LM2,Gestão,54.8602,0.0000,45.1398,0.0751,25.6991
+Gestão e Planeamento em Turismo,LM1:MTC|LM2:Eng. Física,LM1,MTC,44.1691,0.0000,55.8309,LM2,Eng. Física,55.5394,0.0000,44.4606,0.0686,23.9067
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,47.9675,0.0000,52.0325,LM2,Gestão,57.5610,0.0000,42.4390,0.0615,39.8374
+Gestão e Planeamento em Turismo,LM1:Biologia|LM2:Eng. Física,LM1,Biologia,50.2618,0.0000,49.7382,LM2,Eng. Física,58.8133,0.0000,41.1867,0.0573,42.2339
+Gestão e Planeamento em Turismo,LM1:Matemática|LM2:Gestão,LM1,Matemática,50.7353,0.0000,49.2647,LM2,Gestão,53.3088,0.0000,46.6912,0.0544,28.6765
+Gestão e Planeamento em Turismo,LM1:Eng. Informática|LM2:Gestão,LM1,Eng. Informática,42.1951,0.0000,57.8049,LM2,Gestão,56.0976,0.0000,43.9024,0.0410,32.9268
+Gestão e Planeamento em Turismo,LM1:MTC|LM2:Gestão,LM1,MTC,46.5000,0.0000,53.5000,LM2,Gestão,58.0000,0.0000,42.0000,0.0200,27.5000
+Gestão e Planeamento em Turismo,LM1:Biologia|LM2:Gestão,LM1,Biologia,53.1646,0.0000,46.8354,LM2,Gestão,50.6329,0.0000,49.3671,0.0158,37.9747
+Línguas e Relações Empresariais,LM1:Eng. Aeroespacial|LM2:Administração Pública,LM1,Eng. Aeroespacial,44.3045,0.0000,55.6955,LM2,Administração Pública,54.5461,0.0000,45.4539,2.8101,34.5717
+Línguas e Relações Empresariais,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,43.3796,0.0000,56.6204,LM2,Administração Pública,54.3276,0.0000,45.6724,2.5950,24.0077
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,44.7098,0.0000,55.2902,LM2,Administração Pública,54.0938,0.0000,45.9062,2.1899,34.6819
+Línguas e Relações Empresariais,LM1:Matemática|LM2:Administração Pública,LM1,Matemática,45.7598,0.0000,54.2402,LM2,Administração Pública,53.8192,0.0000,46.1808,1.8525,25.3711
+Línguas e Relações Empresariais,LM1:Eng. Aeroespacial|LM2:Eng. Biomédica,LM1,Eng. Aeroespacial,44.2116,0.0000,55.7884,LM2,Eng. Biomédica,56.8878,0.0000,43.1122,1.8373,35.6610
+Línguas e Relações Empresariais,LM1:Tecnologias de Informação|LM2:Eng. Biomédica,LM1,Tecnologias de Informação,43.0314,0.0000,56.9686,LM2,Eng. Biomédica,56.7281,0.0000,43.2719,1.7048,24.6950
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,44.8891,0.0000,55.1109,LM2,Eng. Biomédica,56.4108,0.0000,43.5892,1.4694,36.5455
+Línguas e Relações Empresariais,LM1:Eng. Informática|LM2:Administração Pública,LM1,Eng. Informática,44.9315,0.0000,55.0685,LM2,Administração Pública,53.8649,0.0000,46.1351,1.4373,35.3440
+Línguas e Relações Empresariais,LM1:Matemática|LM2:Eng. Biomédica,LM1,Matemática,45.9488,0.0000,54.0512,LM2,Eng. Biomédica,56.0336,0.0000,43.9664,1.2157,25.6395
+Línguas e Relações Empresariais,LM1:Eng. Aeroespacial|LM2:Eng. Computacional,LM1,Eng. Aeroespacial,44.3451,0.0000,55.6549,LM2,Eng. Computacional,53.9976,0.0000,46.0024,0.9956,34.8232
+Línguas e Relações Empresariais,LM1:Tecnologias de Informação|LM2:Eng. Computacional,LM1,Tecnologias de Informação,43.3253,0.0000,56.6747,LM2,Eng. Computacional,55.0632,0.0000,44.9368,0.9184,24.3140
+Línguas e Relações Empresariais,LM1:Eng. Informática|LM2:Eng. Biomédica,LM1,Eng. Informática,45.0770,0.0000,54.9230,LM2,Eng. Biomédica,58.2559,0.0000,41.7441,0.9151,36.9468
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,45.0756,0.0000,54.9244,LM2,Eng. Computacional,54.6575,0.0000,45.3425,0.7869,35.3666
+Línguas e Relações Empresariais,LM1:MTC|LM2:Administração Pública,LM1,MTC,43.7392,0.0000,56.2608,LM2,Administração Pública,53.6293,0.0000,46.3707,0.6916,24.0312
+Línguas e Relações Empresariais,LM1:Matemática|LM2:Eng. Computacional,LM1,Matemática,44.9815,0.0000,55.0185,LM2,Eng. Computacional,54.9592,0.0000,45.0408,0.6745,25.9155
+Línguas e Relações Empresariais,LM1:Biologia|LM2:Administração Pública,LM1,Biologia,45.8340,0.0000,54.1660,LM2,Administração Pública,55.1356,0.0000,44.8644,0.6085,36.1380
+Línguas e Relações Empresariais,LM1:Eng. Aeroespacial|LM2:Eng. Física,LM1,Eng. Aeroespacial,43.7445,0.0000,56.2555,LM2,Eng. Física,56.7964,0.0000,43.2036,0.5731,35.3167
+Línguas e Relações Empresariais,LM1:Tecnologias de Informação|LM2:Eng. Física,LM1,Tecnologias de Informação,43.0043,0.0000,56.9957,LM2,Eng. Física,55.4224,0.0000,44.5776,0.5339,24.0120
+Línguas e Relações Empresariais,LM1:Eng. Informática|LM2:Eng. Computacional,LM1,Eng. Informática,43.8510,0.0000,56.1490,LM2,Eng. Computacional,53.9417,0.0000,46.0583,0.5074,33.9771
+Línguas e Relações Empresariais,LM1:MTC|LM2:Eng. Biomédica,LM1,MTC,45.0350,0.0000,54.9650,LM2,Eng. Biomédica,57.8904,0.0000,42.1096,0.4854,26.1846
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,45.6637,0.0000,54.3363,LM2,Eng. Física,55.3540,0.0000,44.6460,0.4520,35.7080
+Línguas e Relações Empresariais,LM1:Matemática|LM2:Eng. Física,LM1,Matemática,45.3303,0.0000,54.6697,LM2,Eng. Física,55.2518,0.0000,44.7482,0.3951,26.1200
+Línguas e Relações Empresariais,LM1:Biologia|LM2:Eng. Biomédica,LM1,Biologia,45.5886,0.0000,54.4114,LM2,Eng. Biomédica,56.6489,0.0000,43.3511,0.3933,36.6387
+Línguas e Relações Empresariais,LM1:Eng. Informática|LM2:Eng. Física,LM1,Eng. Informática,44.6170,0.0000,55.3830,LM2,Eng. Física,55.1760,0.0000,44.8240,0.2898,35.4037
+Línguas e Relações Empresariais,LM1:MTC|LM2:Eng. Computacional,LM1,MTC,42.5088,0.0000,57.4912,LM2,Eng. Computacional,57.0979,0.0000,42.9021,0.2543,24.6952
+Línguas e Relações Empresariais,LM1:Biologia|LM2:Eng. Computacional,LM1,Biologia,45.2575,0.0000,54.7425,LM2,Eng. Computacional,57.1816,0.0000,42.8184,0.2214,36.4499
+Línguas e Relações Empresariais,LM1:Eng. Aeroespacial|LM2:Gestão,LM1,Eng. Aeroespacial,45.0586,0.0000,54.9414,LM2,Gestão,55.0530,0.0000,44.9470,0.1791,36.6276
+Línguas e Relações Empresariais,LM1:Tecnologias de Informação|LM2:Gestão,LM1,Tecnologias de Informação,42.8920,0.0000,57.1080,LM2,Gestão,56.3148,0.0000,43.6852,0.1639,24.6492
+Línguas e Relações Empresariais,LM1:MTC|LM2:Eng. Física,LM1,MTC,46.2788,0.0000,53.7212,LM2,Eng. Física,56.4276,0.0000,43.5724,0.1478,27.1313
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,44.7210,0.0000,55.2790,LM2,Gestão,55.9578,0.0000,44.0422,0.1326,33.9367
+Línguas e Relações Empresariais,LM1:Matemática|LM2:Gestão,LM1,Matemática,45.4623,0.0000,54.5377,LM2,Gestão,55.8100,0.0000,44.1900,0.1179,26.5479
+Línguas e Relações Empresariais,LM1:Biologia|LM2:Eng. Física,LM1,Biologia,45.4468,0.0000,54.5532,LM2,Eng. Física,56.3404,0.0000,43.6596,0.1175,35.4894
+Línguas e Relações Empresariais,LM1:Eng. Informática|LM2:Gestão,LM1,Eng. Informática,47.6242,0.0000,52.3758,LM2,Gestão,57.9914,0.0000,42.0086,0.0926,37.9050
+Línguas e Relações Empresariais,LM1:MTC|LM2:Gestão,LM1,MTC,43.4870,0.0000,56.5130,LM2,Gestão,54.1082,0.0000,45.8918,0.0499,24.0481
+Línguas e Relações Empresariais,LM1:Biologia|LM2:Gestão,LM1,Biologia,44.9735,0.0000,55.0265,LM2,Gestão,59.2593,0.0000,40.7407,0.0378,36.7725
+MTC,LM1:Línguas e Relações Empresariais|LM3:Administração Pública,LM1,Línguas e Relações Empresariais,56.2608,0.0000,43.7392,LM3,Administração Pública,54.8149,0.0000,45.1851,0.6916,41.4691
+MTC,LM1:Eng. Civil|LM3:Administração Pública,LM1,Eng. Civil,56.9875,0.0000,43.0125,LM3,Administração Pública,56.6831,0.0000,43.3169,0.6898,43.6068
+MTC,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,56.6377,0.0000,43.3623,LM3,Administração Pública,54.6044,0.0000,45.3956,0.6787,41.4174
+MTC,LM1:Línguas e Relações Empresariais|LM3:Eng. Biomédica,LM1,Línguas e Relações Empresariais,54.9650,0.0000,45.0350,LM3,Eng. Biomédica,57.1487,0.0000,42.8513,0.4854,42.3156
+MTC,LM1:Eng. Civil|LM3:Eng. Biomédica,LM1,Eng. Civil,56.4958,0.0000,43.5042,LM3,Eng. Biomédica,57.1144,0.0000,42.8856,0.4526,42.7088
+MTC,LM1:Contabilidade|LM3:Eng. Biomédica,LM1,Contabilidade,57.3921,0.0000,42.6079,LM3,Eng. Biomédica,56.4974,0.0000,43.5026,0.4471,42.6079
+MTC,LM1:Gestão e Planeamento em Turismo|LM3:Administração Pública,LM1,Gestão e Planeamento em Turismo,55.1020,0.0000,44.8980,LM3,Administração Pública,56.9573,0.0000,43.0427,0.3234,42.5788
+MTC,LM1:Línguas e Relações Empresariais|LM3:Eng. Computacional,LM1,Línguas e Relações Empresariais,57.4912,0.0000,42.5088,LM3,Eng. Computacional,55.9575,0.0000,44.0425,0.2543,42.3122
+MTC,LM1:Contabilidade|LM3:Eng. Computacional,LM1,Contabilidade,56.2781,0.0000,43.7219,LM3,Eng. Computacional,54.9693,0.0000,45.0307,0.2445,39.7955
+MTC,LM1:Eng. Civil|LM3:Eng. Computacional,LM1,Eng. Civil,55.9852,0.0000,44.0148,LM3,Eng. Computacional,54.1752,0.0000,45.8248,0.2431,40.3126
+MTC,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Biomédica,LM1,Gestão e Planeamento em Turismo,53.5092,0.0000,46.4908,LM3,Eng. Biomédica,55.8643,0.0000,44.1357,0.2123,40.4616
+MTC,LM1:Línguas e Relações Empresariais|LM3:Eng. Física,LM1,Línguas e Relações Empresariais,53.7212,0.0000,46.2788,LM3,Eng. Física,55.6834,0.0000,44.3166,0.1478,39.8512
+MTC,LM1:Design|LM3:Administração Pública,LM1,Design,57.5034,0.0000,42.4966,LM3,Administração Pública,54.4338,0.0000,45.5662,0.1466,42.0873
+MTC,LM1:Eng. Civil|LM3:Eng. Física,LM1,Eng. Civil,56.3904,0.0000,43.6096,LM3,Eng. Física,53.8624,0.0000,46.1376,0.1424,40.8708
+MTC,LM1:Contabilidade|LM3:Eng. Física,LM1,Contabilidade,55.9078,0.0000,44.0922,LM3,Eng. Física,56.8444,0.0000,43.1556,0.1388,41.4265
+MTC,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Computacional,LM1,Gestão e Planeamento em Turismo,56.0976,0.0000,43.9024,LM3,Eng. Computacional,56.1847,0.0000,43.8153,0.1148,42.4216
+MTC,LM1:Design|LM3:Eng. Biomédica,LM1,Design,56.8569,0.0000,43.1431,LM3,Eng. Biomédica,55.4555,0.0000,44.5445,0.0999,41.6416
+MTC,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Física,LM1,Gestão e Planeamento em Turismo,55.8309,0.0000,44.1691,LM3,Eng. Física,55.9767,0.0000,44.0233,0.0686,42.4198
+MTC,LM1:Línguas e Relações Empresariais|LM3:Gestão,LM1,Línguas e Relações Empresariais,56.5130,0.0000,43.4870,LM3,Gestão,58.1162,0.0000,41.8838,0.0499,42.2846
+MTC,LM1:Design|LM3:Eng. Computacional,LM1,Design,56.4050,0.0000,43.5950,LM3,Eng. Computacional,59.0909,0.0000,40.9091,0.0484,44.0083
+MTC,LM1:Eng. Civil|LM3:Gestão,LM1,Eng. Civil,58.2192,0.0000,41.7808,LM3,Gestão,59.1324,0.0000,40.8676,0.0438,45.8904
+MTC,LM1:Contabilidade|LM3:Gestão,LM1,Contabilidade,59.1479,0.0000,40.8521,LM3,Gestão,56.6416,0.0000,43.3584,0.0399,44.1103
+MTC,LM1:Design|LM3:Eng. Física,LM1,Design,56.1644,0.0000,43.8356,LM3,Eng. Física,54.1096,0.0000,45.8904,0.0292,43.1507
+MTC,LM1:Gestão e Planeamento em Turismo|LM3:Gestão,LM1,Gestão e Planeamento em Turismo,53.5000,0.0000,46.5000,LM3,Gestão,64.5000,0.0000,35.5000,0.0200,46.0000
+MTC,LM1:Biologia e Geologia|LM3:Administração Pública,LM1,Biologia e Geologia,52.9412,0.0000,47.0588,LM3,Administração Pública,62.3529,0.0000,37.6471,0.0085,48.2353
+MTC,LM1:Design|LM3:Gestão,LM1,Design,53.0120,0.0000,46.9880,LM3,Gestão,60.2410,0.0000,39.7590,0.0083,46.9880
+MTC,LM1:Biologia e Geologia|LM3:Eng. Biomédica,LM1,Biologia e Geologia,50.0000,0.0000,50.0000,LM3,Eng. Biomédica,61.2903,0.0000,38.7097,0.0062,48.3871
+MTC,LM1:Biologia e Geologia|LM3:Eng. Computacional,LM1,Biologia e Geologia,45.8333,0.0000,54.1667,LM3,Eng. Computacional,45.8333,0.0000,54.1667,0.0024,33.3333
+MTC,LM1:Biologia e Geologia|LM3:Eng. Física,LM1,Biologia e Geologia,66.6667,0.0000,33.3333,LM3,Eng. Física,33.3333,0.0000,66.6667,0.0012,25.0000
+MTC,LM1:Biologia e Geologia|LM3:Gestão,LM1,Biologia e Geologia,42.8571,0.0000,57.1429,LM3,Gestão,71.4286,0.0000,28.5714,0.0007,28.5714
+MTC,LM1:Economia|LM3:Eng. Física,LM1,Economia,0.0000,0.0000,100.0000,LM3,Eng. Física,100.0000,0.0000,0.0000,0.0001,100.0000
+Matemática,LM1:Línguas e Relações Empresariais|LM3:Administração Pública,LM1,Línguas e Relações Empresariais,54.2402,0.0000,45.7598,LM3,Administração Pública,55.2551,0.0000,44.7449,1.8525,40.7989
+Matemática,LM1:Eng. Civil|LM3:Administração Pública,LM1,Eng. Civil,55.5371,0.0000,44.4629,LM3,Administração Pública,55.1884,0.0000,44.8116,1.8069,41.4688
+Matemática,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,54.8774,0.0000,45.1226,LM3,Administração Pública,54.1967,0.0000,45.8033,1.7776,39.9921
+Matemática,LM1:Línguas e Relações Empresariais|LM3:Eng. Biomédica,LM1,Línguas e Relações Empresariais,54.0512,0.0000,45.9488,LM3,Eng. Biomédica,55.7045,0.0000,44.2955,1.2157,41.5892
+Matemática,LM1:Eng. Civil|LM3:Eng. Biomédica,LM1,Eng. Civil,53.8378,0.0000,46.1622,LM3,Eng. Biomédica,56.2903,0.0000,43.7097,1.1947,41.3577
+Matemática,LM1:Contabilidade|LM3:Eng. Biomédica,LM1,Contabilidade,55.1472,0.0000,44.8528,LM3,Eng. Biomédica,55.6434,0.0000,44.3566,1.1890,41.5307
+Matemática,LM1:Gestão e Planeamento em Turismo|LM3:Administração Pública,LM1,Gestão e Planeamento em Turismo,53.0507,0.0000,46.9493,LM3,Administração Pública,54.8891,0.0000,45.1109,0.8703,39.8483
+Matemática,LM1:Línguas e Relações Empresariais|LM3:Eng. Computacional,LM1,Línguas e Relações Empresariais,55.0185,0.0000,44.9815,LM3,Eng. Computacional,53.9362,0.0000,46.0638,0.6745,39.8073
+Matemática,LM1:Eng. Civil|LM3:Eng. Computacional,LM1,Eng. Civil,54.7567,0.0000,45.2433,LM3,Eng. Computacional,54.9427,0.0000,45.0573,0.6454,41.1218
+Matemática,LM1:Contabilidade|LM3:Eng. Computacional,LM1,Contabilidade,54.7555,0.0000,45.2445,LM3,Eng. Computacional,55.2334,0.0000,44.7666,0.6277,41.7078
+Matemática,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Biomédica,LM1,Gestão e Planeamento em Turismo,53.6384,0.0000,46.3616,LM3,Eng. Biomédica,55.1990,0.0000,44.8010,0.5703,40.5225
+Matemática,LM1:Línguas e Relações Empresariais|LM3:Eng. Física,LM1,Línguas e Relações Empresariais,54.6697,0.0000,45.3303,LM3,Eng. Física,55.5556,0.0000,44.4444,0.3951,41.1288
+Matemática,LM1:Design|LM3:Administração Pública,LM1,Design,54.5478,0.0000,45.4522,LM3,Administração Pública,54.5478,0.0000,45.4522,0.3837,40.8392
+Matemática,LM1:Eng. Civil|LM3:Eng. Física,LM1,Eng. Civil,55.0355,0.0000,44.9645,LM3,Eng. Física,52.8530,0.0000,47.1470,0.3803,40.2051
+Matemática,LM1:Contabilidade|LM3:Eng. Física,LM1,Contabilidade,54.8988,0.0000,45.1012,LM3,Eng. Física,54.6019,0.0000,45.3981,0.3705,40.1350
+Matemática,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Computacional,LM1,Gestão e Planeamento em Turismo,52.4823,0.0000,47.5177,LM3,Eng. Computacional,55.4159,0.0000,44.5841,0.3102,40.7801
+Matemática,LM1:Design|LM3:Eng. Biomédica,LM1,Design,55.0177,0.0000,44.9823,LM3,Eng. Biomédica,55.5687,0.0000,44.4313,0.2541,41.6372
+Matemática,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Física,LM1,Gestão e Planeamento em Turismo,51.5510,0.0000,48.4490,LM3,Eng. Física,53.4123,0.0000,46.5877,0.1773,38.0147
+Matemática,LM1:Design|LM3:Eng. Computacional,LM1,Design,54.8754,0.0000,45.1246,LM3,Eng. Computacional,54.8043,0.0000,45.1957,0.1405,39.7865
+Matemática,LM1:Eng. Civil|LM3:Gestão,LM1,Eng. Civil,53.5744,0.0000,46.4256,LM3,Gestão,56.9433,0.0000,43.0567,0.1217,42.0707
+Matemática,LM1:Línguas e Relações Empresariais|LM3:Gestão,LM1,Línguas e Relações Empresariais,54.5377,0.0000,45.4623,LM3,Gestão,53.8592,0.0000,46.1408,0.1179,39.1009
+Matemática,LM1:Contabilidade|LM3:Gestão,LM1,Contabilidade,56.0391,0.0000,43.9609,LM3,Gestão,51.8650,0.0000,48.1350,0.1126,39.0764
+Matemática,LM1:Design|LM3:Eng. Física,LM1,Design,53.7688,0.0000,46.2312,LM3,Eng. Física,54.1457,0.0000,45.8543,0.0796,40.3266
+Matemática,LM1:Gestão e Planeamento em Turismo|LM3:Gestão,LM1,Gestão e Planeamento em Turismo,49.2647,0.0000,50.7353,LM3,Gestão,55.1471,0.0000,44.8529,0.0544,39.1544
+Matemática,LM1:Design|LM3:Gestão,LM1,Design,57.2016,0.0000,42.7984,LM3,Gestão,56.7901,0.0000,43.2099,0.0243,44.4444
+Matemática,LM1:Biologia e Geologia|LM3:Administração Pública,LM1,Biologia e Geologia,58.0952,0.0000,41.9048,LM3,Administração Pública,53.8095,0.0000,46.1905,0.0210,43.8095
+Matemática,LM1:Biologia e Geologia|LM3:Eng. Biomédica,LM1,Biologia e Geologia,58.5526,0.0000,41.4474,LM3,Eng. Biomédica,57.8947,0.0000,42.1053,0.0152,43.4211
+Matemática,LM1:Biologia e Geologia|LM3:Eng. Computacional,LM1,Biologia e Geologia,51.2195,0.0000,48.7805,LM3,Eng. Computacional,52.4390,0.0000,47.5610,0.0082,35.3659
+Matemática,LM1:Biologia e Geologia|LM3:Eng. Física,LM1,Biologia e Geologia,58.5366,0.0000,41.4634,LM3,Eng. Física,65.8537,0.0000,34.1463,0.0041,53.6585
+Matemática,LM1:Biologia e Geologia|LM3:Gestão,LM1,Biologia e Geologia,50.0000,0.0000,50.0000,LM3,Gestão,64.2857,0.0000,35.7143,0.0014,57.1429
+Matemática,LM1:Economia|LM3:Administração Pública,LM1,Economia,0.0000,0.0000,100.0000,LM3,Administração Pública,0.0000,0.0000,100.0000,0.0001,0.0000
+Matemática,LM1:Economia|LM3:Gestão,LM1,Economia,0.0000,0.0000,100.0000,LM3,Gestão,0.0000,0.0000,100.0000,0.0001,0.0000
+Tecnologias de Informação,LM1:Línguas e Relações Empresariais|LM3:Administração Pública,LM1,Línguas e Relações Empresariais,56.6204,0.0000,43.3796,LM3,Administração Pública,55.9807,0.0000,44.0193,2.5950,42.5202
+Tecnologias de Informação,LM1:Eng. Civil|LM3:Administração Pública,LM1,Eng. Civil,56.8251,0.0000,43.1749,LM3,Administração Pública,55.9742,0.0000,44.0258,2.4681,42.4821
+Tecnologias de Informação,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,56.8530,0.0000,43.1470,LM3,Administração Pública,55.7723,0.0000,44.2277,2.4245,42.1901
+Tecnologias de Informação,LM1:Línguas e Relações Empresariais|LM3:Eng. Biomédica,LM1,Línguas e Relações Empresariais,56.9686,0.0000,43.0314,LM3,Eng. Biomédica,56.6401,0.0000,43.3599,1.7048,42.4625
+Tecnologias de Informação,LM1:Eng. Civil|LM3:Eng. Biomédica,LM1,Eng. Civil,56.5516,0.0000,43.4484,LM3,Eng. Biomédica,56.8975,0.0000,43.1025,1.6187,42.8307
+Tecnologias de Informação,LM1:Contabilidade|LM3:Eng. Biomédica,LM1,Contabilidade,57.0841,0.0000,42.9159,LM3,Eng. Biomédica,58.0249,0.0000,41.9751,1.6050,43.6199
+Tecnologias de Informação,LM1:Gestão e Planeamento em Turismo|LM3:Administração Pública,LM1,Gestão e Planeamento em Turismo,55.9158,0.0000,44.0842,LM3,Administração Pública,55.1411,0.0000,44.8589,1.1875,41.4147
+Tecnologias de Informação,LM1:Línguas e Relações Empresariais|LM3:Eng. Computacional,LM1,Línguas e Relações Empresariais,56.6747,0.0000,43.3253,LM3,Eng. Computacional,55.5858,0.0000,44.4142,0.9184,41.7792
+Tecnologias de Informação,LM1:Eng. Civil|LM3:Eng. Computacional,LM1,Eng. Civil,56.8432,0.0000,43.1568,LM3,Eng. Computacional,55.9457,0.0000,44.0543,0.8914,42.4613
+Tecnologias de Informação,LM1:Contabilidade|LM3:Eng. Computacional,LM1,Contabilidade,56.3932,0.0000,43.6068,LM3,Eng. Computacional,55.8555,0.0000,44.1445,0.8556,42.0991
+Tecnologias de Informação,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Biomédica,LM1,Gestão e Planeamento em Turismo,56.7061,0.0000,43.2939,LM3,Eng. Biomédica,56.8217,0.0000,43.1783,0.7784,42.4974
+Tecnologias de Informação,LM1:Línguas e Relações Empresariais|LM3:Eng. Física,LM1,Línguas e Relações Empresariais,56.9957,0.0000,43.0043,LM3,Eng. Física,56.0966,0.0000,43.9034,0.5339,42.8732
+Tecnologias de Informação,LM1:Design|LM3:Administração Pública,LM1,Design,57.2876,0.0000,42.7124,LM3,Administração Pública,55.5055,0.0000,44.4945,0.5331,42.0371
+Tecnologias de Informação,LM1:Eng. Civil|LM3:Eng. Física,LM1,Eng. Civil,56.0040,0.0000,43.9960,LM3,Eng. Física,56.2809,0.0000,43.7191,0.5055,42.8289
+Tecnologias de Informação,LM1:Contabilidade|LM3:Eng. Física,LM1,Contabilidade,56.2807,0.0000,43.7193,LM3,Eng. Física,56.6899,0.0000,43.3101,0.4888,42.5327
+Tecnologias de Informação,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Computacional,LM1,Gestão e Planeamento em Turismo,56.0038,0.0000,43.9962,LM3,Eng. Computacional,55.9099,0.0000,44.0901,0.4264,42.3077
+Tecnologias de Informação,LM1:Design|LM3:Eng. Biomédica,LM1,Design,57.2640,0.0000,42.7360,LM3,Eng. Biomédica,56.0204,0.0000,43.9796,0.3538,41.9446
+Tecnologias de Informação,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Física,LM1,Gestão e Planeamento em Turismo,57.5258,0.0000,42.4742,LM3,Eng. Física,55.0103,0.0000,44.9897,0.2425,42.8454
+Tecnologias de Informação,LM1:Design|LM3:Eng. Computacional,LM1,Design,58.1053,0.0000,41.8947,LM3,Eng. Computacional,55.5263,0.0000,44.4737,0.1900,42.4737
+Tecnologias de Informação,LM1:Línguas e Relações Empresariais|LM3:Gestão,LM1,Línguas e Relações Empresariais,57.1080,0.0000,42.8920,LM3,Gestão,57.8401,0.0000,42.1599,0.1639,43.5631
+Tecnologias de Informação,LM1:Eng. Civil|LM3:Gestão,LM1,Eng. Civil,56.9384,0.0000,43.0616,LM3,Gestão,55.6938,0.0000,44.3062,0.1607,42.3771
+Tecnologias de Informação,LM1:Contabilidade|LM3:Gestão,LM1,Contabilidade,55.1348,0.0000,44.8652,LM3,Gestão,56.4827,0.0000,43.5173,0.1558,42.2978
+Tecnologias de Informação,LM1:Design|LM3:Eng. Física,LM1,Design,61.4100,0.0000,38.5900,LM3,Eng. Física,58.8126,0.0000,41.1874,0.1078,45.6401
+Tecnologias de Informação,LM1:Gestão e Planeamento em Turismo|LM3:Gestão,LM1,Gestão e Planeamento em Turismo,55.2597,0.0000,44.7403,LM3,Gestão,56.5912,0.0000,43.4088,0.0751,40.4794
+Tecnologias de Informação,LM1:Design|LM3:Gestão,LM1,Design,58.3832,0.0000,41.6168,LM3,Gestão,54.4910,0.0000,45.5090,0.0334,38.6228
+Tecnologias de Informação,LM1:Biologia e Geologia|LM3:Administração Pública,LM1,Biologia e Geologia,58.7031,0.0000,41.2969,LM3,Administração Pública,56.9966,0.0000,43.0034,0.0293,45.0512
+Tecnologias de Informação,LM1:Biologia e Geologia|LM3:Eng. Biomédica,LM1,Biologia e Geologia,55.9406,0.0000,44.0594,LM3,Eng. Biomédica,56.4356,0.0000,43.5644,0.0202,41.0891
+Tecnologias de Informação,LM1:Biologia e Geologia|LM3:Eng. Computacional,LM1,Biologia e Geologia,61.6822,0.0000,38.3178,LM3,Eng. Computacional,55.1402,0.0000,44.8598,0.0107,46.7290
+Tecnologias de Informação,LM1:Biologia e Geologia|LM3:Eng. Física,LM1,Biologia e Geologia,62.9630,0.0000,37.0370,LM3,Eng. Física,61.7284,0.0000,38.2716,0.0081,46.9136
+Tecnologias de Informação,LM1:Biologia e Geologia|LM3:Gestão,LM1,Biologia e Geologia,73.9130,0.0000,26.0870,LM3,Gestão,69.5652,0.0000,30.4348,0.0023,56.5217
+Tecnologias de Informação,LM1:Economia|LM3:Eng. Computacional,LM1,Economia,100.0000,0.0000,0.0000,LM3,Eng. Computacional,0.0000,0.0000,100.0000,0.0001,0.0000
+Tecnologias de Informação,LM1:Economia|LM3:Administração Pública,LM1,Economia,100.0000,0.0000,0.0000,LM3,Administração Pública,0.0000,0.0000,100.0000,0.0001,0.0000

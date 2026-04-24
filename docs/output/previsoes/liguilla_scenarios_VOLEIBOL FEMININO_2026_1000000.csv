@@ -1,0 +1,19 @@
+﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
+Eng. Civil,LM1:Psicologia|LM3:Eng. Física,LM1,Psicologia,68.3780,0.0000,31.6220,LM3,Eng. Física,53.7334,0.0000,46.2666,53.2790,46.7815
+Eng. Civil,"LM1:Psicologia|LM3:Línguas, Literaturas e Culturas",LM1,Psicologia,68.3517,0.0000,31.6483,LM3,"Línguas, Literaturas e Culturas",83.9747,0.0000,16.0253,24.2673,62.8471
+Eng. Civil,LM1:Psicologia|LM3:Gestão,LM1,Psicologia,68.1913,0.0000,31.8087,LM3,Gestão,67.3800,0.0000,32.6200,18.6999,55.0244
+Eng. Física,LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,63.8334,0.0000,36.1666,LM3,Eng. Civil,46.2666,0.0000,53.7334,53.2790,32.2574
+Eng. Física,LM2:Psicologia|LM3:Geologia,LM2,Psicologia,63.4858,0.0000,36.5142,LM3,Geologia,34.6211,0.0000,65.3789,2.0707,27.6766
+Geologia,LM1:Psicologia|LM3:Eng. Física,LM1,Psicologia,78.4614,0.0000,21.5386,LM3,Eng. Física,65.3789,0.0000,34.6211,2.0707,56.6475
+Geologia,"LM1:Psicologia|LM3:Línguas, Literaturas e Culturas",LM1,Psicologia,79.0557,0.0000,20.9443,LM3,"Línguas, Literaturas e Culturas",89.1141,0.0000,10.8859,0.9425,74.5570
+Geologia,LM1:Psicologia|LM3:Gestão,LM1,Psicologia,78.7875,0.0000,21.2125,LM3,Gestão,77.0726,0.0000,22.9274,0.7406,68.2285
+Gestão,LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,48.4404,0.0000,51.5596,LM3,Eng. Civil,32.6200,0.0000,67.3800,18.6999,19.4145
+Gestão,LM2:Psicologia|LM3:Geologia,LM2,Psicologia,48.2447,0.0000,51.7553,LM3,Geologia,22.9274,0.0000,77.0726,0.7406,14.1777
+"Línguas, Literaturas e Culturas",LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,24.5614,0.0000,75.4386,LM3,Eng. Civil,16.0253,0.0000,83.9747,24.2673,7.6585
+"Línguas, Literaturas e Culturas",LM2:Psicologia|LM3:Geologia,LM2,Psicologia,24.0955,0.0000,75.9045,LM3,Geologia,10.8859,0.0000,89.1141,0.9425,5.7082
+Psicologia,LM1:Eng. Civil|LM2:Eng. Física,LM1,Eng. Civil,31.6220,0.0000,68.3780,LM2,Eng. Física,36.1666,0.0000,63.8334,53.2790,20.9612
+Psicologia,"LM1:Eng. Civil|LM2:Línguas, Literaturas e Culturas",LM1,Eng. Civil,31.6483,0.0000,68.3517,LM2,"Línguas, Literaturas e Culturas",75.4386,0.0000,24.5614,24.2673,29.4944
+Psicologia,LM1:Eng. Civil|LM2:Gestão,LM1,Eng. Civil,31.8087,0.0000,68.1913,LM2,Gestão,51.5596,0.0000,48.4404,18.6999,25.5611
+Psicologia,LM1:Geologia|LM2:Eng. Física,LM1,Geologia,21.5386,0.0000,78.4614,LM2,Eng. Física,36.5142,0.0000,63.4858,2.0707,15.6759
+Psicologia,"LM1:Geologia|LM2:Línguas, Literaturas e Culturas",LM1,Geologia,20.9443,0.0000,79.0557,LM2,"Línguas, Literaturas e Culturas",75.9045,0.0000,24.0955,0.9425,19.7347
+Psicologia,LM1:Geologia|LM2:Gestão,LM1,Geologia,21.2125,0.0000,78.7875,LM2,Gestão,51.7553,0.0000,48.2447,0.7406,17.5938
