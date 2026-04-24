@@ -9,11 +9,11 @@
         "Grupo": "B",
         "ranking_key": "2ª Divisão - Grupo B"
       },
-      "tie_points": 15,
+      "tie_points": 9,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão",
-        "Eng. Química"
+        "Marketing",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -27,27 +27,27 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Gestão",
+          "team": "Marketing",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 3,
-            "diferenca_golos_h2h": 3,
-            "golos_marcados_h2h": 4,
-            "diferenca_golos": 19,
-            "golos_marcados": 30
+            "diferenca_golos_h2h": 14,
+            "golos_marcados_h2h": 14,
+            "diferenca_golos": -2,
+            "golos_marcados": 29
           }
         },
         {
-          "team": "Eng. Química",
+          "team": "MTC",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 0,
-            "diferenca_golos_h2h": -3,
-            "golos_marcados_h2h": 1,
-            "diferenca_golos": 12,
-            "golos_marcados": 25
+            "diferenca_golos_h2h": -14,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": -27,
+            "golos_marcados": 18
           }
         }
       ],
@@ -55,15 +55,15 @@
     }
   ],
   "indexByContextTeam": {
-    "2ª Divisão - Grupo B::Gestão": {
+    "2ª Divisão - Grupo B::Marketing": {
       "event_id": 1,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Gestão",
+      "team": "Marketing",
       "tie_type": "head_to_head",
-      "tie_points": 15,
+      "tie_points": 9,
       "tied_teams": [
-        "Gestão",
-        "Eng. Química"
+        "Marketing",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -78,23 +78,23 @@
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 3,
-        "diferenca_golos_h2h": 3,
-        "golos_marcados_h2h": 4,
-        "diferenca_golos": 19,
-        "golos_marcados": 30
+        "diferenca_golos_h2h": 14,
+        "golos_marcados_h2h": 14,
+        "diferenca_golos": -2,
+        "golos_marcados": 29
       },
       "rank_in_tiebreak": 1,
-      "final_position": 3
+      "final_position": 5
     },
-    "2ª Divisão - Grupo B::Eng. Química": {
+    "2ª Divisão - Grupo B::MTC": {
       "event_id": 1,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. Química",
+      "team": "MTC",
       "tie_type": "head_to_head",
-      "tie_points": 15,
+      "tie_points": 9,
       "tied_teams": [
-        "Gestão",
-        "Eng. Química"
+        "Marketing",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -109,13 +109,13 @@
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 0,
-        "diferenca_golos_h2h": -3,
-        "golos_marcados_h2h": 1,
-        "diferenca_golos": 12,
-        "golos_marcados": 25
+        "diferenca_golos_h2h": -14,
+        "golos_marcados_h2h": 0,
+        "diferenca_golos": -27,
+        "golos_marcados": 18
       },
       "rank_in_tiebreak": 2,
-      "final_position": 4
+      "final_position": 6
     }
   }
 }

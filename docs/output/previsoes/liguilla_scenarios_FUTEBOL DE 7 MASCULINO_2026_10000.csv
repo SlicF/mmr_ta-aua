@@ -1,25 +1,19 @@
 ﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Biotecnologia,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,60.0000,20.0000,20.0000,LM3,Ciências Biomédicas,60.0000,40.0000,0.0000,0.0500,60.0000
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Contabilidade,LM2,Tecnologias de Informação,43.4062,17.7396,38.8542,LM3,Contabilidade,40.4167,15.7083,43.8750,96.0000,31.2917
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Biomédica,LM2,Tecnologias de Informação,47.0588,23.5294,29.4118,LM3,Eng. Biomédica,35.2941,17.6471,47.0588,0.1700,29.4118
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Computadores e Telemática,LM2,Tecnologias de Informação,42.8571,0.0000,57.1429,LM3,Eng. Computadores e Telemática,50.0000,7.1429,42.8571,0.1400,28.5714
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Biotecnologia,LM2,Tecnologias de Informação,20.0000,0.0000,80.0000,LM3,Biotecnologia,0.0000,40.0000,60.0000,0.0500,0.0000
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Eletrónica e Telecomunicações,LM2,Tecnologias de Informação,25.0000,25.0000,50.0000,LM3,Eng. Eletrónica e Telecomunicações,50.0000,25.0000,25.0000,0.0400,25.0000
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Economia,LM2,Tecnologias de Informação,100.0000,0.0000,0.0000,LM3,Economia,50.0000,0.0000,50.0000,0.0200,50.0000
-Contabilidade,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,48.3542,14.9375,36.7083,LM3,Ciências Biomédicas,43.8750,15.7083,40.4167,96.0000,39.0625
-Contabilidade,LM1:Tecnologias de Informação|LM3:Eng. Química,LM1,Tecnologias de Informação,47.0588,16.8067,36.1345,LM3,Eng. Química,43.1373,15.6863,41.1765,3.5700,39.7759
-Economia,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,100.0000,0.0000,0.0000,LM3,Ciências Biomédicas,50.0000,0.0000,50.0000,0.0200,50.0000
-Eng. Biomédica,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,47.0588,23.5294,29.4118,LM3,Ciências Biomédicas,47.0588,17.6471,35.2941,0.1700,47.0588
-Eng. Computadores e Telemática,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,50.0000,14.2857,35.7143,LM3,Ciências Biomédicas,42.8571,7.1429,50.0000,0.1400,42.8571
-Eng. Computadores e Telemática,LM1:Tecnologias de Informação|LM3:Eng. Química,LM1,Tecnologias de Informação,100.0000,0.0000,0.0000,LM3,Eng. Química,100.0000,0.0000,0.0000,0.0100,100.0000
-Eng. Eletrónica e Telecomunicações,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,50.0000,25.0000,25.0000,LM3,Ciências Biomédicas,25.0000,25.0000,50.0000,0.0400,25.0000
-Eng. Química,LM2:Tecnologias de Informação|LM3:Contabilidade,LM2,Tecnologias de Informação,40.8964,18.2073,40.8964,LM3,Contabilidade,41.1765,15.6863,43.1373,3.5700,22.4090
-Eng. Química,LM2:Tecnologias de Informação|LM3:Eng. Computadores e Telemática,LM2,Tecnologias de Informação,100.0000,0.0000,0.0000,LM3,Eng. Computadores e Telemática,0.0000,0.0000,100.0000,0.0100,0.0000
-Tecnologias de Informação,LM1:Contabilidade|LM2:Ciências Biomédicas,LM1,Contabilidade,36.7083,14.9375,48.3542,LM2,Ciências Biomédicas,38.8542,17.7396,43.4062,96.0000,29.6458
-Tecnologias de Informação,LM1:Contabilidade|LM2:Eng. Química,LM1,Contabilidade,36.1345,16.8067,47.0588,LM2,Eng. Química,40.8964,18.2073,40.8964,3.5700,37.8151
-Tecnologias de Informação,LM1:Eng. Biomédica|LM2:Ciências Biomédicas,LM1,Eng. Biomédica,29.4118,23.5294,47.0588,LM2,Ciências Biomédicas,29.4118,23.5294,47.0588,0.1700,23.5294
-Tecnologias de Informação,LM1:Eng. Computadores e Telemática|LM2:Ciências Biomédicas,LM1,Eng. Computadores e Telemática,35.7143,14.2857,50.0000,LM2,Ciências Biomédicas,57.1429,0.0000,42.8571,0.1400,28.5714
-Tecnologias de Informação,LM1:Biotecnologia|LM2:Ciências Biomédicas,LM1,Biotecnologia,20.0000,20.0000,60.0000,LM2,Ciências Biomédicas,80.0000,0.0000,20.0000,0.0500,40.0000
-Tecnologias de Informação,LM1:Eng. Eletrónica e Telecomunicações|LM2:Ciências Biomédicas,LM1,Eng. Eletrónica e Telecomunicações,25.0000,25.0000,50.0000,LM2,Ciências Biomédicas,50.0000,25.0000,25.0000,0.0400,50.0000
-Tecnologias de Informação,LM1:Economia|LM2:Ciências Biomédicas,LM1,Economia,0.0000,0.0000,100.0000,LM2,Ciências Biomédicas,0.0000,0.0000,100.0000,0.0200,0.0000
-Tecnologias de Informação,LM1:Eng. Computadores e Telemática|LM2:Eng. Química,LM1,Eng. Computadores e Telemática,0.0000,0.0000,100.0000,LM2,Eng. Química,0.0000,0.0000,100.0000,0.0100,0.0000
+Biotecnologia,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,60.0000,0.0000,40.0000,LM3,Ciências Biomédicas,60.0000,20.0000,20.0000,0.0500,60.0000
+Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Contabilidade,LM2,Tecnologias de Informação,49.5227,17.1742,33.3032,LM3,Contabilidade,45.0106,15.3552,39.6342,99.5100,36.7501
+Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Computadores e Telemática,LM2,Tecnologias de Informação,40.0000,30.0000,30.0000,LM3,Eng. Computadores e Telemática,45.0000,10.0000,45.0000,0.2000,40.0000
+Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Biomédica,LM2,Tecnologias de Informação,60.0000,20.0000,20.0000,LM3,Eng. Biomédica,20.0000,13.3333,66.6667,0.1500,26.6667
+Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Eletrónica e Telecomunicações,LM2,Tecnologias de Informação,71.4286,0.0000,28.5714,LM3,Eng. Eletrónica e Telecomunicações,57.1429,28.5714,14.2857,0.0700,57.1429
+Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Biotecnologia,LM2,Tecnologias de Informação,80.0000,20.0000,0.0000,LM3,Biotecnologia,20.0000,20.0000,60.0000,0.0500,40.0000
+Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Economia,LM2,Tecnologias de Informação,100.0000,0.0000,0.0000,LM3,Economia,0.0000,50.0000,50.0000,0.0200,50.0000
+Contabilidade,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,49.2815,13.9182,36.8003,LM3,Ciências Biomédicas,39.6342,15.3552,45.0106,99.5100,36.9611
+Economia,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,50.0000,0.0000,50.0000,LM3,Ciências Biomédicas,50.0000,50.0000,0.0000,0.0200,50.0000
+Eng. Biomédica,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,60.0000,13.3333,26.6667,LM3,Ciências Biomédicas,66.6667,13.3333,20.0000,0.1500,60.0000
+Eng. Computadores e Telemática,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,50.0000,10.0000,40.0000,LM3,Ciências Biomédicas,45.0000,10.0000,45.0000,0.2000,40.0000
+Eng. Eletrónica e Telecomunicações,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,85.7143,14.2857,0.0000,LM3,Ciências Biomédicas,14.2857,28.5714,57.1429,0.0700,42.8571
+Tecnologias de Informação,LM1:Contabilidade|LM2:Ciências Biomédicas,LM1,Contabilidade,36.8003,13.9182,49.2815,LM2,Ciências Biomédicas,33.3032,17.1742,49.5227,99.5100,26.2888
+Tecnologias de Informação,LM1:Eng. Computadores e Telemática|LM2:Ciências Biomédicas,LM1,Eng. Computadores e Telemática,40.0000,10.0000,50.0000,LM2,Ciências Biomédicas,30.0000,30.0000,40.0000,0.2000,20.0000
+Tecnologias de Informação,LM1:Eng. Biomédica|LM2:Ciências Biomédicas,LM1,Eng. Biomédica,26.6667,13.3333,60.0000,LM2,Ciências Biomédicas,20.0000,20.0000,60.0000,0.1500,13.3333
+Tecnologias de Informação,LM1:Eng. Eletrónica e Telecomunicações|LM2:Ciências Biomédicas,LM1,Eng. Eletrónica e Telecomunicações,0.0000,14.2857,85.7143,LM2,Ciências Biomédicas,28.5714,0.0000,71.4286,0.0700,0.0000
+Tecnologias de Informação,LM1:Biotecnologia|LM2:Ciências Biomédicas,LM1,Biotecnologia,40.0000,0.0000,60.0000,LM2,Ciências Biomédicas,0.0000,20.0000,80.0000,0.0500,0.0000
+Tecnologias de Informação,LM1:Economia|LM2:Ciências Biomédicas,LM1,Economia,50.0000,0.0000,50.0000,LM2,Ciências Biomédicas,0.0000,0.0000,100.0000,0.0200,0.0000

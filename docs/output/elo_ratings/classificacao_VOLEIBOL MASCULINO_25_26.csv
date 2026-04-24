@@ -1,35 +1,35 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia,sets_ganhos,sets_perdidos,diferenca_sets
-1,,1,Eng. Informática,23,8,8,0,0,16,1,15,0,0,0,0
-1,,2,Eng. Eletrónica e Telecomunicações,22,8,7,0,1,15,2,13,0,0,0,0
-1,,3,Eng. e Gestão Industrial,19,8,7,0,1,15,5,10,0,0,0,0
-1,,4,Eng. Mecânica,18,8,6,0,2,13,5,8,0,0,0,0
-1,,5,Design,14,8,6,0,2,13,9,4,0,0,0,0
-1,,6,Tecnologias de Informação,13,8,4,0,4,9,8,1,0,0,0,0
-1,,7,Eng. Biomédica,12,8,4,0,4,9,9,0,0,0,0,0
-1,,8,Ciências do Mar,12,8,4,0,4,9,9,0,0,0,0,0
-1,,9,Línguas e Relações Empresariais,7,8,2,0,6,5,12,-7,1,0,0,0
-1,,10,Eng. Computadores e Telemática,3,8,0,0,8,3,16,-13,0,0,0,0
-1,,11,Gestão e Planeamento em Turismo,1,8,0,0,8,1,16,-15,0,0,0,0
-1,,12,Música,0,8,0,0,8,0,16,-16,0,0,0,0
-2,A,1,Bioquímica,19,8,6,0,2,13,4,9,0,0,0,0
-2,A,2,Administração Pública,18,7,7,0,0,14,3,11,0,0,0,0
-2,A,3,Fisioterapia,18,7,7,0,0,14,3,11,0,0,0,0
-2,A,4,Ciências Biomédicas,18,8,6,0,2,13,5,8,0,0,0,0
-2,A,5,Eng. do Ambiente,15,8,5,0,3,11,7,4,0,0,0,0
-2,A,6,Medicina,13,9,3,0,6,10,12,-2,0,0,0,0
-2,A,7,Geologia,10,8,3,0,5,7,10,-3,0,0,0,0
-2,A,8,Biologia,8,8,3,0,5,7,12,-5,0,0,0,0
-2,A,9,Biotecnologia,5,8,2,0,6,4,13,-9,0,0,0,0
-2,A,10,Eng. de Materiais,5,8,1,0,7,4,14,-10,0,0,0,0
-2,A,11,Economia,0,7,0,0,7,0,14,-14,1,0,0,0
-2,B,1,Contabilidade,22,8,8,0,0,16,2,14,0,0,0,0
-2,B,2,Física,22,8,7,0,1,15,2,13,0,0,0,0
-2,B,3,Eng. Física,16,8,6,0,2,13,7,6,0,0,0,0
-2,B,4,MTC,14,9,4,0,5,11,11,0,0,0,0,0
-2,B,5,Eng. Informática B,13,7,5,0,2,12,8,4,0,0,0,0
+1,,1,Eng. Eletrónica e Telecomunicações,28,10,9,0,1,19,2,17,0,0,0,0
+1,,2,Eng. Informática,27,10,9,0,1,19,3,16,0,0,0,0
+1,,3,Eng. Mecânica,23,10,8,0,2,17,6,11,0,0,0,0
+1,,4,Eng. e Gestão Industrial,19,10,7,0,3,15,9,6,1,0,0,0
+1,,5,Design,17,9,7,0,2,15,9,6,0,0,0,0
+1,,6,Tecnologias de Informação,16,10,5,0,5,11,10,1,0,0,0,0
+1,,7,Eng. Biomédica,15,10,5,0,5,11,11,0,0,0,0,0
+1,,8,Ciências do Mar,12,10,4,0,6,9,13,-4,0,0,0,0
+1,,9,Línguas e Relações Empresariais,10,10,3,0,7,7,14,-7,1,0,0,0
+1,,10,Eng. Computadores e Telemática,8,10,2,0,8,7,17,-10,0,0,0,0
+1,,11,Música,1,9,0,0,9,1,18,-17,0,0,0,0
+1,,12,Gestão e Planeamento em Turismo,1,10,0,0,10,1,20,-19,0,0,0,0
+2,A,1,Administração Pública,24,9,9,0,0,18,3,15,0,0,0,0
+2,A,2,Bioquímica,24,10,8,0,2,17,5,12,0,0,0,0
+2,A,3,Ciências Biomédicas,21,9,7,0,2,15,5,10,0,0,0,0
+2,A,4,Fisioterapia,19,9,7,0,2,15,7,8,0,0,0,0
+2,A,5,Eng. do Ambiente,16,10,5,0,5,12,11,1,0,0,0,0
+2,A,6,Medicina,14,10,3,0,7,11,14,-3,0,0,0,0
+2,A,7,Biologia,13,10,5,0,5,11,13,-2,0,0,0,0
+2,A,8,Geologia,10,10,3,0,7,7,14,-7,0,0,0,0
+2,A,9,Biotecnologia,10,10,4,0,6,8,14,-6,0,0,0,0
+2,A,10,Eng. de Materiais,8,10,2,0,8,7,17,-10,0,0,0,0
+2,A,11,Economia,0,9,0,0,9,0,18,-18,1,0,0,0
+2,B,1,Contabilidade,25,9,9,0,0,18,2,16,0,0,0,0
+2,B,2,Física,25,9,8,0,1,17,2,15,0,0,0,0
+2,B,3,Eng. Informática B,16,8,6,0,2,14,8,6,0,0,0,0
+2,B,4,Eng. Física,16,9,6,0,3,13,9,4,0,0,0,0
+2,B,5,MTC,14,9,4,0,5,11,11,0,0,0,0,0
 2,B,6,Matemática,11,8,3,0,5,9,11,-2,0,0,0,0
-2,B,7,Eng. Civil,11,8,5,0,3,11,11,0,0,0,0,0
+2,B,7,Eng. Civil,11,9,5,0,4,11,13,-2,0,0,0,0
 2,B,8,Gestão,7,8,2,0,6,5,12,-7,0,0,0,0
-2,B,9,Eng. Computacional,6,7,2,0,5,6,12,-6,0,0,0,0
+2,B,9,Eng. Computacional,6,8,2,0,6,6,14,-8,0,0,0,0
 2,B,10,Eng. Eletrónica e Telecomunicações B,6,8,1,0,7,5,14,-9,0,0,0,0
 2,B,11,Psicologia,1,7,0,0,7,1,14,-13,0,0,0,0
