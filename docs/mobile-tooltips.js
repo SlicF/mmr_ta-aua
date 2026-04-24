@@ -5,16 +5,6 @@
 
 let activeTooltip = null;
 
-function isMobileTooltipContext() {
-    if (typeof window.isMobileDevice === 'function') {
-        return window.isMobileDevice();
-    }
-
-    return window.matchMedia('(max-width: 768px)').matches ||
-        'ontouchstart' in window ||
-        (navigator.maxTouchPoints || 0) > 0;
-}
-
 /**
  * Cria e mostra um tooltip com o texto do título
  */
@@ -56,7 +46,7 @@ function showMobileTooltip(element, text) {
  */
 function initMobileTooltips() {
     // Apenas em dispositivos móveis
-    if (!isMobileTooltipContext()) {
+    if (!isMobileDevice()) {
         return;
     }
 
