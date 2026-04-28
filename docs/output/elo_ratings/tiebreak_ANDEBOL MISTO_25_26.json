@@ -12,8 +12,8 @@
       "tie_points": 17,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -59,61 +59,11 @@
         "Grupo": null,
         "ranking_key": "2ª Divisão"
       },
-      "tie_points": 24,
+      "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "standings": [
-        {
-          "team": "Biologia e Geologia",
-          "rank_in_tiebreak": 1,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 76,
-            "golos_marcados": 205
-          }
-        },
-        {
-          "team": "Economia",
-          "rank_in_tiebreak": 2,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 40,
-            "golos_marcados": 184
-          }
-        }
-      ],
-      "event_id": 2
-    },
-    {
-      "context": {
-        "Divisao": 2,
-        "Grupo": null,
-        "ranking_key": "2ª Divisão"
-      },
-      "tie_points": 14,
-      "tie_type": "head_to_head",
-      "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -132,26 +82,26 @@
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 3,
-            "diferenca_golos_h2h": 7,
+            "diferenca_golos_h2h": 9,
             "golos_marcados_h2h": 25,
-            "diferenca_golos": -2,
-            "golos_marcados": 168
+            "diferenca_golos": -17,
+            "golos_marcados": 184
           }
         },
         {
-          "team": "Gestão",
+          "team": "Ciências do Mar",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 1,
-            "diferenca_golos_h2h": -7,
-            "golos_marcados_h2h": 18,
-            "diferenca_golos": -21,
-            "golos_marcados": 164
+            "diferenca_golos_h2h": -9,
+            "golos_marcados_h2h": 16,
+            "diferenca_golos": -18,
+            "golos_marcados": 155
           }
         }
       ],
-      "event_id": 3
+      "event_id": 2
     }
   ],
   "indexByContextTeam": {
@@ -162,8 +112,8 @@
       "tie_type": "head_to_head",
       "tie_points": 17,
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -193,8 +143,8 @@
       "tie_type": "head_to_head",
       "tie_points": 17,
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -217,77 +167,15 @@
       "rank_in_tiebreak": 2,
       "final_position": 5
     },
-    "2ª Divisão::Biologia e Geologia": {
-      "event_id": 2,
-      "ranking_key": "2ª Divisão",
-      "team": "Biologia e Geologia",
-      "tie_type": "head_to_head",
-      "tie_points": 24,
-      "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 76,
-        "golos_marcados": 205
-      },
-      "rank_in_tiebreak": 1,
-      "final_position": 1
-    },
-    "2ª Divisão::Economia": {
-      "event_id": 2,
-      "ranking_key": "2ª Divisão",
-      "team": "Economia",
-      "tie_type": "head_to_head",
-      "tie_points": 24,
-      "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 40,
-        "golos_marcados": 184
-      },
-      "rank_in_tiebreak": 2,
-      "final_position": 2
-    },
     "2ª Divisão::DPT": {
-      "event_id": 3,
+      "event_id": 2,
       "ranking_key": "2ª Divisão",
       "team": "DPT",
       "tie_type": "head_to_head",
-      "tie_points": 14,
+      "tie_points": 15,
       "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -302,23 +190,23 @@
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 3,
-        "diferenca_golos_h2h": 7,
+        "diferenca_golos_h2h": 9,
         "golos_marcados_h2h": 25,
-        "diferenca_golos": -2,
-        "golos_marcados": 168
+        "diferenca_golos": -17,
+        "golos_marcados": 184
       },
       "rank_in_tiebreak": 1,
-      "final_position": 8
+      "final_position": 7
     },
-    "2ª Divisão::Gestão": {
-      "event_id": 3,
+    "2ª Divisão::Ciências do Mar": {
+      "event_id": 2,
       "ranking_key": "2ª Divisão",
-      "team": "Gestão",
+      "team": "Ciências do Mar",
       "tie_type": "head_to_head",
-      "tie_points": 14,
+      "tie_points": 15,
       "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -333,13 +221,13 @@
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 1,
-        "diferenca_golos_h2h": -7,
-        "golos_marcados_h2h": 18,
-        "diferenca_golos": -21,
-        "golos_marcados": 164
+        "diferenca_golos_h2h": -9,
+        "golos_marcados_h2h": 16,
+        "diferenca_golos": -18,
+        "golos_marcados": 155
       },
       "rank_in_tiebreak": 2,
-      "final_position": 9
+      "final_position": 8
     }
   }
 }

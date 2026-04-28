@@ -94,8 +94,8 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 7,2026-03-30 00:00:00,22h00,Sintético,Eng. Computacional,4.0,1.0,Geologia,2,A,Excel,Excel,False,False,
 7,2026-03-30 00:00:00,23h00,Sintético,Eng. Civil,7.0,1.0,Eng. Química,2,B,Excel,Excel,False,False,
 9,2026-04-13 00:00:00,21h00,Sintético,Economia,3.0,0.0,Eng. Biomédica,1,,Excel,Excel,False,False,
-8,2026-04-13 00:00:00,22h00,Sintético,EGI,,,GPT,1,,Excel,Excel,False,False,
-7,2026-04-13 00:00:00,23h00,Sintético,Contabilidade,,,Fisioterapia,1,,Excel,Excel,False,False,
+8,2026-04-13 00:00:00,22h00,Sintético,EGI,7.0,0.0,GPT,1,,Excel,Excel,False,False,
+7,2026-04-13 00:00:00,23h00,Sintético,Contabilidade,2.0,4.0,Fisioterapia,1,,Excel,Excel,False,False,
 8,2026-04-14 00:00:00,21h00,Sintético,Gestão,1.0,6.0,CBM,2,B,Excel,Excel,False,False,
 8,2026-04-14 00:00:00,22h00,Sintético,Eng. Química,3.0,0.0,Biologia e Geologia,2,B,Excel,Excel,False,False,
 9,2026-04-14 00:00:00,23h00,Sintético,Biotecnologia,1.0,6.0,Eng. Mecânica,1,,Excel,Excel,False,False,
@@ -108,27 +108,27 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 9,2026-04-16 00:00:00,23h00,Sintético,GPT,2.0,3.0,Fisioterapia,1,,Excel,Excel,False,False,
 7,2026-04-20 00:00:00,21h00,Sintético,Eng. Mecânica B,3.0,0.0,Eng. Informática,2,A,Excel,Excel,False,False,
 7,2026-04-20 00:00:00,22h00,Sintético,Tecnologias de Informação,4.0,0.0,Eng. Materiais,2,A,Excel,Excel,False,False,
-10,2026-04-21 00:00:00,21h00,Sintético,EGI,,,Economia,1,,Excel,Excel,False,False,
-10,2026-04-21 00:00:00,22h00,Sintético,Fisioterapia,,,Administração Pública,1,,Excel,Excel,False,False,
+10,2026-04-21 00:00:00,21h00,Sintético,EGI,3.0,0.0,Economia,1,,Excel,Excel,False,False,
+10,2026-04-21 00:00:00,22h00,Sintético,Fisioterapia,3.0,1.0,Administração Pública,1,,Excel,Excel,False,False,
 9,2026-04-21 00:00:00,23h00,Sintético,CBM,2.0,1.0,Eng. Química,2,B,Excel,Excel,False,False,
 9,2026-04-22 00:00:00,21h00,Sintético,MTC,6.0,11.0,Gestão,2,B,Excel,Excel,False,False,
 9,2026-04-22 00:00:00,22h00,Sintético,Biologia e Geologia,2.0,9.0,Eng. Civil,2,B,Excel,Excel,False,False,
 9,2026-04-22 00:00:00,23h00,Sintético,Música,2.0,9.0,Marketing,2,B,Excel,Excel,False,False,
-10,2026-04-23 00:00:00,21h00,Sintético,Eng. Biomédica,,,Biotecnologia,1,,Excel,Excel,False,False,
-10,2026-04-23 00:00:00,22h00,Sintético,ECT,,,GPT,1,,Excel,Excel,False,False,
-10,2026-04-23 00:00:00,23h00,Sintético,Eng. Mecânica,,,EET,1,,Excel,Excel,False,False,
+10,2026-04-23 00:00:00,21h00,Sintético,Eng. Biomédica,0.0,3.0,Biotecnologia,1,,Excel,Excel,False,False,
+10,2026-04-23 00:00:00,22h00,Sintético,ECT,0.0,1.0,GPT,1,,Excel,Excel,False,False,
+10,2026-04-23 00:00:00,23h00,Sintético,Eng. Mecânica,2.0,2.0,EET,1,,Excel,Excel,False,False,
+11,2026-05-04 00:00:00,21h00,Sintético,GPT,,,Contabilidade,1,,Excel,Excel,False,False,
+11,2026-05-04 00:00:00,22h00,Sintético,Economia,,,Fisioterapia,1,,Excel,Excel,False,False,
+11,2026-05-05 00:00:00,21h00,Sintético,Administração Pública,,,ECT,1,,Excel,Excel,False,False,
+11,2026-05-05 00:00:00,22h00,Sintético,Biotecnologia,,,EGI,1,,Excel,Excel,False,False,
+11,2026-05-07 00:00:00,21h00,Sintético,EET,,,Eng. Biomédica,1,,Excel,Excel,False,False,
 4,,,,Eng. Física,,,Tecnologias de Informação,2,A,,,False,False,Eng. Física
 5,,,,Eng. Computacional,,,Eng. Física,2,A,,,False,False,Eng. Física
 6,,,,Geologia,,,Eng. Física,2,A,,,False,False,Eng. Física
 7,,,,Eng. Física,,,Biologia,2,A,,,False,False,Eng. Física
 9,,,,EET,,,Finanças,1,,,,False,False,Finanças
 10,,,,Contabilidade,,,Finanças,1,,,,False,False,Finanças
-11,,,,Administração Pública,,,ECT,1,,,,False,False,
-11,,,,Biotecnologia,,,EGI,1,,,,False,False,
-11,,,,EET,,,Eng. Biomédica,1,,,,False,False,
-11,,,,Economia,,,Fisioterapia,1,,,,False,False,
 11,,,,Finanças,,,Eng. Mecânica,1,,,,False,False,Finanças
-11,,,,GPT,,,Contabilidade,1,,,,False,False,
 LM1,,,,9º Class. 1ª Div.,,,2º Class. 2ª Div. A,,,,,,,
 LM2,,,,2º Class. 2ª Div. A,,,2º Class. 2ª Div. B,,,,,,,
 LM3,,,,2º Class. 2ª Div. B,,,9º Class. 1ª Div.,,,,,,,

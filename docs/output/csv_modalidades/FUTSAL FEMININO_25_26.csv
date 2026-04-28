@@ -52,21 +52,21 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Fonte_Data,Fonte_Local,
 9,2026-04-21 00:00:00,21h45,PAH,CBM,1.0,1.0,Contabilidade,Excel,Excel,False,False,
 9,2026-04-21 00:00:00,22h30,PAH,Eng. Biomédica,5.0,0.0,EET,Excel,Excel,False,False,
 9,2026-04-21 00:00:00,23h15,PAH,Fisioterapia,3.0,0.0,Economia,Excel,Excel,False,False,
+11,2026-05-04 00:00:00,21h00,Caixa UA,Eng. Mecânica,,,Eng. Civil,Excel,Excel,False,False,
+10,2026-05-04 00:00:00,21h45,Caixa UA,Fisioterapia,,,Eng. Biomédica,Excel,Excel,False,False,
+10,2026-05-04 00:00:00,22h30,Caixa UA,Biologia,,,Matemática,Excel,Excel,False,False,
+10,2026-05-04 00:00:00,23h15,Caixa UA,Música,,,Contabilidade,Excel,Excel,False,False,
+5,2026-05-07 00:00:00,20h45,Caixa UA,Eng. Mecânica,,,Biologia,Excel,Excel,False,False,
+6,2026-05-07 00:00:00,21h30,Caixa UA,Economia,,,Eng. Civil,Excel,Excel,False,False,
+6,2026-05-11 00:00:00,20h15,PAH,Biologia,,,Eng. Biomédica,Excel,Excel,False,False,
 4,,,,Biologia,,,Educação Básica,,,False,False,Educação Básica
 4,,,,Música,,,EGI,,,False,False,
 5,,,,Educação Básica,,,Contabilidade,,,False,False,Educação Básica
-5,,,,Eng. Mecânica,,,Biologia,,,False,False,
-6,,,,Biologia,,,Eng. Biomédica,,,False,False,
-6,,,,Economia,,,Eng. Civil,,,False,False,
 6,,,,Educação Básica,,,Matemática,,,False,False,Educação Básica
 7,,,,Educação Básica,,,Economia,,,False,False,Educação Básica
 8,,,,Biologia,,,Música,,,False,False,
 9,,,,Eng. Informática,,,Educação Básica,,,False,False,"Eng. Informática, Educação Básica"
-10,,,,Biologia,,,Matemática,,,False,False,
 10,,,,Economia,,,Eng. Informática,,,False,False,Eng. Informática
-10,,,,Fisioterapia,,,Eng. Biomédica,,,False,False,
-10,,,,Música,,,Contabilidade,,,False,False,
-11,,,,Eng. Mecânica,,,Eng. Civil,,,False,False,
 E1,,,,1º Class. 1ª Div.,,,8º Class. 1ª Div.,,,,,
 E1,,,,2º Class. 1ª Div.,,,7º Class. 1ª Div.,,,,,
 E1,,,,3º Class. 1ª Div.,,,6º Class. 1ª Div.,,,,,

@@ -11,8 +11,8 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 1,,10,Geologia,9,10,3,0,7,7,15,-8,0,0,0,0
 1,,11,Eng. de Materiais,6,10,2,0,8,5,17,-12,0,0,0,0
 1,,12,Eng. Biomédica,1,10,0,0,10,1,20,-19,0,0,0,0
-2,A,1,Eng. do Ambiente,25,9,9,0,0,18,2,16,0,0,0,0
-2,A,2,Psicologia,23,9,8,0,1,17,4,13,0,0,0,0
+2,A,1,Psicologia,23,9,8,0,1,17,4,13,0,0,0,0
+2,A,2,Eng. do Ambiente,22,8,8,0,0,16,2,14,0,0,0,0
 2,A,3,Bioquímica,18,9,6,0,3,14,8,6,0,0,0,0
 2,A,4,Línguas e Relações Empresariais,16,9,6,0,3,13,9,4,0,0,0,0
 2,A,5,MTC,15,9,5,0,4,11,9,2,0,0,0,0
@@ -21,7 +21,7 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,A,8,Gestão Comercial,10,9,3,0,6,8,13,-5,0,0,0,0
 2,A,9,Tradução,7,9,3,0,6,7,15,-8,0,0,0,0
 2,A,10,Eng. Computadores e Telemática,7,10,1,0,9,6,18,-12,0,0,0,0
-2,A,11,Educação Básica,3,9,1,0,8,3,17,-14,0,0,0,0
+2,A,11,Educação Básica,3,8,1,0,7,3,15,-12,0,0,0,0
 2,B,1,Gestão,22,9,7,0,2,16,5,11,0,0,0,0
 2,B,2,"Línguas, Literaturas e Culturas",20,10,7,0,3,15,8,7,0,0,0,0
 2,B,3,Eng. Química,19,9,7,0,2,15,7,8,0,0,0,0
