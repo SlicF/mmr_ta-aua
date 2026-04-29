@@ -62,8 +62,8 @@
       "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -212,8 +212,8 @@
       "tie_points": 19,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Física",
-        "Eng. Química"
+        "Eng. Química",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -374,8 +374,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -405,8 +405,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -560,8 +560,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Física",
-        "Eng. Química"
+        "Eng. Química",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -591,8 +591,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Física",
-        "Eng. Química"
+        "Eng. Química",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
