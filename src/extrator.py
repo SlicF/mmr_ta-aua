@@ -777,6 +777,8 @@ class ExcelProcessor:
         except Exception:
             base_df = pd.DataFrame(columns=self.base_headers)
 
+        base_df = self._coerce_integer_columns(base_df)
+
         # Remover coluna 'Época' antiga se existir, para padronizar saída
         if "Época" in base_df.columns:
             base_df = base_df.drop(columns=["Época"])  # normalizar
@@ -791,9 +793,11 @@ class ExcelProcessor:
                     playoffs_df[c] = ""
         # Ordem de colunas igual ao base_df
         playoffs_df = playoffs_df[base_df.columns]
+        playoffs_df = self._coerce_integer_columns(playoffs_df)
 
         # Concatenar mantendo ordem
         combined = pd.concat([base_df, playoffs_df], ignore_index=True)
+        combined = self._coerce_integer_columns(combined)
         # Evitar duplicados caso este método seja chamado várias vezes
         # Chave para duplicados: tudo exceto Data_Placeholder e Falta de Comparência
         dup_cols = [
@@ -1813,11 +1817,13 @@ class ExcelProcessor:
         # Remove linhas vazias
         df = df.dropna(how="all").reset_index(drop=True)
 
-        # Filtra linhas válidas (que começam por número ou estão vazias)
+        # Filtra linhas válidas (que começam por número, mesmo que venham como texto,
+        # ou estão vazias). Isto evita perder jogos quando o Excel guarda a jornada
+        # como string "1" em vez de valor numérico.
         primeira_coluna = df.columns[0]
-        df = df[
-            df[primeira_coluna].map(lambda x: pd.isna(x) or isinstance(x, (int, float)))
-        ]
+        jornada_numerica = pd.to_numeric(df[primeira_coluna], errors="coerce")
+        df = df[df[primeira_coluna].isna() | jornada_numerica.notna()].copy()
+        df[primeira_coluna] = jornada_numerica.loc[df.index].astype("Int64")
 
         # Remove linhas com equipas zeradas
         df = df[~((df["Equipa 1"] == 0) | (df["Equipa 2"] == 0))]
@@ -2032,6 +2038,19 @@ class ExcelProcessor:
         colunas.append("Falta de Comparência")
         df = df[colunas]
 
+        df = self._coerce_integer_columns(df)
+
+        return df
+
+    def _coerce_integer_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Garante que golos e divisões ficam serializados como inteiros no CSV."""
+        df = df.copy()
+
+        for col in ("Golos 1", "Golos 2", "Divisão", "Divisao"):
+            if col in df.columns:
+                numeric = pd.to_numeric(df[col], errors="coerce")
+                df[col] = numeric.astype("Int64")
+
         return df
 
     def process_sheet(self, sheet_name: str) -> bool:
@@ -2103,6 +2122,8 @@ class ExcelProcessor:
         # Garantir que não existe coluna 'Época' nos CSVs
         if "Época" in df.columns:
             df = df.drop(columns=["Época"])  # normalizar
+
+        df = self._coerce_integer_columns(df)
 
         # Salva resultado
         if self.season:

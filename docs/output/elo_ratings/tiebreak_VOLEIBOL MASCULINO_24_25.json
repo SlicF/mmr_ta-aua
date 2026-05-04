@@ -63,8 +63,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Ciências do Mar",
-        "Línguas e Relações Empresariais",
-        "Eng. Física"
+        "Eng. Física",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -125,8 +125,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão",
-        "Psicologia"
+        "Psicologia",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -275,8 +275,8 @@
       "tie_points": 9,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. Eletrónica e Telecomunicações B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -397,7 +397,7 @@
         "golos_marcados": 11
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 7
     },
     "1ª Divisão::Eng. Computadores e Telemática": {
       "event_id": 1,
@@ -428,7 +428,7 @@
         "golos_marcados": 10
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 8
     },
     "2ª Divisão - Grupo A::Línguas e Relações Empresariais": {
       "event_id": 2,
@@ -438,8 +438,8 @@
       "tie_points": 24,
       "tied_teams": [
         "Ciências do Mar",
-        "Línguas e Relações Empresariais",
-        "Eng. Física"
+        "Eng. Física",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -460,7 +460,7 @@
         "golos_marcados": 17
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 1
     },
     "2ª Divisão - Grupo A::Ciências do Mar": {
       "event_id": 2,
@@ -470,8 +470,8 @@
       "tie_points": 24,
       "tied_teams": [
         "Ciências do Mar",
-        "Línguas e Relações Empresariais",
-        "Eng. Física"
+        "Eng. Física",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -492,7 +492,7 @@
         "golos_marcados": 18
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 2
     },
     "2ª Divisão - Grupo A::Eng. Física": {
       "event_id": 2,
@@ -502,8 +502,8 @@
       "tie_points": 24,
       "tied_teams": [
         "Ciências do Mar",
-        "Línguas e Relações Empresariais",
-        "Eng. Física"
+        "Eng. Física",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -524,7 +524,7 @@
         "golos_marcados": 17
       },
       "rank_in_tiebreak": 3,
-      "final_position": null
+      "final_position": 3
     },
     "2ª Divisão - Grupo A::Gestão": {
       "event_id": 3,
@@ -533,8 +533,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Gestão",
-        "Psicologia"
+        "Psicologia",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -555,7 +555,7 @@
         "golos_marcados": 10
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 5
     },
     "2ª Divisão - Grupo A::Psicologia": {
       "event_id": 3,
@@ -564,8 +564,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Gestão",
-        "Psicologia"
+        "Psicologia",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -586,7 +586,7 @@
         "golos_marcados": 11
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 6
     },
     "2ª Divisão - Grupo A::Biotecnologia": {
       "event_id": 4,
@@ -617,7 +617,7 @@
         "golos_marcados": 6
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 9
     },
     "2ª Divisão - Grupo A::Matemática": {
       "event_id": 4,
@@ -648,7 +648,7 @@
         "golos_marcados": 7
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 10
     },
     "2ª Divisão - Grupo B::Eng. Biomédica": {
       "event_id": 5,
@@ -679,7 +679,7 @@
         "golos_marcados": 15
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 2
     },
     "2ª Divisão - Grupo B::Ciências Biomédicas": {
       "event_id": 5,
@@ -710,7 +710,7 @@
         "golos_marcados": 14
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 3
     },
     "2ª Divisão - Grupo B::Eng. Eletrónica e Telecomunicações B": {
       "event_id": 6,
@@ -719,8 +719,8 @@
       "tie_type": "head_to_head",
       "tie_points": 9,
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. Eletrónica e Telecomunicações B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -741,7 +741,7 @@
         "golos_marcados": 8
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 8
     },
     "2ª Divisão - Grupo B::Eng. Computacional": {
       "event_id": 6,
@@ -750,8 +750,8 @@
       "tie_type": "head_to_head",
       "tie_points": 9,
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. Eletrónica e Telecomunicações B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -772,7 +772,7 @@
         "golos_marcados": 8
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 9
     },
     "2ª Divisão - Grupo B::Contabilidade": {
       "event_id": 7,
@@ -803,7 +803,7 @@
         "golos_marcados": 6
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 10
     },
     "2ª Divisão - Grupo B::Eng. do Ambiente": {
       "event_id": 7,
@@ -834,7 +834,7 @@
         "golos_marcados": 5
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 11
     }
   }
 }

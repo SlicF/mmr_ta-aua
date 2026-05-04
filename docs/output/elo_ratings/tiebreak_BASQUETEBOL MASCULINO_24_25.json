@@ -75,9 +75,9 @@
       "tie_points": 8,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. e Gestão Industrial",
+        "Biologia",
         "Eng. Aeroespacial",
-        "Biologia"
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -138,8 +138,8 @@
       "tie_points": 4,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -301,8 +301,8 @@
       "tie_points": 4,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "DPT",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -351,8 +351,8 @@
       "tie_points": 14,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Línguas e Relações Empresariais",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -401,9 +401,9 @@
       "tie_points": 10,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Civil",
         "Design",
-        "Psicologia"
+        "Psicologia",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -560,9 +560,9 @@
       "tie_type": "mini_league",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
+        "Biologia",
         "Eng. Aeroespacial",
-        "Biologia"
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -592,9 +592,9 @@
       "tie_type": "mini_league",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
+        "Biologia",
         "Eng. Aeroespacial",
-        "Biologia"
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -624,9 +624,9 @@
       "tie_type": "mini_league",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
+        "Biologia",
         "Eng. Aeroespacial",
-        "Biologia"
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -656,8 +656,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "Economia",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -687,8 +687,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "Economia",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -876,8 +876,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "DPT",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -907,8 +907,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "DPT",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -938,8 +938,8 @@
       "tie_type": "head_to_head",
       "tie_points": 14,
       "tied_teams": [
-        "Línguas e Relações Empresariais",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -969,8 +969,8 @@
       "tie_type": "head_to_head",
       "tie_points": 14,
       "tied_teams": [
-        "Línguas e Relações Empresariais",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1000,9 +1000,9 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Civil",
         "Design",
-        "Psicologia"
+        "Psicologia",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1032,9 +1032,9 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Civil",
         "Design",
-        "Psicologia"
+        "Psicologia",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1064,9 +1064,9 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Civil",
         "Design",
-        "Psicologia"
+        "Psicologia",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",

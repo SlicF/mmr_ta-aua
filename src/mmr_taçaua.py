@@ -2977,22 +2977,17 @@ class TournamentProcessor:
 
                 # Converter a coluna Divisao para inteiro quando existir
                 if "Divisao" in real_standings.columns:
-                    # Criar uma cópia para evitar problemas com cópias de DataFrame
-                    real_standings_copy = real_standings.copy()
-
-                    # Converter Divisão, mantendo os None/NaN para equipas desistentes
                     divisao_values = []
-                    for _, row in real_standings_copy.iterrows():
+                    for _, row in real_standings.iterrows():
                         if pd.isna(row["Divisao"]) or row["Divisao"] == "":
-                            # Equipas desistentes sem divisão - manter como None
-                            divisao_values.append(None)
+                            divisao_values.append(pd.NA)
                         else:
                             try:
                                 divisao_values.append(int(row["Divisao"]))
                             except (ValueError, TypeError):
-                                divisao_values.append(None)
+                                divisao_values.append(pd.NA)
 
-                    real_standings["Divisao"] = divisao_values
+                    real_standings["Divisao"] = pd.Series(divisao_values, dtype="Int64")
 
                 real_standings.to_csv(
                     os.path.join(self.output_dir, f"classificacao_{filename}"),
@@ -3008,6 +3003,11 @@ class TournamentProcessor:
 
             # Salvar detalhes dos jogos (sempre)
             detailed_df = pd.DataFrame(detailed_rows)
+            for col in ("Golos 1", "Golos 2", "Divisao", "Divisão"):
+                if col in detailed_df.columns:
+                    detailed_df[col] = pd.to_numeric(
+                        detailed_df[col], errors="coerce"
+                    ).astype("Int64")
             detailed_df.to_csv(
                 os.path.join(self.output_dir, f"detalhe_{filename}"), index=False
             )

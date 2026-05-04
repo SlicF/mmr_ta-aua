@@ -1,10 +1,7 @@
 ﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Contabilidade,LM2,Tecnologias de Informação,48.8076,17.5551,33.6373,LM3,Contabilidade,46.4228,14.6894,38.8878,99.8000,37.3848
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Computadores e Telemática,LM2,Tecnologias de Informação,63.1579,10.5263,26.3158,LM3,Eng. Computadores e Telemática,36.8421,21.0526,42.1053,0.1900,36.8421
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Eletrónica e Telecomunicações,LM2,Tecnologias de Informação,0.0000,0.0000,100.0000,LM3,Eng. Eletrónica e Telecomunicações,100.0000,0.0000,0.0000,0.0100,100.0000
-Contabilidade,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,48.7976,13.5872,37.6152,LM3,Ciências Biomédicas,38.8878,14.6894,46.4228,99.8000,36.3226
-Eng. Computadores e Telemática,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,57.8947,5.2632,36.8421,LM3,Ciências Biomédicas,42.1053,21.0526,36.8421,0.1900,47.3684
-Eng. Eletrónica e Telecomunicações,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,100.0000,0.0000,0.0000,LM3,Ciências Biomédicas,0.0000,0.0000,100.0000,0.0100,0.0000
-Tecnologias de Informação,LM1:Contabilidade|LM2:Ciências Biomédicas,LM1,Contabilidade,37.6152,13.5872,48.7976,LM2,Ciências Biomédicas,33.6373,17.5551,48.8076,99.8000,26.2926
-Tecnologias de Informação,LM1:Eng. Computadores e Telemática|LM2:Ciências Biomédicas,LM1,Eng. Computadores e Telemática,36.8421,5.2632,57.8947,LM2,Ciências Biomédicas,26.3158,10.5263,63.1579,0.1900,15.7895
-Tecnologias de Informação,LM1:Eng. Eletrónica e Telecomunicações|LM2:Ciências Biomédicas,LM1,Eng. Eletrónica e Telecomunicações,0.0000,0.0000,100.0000,LM2,Ciências Biomédicas,100.0000,0.0000,0.0000,0.0100,0.0000
+Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Contabilidade,LM2,Tecnologias de Informação,49.8947,18.4535,31.6518,LM3,Contabilidade,43.7569,17.6412,38.6019,99.7100,36.6663
+Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Eng. Computadores e Telemática,LM2,Tecnologias de Informação,51.7241,17.2414,31.0345,LM3,Eng. Computadores e Telemática,58.6207,10.3448,31.0345,0.2900,44.8276
+Contabilidade,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,46.2943,20.8304,32.8753,LM3,Ciências Biomédicas,38.6019,17.6412,43.7569,99.7100,38.6822
+Eng. Computadores e Telemática,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,44.8276,24.1379,31.0345,LM3,Ciências Biomédicas,31.0345,10.3448,58.6207,0.2900,34.4828
+Tecnologias de Informação,LM1:Contabilidade|LM2:Ciências Biomédicas,LM1,Contabilidade,32.8753,20.8304,46.2943,LM2,Ciências Biomédicas,31.6518,18.4535,49.8947,99.7100,24.6515
+Tecnologias de Informação,LM1:Eng. Computadores e Telemática|LM2:Ciências Biomédicas,LM1,Eng. Computadores e Telemática,31.0345,24.1379,44.8276,LM2,Ciências Biomédicas,31.0345,17.2414,51.7241,0.2900,20.6897

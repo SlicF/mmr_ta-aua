@@ -411,7 +411,7 @@ class BacktestValidator:
             str(r.get("Jornada", "")).upper().startswith(("LM", "PM")) for r in all_rows
         )
 
-        results, _, _, _ = monte_carlo_forecast(
+        results, *_ = monte_carlo_forecast(
             teams,
             fixtures,
             elo_system,

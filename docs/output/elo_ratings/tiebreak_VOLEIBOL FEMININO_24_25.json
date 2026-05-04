@@ -234,7 +234,7 @@
         "golos_marcados": 9
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 8
     },
     "1ª Divisão::Eng. Civil": {
       "event_id": 1,
@@ -265,7 +265,7 @@
         "golos_marcados": 9
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 9
     },
     "2ª Divisão - Grupo A::Eng. Mecânica": {
       "event_id": 2,
@@ -296,7 +296,7 @@
         "golos_marcados": 8
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 6
     },
     "2ª Divisão - Grupo A::Gestão Comercial": {
       "event_id": 2,
@@ -327,7 +327,7 @@
         "golos_marcados": 6
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 7
     },
     "2ª Divisão - Grupo B::Geologia": {
       "event_id": 3,
@@ -358,7 +358,7 @@
         "golos_marcados": 16
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 2
     },
     "2ª Divisão - Grupo B::Eng. Física": {
       "event_id": 3,
@@ -389,7 +389,7 @@
         "golos_marcados": 15
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 3
     },
     "2ª Divisão - Grupo B::Ciências Biomédicas B": {
       "event_id": 4,
@@ -420,7 +420,7 @@
         "golos_marcados": 9
       },
       "rank_in_tiebreak": 1,
-      "final_position": null
+      "final_position": 6
     },
     "2ª Divisão - Grupo B::Línguas e Relações Empresariais": {
       "event_id": 4,
@@ -451,7 +451,7 @@
         "golos_marcados": 10
       },
       "rank_in_tiebreak": 2,
-      "final_position": null
+      "final_position": 7
     }
   }
 }

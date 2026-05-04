@@ -12,8 +12,8 @@
       "tie_points": 1,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Música",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -27,7 +27,7 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Música",
+          "team": "Gestão e Planeamento em Turismo",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -39,7 +39,7 @@
           }
         },
         {
-          "team": "Gestão e Planeamento em Turismo",
+          "team": "Música",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -205,15 +205,15 @@
     }
   ],
   "indexByContextTeam": {
-    "1ª Divisão::Música": {
+    "1ª Divisão::Gestão e Planeamento em Turismo": {
       "event_id": 1,
       "ranking_key": "1ª Divisão",
-      "team": "Música",
+      "team": "Gestão e Planeamento em Turismo",
       "tie_type": "head_to_head",
       "tie_points": 1,
       "tied_teams": [
-        "Música",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -236,15 +236,15 @@
       "rank_in_tiebreak": 1,
       "final_position": 11
     },
-    "1ª Divisão::Gestão e Planeamento em Turismo": {
+    "1ª Divisão::Música": {
       "event_id": 1,
       "ranking_key": "1ª Divisão",
-      "team": "Gestão e Planeamento em Turismo",
+      "team": "Música",
       "tie_type": "head_to_head",
       "tie_points": 1,
       "tied_teams": [
-        "Música",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
