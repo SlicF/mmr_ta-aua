@@ -93,7 +93,6 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Fonte_Data,Fon
 7,2026-03-24 00:00:00,21h15,PAH,Administração Pública,22,17,Ciências do Mar,2,Excel,Excel,False,False,
 5,2026-03-25 00:00:00,20h00,PAH,Biologia,0,15,MTC,2,Excel,Excel,False,False,Biologia
 11,2026-03-25 00:00:00,21h00,PAH,Biologia e Geologia,31,16,Gestão,2,Excel,Excel,False,False,
-7,2026-03-25 00:00:00,21h15,PAH,Biologia e Geologia,31,16,DPT,2,Excel,Excel,False,False,
 9,2026-03-25 00:00:00,22h00,PAH,Gestão Comercial,27,20,Marketing,1,Excel,Excel,False,False,
 9,2026-03-25 00:00:00,23h00,PAH,Eng. Materiais,19,22,Eng. Informática,1,Excel,Excel,False,False,
 6,2026-03-26 00:00:00,22h15,PAH,Eng. Informática,16,16,Eng. Civil,1,Excel,Excel,False,False,
@@ -116,6 +115,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Fonte_Data,Fon
 10,2026-05-07 00:00:00,22h15,PAH,ECT,,,Eng. Materiais,1,Excel,Excel,False,False,
 5,,,,Fisioterapia,,,Marketing,1,,,False,False,Fisioterapia
 7,,,,Fisioterapia,,,Eng. Informática,1,,,False,False,Fisioterapia
+7,,,PAH,Biologia e Geologia,,,DPT,2,,Excel,False,False,
 8,,,,ECT,,,Fisioterapia,1,,,False,False,Fisioterapia
 9,,,,Fisioterapia,,,EET,1,,,False,False,Fisioterapia
 10,,,,Eng. Civil,,,Fisioterapia,1,,,False,False,Fisioterapia

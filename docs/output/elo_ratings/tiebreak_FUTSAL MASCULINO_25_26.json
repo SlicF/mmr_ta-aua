@@ -62,8 +62,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Música",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,8 +162,8 @@
       "tie_points": 21,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. e Gestão Industrial B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. e Gestão Industrial B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -213,8 +213,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Eng. do Ambiente",
-        "Gestão",
-        "Matemática"
+        "Matemática",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -275,9 +275,9 @@
       "tie_points": 16,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Ciências Biomédicas",
         "Gestão Pública",
-        "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -400,8 +400,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Música",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -431,8 +431,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Música",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -524,8 +524,8 @@
       "tie_type": "head_to_head",
       "tie_points": 21,
       "tied_teams": [
-        "Eng. e Gestão Industrial B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. e Gestão Industrial B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -555,8 +555,8 @@
       "tie_type": "head_to_head",
       "tie_points": 21,
       "tied_teams": [
-        "Eng. e Gestão Industrial B",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Eng. e Gestão Industrial B"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -587,8 +587,8 @@
       "tie_points": 12,
       "tied_teams": [
         "Eng. do Ambiente",
-        "Gestão",
-        "Matemática"
+        "Matemática",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -619,8 +619,8 @@
       "tie_points": 12,
       "tied_teams": [
         "Eng. do Ambiente",
-        "Gestão",
-        "Matemática"
+        "Matemática",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -651,8 +651,8 @@
       "tie_points": 12,
       "tied_teams": [
         "Eng. do Ambiente",
-        "Gestão",
-        "Matemática"
+        "Matemática",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -682,9 +682,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Gestão Pública",
-        "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -714,9 +714,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Gestão Pública",
-        "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -746,9 +746,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Gestão Pública",
-        "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
