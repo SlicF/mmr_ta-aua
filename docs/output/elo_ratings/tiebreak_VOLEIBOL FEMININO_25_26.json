@@ -62,8 +62,8 @@
       "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Civil",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,8 +162,8 @@
       "tie_points": 7,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Tradução",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Tradução"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -262,8 +262,8 @@
       "tie_points": 5,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -374,8 +374,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Civil",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -405,8 +405,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Civil",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Eng. Civil"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -498,8 +498,8 @@
       "tie_type": "head_to_head",
       "tie_points": 7,
       "tied_teams": [
-        "Tradução",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Tradução"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -529,8 +529,8 @@
       "tie_type": "head_to_head",
       "tie_points": 7,
       "tied_teams": [
-        "Tradução",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Tradução"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -622,8 +622,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -653,8 +653,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",

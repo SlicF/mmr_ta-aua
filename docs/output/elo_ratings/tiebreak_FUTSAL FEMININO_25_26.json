@@ -9,106 +9,6 @@
         "Grupo": null,
         "ranking_key": "geral"
       },
-      "tie_points": 18,
-      "tie_type": "head_to_head",
-      "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "standings": [
-        {
-          "team": "Eng. Biomédica",
-          "rank_in_tiebreak": 1,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 46,
-            "golos_marcados": 47
-          }
-        },
-        {
-          "team": "Fisioterapia",
-          "rank_in_tiebreak": 2,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 30,
-            "golos_marcados": 40
-          }
-        }
-      ],
-      "event_id": 1
-    },
-    {
-      "context": {
-        "Divisao": null,
-        "Grupo": null,
-        "ranking_key": "geral"
-      },
-      "tie_points": 12,
-      "tie_type": "head_to_head",
-      "tied_teams": [
-        "Eng. Civil",
-        "Eng. Eletrónica e Telecomunicações"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "standings": [
-        {
-          "team": "Eng. Civil",
-          "rank_in_tiebreak": 1,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 11,
-            "golos_marcados": 26
-          }
-        },
-        {
-          "team": "Eng. Eletrónica e Telecomunicações",
-          "rank_in_tiebreak": 2,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 6,
-            "golos_marcados": 27
-          }
-        }
-      ],
-      "event_id": 2
-    },
-    {
-      "context": {
-        "Divisao": null,
-        "Grupo": null,
-        "ranking_key": "geral"
-      },
       "tie_points": 9,
       "tie_type": "head_to_head",
       "tied_teams": [
@@ -146,141 +46,17 @@
             "pontos_h2h": 0,
             "diferenca_golos_h2h": 0,
             "golos_marcados_h2h": 0,
-            "diferenca_golos": 9,
-            "golos_marcados": 26
+            "diferenca_golos": 7,
+            "golos_marcados": 27
           }
         }
       ],
-      "event_id": 3
+      "event_id": 1
     }
   ],
   "indexByContextTeam": {
-    "geral::Eng. Biomédica": {
-      "event_id": 1,
-      "ranking_key": "geral",
-      "team": "Eng. Biomédica",
-      "tie_type": "head_to_head",
-      "tie_points": 18,
-      "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 46,
-        "golos_marcados": 47
-      },
-      "rank_in_tiebreak": 1,
-      "final_position": 2
-    },
-    "geral::Fisioterapia": {
-      "event_id": 1,
-      "ranking_key": "geral",
-      "team": "Fisioterapia",
-      "tie_type": "head_to_head",
-      "tie_points": 18,
-      "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 30,
-        "golos_marcados": 40
-      },
-      "rank_in_tiebreak": 2,
-      "final_position": 3
-    },
-    "geral::Eng. Civil": {
-      "event_id": 2,
-      "ranking_key": "geral",
-      "team": "Eng. Civil",
-      "tie_type": "head_to_head",
-      "tie_points": 12,
-      "tied_teams": [
-        "Eng. Civil",
-        "Eng. Eletrónica e Telecomunicações"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 11,
-        "golos_marcados": 26
-      },
-      "rank_in_tiebreak": 1,
-      "final_position": 4
-    },
-    "geral::Eng. Eletrónica e Telecomunicações": {
-      "event_id": 2,
-      "ranking_key": "geral",
-      "team": "Eng. Eletrónica e Telecomunicações",
-      "tie_type": "head_to_head",
-      "tie_points": 12,
-      "tied_teams": [
-        "Eng. Civil",
-        "Eng. Eletrónica e Telecomunicações"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 6,
-        "golos_marcados": 27
-      },
-      "rank_in_tiebreak": 2,
-      "final_position": 5
-    },
     "geral::Eng. e Gestão Industrial": {
-      "event_id": 3,
+      "event_id": 1,
       "ranking_key": "geral",
       "team": "Eng. e Gestão Industrial",
       "tie_type": "head_to_head",
@@ -308,10 +84,10 @@
         "golos_marcados": 26
       },
       "rank_in_tiebreak": 1,
-      "final_position": 7
+      "final_position": 8
     },
     "geral::Eng. Mecânica": {
-      "event_id": 3,
+      "event_id": 1,
       "ranking_key": "geral",
       "team": "Eng. Mecânica",
       "tie_type": "head_to_head",
@@ -335,11 +111,11 @@
         "pontos_h2h": 0,
         "diferenca_golos_h2h": 0,
         "golos_marcados_h2h": 0,
-        "diferenca_golos": 9,
-        "golos_marcados": 26
+        "diferenca_golos": 7,
+        "golos_marcados": 27
       },
       "rank_in_tiebreak": 2,
-      "final_position": 8
+      "final_position": 9
     }
   }
 }

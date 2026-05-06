@@ -1,14 +1,14 @@
 Divisao,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
 1,1,Gestão Comercial,22,8,7,0,1,191,142,49,0
 1,2,Marketing,20,9,5,1,3,217,204,13,0
-1,3,Eng. Eletrónica e Telecomunicações,19,8,5,1,2,186,170,16,0
-1,4,Eng. Civil,17,9,3,2,4,171,173,-2,0
-1,5,Eng. Informática,17,8,4,1,3,159,172,-13,0
-1,6,Eng. Mecânica,16,6,4,2,0,138,100,38,0
+1,3,Eng. Mecânica,19,7,5,2,0,153,100,53,0
+1,4,Eng. Eletrónica e Telecomunicações,19,8,5,1,2,186,170,16,0
+1,5,Eng. Civil,17,9,3,2,4,171,173,-2,0
+1,6,Eng. Informática,17,8,4,1,3,159,172,-13,0
 1,7,Eng. e Gestão Industrial,13,6,3,1,2,130,124,6,0
 1,8,Eng. de Materiais,12,8,2,0,6,170,199,-29,0
 1,9,Eng. Computadores e Telemática,9,7,1,0,6,151,185,-34,0
-1,10,Eng. Física,7,7,0,0,7,124,168,-44,0
+1,10,Eng. Física,8,8,0,0,8,124,183,-59,0
 1,11,Fisioterapia,0,10,0,0,0,0,0,0,10
 2,1,Biologia e Geologia,24,8,8,0,0,205,129,76,0
 2,2,Economia,24,8,8,0,0,184,144,40,0
