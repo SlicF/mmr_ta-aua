@@ -1,0 +1,28 @@
+﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
+Eng. Civil,LM1:Psicologia|LM3:Eng. Química,LM1,Psicologia,62.8560,0.0000,37.1440,LM3,Eng. Química,69.5315,0.0000,30.4685,68.0540,51.9117
+Eng. Civil,LM1:Psicologia|LM3:Gestão,LM1,Psicologia,62.9142,0.0000,37.0858,LM3,Gestão,80.9119,0.0000,19.0881,21.1860,56.9527
+Eng. Civil,LM1:Psicologia|LM3:Eng. Física,LM1,Psicologia,63.0669,0.0000,36.9331,LM3,Eng. Física,76.6942,0.0000,23.3058,9.5470,55.6196
+Eng. Civil,LM1:Psicologia|LM3:Eng. Mecânica,LM1,Psicologia,62.4606,0.0000,37.5394,LM3,Eng. Mecânica,80.1262,0.0000,19.8738,0.3170,56.7823
+Eng. Física,LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,33.0889,0.0000,66.9111,LM3,Eng. Civil,23.3058,0.0000,76.6942,9.5470,9.3747
+Eng. Física,LM2:Psicologia|LM3:Gestão e Planeamento em Turismo,LM2,Psicologia,44.8718,0.0000,55.1282,LM3,Gestão e Planeamento em Turismo,20.5128,0.0000,79.4872,0.0780,10.2564
+Eng. Mecânica,LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,29.0221,0.0000,70.9779,LM3,Eng. Civil,19.8738,0.0000,80.1262,0.3170,7.2555
+Eng. Mecânica,LM2:Psicologia|LM3:Gestão e Planeamento em Turismo,LM2,Psicologia,50.0000,0.0000,50.0000,LM3,Gestão e Planeamento em Turismo,33.3333,0.0000,66.6667,0.0060,33.3333
+Eng. Química,LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,40.1181,0.0000,59.8819,LM3,Eng. Civil,30.4685,0.0000,69.5315,68.0540,15.1203
+Eng. Química,LM2:Psicologia|LM3:Gestão e Planeamento em Turismo,LM2,Psicologia,43.8538,0.0000,56.1462,LM3,Gestão e Planeamento em Turismo,19.4352,0.0000,80.5648,0.6020,11.1296
+Geologia,LM1:Psicologia|LM3:Gestão,LM1,Psicologia,100.0000,0.0000,0.0000,LM3,Gestão,100.0000,0.0000,0.0000,0.0010,100.0000
+Gestão,LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,28.4669,0.0000,71.5331,LM3,Eng. Civil,19.0881,0.0000,80.9119,21.1860,7.1085
+Gestão,LM2:Psicologia|LM3:Gestão e Planeamento em Turismo,LM2,Psicologia,27.2727,0.0000,72.7273,LM3,Gestão e Planeamento em Turismo,15.3110,0.0000,84.6890,0.2090,7.6555
+Gestão,LM2:Psicologia|LM3:Geologia,LM2,Psicologia,100.0000,0.0000,0.0000,LM3,Geologia,0.0000,0.0000,100.0000,0.0010,0.0000
+Gestão e Planeamento em Turismo,LM1:Psicologia|LM3:Eng. Química,LM1,Psicologia,75.0831,0.0000,24.9169,LM3,Eng. Química,80.5648,0.0000,19.4352,0.6020,66.2791
+Gestão e Planeamento em Turismo,LM1:Psicologia|LM3:Gestão,LM1,Psicologia,74.6411,0.0000,25.3589,LM3,Gestão,84.6890,0.0000,15.3110,0.2090,68.8995
+Gestão e Planeamento em Turismo,LM1:Psicologia|LM3:Eng. Física,LM1,Psicologia,74.3590,0.0000,25.6410,LM3,Eng. Física,79.4872,0.0000,20.5128,0.0780,67.9487
+Gestão e Planeamento em Turismo,LM1:Psicologia|LM3:Eng. Mecânica,LM1,Psicologia,100.0000,0.0000,0.0000,LM3,Eng. Mecânica,66.6667,0.0000,33.3333,0.0060,66.6667
+Psicologia,LM1:Eng. Civil|LM2:Eng. Química,LM1,Eng. Civil,37.1440,0.0000,62.8560,LM2,Eng. Química,59.8819,0.0000,40.1181,68.0540,32.9679
+Psicologia,LM1:Eng. Civil|LM2:Gestão,LM1,Eng. Civil,37.0858,0.0000,62.9142,LM2,Gestão,71.5331,0.0000,28.4669,21.1860,35.9388
+Psicologia,LM1:Eng. Civil|LM2:Eng. Física,LM1,Eng. Civil,36.9331,0.0000,63.0669,LM2,Eng. Física,66.9111,0.0000,33.0889,9.5470,35.0058
+Psicologia,LM1:Gestão e Planeamento em Turismo|LM2:Eng. Química,LM1,Gestão e Planeamento em Turismo,24.9169,0.0000,75.0831,LM2,Eng. Química,56.1462,0.0000,43.8538,0.6020,22.5914
+Psicologia,LM1:Eng. Civil|LM2:Eng. Mecânica,LM1,Eng. Civil,37.5394,0.0000,62.4606,LM2,Eng. Mecânica,70.9779,0.0000,29.0221,0.3170,35.9621
+Psicologia,LM1:Gestão e Planeamento em Turismo|LM2:Gestão,LM1,Gestão e Planeamento em Turismo,25.3589,0.0000,74.6411,LM2,Gestão,72.7273,0.0000,27.2727,0.2090,23.4450
+Psicologia,LM1:Gestão e Planeamento em Turismo|LM2:Eng. Física,LM1,Gestão e Planeamento em Turismo,25.6410,0.0000,74.3590,LM2,Eng. Física,55.1282,0.0000,44.8718,0.0780,21.7949
+Psicologia,LM1:Gestão e Planeamento em Turismo|LM2:Eng. Mecânica,LM1,Gestão e Planeamento em Turismo,0.0000,0.0000,100.0000,LM2,Eng. Mecânica,50.0000,0.0000,50.0000,0.0060,0.0000
+Psicologia,LM1:Geologia|LM2:Gestão,LM1,Geologia,0.0000,0.0000,100.0000,LM2,Gestão,0.0000,0.0000,100.0000,0.0010,0.0000
