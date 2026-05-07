@@ -390,7 +390,9 @@ class BacktestValidator:
         if not fixtures:
             return None
 
-        real_points = calculate_real_points(simulated_past, self.course_mapping)
+        real_points = calculate_real_points(
+            simulated_past, self.course_mapping, modalidade=self.modalidade
+        )
 
         team_division = {}
         for row in all_rows:

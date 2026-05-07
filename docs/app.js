@@ -77,6 +77,48 @@ let predictionsTooltipLastCell = null; // Última célula onde o tooltip estava 
 let predictionsTooltipVisible = false; // Flag para rastrear se o tooltip está visível (evita flicker)
 let favoriteTeam = localStorage.getItem('favoriteTeam'); // Equipa favorita do utilizador
 let favoriteUiUpdateToken = 0;
+let eloChart = null; // Instância do gráfico ApexCharts
+
+const preloadCache = new Set(); // Cache de URLs já pré-carregados
+
+function preloadAllLogos() {
+    if (!sampleData || !sampleData.teams) return;
+    
+    const uniqueLogos = new Set();
+    
+    // Collect unique logos from all teams
+    sampleData.teams.forEach(team => {
+        if (team.emblemPath) {
+            uniqueLogos.add(team.emblemPath);
+        }
+    });
+    
+    // Also add the default logo
+    uniqueLogos.add('assets/taça_ua.png');
+    
+    // Preload each unique logo
+    uniqueLogos.forEach(logoPath => {
+        preloadImage(logoPath);
+    });
+}
+
+function preloadImage(logoPath) {
+    if (!logoPath || preloadCache.has(logoPath)) return;
+    
+    preloadCache.add(logoPath);
+    
+    // Method 1: Link preload (helps with initial load)
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = logoPath;
+    document.head.appendChild(link);
+    
+    // Method 2: Image object (forces browser to load into cache)
+    const img = new Image();
+    img.src = logoPath;
+    img.loading = 'eager';
+}
 
 function applyCompactModeClass() {
     if (!document.body) return;
@@ -93,7 +135,7 @@ function getSavedCalendarSortMode() {
     if (savedMode === CALENDAR_SORT_MODE_MATCHDAY || savedMode === CALENDAR_SORT_MODE_DATE_TIME || savedMode === CALENDAR_SORT_MODE_TEAM) {
         return savedMode;
     }
-    return CALENDAR_SORT_MODE_TEAM;
+    return CALENDAR_SORT_MODE_DATE_TIME;
 }
 
 let calendarSortMode = getSavedCalendarSortMode();
@@ -287,22 +329,64 @@ function renderFormBadges(form) {
 /**
  * Inicializa o comportamento colapsável do gráfico ELO
  */
+let eloChartInitialized = false;
+
 function initializeCollapsibles() {
+    console.log('[DEBUG] initializeCollapsibles called');
     const toggleBtn = document.getElementById('toggleEloChart');
     const chartContent = document.getElementById('eloChartContent');
+    console.log('[DEBUG] toggleBtn:', !!toggleBtn, 'chartContent:', !!chartContent);
 
-    if (!toggleBtn || !chartContent) return;
+    if (!toggleBtn || !chartContent) {
+        console.log('[DEBUG] Elementos não encontrados, a sair');
+        return;
+    }
 
-    const isCollapsed = localStorage.getItem('eloChartCollapsed') === 'true';
+    // O gráfico começa SEMPRE escondido por defeito (independentemente do localStorage)
+    // O utilizador precisa de clicar para o expandir
+    // O localStorage só é usado para lembrar a preferência APÓS o utilizador ter interactuado
+    const storedPreference = localStorage.getItem('eloChartCollapsed');
+    const isCollapsed = storedPreference === null ? true : storedPreference === 'true';
+    console.log('[DEBUG] isCollapsed:', isCollapsed, 'storedPreference:', storedPreference);
+
     chartContent.classList.toggle('collapsed', isCollapsed);
     toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
 
     toggleBtn.addEventListener('click', () => {
-        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-        const nowCollapsed = !expanded;
+        console.log('[DEBUG] Botão clicado!');
+        const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        console.log('[DEBUG] isExpanded antes do clique:', isExpanded);
+        
+        // Se está expanded (true), ao clicar vamos collabsar (agora Collapsed = true)
+        // Se está collapsed (false), ao clicar vamos expandir (agora Collapsed = false)
+        const nowCollapsed = isExpanded;
+        
         chartContent.classList.toggle('collapsed', nowCollapsed);
         toggleBtn.setAttribute('aria-expanded', String(!nowCollapsed));
         localStorage.setItem('eloChartCollapsed', String(nowCollapsed));
+        console.log('[DEBUG] nowCollapsed:', nowCollapsed);
+
+        // Ao EXPANDIR: criar gráfico se não existir, ou actualizar se já existir
+        // Ao COLAPSAR: apenas esconder (não destruir)
+        if (!nowCollapsed) {
+            // Utilizador está a EXPANDIR o gráfico
+            // Dar tempo ao CSS de renderizar (display:block aplicada) antes de criar o gráfico
+            requestAnimationFrame(() => {
+                // Mais um frame para garantir que as dimensões estão calculadas
+                requestAnimationFrame(() => {
+                    console.log('[DEBUG] Expandir gráfico - eloChart:', !!eloChart, 'sampleData:', sampleData ? 'exists' : 'null');
+                    console.log('[DEBUG] sampleData.teams:', sampleData && sampleData.teams ? sampleData.teams.length : 'undefined');
+                    if (!eloChart && sampleData && sampleData.teams && sampleData.teams.length > 0) {
+                        console.log('[DEBUG] A chamar initEloChart...');
+                        initEloChart();
+                        scheduleLowPriorityTask(() => updateEloChart(), 100);
+                    } else if (eloChart) {
+                        console.log('[DEBUG] A chamar updateEloChart...');
+                        updateEloChart();
+                    }
+                });
+            });
+        }
     });
 }
 
@@ -350,46 +434,65 @@ function updateCalendarSortControls() {
 }
 
 function setCalendarSortMode(mode) {
-    const allowedModes = new Set([
-        CALENDAR_SORT_MODE_MATCHDAY,
-        CALENDAR_SORT_MODE_DATE_TIME,
-        CALENDAR_SORT_MODE_TEAM
-    ]);
-    const normalizedMode = allowedModes.has(mode) ? mode : CALENDAR_SORT_MODE_TEAM;
-
-    const changed = normalizedMode !== calendarSortMode;
-    calendarSortMode = normalizedMode;
-    localStorage.setItem(CALENDAR_SORT_MODE_KEY, calendarSortMode);
-
-    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
-        updateAvailableJornadas({ anchorLatestResults: true, preserveCurrentPage: false });
-    } else if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
-        updateAvailableJornadas({ preserveCurrentPage: true, preferredTeam: PredictionsState.selectedTeam || currentCalendarTeam || favoriteTeam });
-    } else {
-        updateAvailableJornadas({ preserveCurrentPage: true });
+    if (setCalendarSortModeDebounceTimer) {
+        clearTimeout(setCalendarSortModeDebounceTimer);
     }
 
-    updateCalendarSortControls();
+    // Debounce mínimo apenas para evitar cliques múltiplos rápidos
+    setCalendarSortModeDebounceTimer = setTimeout(() => {
+        const allowedModes = new Set([
+            CALENDAR_SORT_MODE_MATCHDAY,
+            CALENDAR_SORT_MODE_DATE_TIME,
+            CALENDAR_SORT_MODE_TEAM
+        ]);
+        const normalizedMode = allowedModes.has(mode) ? mode : CALENDAR_SORT_MODE_TEAM;
 
-    if (!changed) {
+        const changed = normalizedMode !== calendarSortMode;
+        calendarSortMode = normalizedMode;
+        localStorage.setItem(CALENDAR_SORT_MODE_KEY, calendarSortMode);
+
+        // Atualizar controlos UI
+        updateCalendarSortControls();
+
+        // Atualizar jornadas disponíveis
+        if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+            updateAvailableJornadas({ anchorLatestResults: true, preserveCurrentPage: false });
+        } else if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+            updateAvailableJornadas({ preserveCurrentPage: true, preferredTeam: PredictionsState.selectedTeam || currentCalendarTeam || favoriteTeam });
+        } else {
+            updateAvailableJornadas({ preserveCurrentPage: true });
+        }
+
+        // Se modo não mudou, apenas atualizar display
+        if (!changed) {
+            updateJornadaDisplay();
+            updateCalendar();
+            return;
+        }
+
+        // Ajustar estado conforme o novo modo
+        if (calendarSortMode === CALENDAR_SORT_MODE_MATCHDAY && !availableJornadas.includes(currentCalendarJornada)) {
+            currentCalendarJornada = getCurrentJornada();
+        } else if (calendarSortMode === CALENDAR_SORT_MODE_TEAM && availableCalendarTeamPages.length > 0) {
+            const safeIndex = Math.max(0, Math.min(currentCalendarTeamPageIndex, availableCalendarTeamPages.length - 1));
+            currentCalendarTeamPageIndex = safeIndex;
+            currentCalendarTeam = availableCalendarTeamPages[safeIndex].team;
+        }
+
         updateJornadaDisplay();
         updateCalendar();
-        return;
-    }
 
-    if (calendarSortMode === CALENDAR_SORT_MODE_MATCHDAY && !availableJornadas.includes(currentCalendarJornada)) {
-        currentCalendarJornada = getCurrentJornada();
-    } else if (calendarSortMode === CALENDAR_SORT_MODE_TEAM && availableCalendarTeamPages.length > 0) {
-        const safeIndex = Math.max(0, Math.min(currentCalendarTeamPageIndex, availableCalendarTeamPages.length - 1));
-        currentCalendarTeamPageIndex = safeIndex;
-        currentCalendarTeam = availableCalendarTeamPages[safeIndex].team;
-    }
+        // Preload da próxima/página anterior após render
+        scheduleLowPriorityTask(() => preloadAdjacentCalendarPages(), 100);
+    }, 30);
+}
 
-    updateJornadaDisplay();
-    updateCalendar();
-
-    if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
-        syncPredictionsWithCalendarTeamSelection();
+// Preload de páginas adjacentes do calendário
+function preloadAdjacentCalendarPages() {
+    if (calendarSortMode === CALENDAR_SORT_MODE_TEAM && availableCalendarTeamPages.length > 1) {
+        const prevIndex = (currentCalendarTeamPageIndex - 1 + availableCalendarTeamPages.length) % availableCalendarTeamPages.length;
+        const nextIndex = (currentCalendarTeamPageIndex + 1) % availableCalendarTeamPages.length;
+        // As páginas já estão em memória, apenas garantir que estão construídas
     }
 }
 
@@ -425,8 +528,7 @@ async function initApp() {
     document.getElementById('rankingsBody').innerHTML = '<tr><td colspan="13" style="text-align: center; color: #666;">' + t('selectModality') + '</td></tr>';
     document.getElementById('bracketContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">' + t('selectModalityBracket') + '</p>';
 
-    // Inicializar gráfico vazio
-    initEloChart();
+    // Não inicializar gráfico aqui - será inicializado em executeChangeModalidade quando necessário
 
     // Disparar evento de mudança na modalidade para carregar dados iniciais (User Feedback: Render on Load)
     requestAnimationFrame(() => {
@@ -1020,49 +1122,56 @@ function updateRankingsDivisionButtons() {
     divisionSelector.setActive(appState.view.division);
 }
 
-// Trocar divisão
+// Trocar divisão - com debounce para evitar múltiplas renderizações rápidas
+// Execução em frames separados para permitir renderização entre cada operação
 function switchDivision(division) {
-    // Atualizar appState e variáveis globais
-    appState.view.division = division;
-    appState.view.group = null; // Reset group quando muda divisão
-    currentDivision = division;
-    currentGroup = null;
-
-    // Atualizar UI da classificação
-    divisionSelector.setActive(division);
-    groupSelector.render();
-    updateRankingsTable();
-
-    // Sincronizar com o calendário
-    currentCalendarDivision = division;
-    currentCalendarGroup = null;
-
-    // Atualizar botões do calendário
-    document.querySelectorAll('#calendarDivisionSelector .division-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.division === division);
-    });
-
-    // Atualizar seletor de grupo do calendário
-    createCalendarGroupSelector();
-
-    // Atualizar jornadas disponíveis
-    updateAvailableJornadas({
-        anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
-        preserveCurrentPage: false
-    });
-
-    // Atualizar calendário se houver jornada selecionada
-    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME || currentCalendarJornada) {
-        updateJornadaDisplay();
-        updateCalendar();
+    if (switchDivisionDebounceTimer) {
+        clearTimeout(switchDivisionDebounceTimer);
     }
 
-    updatePredictionsSelectors();
-    refreshPredictionsTeamsForSelection();
-    updatePredictionsDisplay();
+    switchDivisionDebounceTimer = setTimeout(() => {
+        // Atualizar appState e variáveis globais
+        appState.view.division = division;
+        appState.view.group = null; // Reset group quando muda divisão
+        currentDivision = division;
+        currentGroup = null;
 
-    // Sincronizar com o gráfico ELO (exceto se for divisão com grupos, aí mostra todos)
-    filterDivision(division);
+        // 1. PRIMEIRO: Classificação (immediate)
+        divisionSelector.setActive(division);
+        groupSelector.render();
+        updateRankingsTable();
+
+        // 2. SEGUNDO: Detalhes + Calendário (16ms = 1 frame)
+        setTimeout(() => {
+            currentCalendarDivision = division;
+            currentCalendarGroup = null;
+
+            document.querySelectorAll('#calendarDivisionSelector .division-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.division === division);
+            });
+
+            createCalendarGroupSelector();
+
+            updateAvailableJornadas({
+                anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+                preserveCurrentPage: false
+            });
+
+            if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME || currentCalendarJornada) {
+                updateJornadaDisplay();
+                updateCalendar();
+            }
+
+            updatePredictionsSelectors();
+            refreshPredictionsTeamsForSelection();
+            updatePredictionsDisplay();
+        }, 16);
+
+        // 3. TERCEIRO: Gráfico (32ms = 2 frames)
+        setTimeout(() => {
+            filterDivision(division);
+        }, 32);
+    }, 50);
 }
 
 // Atualizar seletor de grupos (usa GroupSelector class)
@@ -1075,53 +1184,59 @@ function updateRankingsGroupButtons() {
     groupSelector.setActive(appState.view.group ? `Grupo ${appState.view.group}` : '');
 }
 
-// Trocar grupo
+// Trocar grupo - com debounce para evitar múltiplas renderizações rápidas
+// Execução em frames separados para permitir renderização entre cada operação
 function switchGroup(group) {
-    // Atualizar appState e variáveis globais
-    appState.view.group = group;
-    currentGroup = group;
-
-    // Atualizar UI da classificação
-    groupSelector.setActive(group ? `Grupo ${group}` : '');
-    updateRankingsTable();
-
-    // Sincronizar com o calendário
-    currentCalendarGroup = group;
-
-    // Atualizar botões do calendário
-    document.querySelectorAll('#calendarGroupSelector .group-btn').forEach(btn => {
-        const btnGroup = btn.dataset.group || '';
-        const isActive = (group === null && btnGroup === '') || (btnGroup === group);
-        btn.classList.toggle('active', isActive);
-    });
-
-    // Atualizar jornadas disponíveis
-    updateAvailableJornadas({
-        anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
-        preserveCurrentPage: false
-    });
-
-    // Atualizar calendário se houver jornada selecionada
-    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME || currentCalendarJornada) {
-        updateJornadaDisplay();
-        updateCalendar();
+    if (switchGroupDebounceTimer) {
+        clearTimeout(switchGroupDebounceTimer);
     }
 
-    updatePredictionsSelectors();
-    refreshPredictionsTeamsForSelection();
-    updatePredictionsDisplay();
+    switchGroupDebounceTimer = setTimeout(() => {
+        // Atualizar appState e variáveis globais
+        appState.view.group = group;
+        currentGroup = group;
 
-    // Sincronizar com o gráfico ELO
-    if (group) {
-        // Extrair letra do grupo se necessário (ex: "Grupo A" -> "A")
-        const groupLetter = group.replace('Grupo ', '');
-        filterGroup(groupLetter);
-    } else {
-        // Se grupo for null (clicou "Todos"), mostrar toda a divisão
-        if (appState.view.division) {
-            filterDivision(appState.view.division);
-        }
-    }
+        // 1. PRIMEIRO: Classificação (immediate)
+        groupSelector.setActive(group ? `Grupo ${group}` : '');
+        updateRankingsTable();
+
+        // 2. SEGUNDO: Detalhes + Calendário (16ms = 1 frame)
+        setTimeout(() => {
+            currentCalendarGroup = group;
+
+            document.querySelectorAll('#calendarGroupSelector .group-btn').forEach(btn => {
+                const btnGroup = btn.dataset.group || '';
+                const isActive = (group === null && btnGroup === '') || (btnGroup === group);
+                btn.classList.toggle('active', isActive);
+            });
+
+            updateAvailableJornadas({
+                anchorLatestResults: calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME,
+                preserveCurrentPage: false
+            });
+
+            if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME || currentCalendarJornada) {
+                updateJornadaDisplay();
+                updateCalendar();
+            }
+
+            updatePredictionsSelectors();
+            refreshPredictionsTeamsForSelection();
+            updatePredictionsDisplay();
+        }, 16);
+
+        // 3. TERCEIRO: Gráfico (32ms = 2 frames)
+        setTimeout(() => {
+            if (group) {
+                const groupLetter = group.replace('Grupo ', '');
+                filterGroup(groupLetter);
+            } else {
+                if (appState.view.division) {
+                    filterDivision(appState.view.division);
+                }
+            }
+        }, 32);
+    }, 50);
 }
 
 function getEloChartContainerHeight() {
@@ -6235,35 +6350,6 @@ function normalizeTeamName(teamName) {
 
     let normalized = teamName.trim();
 
-    // Casos específicos conhecidos de typos
-    if (normalized === 'Traduçao' || normalized === 'TRADUÇÃO' || normalized === 'TRADUÇAO' ||
-        normalized.toLowerCase() === 'tradução' || normalized.toLowerCase() === 'traduçao') {
-        normalized = 'Tradução';
-    }
-
-    // Corrigir typo conhecido
-    if (normalized === 'Edcucação Básica') {
-        normalized = 'Educação Básica';
-    }
-
-    // Typos da época 24_25 (ficheiros antigos)
-    if (normalized === 'Eng. Civil') {
-        normalized = 'Eng. Cívil';
-    }
-    if (normalized === 'Eng. Materias') {
-        normalized = 'Eng. Materiais';
-    }
-    if (normalized === 'Educaçao Básica') {
-        normalized = 'Educação Básica';
-    }
-
-    // Normalização adicional removendo acentos
-    const withoutAccents = normalizeText(normalized);
-    if (withoutAccents === 'traducao') {
-        normalized = 'Tradução';
-    }
-
-    // Forçar nomes canónicos quando o config estiver disponível
     const canonical = resolveCanonicalCourseKey(normalized);
     return canonical || normalized;
 }
@@ -6499,7 +6585,7 @@ function getCourseInfo(courseName) {
     }
 
     if (courseInfo) {
-        return {
+        const result = {
             shortName: courseInfo.shortName || courseKey,
             fullName: courseInfo.displayName || courseKey,
             nucleus: courseInfo.nucleus,
@@ -6508,10 +6594,15 @@ function getCourseInfo(courseName) {
             primaryColor: courseInfo.colors[0],
             secondaryColor: courseInfo.colors[1]
         };
+        // Pré-carregar o logo automaticamente
+        if (result.emblemPath) {
+            preloadImage(result.emblemPath);
+        }
+        return result;
     }
 
     // Fallback para cursos não configurados - usar emblema padrão da UA
-    return {
+    const fallbackResult = {
         shortName: courseKey,
         fullName: courseKey,
         nucleus: 'UA',
@@ -6519,6 +6610,9 @@ function getCourseInfo(courseName) {
         primaryColor: generateFallbackColor(courseKey),
         secondaryColor: generateFallbackColor(courseKey, true)
     };
+    // Pré-carregar o logo padrão
+    preloadImage(fallbackResult.emblemPath);
+    return fallbackResult;
 }
 
 /**
@@ -6785,52 +6879,35 @@ function updateModalidadeSelector() {
 
     const modalidades = getModalidadesForEpoca(currentEpoca);
 
-    // Tentar carregar modalidade do cache
     const cachedModalidade = localStorage.getItem('mmr_selectedModalidade');
 
-    // Tentar preservar modalidade atual ou do cache se existir na nova época
-    let modalidadeToLoad = null;
-
-    // Extrair o nome da modalidade atual sem a época (ex: "FUTSAL MASCULINO_25_26" -> "FUTSAL MASCULINO")
-    let currentModalidadeName = null;
-    if (currentModalidade) {
-        currentModalidadeName = currentModalidade.replace(/_\d{2}_\d{2}$/, '');
-    }
-
-    // Também extrair nome da modalidade do cache
-    let cachedModalidadeName = null;
-    if (cachedModalidade) {
-        cachedModalidadeName = cachedModalidade.replace(/_\d{2}_\d{2}$/, '');
-    }
+    let selectedIndex = -1;
+    let fallbackIndex = -1;
 
     modalidades.forEach((mod, index) => {
         const option = document.createElement('option');
         option.value = mod.value;
         option.textContent = mod.label;
+        modalidadeSelect.appendChild(option);
 
-        // Verificar se esta modalidade corresponde à atual ou cached
-        const modName = mod.value.replace(/_\d{2}_\d{2}$/, '');
-
-        if (currentModalidadeName && modName === currentModalidadeName) {
-            // Preservar modalidade atual se existir na nova época
-            option.selected = true;
-            modalidadeToLoad = mod.value;
-        } else if (!modalidadeToLoad && cachedModalidadeName && modName === cachedModalidadeName) {
-            // Usar modalidade do cache como segunda prioridade
-            option.selected = true;
-            modalidadeToLoad = mod.value;
-        } else if (!modalidadeToLoad && mod.value.includes('FUTSAL MASCULINO')) {
-            // Usar Futsal Masculino como fallback
-            option.selected = true;
-            modalidadeToLoad = mod.value;
+        // Guardar fallback para Futsal Masculino
+        if (mod.value.includes('FUTSAL MASCULINO')) {
+            fallbackIndex = index;
         }
 
-        modalidadeSelect.appendChild(option);
+        // Verificar se corresponde ao cache
+        if (cachedModalidade && mod.value === cachedModalidade) {
+            selectedIndex = index;
+        }
     });
 
-    // Carregar a modalidade selecionada
-    if (modalidadeToLoad) {
-        changeModalidade(modalidadeToLoad);
+    // Selecionar: cache > fallback
+    if (selectedIndex >= 0) {
+        modalidadeSelect.selectedIndex = selectedIndex;
+        changeModalidade(modalidadeSelect.value);
+    } else if (fallbackIndex >= 0) {
+        modalidadeSelect.selectedIndex = fallbackIndex;
+        changeModalidade(modalidadeSelect.value);
     }
 }
 
@@ -6864,6 +6941,10 @@ function changeEpoca(epoca) {
 
     // Salvar época selecionada no cache
     localStorage.setItem('mmr_selectedEpoca', epoca);
+
+    // IMPORTANTE: invalidar cache de modalidade quando muda de época
+    // A modalidade pode não existir na nova época
+    localStorage.removeItem('mmr_selectedModalidade');
 
     updateModalidadeSelector();
 }
@@ -7979,6 +8060,37 @@ function positionHistoricalTooltip(anchorEl) {
 }
 
 /**
+ * Mostra skeleton loading nos principais elementos da UI
+ */
+function showSkeletonLoading() {
+    // Team selector - skeleton
+    const teamSelector = document.getElementById('teamSelector');
+    if (teamSelector) {
+        teamSelector.innerHTML = `
+            <div class="skeleton-container">
+                ${Array(8).fill().map(() => '<div class="skeleton-row"></div>').join('')}
+            </div>
+        `;
+    }
+
+    // Rankings - skeleton
+    const rankingsBody = document.getElementById('rankingsBody');
+    if (rankingsBody) {
+        rankingsBody.innerHTML = `
+            <tr class="skeleton-row">
+                <td colspan="13"><div class="skeleton-loading"></div></td>
+            </tr>
+        `;
+    }
+
+    // Bracket - skeleton
+    const bracketContainer = document.getElementById('bracketContainer');
+    if (bracketContainer) {
+        bracketContainer.innerHTML = '<div class="skeleton-loading" style="height: 200px;"></div>';
+    }
+}
+
+/**
  * Esconde o tooltip histórico
  */
 function hideHistoricalTooltip() {
@@ -7987,8 +8099,29 @@ function hideHistoricalTooltip() {
     }
 }
 
+let changeModalidadeTimeout = null;
+let lastChangeModalidadeValue = null;
+
 function changeModalidade(mod) {
     if (!mod) return;
+
+    // Debounce: se mudou há menos de 300ms, ignorar
+    if (changeModalidadeTimeout) {
+        clearTimeout(changeModalidadeTimeout);
+    }
+
+    const pendingMod = mod;
+    changeModalidadeTimeout = setTimeout(() => {
+        changeModalidadeTimeout = null;
+        executeChangeModalidade(pendingMod);
+    }, 300);
+}
+
+function executeChangeModalidade(mod) {
+    if (mod === lastChangeModalidadeValue && sampleData.teams.length > 0) {
+        return;
+    }
+    lastChangeModalidadeValue = mod;
 
     currentLoadToken += 1;
     const loadToken = currentLoadToken;
@@ -8029,6 +8162,10 @@ function changeModalidade(mod) {
     };
     calendarEloLookup = new Map();
     currentModalityHasAdjustments = false;
+    changeModalidadeTimeout = null; // Reset debounce
+
+    // Mostrar skeleton loading imediatamente
+    showSkeletonLoading();
 
     // Variáveis para guardar ELOs iniciais e equipas da época anterior
     let initialElosFromFile = {};
@@ -8099,28 +8236,53 @@ function changeModalidade(mod) {
                 // Disparar evento indicando que os dados foram carregados
                 document.dispatchEvent(new CustomEvent('data:loaded'));
 
-                // Trabalhos pesados em segundo plano: primeiro histórico, gráfico por último
+                // Pré-carregar todos os logos para evitar re-downloads
+                preloadAllLogos();
+
+                // MUDANÇA DE MODALIDADE: Destruir gráfico e forçar estado Collapsed
+                // O gráfico só será criado quando o utilizador clicar para expandir
+                if (eloChart) {
+                    eloChart.destroy();
+                    eloChart = null;
+                }
+                localStorage.setItem('eloChartCollapsed', 'true');
+
+                // Forçar UI a refletir estado Collapsed
+                const chartContent = document.getElementById('eloChartContent');
+                const toggleBtn = document.getElementById('toggleEloChart');
+                if (chartContent) {
+                    chartContent.classList.add('collapsed');
+                }
+                if (toggleBtn) {
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                }
+
+                // Trabalhos pesados em segundo plano com prioridades escalonadas
+                // 1. Quick filters primeiro (rápido)
                 scheduleLowPriorityTask(() => {
                     if (loadToken !== currentLoadToken) return;
-
                     updateQuickFilters();
+                }, 200);
 
+                // 2. Histórico depois (pode demorar mais)
+                scheduleLowPriorityTask(() => {
+                    if (loadToken !== currentLoadToken) return;
                     loadHistoricalData(mod).catch(err => {
                         console.error('Erro ao carregar dados históricos:', err);
                     });
+                }, 800);
 
+                // 3. Gráfico - só updatear se existir
+                if (eloChart) {
                     scheduleLowPriorityTask(() => {
                         if (loadToken !== currentLoadToken) return;
-
-                        if (eloChart) {
-                            try {
-                                updateEloChart();
-                            } catch (error) {
-                                console.error('Erro ao atualizar gráfico ELO:', error);
-                            }
+                        try {
+                            updateEloChart();
+                        } catch (error) {
+                            console.error('Erro ao atualizar gráfico ELO:', error);
                         }
-                    }, 1500);
-                }, 500);
+                    }, 2000);
+                }
             });
         }
     }
@@ -8300,16 +8462,25 @@ function buildCalendarTeamPages(filteredMatches, options = {}) {
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b, 'pt-PT'));
 
+    // Pré-calcular mapping de equipas para jogos (otimização O(n*m) -> O(n+m))
+    const teamGamesMap = new Map();
+    filteredMatches.forEach(match => {
+        const t1 = normalizeTeamName(match.team1 || match['Equipa 1'] || '');
+        const t2 = normalizeTeamName(match.team2 || match['Equipa 2'] || '');
+        const c1 = t1 ? resolveCanonicalCourseKey(t1) : null;
+        const c2 = t2 ? resolveCanonicalCourseKey(t2) : null;
+        
+        if (c1 && !teamGamesMap.has(c1)) teamGamesMap.set(c1, []);
+        if (c1) teamGamesMap.get(c1).push(match);
+        if (c2 && !teamGamesMap.has(c2)) teamGamesMap.set(c2, []);
+        if (c2) teamGamesMap.get(c2).push(match);
+    });
+
     const pages = orderedTeams.map(teamName => {
         const courseInfo = getCourseInfo(teamName);
         const teamLabel = getTranslatedTeamLabel(courseInfo, teamName);
-        const games = filteredMatches
-            .filter(match => {
-                const team1 = normalizeTeamName(match.team1 || match['Equipa 1'] || '');
-                const team2 = normalizeTeamName(match.team2 || match['Equipa 2'] || '');
-                const canonicalTeam = resolveCanonicalCourseKey(teamName);
-                return resolveCanonicalCourseKey(team1) === canonicalTeam || resolveCanonicalCourseKey(team2) === canonicalTeam;
-            })
+        const canonicalTeam = resolveCanonicalCourseKey(teamName);
+        const games = (teamGamesMap.get(canonicalTeam) || [])
             .sort(compareCalendarMatchesChronologically);
 
         return {
@@ -8347,6 +8518,14 @@ function buildCalendarTeamPages(filteredMatches, options = {}) {
     currentCalendarTeam = availableCalendarTeamPages[nextIndex].team;
 }
 
+let syncPredictionsDebounceTimer = null;
+let syncCalendarDebounceTimer = null;
+let switchDivisionDebounceTimer = null;
+let switchGroupDebounceTimer = null;
+let changeJornadaDebounceTimer = null;
+let setCalendarSortModeDebounceTimer = null;
+let updatePredictionsDisplayDebounceTimer = null;
+
 function syncPredictionsWithCalendarTeamSelection() {
     if (calendarSortMode !== CALENDAR_SORT_MODE_TEAM) return;
     if (isSyncingCalendarAndPredictions) return;
@@ -8355,18 +8534,25 @@ function syncPredictionsWithCalendarTeamSelection() {
     const page = availableCalendarTeamPages[currentCalendarTeamPageIndex];
     if (!page || !page.team) return;
 
-    refreshPredictionsTeamsForSelection();
-    if (!PredictionsState.availableTeams.length) return;
+    // Debounce para evitar múltiplas sincronizações rápidas
+    if (syncPredictionsDebounceTimer) {
+        clearTimeout(syncPredictionsDebounceTimer);
+    }
+    
+    syncPredictionsDebounceTimer = setTimeout(() => {
+        refreshPredictionsTeamsForSelection();
+        if (!PredictionsState.availableTeams.length) return;
 
-    const targetCanonical = resolveCanonicalCourseKey(page.team);
-    const matchingTeam = PredictionsState.availableTeams.find(team => resolveCanonicalCourseKey(team) === targetCanonical);
-    if (!matchingTeam || matchingTeam === PredictionsState.selectedTeam) return;
+        const targetCanonical = resolveCanonicalCourseKey(page.team);
+        const matchingTeam = PredictionsState.availableTeams.find(team => resolveCanonicalCourseKey(team) === targetCanonical);
+        if (!matchingTeam || matchingTeam === PredictionsState.selectedTeam) return;
 
-    isSyncingCalendarAndPredictions = true;
-    PredictionsState.selectedTeam = matchingTeam;
-    PredictionsState.currentTeamIndex = PredictionsState.availableTeams.indexOf(matchingTeam);
-    updatePredictionsDisplay();
-    isSyncingCalendarAndPredictions = false;
+        isSyncingCalendarAndPredictions = true;
+        PredictionsState.selectedTeam = matchingTeam;
+        PredictionsState.currentTeamIndex = PredictionsState.availableTeams.indexOf(matchingTeam);
+        updatePredictionsDisplay();
+        isSyncingCalendarAndPredictions = false;
+    }, 100);
 }
 
 function syncCalendarWithPredictionsSelection() {
@@ -8378,12 +8564,19 @@ function syncCalendarWithPredictionsSelection() {
     const targetIndex = availableCalendarTeamPages.findIndex(page => resolveCanonicalCourseKey(page.team) === selectedCanonical);
     if (targetIndex < 0 || targetIndex === currentCalendarTeamPageIndex) return;
 
-    isSyncingCalendarAndPredictions = true;
-    currentCalendarTeamPageIndex = targetIndex;
-    currentCalendarTeam = availableCalendarTeamPages[targetIndex].team;
-    updateJornadaDisplay();
-    updateCalendar();
-    isSyncingCalendarAndPredictions = false;
+    // Debounce para evitar múltiplas sincronizações rápidas
+    if (syncCalendarDebounceTimer) {
+        clearTimeout(syncCalendarDebounceTimer);
+    }
+
+    syncCalendarDebounceTimer = setTimeout(() => {
+        isSyncingCalendarAndPredictions = true;
+        currentCalendarTeamPageIndex = targetIndex;
+        currentCalendarTeam = availableCalendarTeamPages[targetIndex].team;
+        updateJornadaDisplay();
+        updateCalendar();
+        isSyncingCalendarAndPredictions = false;
+    }, 100);
 }
 
 function getCalendarDivisionGroupFilter() {
@@ -8780,6 +8973,15 @@ function initializeCalendarSelectors() {
     divisionSelectorDiv.innerHTML = '';
     groupSelectorDiv.innerHTML = '';
 
+    // Reset completo das variáveis de calendário para forçar sincronização com classificação
+    // Isto é crítico quando se muda de modalidade
+    currentCalendarDivision = null;
+    currentCalendarGroup = null;
+    availableCalendarDatePages = [];
+    availableCalendarTeamPages = [];
+    currentCalendarDatePageIndex = 0;
+    currentCalendarTeamPageIndex = 0;
+
     // Verificar se há jogos disponíveis (usar matches, não rawEloData)
     if (!sampleData.matches || sampleData.matches.length === 0) {
         jornadaTitle.textContent = t('noGamesAvailable');
@@ -8798,6 +9000,10 @@ function initializeCalendarSelectors() {
 
     // Criar seletores IGUAIS à classificação
     if (hasDivisions && structure.type !== 'single-league') {
+        // Em modo equipa, sincronizar SEMPRE com a divisão da classificação
+        if (calendarSortMode === CALENDAR_SORT_MODE_TEAM && currentDivision) {
+            currentCalendarDivision = currentDivision;
+        }
         createCalendarDivisionSelector();
     } else {
         divisionSelectorDiv.style.display = 'none';
@@ -8930,18 +9136,19 @@ function createCalendarDivisionSelector() {
     }
 
     const structure = analyzeModalityStructure();
-    const divisions = Object.keys(sampleData.rankings); // Labels formatados: "1ª Divisão", "2ª Divisão - Grupo A"
+    const divisions = Object.keys(sampleData.rankings);
 
-    // Se for liga única, ocultar o seletor
     if (structure.type === 'single-league') {
         divisionSelectorDiv.style.display = 'none';
+        currentCalendarDivision = null;
         return;
     }
 
     divisionSelectorDiv.style.display = 'flex';
     divisionSelectorDiv.innerHTML = '';
 
-    // Sincronizar com divisão atual da classificação ou usar primeira
+    // Sincronizar SEMPRE com a divisão atual da classificação (motivada por equipa favorita ou seleção)
+    // Isto garante que quando se muda de modalidade, o calendário segue a divisão da classificação
     if (!currentCalendarDivision || !divisions.includes(currentCalendarDivision)) {
         currentCalendarDivision = currentDivision || divisions[0];
     }
@@ -8965,7 +9172,6 @@ function createCalendarGroupSelector() {
         return;
     }
 
-    // Obter grupos únicos para a divisão atual
     const teams = sampleData.rankings[currentCalendarDivision];
     const groups = [...new Set(teams.map(team => team.group))].filter(group => group && group !== 'nan');
 
@@ -8975,14 +9181,13 @@ function createCalendarGroupSelector() {
         return;
     }
 
-    // Mostrar seletor de grupos se há múltiplos grupos
     groupSelectorDiv.style.display = 'flex';
     groupSelectorDiv.innerHTML = '';
 
-    // Sincronizar com grupo da classificação, ou usar Grupo A, ou primeiro disponível
-    if (currentCalendarGroup === null || !groups.includes(currentCalendarGroup)) {
-        // Tentar usar grupo atual da classificação
-        if (currentGroup && groups.includes(currentGroup)) {
+    // Em modo equipa, sincronizar SEMPRE com currentGroup da classificação
+    // Em outros modos, usar fallback se necessário
+    if (!groups.includes(currentCalendarGroup)) {
+        if (calendarSortMode === CALENDAR_SORT_MODE_TEAM && currentGroup && groups.includes(currentGroup)) {
             currentCalendarGroup = currentGroup;
         } else if (groups.includes('A')) {
             currentCalendarGroup = 'A';
@@ -8991,7 +9196,6 @@ function createCalendarGroupSelector() {
         }
     }
 
-    // Botões de grupos específicos
     groups.forEach(group => {
         const btn = document.createElement('button');
         btn.className = `group-btn ${group === currentCalendarGroup ? 'active' : ''}`;
@@ -9103,55 +9307,67 @@ function switchCalendarGroup(group) {
     updatePredictionsDisplay();
 }
 
-// Mudar jornada (navegação com setas)
+// Mudar jornada (navegação com setas) - com debounce
+// Execução em frames separados para permitir renderização
 function changeJornada(direction) {
-    if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
-        if (availableCalendarTeamPages.length === 0) return;
-
-        const totalPages = availableCalendarTeamPages.length;
-        const newIndex = (currentCalendarTeamPageIndex + direction + totalPages) % totalPages;
-
-        currentCalendarTeamPageIndex = newIndex;
-        currentCalendarTeam = availableCalendarTeamPages[newIndex].team;
-        updateJornadaDisplay();
-        updateCalendar();
-        syncPredictionsWithCalendarTeamSelection();
-        return;
+    if (changeJornadaDebounceTimer) {
+        clearTimeout(changeJornadaDebounceTimer);
     }
 
-    if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
-        if (availableCalendarDatePages.length === 0) return;
+    changeJornadaDebounceTimer = setTimeout(() => {
+        // Determinar o novo índice primeiro (sem atualizar ainda)
+        let newCalendarJornada = null;
+        let newCalendarTeamPageIndex = currentCalendarTeamPageIndex;
+        let newCalendarDatePageIndex = currentCalendarDatePageIndex;
+        let shouldNavigateEpoca = null; // 'prev' | 'next' | null
 
-        const newIndex = currentCalendarDatePageIndex + direction;
-        if (newIndex < 0 || newIndex >= availableCalendarDatePages.length) {
+        if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+            if (availableCalendarTeamPages.length === 0) return;
+            const totalPages = availableCalendarTeamPages.length;
+            newCalendarTeamPageIndex = (currentCalendarTeamPageIndex + direction + totalPages) % totalPages;
+        } else if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+            if (availableCalendarDatePages.length === 0) return;
+            newCalendarDatePageIndex = currentCalendarDatePageIndex + direction;
+            if (newCalendarDatePageIndex < 0 || newCalendarDatePageIndex >= availableCalendarDatePages.length) return;
+        } else {
+            if (availableJornadas.length === 0) return;
+            const currentIndex = availableJornadas.indexOf(currentCalendarJornada);
+            const newIndex = currentIndex + direction;
+            if (newIndex >= 0 && newIndex < availableJornadas.length) {
+                newCalendarJornada = availableJornadas[newIndex];
+            } else if (newIndex < 0) {
+                shouldNavigateEpoca = 'prev';
+            } else if (newIndex >= availableJornadas.length) {
+                shouldNavigateEpoca = 'next';
+            }
+        }
+
+        // Se precisa mudar de época, fazer isso imediatamente
+        if (shouldNavigateEpoca === 'prev') {
+            switchToPreviousEpoca();
+            return;
+        } else if (shouldNavigateEpoca === 'next') {
+            switchToNextEpoca();
             return;
         }
 
-        currentCalendarDatePageIndex = newIndex;
+        // Atualizar estados
+        if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+            currentCalendarTeamPageIndex = newCalendarTeamPageIndex;
+            currentCalendarTeam = availableCalendarTeamPages[newCalendarTeamPageIndex].team;
+        } else if (calendarSortMode === CALENDAR_SORT_MODE_DATE_TIME) {
+            currentCalendarDatePageIndex = newCalendarDatePageIndex;
+        } else {
+            currentCalendarJornada = newCalendarJornada;
+        }
+
         updateJornadaDisplay();
         updateCalendar();
-        return;
-    }
 
-    if (availableJornadas.length === 0) return;
-
-    const currentIndex = availableJornadas.indexOf(currentCalendarJornada);
-    const newIndex = currentIndex + direction;
-
-    // Se está dentro do range de jornadas, navegar normalmente
-    if (newIndex >= 0 && newIndex < availableJornadas.length) {
-        currentCalendarJornada = availableJornadas[newIndex];
-        updateJornadaDisplay();
-        updateCalendar();
-    }
-    // Se chegou ao limite, verificar se pode mudar de época
-    else if (newIndex < 0) {
-        // Tentar ir para época anterior
-        switchToPreviousEpoca();
-    } else if (newIndex >= availableJornadas.length) {
-        // Tentar ir para próxima época
-        switchToNextEpoca();
-    }
+        if (calendarSortMode === CALENDAR_SORT_MODE_TEAM) {
+            syncPredictionsWithCalendarTeamSelection();
+        }
+    }, 20);
 }
 
 // Mudar para época anterior (última jornada)
@@ -9408,18 +9624,23 @@ function updateCalendar() {
         games.sort(compareCalendarMatchesChronologically);
     }
 
-    // Renderizar jogos
+    // Renderizar jogos - pré-calcular dados para evitar chamadas repetitivas
     gamesList.innerHTML = '';
     const fragment = document.createDocumentFragment();
+    
+    // Pré-calcular teams favoritos para esta renderização
+    const favoriteTeamCanonical = favoriteTeam ? resolveCanonicalCourseKey(favoriteTeam) : null;
+    
+    // Processar todos os jogos
     games.forEach(game => {
-        const gameItem = createGameItem(game);
+        const gameItem = createGameItem(game, favoriteTeamCanonical);
         fragment.appendChild(gameItem);
     });
     gamesList.appendChild(fragment);
 }
 
 // Criar elemento HTML de um jogo
-function createGameItem(game) {
+function createGameItem(game, favoriteTeamCanonical = null) {
     const div = document.createElement('div');
 
     // Suportar tanto estrutura de rawEloData quanto de matches
@@ -9445,7 +9666,12 @@ function createGameItem(game) {
     const isPlaceholder = game.isPlaceholder === true;
     const isLocationPlaceholder = game.isLocationPlaceholder === true;
 
-    div.className = `game-item ${hasResult ? 'played' : 'not-played'} ${isTeamFavorite(team1) || isTeamFavorite(team2) ? 'favorite-team-game' : ''}`;
+    // Verificação otimizada de favorito usando canonical pré-calculado
+    const team1Canonical = resolveCanonicalCourseKey(team1);
+    const team2Canonical = resolveCanonicalCourseKey(team2);
+    const isFavoriteGame = favoriteTeamCanonical && (team1Canonical === favoriteTeamCanonical || team2Canonical === favoriteTeamCanonical);
+    
+    div.className = `game-item ${hasResult ? 'played' : 'not-played'} ${isFavoriteGame ? 'favorite-team-game' : ''}`;
 
     // Obter informações das equipas
     const team1Info = getCourseInfo(team1);
@@ -9641,6 +9867,28 @@ function processRankings(data) {
             }
         }
 
+        // Obter informações do curso
+        const normalizedTeamName = normalizeTeamName(row.Equipa);
+        const courseInfo = getCourseInfo(normalizedTeamName);
+
+        const team = {
+            name: normalizedTeamName,
+            division: divisao || null,
+            group: grupo || null,
+            color: courseInfo.primaryColor,
+            secondaryColor: courseInfo.secondaryColor,
+            fullName: courseInfo.fullName,
+            nucleus: courseInfo.nucleus,
+            emblemPath: courseInfo.emblemPath
+        };
+
+        const existingTeam = sampleData.teams.find(t => t.name === team.name);
+        if (!existingTeam) {
+            sampleData.teams.push(team);
+            sampleData.eloHistory[team.name] = [];
+        }
+        // Equipa duplicada ignorada silenciosamente (é normal em context com divisões/grupos)
+
         // Determinar mainKey
         if (!divisao && !grupo) {
             // Liga única sem divisões nem grupos
@@ -9657,28 +9905,6 @@ function processRankings(data) {
         }
 
         DebugUtils.debugRankingsProcessing('processing_row', { team: row.Equipa, divisao, grupo, key: mainKey });
-
-        // Obter informações do curso
-        const normalizedTeamName = normalizeTeamName(row.Equipa);
-        const courseInfo = getCourseInfo(normalizedTeamName);
-
-        const team = {
-            name: normalizedTeamName,
-            division: divisao || null,  // Manter null se não há divisão
-            group: grupo || null,  // Manter null se não há grupo
-            color: courseInfo.primaryColor,
-            secondaryColor: courseInfo.secondaryColor,
-            fullName: courseInfo.fullName,
-            nucleus: courseInfo.nucleus,
-            emblemPath: courseInfo.emblemPath
-        };
-
-        const existingTeam = sampleData.teams.find(t => t.name === team.name);
-        if (!existingTeam) {
-            sampleData.teams.push(team);
-            sampleData.eloHistory[team.name] = [];
-        }
-        // Equipa duplicada ignorada silenciosamente (é normal em context com divisões/grupos)
 
         if (!sampleData.rankings[mainKey]) sampleData.rankings[mainKey] = [];
         sampleData.rankings[mainKey].push({
@@ -11366,16 +11592,30 @@ async function loadPredictionsData() {
             : [];
 
         if (isStaleLoad()) return;
+        
+        // Não bloquear UI - executar renderização em background
         setPredictionsCardVisible(true);
-        updatePredictionsSimulationsCount();
-        updatePredictionsSelectors();
-        refreshPredictionsTeamsForSelection();
+        
+        scheduleLowPriorityTask(() => {
+            if (isStaleLoad()) return;
+            updatePredictionsSimulationsCount();
+        }, 50);
 
-        if (PredictionsState.availableTeams.length > 0) {
-            updatePredictionsDisplay();
-        } else {
-            clearPredictionsDisplay();
-        }
+        scheduleLowPriorityTask(() => {
+            if (isStaleLoad()) return;
+            updatePredictionsSelectors();
+        }, 100);
+
+        scheduleLowPriorityTask(() => {
+            if (isStaleLoad()) return;
+            refreshPredictionsTeamsForSelection();
+            
+            if (PredictionsState.availableTeams.length > 0) {
+                updatePredictionsDisplay();
+            } else {
+                clearPredictionsDisplay();
+            }
+        }, 200);
 
     } catch (error) {
         if (isStaleLoad()) return;
@@ -11533,38 +11773,46 @@ function clearPredictionsDisplay(customMessage = null) {
 
 /**
  * Atualiza a exibição com os dados da equipa selecionada
+ * Com debounce e execução em frames separados para não bloquear UI
  */
 function updatePredictionsDisplay() {
-    refreshPredictionsTeamsForSelection();
-    if (!PredictionsState.selectedTeam) {
-        clearPredictionsDisplay(t('selectModalityFirst'));
-        return;
+    // Cancelar atualização anterior se ainda pendente
+    if (updatePredictionsDisplayDebounceTimer) {
+        clearTimeout(updatePredictionsDisplayDebounceTimer);
     }
 
-    const prevBtn = document.getElementById('prevTeamBtn');
-    const nextBtn = document.getElementById('nextTeamBtn');
-    const disableNav = PredictionsState.availableTeams.length <= 1;
-    if (prevBtn) prevBtn.disabled = disableNav;
-    if (nextBtn) nextBtn.disabled = disableNav;
+    updatePredictionsDisplayDebounceTimer = setTimeout(() => {
+        refreshPredictionsTeamsForSelection();
+        if (!PredictionsState.selectedTeam) {
+            clearPredictionsDisplay(t('selectModalityFirst'));
+            return;
+        }
 
-    // Atualizar nome e emblema da equipa
-    updateTeamSliderDisplay();
+        const prevBtn = document.getElementById('prevTeamBtn');
+        const nextBtn = document.getElementById('nextTeamBtn');
+        const disableNav = PredictionsState.availableTeams.length <= 1;
+        if (prevBtn) prevBtn.disabled = disableNav;
+        if (nextBtn) nextBtn.disabled = disableNav;
 
-    // Atualizar estatísticas gerais
-    updatePredictionsStats();
+        // 1. Atualizar nome e emblema da equipa (immediate)
+        updateTeamSliderDisplay();
 
-    // Atualizar cabeçalhos da tabela de previsões conforme a modalidade
-    updatePredictionsTableHeaders();
+        // 2. Atualizar estatísticas gerais (próximo frame)
+        setTimeout(() => updatePredictionsStats(), 16);
 
-    // Atualizar tabela de previsões
-    updatePredictionsTable();
+        // 3. Atualizar cabeçalhos da tabela (2º frame)
+        setTimeout(() => updatePredictionsTableHeaders(), 32);
 
-    // Atualizar histórico real de jogos
-    updateTeamHistoryTable();
+        // 4. Atualizar tabela de previsões (3º frame)
+        setTimeout(() => updatePredictionsTable(), 48);
 
-    if (!isSyncingCalendarAndPredictions) {
-        syncCalendarWithPredictionsSelection();
-    }
+        // 5. Atualizar histórico real de jogos (4º frame)
+        setTimeout(() => updateTeamHistoryTable(), 64);
+
+        if (!isSyncingCalendarAndPredictions) {
+            syncCalendarWithPredictionsSelection();
+        }
+    }, 50);
 }
 
 /**

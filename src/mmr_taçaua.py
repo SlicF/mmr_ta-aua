@@ -2863,12 +2863,26 @@ class TournamentProcessor:
                     # Extrair divisão e grupo originais da equipa desistente do DataFrame original
                     if df_original is not None:
                         # Procurar a equipa desistente no DataFrame original para obter divisão/grupo
-                        team_data = df_original[
-                            df_original["Equipa 1"] == withdrawn_team
+                        # USAR NOME NORMALIZADO para encontrar a equipa
+                        normalized_withdrawn = normalize_team_name(withdrawn_team)
+                        
+                        # Normalizar nomes das equipas no DataFrame para matching
+                        df_original_normalized = df_original.copy()
+                        if "Equipa 1" in df_original_normalized.columns:
+                            df_original_normalized["Equipa 1_normalized"] = df_original_normalized["Equipa 1"].apply(
+                                lambda x: normalize_team_name(str(x)) if pd.notna(x) else ""
+                            )
+                        if "Equipa 2" in df_original_normalized.columns:
+                            df_original_normalized["Equipa 2_normalized"] = df_original_normalized["Equipa 2"].apply(
+                                lambda x: normalize_team_name(str(x)) if pd.notna(x) else ""
+                            )
+                        
+                        team_data = df_original_normalized[
+                            df_original_normalized["Equipa 1_normalized"] == normalized_withdrawn
                         ]
                         if team_data.empty:
-                            team_data = df_original[
-                                df_original["Equipa 2"] == withdrawn_team
+                            team_data = df_original_normalized[
+                                df_original_normalized["Equipa 2_normalized"] == normalized_withdrawn
                             ]
 
                         if not team_data.empty:
@@ -3128,15 +3142,17 @@ def main():
         if args.season and not re.match(r"^\d{2}_\d{2}$", args.season):
             raise ValueError("Formato inválido para --season. Use YY_YY, ex: 24_25")
 
-        # Apagar CSVs antigos da pasta de previsões
-        previsoes_dir = REPO_ROOT / "docs" / "output" / "previsoes"
-        if previsoes_dir.exists():
-            for csv_file in previsoes_dir.glob("*.csv"):
-                try:
-                    csv_file.unlink()
-                    logger.info(f"Apagado ficheiro de previsão antigo: {csv_file.name}")
-                except Exception as e:
-                    logger.warning(f"Erro ao apagar {csv_file.name}: {e}")
+        # Apagar CSVs antigos da pasta de previsões APENAS quando não é passada época específica
+        # Isto preserva os ficheiros de simulação quando se processa uma época específica
+        if not args.season:
+            previsoes_dir = REPO_ROOT / "docs" / "output" / "previsoes"
+            if previsoes_dir.exists():
+                for csv_file in previsoes_dir.glob("*.csv"):
+                    try:
+                        csv_file.unlink()
+                        logger.info(f"Apagado ficheiro de previsão antigo: {csv_file.name}")
+                    except Exception as e:
+                        logger.warning(f"Erro ao apagar {csv_file.name}: {e}")
 
         logger.info("A iniciar processamento de torneios")
         processor = TournamentProcessor()

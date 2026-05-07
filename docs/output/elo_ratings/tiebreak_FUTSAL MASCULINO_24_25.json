@@ -12,8 +12,8 @@
       "tie_points": 19,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,8 +162,8 @@
       "tie_points": 16,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Ciências do Mar",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -212,8 +212,8 @@
       "tie_points": 10,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Mecânica B",
         "Eng. Civil",
+        "Eng. Mecânica B",
         "Biotecnologia"
       ],
       "criteria_order": [
@@ -275,8 +275,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -306,8 +306,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -461,8 +461,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Ciências do Mar",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -492,8 +492,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Ciências do Mar",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Ciências do Mar"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -523,8 +523,8 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Mecânica B",
         "Eng. Civil",
+        "Eng. Mecânica B",
         "Biotecnologia"
       ],
       "criteria_order": [
@@ -555,8 +555,8 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Mecânica B",
         "Eng. Civil",
+        "Eng. Mecânica B",
         "Biotecnologia"
       ],
       "criteria_order": [
@@ -587,8 +587,8 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Mecânica B",
         "Eng. Civil",
+        "Eng. Mecânica B",
         "Biotecnologia"
       ],
       "criteria_order": [

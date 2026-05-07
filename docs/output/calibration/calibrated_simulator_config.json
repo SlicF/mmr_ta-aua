@@ -5,12 +5,12 @@
     "base_goals_std": 6.880860649947371,
     "dispersion_k": 15.702645581398288,
     "base_draw_rate": 0.05069124423963134,
-    "draw_elo_sensitivity": 0.00048267468851644014,
+    "draw_elo_sensitivity": 0.000482674688642535,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.5286016422678244,
-      "coef_linear": -0.00048267468851644014,
-      "coef_quadratic": -1.940252305023236e-05
+      "intercept": -2.5286016422582023,
+      "coef_linear": -0.000482674688642535,
+      "coef_quadratic": -1.9402523049734487e-05
     },
     "margin_elo_slope": 0.01257893576658809,
     "margin_elo_intercept": 5.706467776897389,
@@ -58,7 +58,7 @@
     "sport_type": "basquete",
     "base_goals": 9.601626016260163,
     "base_goals_std": 4.609092881844485,
-    "dispersion_k": 7.9187718406776675,
+    "dispersion_k": 7.918771840677665,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
     "draw_multiplier": 1.0,
@@ -67,15 +67,15 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.004401423447778185,
-    "margin_elo_intercept": 4.906309155850424,
+    "margin_elo_slope": 0.0020353446595346818,
+    "margin_elo_intercept": 5.177820395978797,
     "elo_adjustment_limit": 0.5,
     "base_score": 9.601626016260163,
     "sigma": 4.609092881844485,
     "division_params": {
       "1": {
         "base_goals": 10.154205607476635,
-        "dispersion_k": 11.53482117338402,
+        "dispersion_k": 11.534821173384014,
         "base_draw_rate": 0.0
       },
       "2": {
@@ -91,15 +91,15 @@
     "base_goals_std": 2.273449108536988,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.10465116279069768,
-    "draw_elo_sensitivity": 0.011298964751207778,
+    "draw_elo_sensitivity": 0.00045957248374065885,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.507400289742412,
-      "coef_linear": 0.011298964751207778,
-      "coef_quadratic": -4.393910668996464e-05
+      "intercept": -1.8212327854028934,
+      "coef_linear": -0.00045957248374065885,
+      "coef_quadratic": -1.3677214980326614e-05
     },
-    "margin_elo_slope": 0.002592867930741736,
-    "margin_elo_intercept": 2.746529310913613,
+    "margin_elo_slope": 0.002652285403630089,
+    "margin_elo_intercept": 2.75765230029494,
     "elo_adjustment_limit": 1.0,
     "division_params": {
       "1": {
@@ -144,15 +144,15 @@
     "base_goals_std": 2.798534638305395,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.11320754716981132,
-    "draw_elo_sensitivity": 0.0036147230565957453,
+    "draw_elo_sensitivity": 0.001607294069607452,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.5827010203202108,
-      "coef_linear": -0.0036147230565957453,
-      "coef_quadratic": -4.102979209733868e-06
+      "intercept": -1.6616247314213608,
+      "coef_linear": -0.001607294069607452,
+      "coef_quadratic": -1.4495494929619878e-05
     },
-    "margin_elo_slope": 0.004832438965775649,
-    "margin_elo_intercept": 3.016023811609183,
+    "margin_elo_slope": 0.0043883069352978,
+    "margin_elo_intercept": 3.1283108472593812,
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
@@ -180,10 +180,13 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0009606449613364171,
+    "margin_elo_slope": 0.0009606449613364162,
     "margin_elo_intercept": 1.6019445802305705,
     "elo_adjustment_limit": 0.5,
-    "p_sweep_base": 0.721,
+    "p_sweep_base": 0.5,
+    "volei_sigma": 1.2,
+    "elo_factor": 1.5,
+    "elo_divisor": 600,
     "division_params": {
       "1": {
         "base_goals": 1.1119402985074627,
@@ -210,10 +213,13 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0004320403609286449,
+    "margin_elo_slope": 0.0004320403609286451,
     "margin_elo_intercept": 1.6498711452280137,
     "elo_adjustment_limit": 0.5,
-    "p_sweep_base": 0.708,
+    "p_sweep_base": 0.5,
+    "volei_sigma": 1.2,
+    "elo_factor": 1.5,
+    "elo_divisor": 600,
     "division_params": {
       "1": {
         "base_goals": 1.1374045801526718,

@@ -20,6 +20,7 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,A,7,Gestão Comercial,9,8,3,0,5,6,10,-4,0,0,0,0
 2,A,8,Psicologia,8,8,3,0,5,7,12,-5,0,0,0,0
 2,A,9,Matemática,5,8,2,0,6,4,13,-9,0,0,0,0
+2,A,10,Eng. do Ambiente,0,9,0,0,0,0,0,0,9,,,
 2,B,1,Gestão e Planeamento em Turismo,23,9,8,0,1,17,4,13,0,0,0,0
 2,B,2,Geologia,19,9,7,0,2,16,8,8,0,0,0,0
 2,B,3,Eng. Física,19,9,6,0,3,15,8,7,0,0,0,0
@@ -30,4 +31,3 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,B,8,MTC,7,9,2,0,7,6,15,-9,0,0,0,0
 2,B,9,Tradução,5,8,2,0,6,4,13,-9,0,0,0,0
 2,B,10,Gestão,1,9,0,0,9,1,18,-17,0,0,0,0
-,,1,Eng. do Ambiente,0,9,0,0,0,0,0,0,9,,,

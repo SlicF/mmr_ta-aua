@@ -1,32 +1,32 @@
 {
   "modalidade": "FUTSAL MASCULINO",
-  "num_seasons": 1,
-  "avg_brier_score": 0.020265310555555558,
-  "avg_rmse_place": 14.282063150776844,
-  "avg_rmse_points": 2.056021866097536,
+  "num_seasons": 2,
+  "avg_brier_score": 0.014860900027777776,
+  "avg_rmse_place": 15.98099422685786,
+  "avg_rmse_points": 1.9519922631882822,
   "seasons": [
     {
       "season": "24_25",
       "cutoff_jornada": 8,
       "num_teams": 36,
-      "brier_score_champion": 0.020265310555555558,
-      "rmse_expected_place": 14.282063150776844,
-      "rmse_expected_points": 2.056021866097536,
+      "brier_score_champion": 0.019867160555555555,
+      "rmse_expected_place": 14.282340954712804,
+      "rmse_expected_points": 2.0547517007243625,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.011727272727272727,
+          "predicted": 0.011803030303030303,
           "observed": 0.0,
           "count": 33,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.1469,
+          "predicted": 0.1462,
           "observed": 0.0,
           "count": 1,
           "calibrated": true
         },
         "20-30%": {
-          "predicted": 0.23305,
+          "predicted": 0.23215000000000002,
           "observed": 0.5,
           "count": 2,
           "calibrated": false
@@ -34,19 +34,103 @@
       },
       "calibration_playoffs": {
         "0-10%": {
-          "predicted": 0.002011111111111111,
+          "predicted": 0.0019814814814814816,
           "observed": 0.07407407407407407,
           "count": 27,
           "calibrated": true
         },
         "90-100%": {
-          "predicted": 0.9705375,
+          "predicted": 0.9707375,
           "observed": 0.75,
           "count": 8,
           "calibrated": false
         },
         "10-20%": {
-          "predicted": 0.1814,
+          "predicted": 0.1806,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        }
+      }
+    },
+    {
+      "season": "25_26",
+      "cutoff_jornada": 8,
+      "num_teams": 40,
+      "brier_score_champion": 0.009854639499999998,
+      "rmse_expected_place": 17.679647499002915,
+      "rmse_expected_points": 1.849232825652202,
+      "calibration_champion": {
+        "0-10%": {
+          "predicted": 0.00818108108108108,
+          "observed": 0.0,
+          "count": 37,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.13915,
+          "observed": 0.0,
+          "count": 2,
+          "calibrated": true
+        },
+        "40-50%": {
+          "predicted": 0.419,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        }
+      },
+      "calibration_playoffs": {
+        "50-60%": {
+          "predicted": 0.5398333333333333,
+          "observed": 0.3333333333333333,
+          "count": 3,
+          "calibrated": false
+        },
+        "0-10%": {
+          "predicted": 0.0012703703703703703,
+          "observed": 0.07407407407407407,
+          "count": 27,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.1645,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "20-30%": {
+          "predicted": 0.2641,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "90-100%": {
+          "predicted": 0.9900333333333333,
+          "observed": 1.0,
+          "count": 3,
+          "calibrated": true
+        },
+        "80-90%": {
+          "predicted": 0.8546,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": true
+        },
+        "60-70%": {
+          "predicted": 0.6461,
+          "observed": 0.5,
+          "count": 2,
+          "calibrated": true
+        },
+        "40-50%": {
+          "predicted": 0.4235,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "30-40%": {
+          "predicted": 0.3772,
           "observed": 0.0,
           "count": 1,
           "calibrated": false

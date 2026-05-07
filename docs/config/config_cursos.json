@@ -14,6 +14,48 @@
       "emblem": "assets/Logos/NEAP-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
+    "Adminstração Pública": {
+      "displayName": "Administração Pública",
+      "shortName": "AP",
+      "nucleus": "NEAP",
+      "emblem": "assets/Logos/NEAP-07.png",
+      "colors": ["#1e4395", "#6c757d"]
+    },
+    "Traduçao": {
+      "displayName": "Tradução",
+      "shortName": "Tradução",
+      "nucleus": "NET",
+      "emblem": "assets/Logos/NET-07.png",
+      "colors": ["#1e4395", "#6c757d"]
+    },
+    "TRADUÇÃO": {
+      "displayName": "Tradução",
+      "shortName": "Tradução",
+      "nucleus": "NET",
+      "emblem": "assets/Logos/NET-07.png",
+      "colors": ["#1e4395", "#6c757d"]
+    },
+    "TRADUÇAO": {
+      "displayName": "Tradução",
+      "shortName": "Tradução",
+      "nucleus": "NET",
+      "emblem": "assets/Logos/NET-07.png",
+      "colors": ["#1e4395", "#6c757d"]
+    },
+    "Eng. Civil": {
+      "displayName": "Eng. Civil",
+      "shortName": "Civil",
+      "nucleus": "NEBEC",
+      "emblem": "assets/Logos/NEBEC-07.png",
+      "colors": ["#f08344", "#6c757d"]
+    },
+    "Eng. Materias": {
+      "displayName": "Eng. de Materiais",
+      "shortName": "Materiais",
+      "nucleus": "NEM",
+      "emblem": "assets/Logos/NEM-07.png",
+      "colors": ["#e73630", "#6c757d"]
+    },
     "ASP": {
       "displayName": "Automação e Sistemas de Produção",
       "shortName": "ASP",

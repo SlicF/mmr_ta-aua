@@ -724,17 +724,118 @@ class FullCalibrator:
 
             # Parâmetros específicos para voleibol (modelo de sets)
             if sport_key == "volei":
-                # Calcular p_sweep histórico (percentagem de 2-0 vs 2-1)
+                # Calcular parâmetros para o modelo Gaussiano de Bell
                 # Em voleibol, score_a/score_b representam sets (2-0, 2-1, etc.)
                 volei_games = [g for g in self.games if g["modalidade"] == modalidade]
                 if volei_games:
+                    import numpy as np
+
+                    # ========== 1. SIGMA: Variabilidade dos resultados ==========
+                    result_scores = []
+                    for g in volei_games:
+                        # Mapear resultado para score de 0-3
+                        # 0-2: score 0 | 1-2: score 1 | 2-1: score 2 | 2-0: score 3
+                        if min(g["score_a"], g["score_b"]) == 0:  # sweep
+                            score = 0 if g["score_a"] == 0 else 3
+                        else:  # derrota apertada (1-2) ou vitória apertada (2-1)
+                            score = 1 if g["score_a"] == 1 else 2
+                        result_scores.append(score)
+
+                    volei_sigma = (
+                        float(np.std(result_scores)) if result_scores else 0.85
+                    )
+                    volei_sigma = max(0.5, min(1.2, volei_sigma))  # clipping
+
+                    # ========== 2. P_SWEEP_BASE: Frequência de sweeps ==========
                     sweeps = sum(
                         1 for g in volei_games if min(g["score_a"], g["score_b"]) == 0
                     )
                     p_sweep_hist = sweeps / len(volei_games) if volei_games else 0.5
-                    config[modalidade]["p_sweep_base"] = round(p_sweep_hist, 3)
+                    p_sweep_base = min(p_sweep_hist, 0.50)
+
+                    # ========== 3. ELO FACTOR & DIVISOR: Agressividade do ELO ==========
+                    # Calcular correlação entre ELO diferença e resultado
+                    # Quando ELO_diff é positivo, team A é favorito
+                    # Queremos estimar: center = 1.5 + (elo_diff / elo_divisor) * elo_factor
+
+                    elo_diffs_signed = (
+                        []
+                    )  # Vencedor_ELO - Perdedor_ELO (sempre positivo para vencedor)
+                    result_outcomes = []  # 2=sweep do vencedor, 1=derrota apertada
+
+                    for g in volei_games:
+                        elo_a = g.get("elo_a_before", None)
+                        elo_b = g.get("elo_b_before", None)
+
+                        if elo_a is None or elo_b is None:
+                            continue
+
+                        score_a = g["score_a"]
+                        score_b = g["score_b"]
+
+                        # Determinar vencedor
+                        if score_a > score_b:
+                            # A venceu: diferença = ELO_A - ELO_B
+                            winner_elo = elo_a
+                            loser_elo = elo_b
+                            winner_sets = score_a
+                        else:  # score_b > score_a
+                            # B venceu: diferença = ELO_B - ELO_A
+                            winner_elo = elo_b
+                            loser_elo = elo_a
+                            winner_sets = score_b
+
+                        # Se empate, ignorar (não deve acontecer em voleibol)
+                        if score_a == score_b:
+                            continue
+
+                        elo_diff = winner_elo - loser_elo
+                        # Outcome: 3=sweep(2-0), 2=close(2-1)
+                        outcome = 3 if winner_sets == 2 else 2
+
+                        elo_diffs_signed.append(elo_diff)
+                        result_outcomes.append(outcome)
+
+                    # Estimar slope entre ELO_diff (vencedor perspective) e resultado
+                    # A ideia é: score_centro = 1.5 + (elo_diff / elo_divisor) * elo_factor
+                    # outcome=3 significa centro=3, outcome=2 significa centro=2
+                    # Então: outcome = slope * elo_diff
+                    # Logo: slope = elo_factor / elo_divisor
+
+                    if len(elo_diffs_signed) > 20:  # Precisamos de dados suficientes
+                        elo_arr = np.array(elo_diffs_signed)
+                        result_arr = np.array(result_outcomes)
+
+                        # Regressão linear: resultado ~ elo_diff
+                        try:
+                            coeffs = np.polyfit(elo_arr, result_arr, 1)
+                            slope = coeffs[0]  # dy/dx
+
+                            # slope ≈ elo_factor / elo_divisor
+                            # Se slope é muito pequeno, defaults para 1.8/600 = 0.003
+                            slope = max(
+                                0.001, min(0.006, slope)
+                            )  # Limpar valores extremos
+
+                            # Calibrar elo_divisor = 600, elo_factor = slope * 600
+                            elo_divisor = 600
+                            elo_factor = round(slope * elo_divisor, 2)
+                            elo_factor = min(2.0, max(1.5, elo_factor))  # Clipping
+                        except:
+                            elo_factor = 1.8
+                            elo_divisor = 600
+                    else:
+                        elo_factor = 1.8  # default
+                        elo_divisor = 600
+
+                    # Guardar parâmetros
+                    config[modalidade]["p_sweep_base"] = round(p_sweep_base, 3)
+                    config[modalidade]["volei_sigma"] = round(volei_sigma, 3)
+                    config[modalidade]["elo_factor"] = round(elo_factor, 3)
+                    config[modalidade]["elo_divisor"] = round(elo_divisor, 1)
+
                     print(
-                        f"  📊 {modalidade}: p_sweep histórico = {p_sweep_hist:.1%} ({sweeps}/{len(volei_games)} sweeps)"
+                        f"  📊 {modalidade}: p_sweep_base={p_sweep_base:.1%}, sigma={volei_sigma:.3f}, elo_factor={elo_factor:.3f}, elo_divisor={elo_divisor:.0f}"
                     )
 
             # Adicionar parâmetros por divisão

@@ -855,16 +855,73 @@ class SportScoreSimulator:
     def _simulate_volei(
         self, elo_a: float, elo_b: float, winner_is_a: bool
     ) -> Tuple[int, int]:
-        """Voleibol: Apenas 2-0 ou 2-1. P(2-0) aumenta com diferença de ELO."""
-        elo_diff = abs(elo_a - elo_b)
-        # Usar p_sweep_base calibrado se disponível, senão default 0.35
-        p_sweep_base = self.params.get("p_sweep_base", 0.35)
-        p_sweep = p_sweep_base + min(elo_diff / 800, 0.4)
+        """
+        Voleibol: Distribuição de Bell sobre 4 resultados possíveis.
 
-        if random.random() < p_sweep:
-            return (2, 0) if winner_is_a else (0, 2)
+        Resultados (do ponto de vista do favorito):
+        - 0: 0-2 sweep (azarão vence bem)
+        - 1: 1-2 derrota apertada
+        - 2: 2-1 vitória apertada
+        - 3: 2-0 sweep (favorito vence bem)
+
+        Modelo:
+        - Equipas equilibradas (ELO_diff=0): centro em 1.5 (2-1 e 1-2 prováveis)
+        - Favorito forte: centro move para 3 (2-0 mais provável)
+        - Azarão que vence: centro move para 0 (0-2 mais provável)
+
+        **NOVO**: ELO scaling mais agressivo + sigma adapta-se a desequilíbrio
+        - ELO factor: multiplicador aumentado para +1.5 a +2.0 em vez de +0.4
+        - Sigma: BAIXA quando desequilibrado (resultado previsível)
+                 ALTA quando equilibrado (resultado incerto)
+        """
+        import numpy as np
+
+        # Calcular diferença de ELO ASSINADA
+        if winner_is_a:
+            elo_diff_signed = elo_a - elo_b
         else:
+            elo_diff_signed = elo_b - elo_a
+
+        # ========== CENTER: Usar parâmetros calibrados ==========
+        # Antes: elo_factor e elo_divisor eram hardcoded
+        # Agora: vêm da calibração automática
+
+        elo_factor = self.params.get("elo_factor", 1.8)  # default 1.8
+        elo_divisor = self.params.get("elo_divisor", 600)  # default 600
+
+        center = 1.5 + (elo_diff_signed / elo_divisor) * elo_factor
+        center = max(-0.5, min(3.5, center))  # clipping
+
+        # ========== SIGMA: Varia com desequilíbrio ==========
+        # Base sigma do calibrador
+        sigma_base = self.params.get("volei_sigma", 0.85)
+
+        # Quanto maior |elo_diff_signed|, menor sigma (resultado mais previsível)
+        # Quando elo_diff = 0, sigma = sigma_base (máxima variabilidade)
+        # Quando elo_diff = ±800, sigma = sigma_base * 0.4 (mínima variabilidade)
+
+        abs_elo_diff = abs(elo_diff_signed)
+        sigma_reduction = min(abs_elo_diff / 800, 0.6)  # redução máxima de 60%
+        sigma = sigma_base * (1.0 - sigma_reduction)
+        sigma = max(0.3, sigma)  # mínimo de 0.3 para evitar muito previsível
+
+        # Distribuição de Bell sobre os 4 resultados possíveis
+        outcomes = np.array([0, 1, 2, 3])
+        probabilities = np.exp(-((outcomes - center) ** 2) / (2 * sigma**2))
+        probabilities = probabilities / np.sum(probabilities)
+
+        # Sample do resultado
+        result_idx = np.random.choice([0, 1, 2, 3], p=probabilities)
+
+        # Converter índice para score (sets)
+        if result_idx == 0:  # 0-2 (azarão sweep)
+            return (0, 2) if winner_is_a else (2, 0)
+        elif result_idx == 1:  # 1-2 (derrota apertada)
+            return (1, 2) if winner_is_a else (2, 1)
+        elif result_idx == 2:  # 2-1 (vitória apertada)
             return (2, 1) if winner_is_a else (1, 2)
+        else:  # result_idx == 3: 2-0 (favorito sweep)
+            return (2, 0) if winner_is_a else (0, 2)
 
     def _simulate_basquete(
         self,
@@ -1325,6 +1382,7 @@ def calculate_real_points(
     past_matches_rows: List[Dict],
     course_mapping: Dict[str, str],
     withdrawn_teams: Set[str] = None,
+    modalidade: str | None = None,
 ) -> Dict[str, int]:
     """
     Calcula os pontos reais já alcançados pelas equipas na época regular.
@@ -1335,6 +1393,7 @@ def calculate_real_points(
     if withdrawn_teams is None:
         withdrawn_teams = set()
     real_points = defaultdict(int)
+    is_volei = bool(modalidade and str(modalidade).upper().startswith("VOLEIBOL"))
 
     for row in past_matches_rows:
         team_a_raw = row[COL_EQUIPA_1].strip()
@@ -1363,15 +1422,32 @@ def calculate_real_points(
         except ValueError:
             continue
 
-        # Distribuir pontos
-        if golos_1 > golos_2:
-            real_points[team_a] += 3
-        elif golos_2 > golos_1:
-            real_points[team_b] += 3
+        # Distribuir pontos de acordo com a modalidade.
+        # No voleibol o CSV guarda sets (2-0, 2-1, 1-2, 0-2), não uma regra 3/1/0.
+        if is_volei:
+            if golos_1 == 2 and golos_2 == 0:
+                real_points[team_a] += 3
+            elif golos_1 == 2 and golos_2 == 1:
+                real_points[team_a] += 2
+                real_points[team_b] += 1
+            elif golos_1 == 1 and golos_2 == 2:
+                real_points[team_a] += 1
+                real_points[team_b] += 2
+            elif golos_1 == 0 and golos_2 == 2:
+                real_points[team_b] += 3
+            elif golos_1 > golos_2:
+                real_points[team_a] += 3
+            elif golos_2 > golos_1:
+                real_points[team_b] += 3
         else:
-            # Empate
-            real_points[team_a] += 1
-            real_points[team_b] += 1
+            if golos_1 > golos_2:
+                real_points[team_a] += 3
+            elif golos_2 > golos_1:
+                real_points[team_b] += 3
+            else:
+                # Empate
+                real_points[team_a] += 1
+                real_points[team_b] += 1
 
     return dict(real_points)
 
@@ -1787,10 +1863,28 @@ def _points_from_score(score_a: int, score_b: int) -> Tuple[int, int]:
     return 1, 1
 
 
+def _points_from_score_for_modalidade(
+    score_a: int, score_b: int, modalidade: str | None = None
+) -> Tuple[int, int]:
+    """Calcula pontos por jogo, com regra especial para voleibol."""
+    if modalidade and str(modalidade).upper().startswith("VOLEIBOL"):
+        if score_a == 2 and score_b == 0:
+            return 3, 0
+        if score_a == 2 and score_b == 1:
+            return 2, 1
+        if score_a == 1 and score_b == 2:
+            return 1, 2
+        if score_a == 0 and score_b == 2:
+            return 0, 3
+
+    return _points_from_score(score_a, score_b)
+
+
 def _rank_group_with_tiebreak(
     group_teams: List[str],
     points: Dict[str, int],
     played_matches: List[Tuple[str, str, int, int]],
+    modalidade: str | None = None,
 ) -> List[str]:
     """Ordena equipas de um grupo com critérios de desempate do mmr_taçaua."""
     if not group_teams:
@@ -1831,7 +1925,7 @@ def _rank_group_with_tiebreak(
             if team_a not in tied_set or team_b not in tied_set:
                 continue
 
-            p_a, p_b = _points_from_score(score_a, score_b)
+            p_a, p_b = _points_from_score_for_modalidade(score_a, score_b, modalidade)
             h2h_stats[team_a]["points"] += p_a
             h2h_stats[team_b]["points"] += p_b
             h2h_stats[team_a]["gf"] += score_a
@@ -1862,11 +1956,14 @@ def build_ranking_with_tiebreak(
     points: Dict[str, int],
     team_division: Dict[str, Tuple[int, str]],
     played_matches: List[Tuple[str, str, int, int]],
+    modalidade: str | None = None,
 ) -> Tuple[List[Tuple[str, int]], Dict[Tuple[int, str], List[str]]]:
     """Constrói ranking global e por grupo/divisão já com desempate aplicado."""
     if not team_division:
         teams = list(points.keys())
-        ordered = _rank_group_with_tiebreak(teams, points, played_matches)
+        ordered = _rank_group_with_tiebreak(
+            teams, points, played_matches, modalidade=modalidade
+        )
         return [(t, points.get(t, 0)) for t in ordered], {(1, ""): ordered}
 
     groups: Dict[Tuple[int, str], List[str]] = defaultdict(list)
@@ -1876,7 +1973,9 @@ def build_ranking_with_tiebreak(
     ranked_by_group: Dict[Tuple[int, str], List[str]] = {}
     ranking: List[Tuple[str, int]] = []
     for group_key in sorted(groups.keys(), key=lambda k: (k[0], k[1])):
-        ordered = _rank_group_with_tiebreak(groups[group_key], points, played_matches)
+        ordered = _rank_group_with_tiebreak(
+            groups[group_key], points, played_matches, modalidade=modalidade
+        )
         ranked_by_group[group_key] = ordered
         ranking.extend((t, points.get(t, 0)) for t in ordered)
 
@@ -2203,6 +2302,7 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         past_played_matches,
         hardset_manager,
         withdrawn_teams,
+        modalidade,
     ) = args_tuple
 
     sim_teams = {
@@ -2238,6 +2338,7 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         points,
         team_division,
         played_matches_for_tiebreak,
+        modalidade=modalidade,
     )
     playoff_teams = {name: Team(name, final_elos[name]) for name in final_elos}
 
@@ -2740,6 +2841,7 @@ def monte_carlo_forecast(
     past_played_matches: List[Tuple[str, str, int, int]] = None,
     hardset_manager: "HardsetManager | None" = None,
     withdrawn_teams: Set[str] = None,
+    modalidade: str | None = None,
 ) -> Tuple[
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
@@ -2852,6 +2954,7 @@ def monte_carlo_forecast(
                         past_played_matches,
                         hardset_manager,
                         withdrawn_teams,
+                        modalidade,
                     )
                 )
 
@@ -4209,7 +4312,10 @@ def main(
         secondary_playoff_pm1 = parse_secondary_playoff_structure(all_csv_rows)
         secondary_liguilla_rows = parse_secondary_liguilla_structure(all_csv_rows)
         real_points = calculate_real_points(
-            past_matches_rows, course_mapping, withdrawn_teams=withdrawn_teams
+            past_matches_rows,
+            course_mapping,
+            withdrawn_teams=withdrawn_teams,
+            modalidade=modalidade,
         )
         past_played_matches = extract_played_matches_for_tiebreak(
             past_matches_rows,
@@ -4244,6 +4350,7 @@ def main(
             past_played_matches=past_played_matches,
             hardset_manager=hardset_manager,
             withdrawn_teams=withdrawn_teams,
+            modalidade=modalidade,
         )
 
         # --- Diagnóstico de baselines ---

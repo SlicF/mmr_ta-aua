@@ -297,8 +297,7 @@ body {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  padding: 0;
-  border: none;
+  display: none;
 }
 
 .chart-container {
@@ -1926,6 +1925,10 @@ body {
     height: 42px;
   }
 
+  .jornada-team-emblem[src*="EGI-07.png"] {
+    padding: 10px;
+  }
+
   .game-team-emblem[src*="EGI-07.png"] {
     width: 40px !important;
     height: 40px !important;
@@ -2620,6 +2623,44 @@ body {
   animation: spin 1s linear infinite;
 }
 
+/* Skeleton loading styles */
+.skeleton-row td > div {
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin: 4px 0;
+}
+
+.skeleton-loading {
+  height: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px;
+}
+
+.skeleton-row {
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Estilos do Calendário de Jogos */
 .calendar-card {
   margin-top: 30px;
@@ -2778,6 +2819,11 @@ body {
   height: 72px;
   object-fit: contain;
   flex-shrink: 0;
+}
+
+/* Ajuste específico para o emblema EGI no calendário */
+.jornada-team-emblem[src*="EGI-07.png"] {
+  padding: 16px;
 }
 
 .games-list {
