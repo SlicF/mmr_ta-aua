@@ -275,9 +275,9 @@
       "tie_points": 16,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Gestão Pública",
         "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Gestão Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -682,9 +682,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Gestão Pública",
         "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Gestão Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -714,9 +714,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Gestão Pública",
         "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Gestão Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -746,9 +746,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Gestão Pública",
         "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Gestão Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",

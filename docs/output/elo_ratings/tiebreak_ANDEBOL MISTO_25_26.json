@@ -12,8 +12,8 @@
       "tie_points": 19,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Mecânica",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Mecânica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -159,10 +159,10 @@
         "Grupo": null,
         "ranking_key": "2ª Divisão"
       },
-      "tie_points": 14,
+      "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "DPT",
+        "Ciências do Mar",
         "Gestão"
       ],
       "criteria_order": [
@@ -177,15 +177,15 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "DPT",
+          "team": "Ciências do Mar",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 3,
-            "diferenca_golos_h2h": 7,
-            "golos_marcados_h2h": 25,
-            "diferenca_golos": -2,
-            "golos_marcados": 168
+            "diferenca_golos_h2h": 6,
+            "golos_marcados_h2h": 24,
+            "diferenca_golos": -18,
+            "golos_marcados": 155
           }
         },
         {
@@ -194,10 +194,10 @@
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 1,
-            "diferenca_golos_h2h": -7,
+            "diferenca_golos_h2h": -6,
             "golos_marcados_h2h": 18,
-            "diferenca_golos": -21,
-            "golos_marcados": 164
+            "diferenca_golos": -28,
+            "golos_marcados": 177
           }
         }
       ],
@@ -212,8 +212,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Mecânica",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Mecânica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -243,8 +243,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Mecânica",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. Mecânica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -391,14 +391,14 @@
       "rank_in_tiebreak": 2,
       "final_position": 2
     },
-    "2ª Divisão::DPT": {
+    "2ª Divisão::Ciências do Mar": {
       "event_id": 4,
       "ranking_key": "2ª Divisão",
-      "team": "DPT",
+      "team": "Ciências do Mar",
       "tie_type": "head_to_head",
-      "tie_points": 14,
+      "tie_points": 15,
       "tied_teams": [
-        "DPT",
+        "Ciências do Mar",
         "Gestão"
       ],
       "criteria_order": [
@@ -414,22 +414,22 @@
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 3,
-        "diferenca_golos_h2h": 7,
-        "golos_marcados_h2h": 25,
-        "diferenca_golos": -2,
-        "golos_marcados": 168
+        "diferenca_golos_h2h": 6,
+        "golos_marcados_h2h": 24,
+        "diferenca_golos": -18,
+        "golos_marcados": 155
       },
       "rank_in_tiebreak": 1,
-      "final_position": 8
+      "final_position": 7
     },
     "2ª Divisão::Gestão": {
       "event_id": 4,
       "ranking_key": "2ª Divisão",
       "team": "Gestão",
       "tie_type": "head_to_head",
-      "tie_points": 14,
+      "tie_points": 15,
       "tied_teams": [
-        "DPT",
+        "Ciências do Mar",
         "Gestão"
       ],
       "criteria_order": [
@@ -445,13 +445,13 @@
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 1,
-        "diferenca_golos_h2h": -7,
+        "diferenca_golos_h2h": -6,
         "golos_marcados_h2h": 18,
-        "diferenca_golos": -21,
-        "golos_marcados": 164
+        "diferenca_golos": -28,
+        "golos_marcados": 177
       },
       "rank_in_tiebreak": 2,
-      "final_position": 9
+      "final_position": 8
     }
   }
 }

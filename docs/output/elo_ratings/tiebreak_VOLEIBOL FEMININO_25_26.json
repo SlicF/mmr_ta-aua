@@ -109,11 +109,11 @@
         "Grupo": "A",
         "ranking_key": "2ª Divisão - Grupo A"
       },
-      "tie_points": 15,
+      "tie_points": 16,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Administração Pública",
-        "MTC"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -123,31 +123,31 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
       "standings": [
         {
-          "team": "MTC",
+          "team": "Línguas e Relações Empresariais",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
+            "pontos_h2h": 2,
+            "diferenca_golos_h2h": 1,
+            "golos_marcados_h2h": 2,
             "diferenca_golos": 2,
-            "golos_marcados": 11
+            "golos_marcados": 13
           }
         },
         {
-          "team": "Administração Pública",
+          "team": "MTC",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": -1,
+            "golos_marcados_h2h": 1,
             "diferenca_golos": 1,
-            "golos_marcados": 11
+            "golos_marcados": 12
           }
         }
       ],
@@ -159,11 +159,11 @@
         "Grupo": "A",
         "ranking_key": "2ª Divisão - Grupo A"
       },
-      "tie_points": 7,
+      "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Tradução",
-        "Eng. Computadores e Telemática"
+        "Gestão Comercial",
+        "Tradução"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -184,20 +184,20 @@
             "pontos_h2h": 2,
             "diferenca_golos_h2h": 1,
             "golos_marcados_h2h": 2,
-            "diferenca_golos": -8,
-            "golos_marcados": 7
+            "diferenca_golos": -6,
+            "golos_marcados": 9
           }
         },
         {
-          "team": "Eng. Computadores e Telemática",
+          "team": "Gestão Comercial",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 1,
             "diferenca_golos_h2h": -1,
             "golos_marcados_h2h": 1,
-            "diferenca_golos": -12,
-            "golos_marcados": 6
+            "diferenca_golos": -7,
+            "golos_marcados": 8
           }
         }
       ],
@@ -429,77 +429,15 @@
       "rank_in_tiebreak": 2,
       "final_position": 9
     },
-    "2ª Divisão - Grupo A::MTC": {
+    "2ª Divisão - Grupo A::Línguas e Relações Empresariais": {
       "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo A",
-      "team": "MTC",
+      "team": "Línguas e Relações Empresariais",
       "tie_type": "head_to_head",
-      "tie_points": 15,
+      "tie_points": 16,
       "tied_teams": [
-        "Administração Pública",
-        "MTC"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 2,
-        "golos_marcados": 11
-      },
-      "rank_in_tiebreak": 1,
-      "final_position": 5
-    },
-    "2ª Divisão - Grupo A::Administração Pública": {
-      "event_id": 3,
-      "ranking_key": "2ª Divisão - Grupo A",
-      "team": "Administração Pública",
-      "tie_type": "head_to_head",
-      "tie_points": 15,
-      "tied_teams": [
-        "Administração Pública",
-        "MTC"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "diferenca_golos",
-      "used_global_fallback": true,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": 1,
-        "golos_marcados": 11
-      },
-      "rank_in_tiebreak": 2,
-      "final_position": 6
-    },
-    "2ª Divisão - Grupo A::Tradução": {
-      "event_id": 4,
-      "ranking_key": "2ª Divisão - Grupo A",
-      "team": "Tradução",
-      "tie_type": "head_to_head",
-      "tie_points": 7,
-      "tied_teams": [
-        "Tradução",
-        "Eng. Computadores e Telemática"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -516,21 +454,21 @@
         "pontos_h2h": 2,
         "diferenca_golos_h2h": 1,
         "golos_marcados_h2h": 2,
-        "diferenca_golos": -8,
-        "golos_marcados": 7
+        "diferenca_golos": 2,
+        "golos_marcados": 13
       },
       "rank_in_tiebreak": 1,
-      "final_position": 9
+      "final_position": 5
     },
-    "2ª Divisão - Grupo A::Eng. Computadores e Telemática": {
-      "event_id": 4,
+    "2ª Divisão - Grupo A::MTC": {
+      "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo A",
-      "team": "Eng. Computadores e Telemática",
+      "team": "MTC",
       "tie_type": "head_to_head",
-      "tie_points": 7,
+      "tie_points": 16,
       "tied_teams": [
-        "Tradução",
-        "Eng. Computadores e Telemática"
+        "MTC",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -547,11 +485,73 @@
         "pontos_h2h": 1,
         "diferenca_golos_h2h": -1,
         "golos_marcados_h2h": 1,
-        "diferenca_golos": -12,
-        "golos_marcados": 6
+        "diferenca_golos": 1,
+        "golos_marcados": 12
       },
       "rank_in_tiebreak": 2,
-      "final_position": 10
+      "final_position": 6
+    },
+    "2ª Divisão - Grupo A::Tradução": {
+      "event_id": 4,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Tradução",
+      "tie_type": "head_to_head",
+      "tie_points": 10,
+      "tied_teams": [
+        "Gestão Comercial",
+        "Tradução"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 2,
+        "diferenca_golos_h2h": 1,
+        "golos_marcados_h2h": 2,
+        "diferenca_golos": -6,
+        "golos_marcados": 9
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 8
+    },
+    "2ª Divisão - Grupo A::Gestão Comercial": {
+      "event_id": 4,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Gestão Comercial",
+      "tie_type": "head_to_head",
+      "tie_points": 10,
+      "tied_teams": [
+        "Gestão Comercial",
+        "Tradução"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": -1,
+        "golos_marcados_h2h": 1,
+        "diferenca_golos": -7,
+        "golos_marcados": 8
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 9
     },
     "2ª Divisão - Grupo B::Eng. Química": {
       "event_id": 5,

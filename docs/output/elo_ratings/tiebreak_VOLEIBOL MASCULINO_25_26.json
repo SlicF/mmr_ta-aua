@@ -9,11 +9,11 @@
         "Grupo": null,
         "ranking_key": "1ª Divisão"
       },
-      "tie_points": 1,
+      "tie_points": 21,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Música",
-        "Gestão e Planeamento em Turismo"
+        "Design",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -23,31 +23,31 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": null,
+      "deciding_criterion": "faltas_comparencia",
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Música",
+          "team": "Design",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": -19,
-            "golos_marcados": 1
+            "pontos_h2h": 1,
+            "diferenca_golos_h2h": -1,
+            "golos_marcados_h2h": 1,
+            "diferenca_golos": 7,
+            "golos_marcados": 18
           }
         },
         {
-          "team": "Gestão e Planeamento em Turismo",
+          "team": "Eng. e Gestão Industrial",
           "rank_in_tiebreak": 2,
           "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": -19,
-            "golos_marcados": 1
+            "faltas_comparencia": 1,
+            "pontos_h2h": 2,
+            "diferenca_golos_h2h": 1,
+            "golos_marcados_h2h": 2,
+            "diferenca_golos": 7,
+            "golos_marcados": 17
           }
         }
       ],
@@ -62,8 +62,8 @@
       "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Geologia",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 19,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Física",
-        "Eng. Informática B"
+        "Eng. Informática B",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -205,15 +205,15 @@
     }
   ],
   "indexByContextTeam": {
-    "1ª Divisão::Música": {
+    "1ª Divisão::Design": {
       "event_id": 1,
       "ranking_key": "1ª Divisão",
-      "team": "Música",
+      "team": "Design",
       "tie_type": "head_to_head",
-      "tie_points": 1,
+      "tie_points": 21,
       "tied_teams": [
-        "Música",
-        "Gestão e Planeamento em Turismo"
+        "Design",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -223,28 +223,28 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": null,
+      "deciding_criterion": "faltas_comparencia",
       "used_global_fallback": false,
       "criteria_values": {
         "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": -19,
-        "golos_marcados": 1
+        "pontos_h2h": 1,
+        "diferenca_golos_h2h": -1,
+        "golos_marcados_h2h": 1,
+        "diferenca_golos": 7,
+        "golos_marcados": 18
       },
       "rank_in_tiebreak": 1,
-      "final_position": 11
+      "final_position": 4
     },
-    "1ª Divisão::Gestão e Planeamento em Turismo": {
+    "1ª Divisão::Eng. e Gestão Industrial": {
       "event_id": 1,
       "ranking_key": "1ª Divisão",
-      "team": "Gestão e Planeamento em Turismo",
+      "team": "Eng. e Gestão Industrial",
       "tie_type": "head_to_head",
-      "tie_points": 1,
+      "tie_points": 21,
       "tied_teams": [
-        "Música",
-        "Gestão e Planeamento em Turismo"
+        "Design",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -254,18 +254,18 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": null,
+      "deciding_criterion": "faltas_comparencia",
       "used_global_fallback": false,
       "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 0,
-        "diferenca_golos_h2h": 0,
-        "golos_marcados_h2h": 0,
-        "diferenca_golos": -19,
-        "golos_marcados": 1
+        "faltas_comparencia": 1,
+        "pontos_h2h": 2,
+        "diferenca_golos_h2h": 1,
+        "golos_marcados_h2h": 2,
+        "diferenca_golos": 7,
+        "golos_marcados": 17
       },
       "rank_in_tiebreak": 2,
-      "final_position": 12
+      "final_position": 5
     },
     "2ª Divisão - Grupo A::Geologia": {
       "event_id": 2,
@@ -274,8 +274,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Geologia",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -305,8 +305,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Geologia",
-        "Biotecnologia"
+        "Biotecnologia",
+        "Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -336,8 +336,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Física",
-        "Eng. Informática B"
+        "Eng. Informática B",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -367,8 +367,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Física",
-        "Eng. Informática B"
+        "Eng. Informática B",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
