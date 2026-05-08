@@ -12,8 +12,8 @@
       "tie_points": 19,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -159,11 +159,11 @@
         "Grupo": null,
         "ranking_key": "2ª Divisão"
       },
-      "tie_points": 15,
+      "tie_points": 17,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Ciências do Mar",
-        "Gestão"
+        "DPT",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -177,27 +177,27 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Ciências do Mar",
+          "team": "MTC",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 3,
-            "diferenca_golos_h2h": 6,
-            "golos_marcados_h2h": 24,
-            "diferenca_golos": -18,
-            "golos_marcados": 155
+            "diferenca_golos_h2h": 1,
+            "golos_marcados_h2h": 26,
+            "diferenca_golos": 0,
+            "golos_marcados": 158
           }
         },
         {
-          "team": "Gestão",
+          "team": "DPT",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 1,
-            "diferenca_golos_h2h": -6,
-            "golos_marcados_h2h": 18,
-            "diferenca_golos": -28,
-            "golos_marcados": 177
+            "diferenca_golos_h2h": -1,
+            "golos_marcados_h2h": 25,
+            "diferenca_golos": 7,
+            "golos_marcados": 192
           }
         }
       ],
@@ -212,8 +212,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -243,8 +243,8 @@
       "tie_type": "head_to_head",
       "tie_points": 19,
       "tied_teams": [
-        "Eng. Eletrónica e Telecomunicações",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -391,15 +391,15 @@
       "rank_in_tiebreak": 2,
       "final_position": 2
     },
-    "2ª Divisão::Ciências do Mar": {
+    "2ª Divisão::MTC": {
       "event_id": 4,
       "ranking_key": "2ª Divisão",
-      "team": "Ciências do Mar",
+      "team": "MTC",
       "tie_type": "head_to_head",
-      "tie_points": 15,
+      "tie_points": 17,
       "tied_teams": [
-        "Ciências do Mar",
-        "Gestão"
+        "DPT",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -414,23 +414,23 @@
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 3,
-        "diferenca_golos_h2h": 6,
-        "golos_marcados_h2h": 24,
-        "diferenca_golos": -18,
-        "golos_marcados": 155
+        "diferenca_golos_h2h": 1,
+        "golos_marcados_h2h": 26,
+        "diferenca_golos": 0,
+        "golos_marcados": 158
       },
       "rank_in_tiebreak": 1,
-      "final_position": 7
+      "final_position": 6
     },
-    "2ª Divisão::Gestão": {
+    "2ª Divisão::DPT": {
       "event_id": 4,
       "ranking_key": "2ª Divisão",
-      "team": "Gestão",
+      "team": "DPT",
       "tie_type": "head_to_head",
-      "tie_points": 15,
+      "tie_points": 17,
       "tied_teams": [
-        "Ciências do Mar",
-        "Gestão"
+        "DPT",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -445,13 +445,13 @@
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 1,
-        "diferenca_golos_h2h": -6,
-        "golos_marcados_h2h": 18,
-        "diferenca_golos": -28,
-        "golos_marcados": 177
+        "diferenca_golos_h2h": -1,
+        "golos_marcados_h2h": 25,
+        "diferenca_golos": 7,
+        "golos_marcados": 192
       },
       "rank_in_tiebreak": 2,
-      "final_position": 8
+      "final_position": 7
     }
   }
 }

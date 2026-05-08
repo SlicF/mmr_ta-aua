@@ -70,7 +70,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 6,2026-03-11 00:00:00,22h00,Sintético,EET,7,1,Economia,1,,Excel,Excel,False,False,
 4,2026-03-11 00:00:00,23h00,Sintético,MTC,0,4,CBM,2,B,Excel,Excel,False,False,
 6,2026-03-11 00:00:00,23h00,Sintético,Finanças,,,Administração Pública,1,,Excel,Excel,False,False,Finanças
-6,2026-03-12 00:00:00,21h00,Sintético,Biotecnologia,,,Contabilidade,1,,Excel,Excel,False,False,
+6,2026-03-12 00:00:00,21h00,Sintético,Biotecnologia,5,0,Contabilidade,1,,Excel,Excel,False,False,
 6,2026-03-16 00:00:00,21h00,Sintético,Matemática,1,4,CBM,2,B,Excel,Excel,False,False,
 5,2026-03-16 00:00:00,23h00,Sintético,Eng. Mecânica B,4,0,Biologia,2,A,Excel,Excel,False,False,
 6,2026-03-16 00:00:00,23h00,Sintético,Música,0,7,MTC,2,B,Excel,Excel,False,False,

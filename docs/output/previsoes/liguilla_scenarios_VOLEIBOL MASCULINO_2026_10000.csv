@@ -1,7 +1,7 @@
 ﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Bioquímica,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,48.2694,0.0000,51.7306,LM2,Física,65.2025,0.0000,34.7975,64.4300,42.0767
-Ciências Biomédicas,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,39.0779,0.0000,60.9221,LM2,Física,56.5083,0.0000,43.4917,35.5700,28.5072
-Eng. Computadores e Telemática,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,51.7306,0.0000,48.2694,LM3,Física,64.7835,0.0000,35.2165,64.4300,42.3250
-Eng. Computadores e Telemática,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,60.9221,0.0000,39.0779,LM3,Física,64.2676,0.0000,35.7324,35.5700,48.7771
-Física,LM2:Bioquímica|LM3:Eng. Computadores e Telemática,LM2,Bioquímica,34.7975,0.0000,65.2025,LM3,Eng. Computadores e Telemática,35.2165,0.0000,64.7835,64.4300,15.5983
-Física,LM2:Ciências Biomédicas|LM3:Eng. Computadores e Telemática,LM2,Ciências Biomédicas,43.4917,0.0000,56.5083,LM3,Eng. Computadores e Telemática,35.7324,0.0000,64.2676,35.5700,22.7158
+Bioquímica,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,48.5578,0.0000,51.4422,LM2,Física,65.0506,0.0000,34.9494,65.1800,41.5618
+Ciências Biomédicas,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,38.1964,0.0000,61.8036,LM2,Física,55.0833,0.0000,44.9167,34.8200,28.7766
+Eng. Computadores e Telemática,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,51.4422,0.0000,48.5578,LM3,Física,64.0227,0.0000,35.9773,65.1800,42.2369
+Eng. Computadores e Telemática,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,61.8036,0.0000,38.1964,LM3,Física,63.4980,0.0000,36.5020,34.8200,47.6450
+Física,LM2:Bioquímica|LM3:Eng. Computadores e Telemática,LM2,Bioquímica,34.9494,0.0000,65.0506,LM3,Eng. Computadores e Telemática,35.9773,0.0000,64.0227,65.1800,16.2013
+Física,LM2:Ciências Biomédicas|LM3:Eng. Computadores e Telemática,LM2,Ciências Biomédicas,44.9167,0.0000,55.0833,LM3,Eng. Computadores e Telemática,36.5020,0.0000,63.4980,34.8200,23.5784
