@@ -418,6 +418,8 @@ const translations = {
         noPredictionsData: 'Sem dados de previsões para esta modalidade/época',
         noDataAvailableShort: 'Sem dados disponíveis',
         errorLoading: 'Erro ao carregar',
+        loading: 'A carregar',
+        showMore: 'Ver mais',
         loadingData: 'A carregar dados...',
         loadingRankings: 'A carregar classificação...',
         noGamesForTeam: 'Sem jogos previstos para esta equipa',
@@ -526,12 +528,6 @@ const translations = {
         championsViceMale: 'Vice-Campeões',
         championsFemale: 'Campeãs',
         championsViceFemale: 'Vice-Campeãs',
-
-        // === Debug Panel ===
-        activateDebug: 'Ativar Debug',
-        verboseDebug: 'Debug Verbose',
-        deactivate: 'Desativar',
-        close: 'Fechar',
 
         // === DivisionSelector ===
         div1Label: '1ª Divisão',
@@ -836,6 +832,8 @@ const translations = {
         noPredictionsData: 'No predictions data for this sport/season',
         noDataAvailableShort: 'No data available',
         errorLoading: 'Error loading',
+        loading: 'Loading',
+        showMore: 'Show more',
         loadingData: 'Loading data...',
         loadingRankings: 'Loading rankings...',
         noGamesForTeam: 'No predicted games for this team',
@@ -944,12 +942,6 @@ const translations = {
         championsViceMale: 'Runners-up',
         championsFemale: 'Champions',
         championsViceFemale: 'Runners-up',
-
-        // === Debug Panel ===
-        activateDebug: 'Enable Debug',
-        verboseDebug: 'Verbose Debug',
-        deactivate: 'Disable',
-        close: 'Close',
 
         // === DivisionSelector ===
         div1Label: '1st Division',
@@ -1246,8 +1238,10 @@ translations.es = {
     noStatsAvailable: 'No hay estadísticas disponibles',
     noPredictionsData: 'No hay datos de predicciones para esta modalidad/temporada',
     noDataAvailableShort: 'No hay datos disponibles',
-    errorLoading: 'Error al cargar',
-    loadingData: 'Cargando datos...',
+errorLoading: 'Error al cargar',
+        loading: 'Cargando',
+        showMore: 'Ver más',
+        loadingData: 'Cargando datos...',
     loadingRankings: 'Cargando clasificación...',
     noGamesForTeam: 'No hay partidos previstos para este equipo',
     noHistoryForTeam: 'No hay partidos disponibles para este equipo',
@@ -1349,16 +1343,10 @@ translations.es = {
     setsExpectedAbbr: 'Sets esp.',
 
     // === Champions ===
-    championsMale: 'Campeones',
+championsMale: 'Campeones',
     championsViceMale: 'Subcampeones',
     championsFemale: 'Campeonas',
     championsViceFemale: 'Subcampeonas',
-
-    // === Debug Panel ===
-    activateDebug: 'Activar debug',
-    verboseDebug: 'Debug verbose',
-    deactivate: 'Desactivar',
-    close: 'Cerrar',
 
     // === DivisionSelector ===
     div1Label: '1a División',
