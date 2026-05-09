@@ -1,15 +1,15 @@
 Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcados,golos_sofridos,diferenca_golos,faltas_comparencia
 1,,1,Fisioterapia,28,10,9,1,0,38,8,30,0
-1,,2,Eng. e Gestão Industrial,24,9,8,0,1,26,6,20,0
+1,,2,Eng. e Gestão Industrial,25,10,8,1,1,27,7,20,0
 1,,3,Eng. Mecânica,22,10,7,1,2,36,12,24,0
 1,,4,Gestão e Planeamento em Turismo,21,10,7,0,3,29,18,11,0
-1,,5,Biotecnologia,17,9,5,2,2,23,15,8,0
-1,,6,Economia,12,10,4,0,6,17,46,-29,0
-1,,7,Eng. Eletrónica e Telecomunicações,11,9,3,2,4,21,21,0,0
-1,,8,Eng. Computadores e Telemática,9,9,3,0,6,12,14,-2,0
+1,,5,Biotecnologia,18,10,5,3,2,24,16,8,0
+1,,6,Eng. Eletrónica e Telecomunicações,12,10,3,3,4,23,23,0,0
+1,,7,Economia,12,10,4,0,6,17,46,-29,0
+1,,8,Eng. Computadores e Telemática,10,10,3,1,6,12,14,-2,0
 1,,9,Contabilidade,6,10,2,0,8,12,29,-17,1
-1,,10,Eng. Biomédica,3,9,1,0,8,9,33,-24,0
-1,,11,Administração Pública,0,9,0,0,9,6,27,-21,0
+1,,10,Eng. Biomédica,4,10,1,1,8,11,35,-24,0
+1,,11,Administração Pública,1,10,0,1,9,6,27,-21,0
 1,,12,Finanças,0,11,0,0,0,0,0,0,11
 2,A,1,Eng. de Materiais,15,6,5,0,1,22,7,15,0
 2,A,2,Tecnologias de Informação,13,6,4,1,1,25,7,18,0
@@ -28,3 +28,13 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,B,7,Matemática,7,8,2,1,5,17,23,-6,0
 2,B,8,Música,2,8,0,2,6,13,41,-28,0
 2,B,9,Biologia e Geologia,1,8,0,1,7,9,33,-24,0
+2,B,10,Eng. e Gestão Industrial,0,0,0,0,0,0,0,0,0
+2,B,11,Eng. Eletrónica e Telecomunicações,0,0,0,0,0,0,0,0,0
+2,B,12,Tecnologias de Informação,0,0,0,0,0,0,0,0,0
+2,B,13,Contabilidade,0,0,0,0,0,0,0,0,0
+2,B,14,Gestão e Planeamento em Turismo,0,0,0,0,0,0,0,0,0
+2,B,15,Biotecnologia,0,0,0,0,0,0,0,0,0
+2,B,16,Eng. Mecânica,0,0,0,0,0,0,0,0,0
+,,1,Tecnologias de Informação,0,0,0,0,0,0,0,0,0
+,,2,Ciências Biomédicas,0,0,0,0,0,0,0,0,0
+,,3,Contabilidade,0,0,0,0,0,0,0,0,0

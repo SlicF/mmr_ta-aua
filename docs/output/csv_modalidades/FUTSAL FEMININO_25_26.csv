@@ -56,11 +56,11 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Fonte_Data,Fonte_Local,
 10,2026-05-04 00:00:00,21h45,Caixa UA,Fisioterapia,0,4,Eng. Biomédica,Excel,Excel,False,False,
 10,2026-05-04 00:00:00,22h30,Caixa UA,Biologia,0,7,Matemática,Excel,Excel,False,False,
 10,2026-05-04 00:00:00,23h15,Caixa UA,Música,1,10,Contabilidade,Excel,Excel,False,False,
-5,2026-05-07 00:00:00,20h45,Caixa UA,Eng. Mecânica,,,Biologia,Excel,Excel,False,False,
-6,2026-05-07 00:00:00,21h30,Caixa UA,Economia,,,Eng. Civil,Excel,Excel,False,False,
+4,2026-05-07 00:00:00,20h00,Caixa UA,Música,1,5,EGI,Excel,Excel,False,False,
+5,2026-05-07 00:00:00,20h45,Caixa UA,Eng. Mecânica,6,0,Biologia,Excel,Excel,False,False,
+6,2026-05-07 00:00:00,21h30,Caixa UA,Economia,0,11,Eng. Civil,Excel,Excel,False,False,
 6,2026-05-11 00:00:00,20h15,PAH,Biologia,,,Eng. Biomédica,Excel,Excel,False,False,
 4,,,,Biologia,,,Educação Básica,,,False,False,Educação Básica
-4,,,,Música,,,EGI,,,False,False,
 5,,,,Educação Básica,,,Contabilidade,,,False,False,Educação Básica
 6,,,,Educação Básica,,,Matemática,,,False,False,Educação Básica
 7,,,,Educação Básica,,,Economia,,,False,False,Educação Básica

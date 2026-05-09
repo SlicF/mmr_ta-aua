@@ -112,8 +112,8 @@
       "tie_points": 21,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Computacional",
-        "Eng. e Gestão Industrial B"
+        "Eng. e Gestão Industrial B",
+        "Eng. Computacional"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -160,11 +160,10 @@
         "ranking_key": "2ª Divisão - Grupo B"
       },
       "tie_points": 12,
-      "tie_type": "mini_league",
+      "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. do Ambiente",
         "Matemática",
-        "Gestão"
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -174,7 +173,7 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "golos_marcados_h2h",
+      "deciding_criterion": "pontos_h2h",
       "used_global_fallback": false,
       "standings": [
         {
@@ -190,25 +189,13 @@
           }
         },
         {
-          "team": "Gestão",
+          "team": "Matemática",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
-            "pontos_h2h": 3,
-            "diferenca_golos_h2h": 2,
-            "golos_marcados_h2h": 5,
-            "diferenca_golos": 24,
-            "golos_marcados": 38
-          }
-        },
-        {
-          "team": "Matemática",
-          "rank_in_tiebreak": 3,
-          "criteria_values": {
-            "faltas_comparencia": 0,
             "pontos_h2h": 0,
-            "diferenca_golos_h2h": -4,
-            "golos_marcados_h2h": 7,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 4,
             "diferenca_golos": 13,
             "golos_marcados": 42
           }
@@ -225,9 +212,9 @@
       "tie_points": 16,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Aeroespacial",
         "Ciências Biomédicas",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -412,8 +399,8 @@
       "tie_type": "head_to_head",
       "tie_points": 21,
       "tied_teams": [
-        "Eng. Computacional",
-        "Eng. e Gestão Industrial B"
+        "Eng. e Gestão Industrial B",
+        "Eng. Computacional"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -443,8 +430,8 @@
       "tie_type": "head_to_head",
       "tie_points": 21,
       "tied_teams": [
-        "Eng. Computacional",
-        "Eng. e Gestão Industrial B"
+        "Eng. e Gestão Industrial B",
+        "Eng. Computacional"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -471,12 +458,11 @@
       "event_id": 4,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. do Ambiente",
-      "tie_type": "mini_league",
+      "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. do Ambiente",
         "Matemática",
-        "Gestão"
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -486,7 +472,7 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "golos_marcados_h2h",
+      "deciding_criterion": "pontos_h2h",
       "used_global_fallback": false,
       "criteria_values": {
         "faltas_comparencia": 0,
@@ -497,50 +483,17 @@
         "golos_marcados": 35
       },
       "rank_in_tiebreak": 1,
-      "final_position": 3
-    },
-    "2ª Divisão - Grupo B::Gestão": {
-      "event_id": 4,
-      "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Gestão",
-      "tie_type": "mini_league",
-      "tie_points": 12,
-      "tied_teams": [
-        "Eng. do Ambiente",
-        "Matemática",
-        "Gestão"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "golos_marcados_h2h",
-      "used_global_fallback": false,
-      "criteria_values": {
-        "faltas_comparencia": 0,
-        "pontos_h2h": 3,
-        "diferenca_golos_h2h": 2,
-        "golos_marcados_h2h": 5,
-        "diferenca_golos": 24,
-        "golos_marcados": 38
-      },
-      "rank_in_tiebreak": 2,
       "final_position": 4
     },
     "2ª Divisão - Grupo B::Matemática": {
       "event_id": 4,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Matemática",
-      "tie_type": "mini_league",
+      "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. do Ambiente",
         "Matemática",
-        "Gestão"
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -550,17 +503,17 @@
         "diferenca_golos",
         "golos_marcados"
       ],
-      "deciding_criterion": "golos_marcados_h2h",
+      "deciding_criterion": "pontos_h2h",
       "used_global_fallback": false,
       "criteria_values": {
         "faltas_comparencia": 0,
         "pontos_h2h": 0,
-        "diferenca_golos_h2h": -4,
-        "golos_marcados_h2h": 7,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 4,
         "diferenca_golos": 13,
         "golos_marcados": 42
       },
-      "rank_in_tiebreak": 3,
+      "rank_in_tiebreak": 2,
       "final_position": 5
     },
     "2ª Divisão - Grupo C::Ciências Biomédicas": {
@@ -570,9 +523,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Aeroespacial",
         "Ciências Biomédicas",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -602,9 +555,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Aeroespacial",
         "Ciências Biomédicas",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -634,9 +587,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Aeroespacial",
         "Ciências Biomédicas",
-        "Gestão Pública"
+        "Gestão Pública",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",

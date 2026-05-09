@@ -5,6 +5,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 1,2025-10-21 00:00:00,21h00,Sintético,GPT,2,0,Administração Pública,1,,Excel,Excel,False,False,
 1,2025-10-21 00:00:00,22h00,Sintético,ECT,1,2,Economia,1,,Excel,Excel,False,False,
 1,2025-10-21 00:00:00,23h00,Sintético,Eng. Biomédica,,,Finanças,1,,Excel,Excel,False,False,Finanças
+4,2025-10-22 00:00:00,16h20,SINTÉTICO,Eng. Mecânica,,,EET,2,B,Calendário PDF,Calendário PDF,False,False,
 1,2025-10-22 00:00:00,20h00,Sintético,Biologia,1,5,Geologia,2,A,Excel,Excel,False,False,
 1,2025-10-22 00:00:00,21h00,Sintético,Eng. Materiais,,,Eng. Física,2,A,Excel,Excel,False,False,Eng. Física
 1,2025-10-22 00:00:00,22h00,Sintético,EGI,2,1,EET,1,,Excel,Excel,False,False,
@@ -31,6 +32,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 3,2025-11-19 00:00:00,20h30,Sintético,Eng. Mecânica B,,,Eng. Física,2,A,Excel,Excel,False,False,Eng. Física
 3,2025-11-24 00:00:00,21h00,Sintético,ECT,1,0,EET,1,,Excel,Excel,False,False,
 3,2025-11-24 00:00:00,22h00,Sintético,GPT,1,0,Biotecnologia,1,,Excel,Excel,False,False,
+4,2025-11-24 00:00:00,22h00,SINTÉTICO,GPT,,,Biotecnologia,2,B,Calendário PDF,Calendário PDF,False,False,
 3,2025-11-25 00:00:00,21H00,Sintético,Fisioterapia,,,Finanças,1,,Excel,Excel,False,False,Finanças
 3,2025-11-25 00:00:00,22H00,Sintético,EGI,2,1,Eng. Mecânica,1,,Excel,Excel,False,False,
 3,2025-11-25 00:00:00,23H00,Sintético,Contabilidade,5,1,Eng. Biomédica,1,,Excel,Excel,False,False,
@@ -119,23 +121,27 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 10,2026-04-23 00:00:00,23h00,Sintético,Eng. Mecânica,2,2,EET,1,,Excel,Excel,False,False,
 11,2026-05-04 00:00:00,21h00,Sintético,GPT,2,1,Contabilidade,1,,Excel,Excel,False,False,
 11,2026-05-04 00:00:00,22h00,Sintético,Economia,0,14,Fisioterapia,1,,Excel,Excel,False,False,
-11,2026-05-05 00:00:00,21h00,Sintético,Administração Pública,,,ECT,1,,Excel,Excel,False,False,
-11,2026-05-05 00:00:00,22h00,Sintético,Biotecnologia,,,EGI,1,,Excel,Excel,False,False,
-11,2026-05-07 00:00:00,21h00,Sintético,EET,,,Eng. Biomédica,1,,Excel,Excel,False,False,
+11,2026-05-05 00:00:00,21h00,Sintético,Administração Pública,0,0,ECT,1,,Excel,Excel,False,False,
+11,2026-05-05 00:00:00,22h00,Sintético,Biotecnologia,1,1,EGI,1,,Excel,Excel,False,False,
+11,2026-05-07 00:00:00,21h00,Sintético,EET,2,2,Eng. Biomédica,1,,Excel,Excel,False,False,
+2,,,,Contabilidade,,,Tecnologias de Informação,2,B,,,False,False,
+3,,,,Tecnologias de Informação,,,CBM,2,B,,,False,False,
 4,,,,Eng. Física,,,Tecnologias de Informação,2,A,,,False,False,Eng. Física
+4,,,,CBM,,,Contabilidade,2,B,,,False,False,
+4,,,,EGI,,,Eng. Civil,2,B,,,False,False,
 5,,,,Eng. Computacional,,,Eng. Física,2,A,,,False,False,Eng. Física
 6,,,,Geologia,,,Eng. Física,2,A,,,False,False,Eng. Física
 7,,,,Eng. Física,,,Biologia,2,A,,,False,False,Eng. Física
 9,,,,EET,,,Finanças,1,,,,False,False,Finanças
 10,,,,Contabilidade,,,Finanças,1,,,,False,False,Finanças
 11,,,,Finanças,,,Eng. Mecânica,1,,,,False,False,Finanças
-LM1,,,,9º Class. 1ª Div.,,,2º Class. 2ª Div. A,,,,,,,
-LM2,,,,2º Class. 2ª Div. A,,,2º Class. 2ª Div. B,,,,,,,
-LM3,,,,2º Class. 2ª Div. B,,,9º Class. 1ª Div.,,,,,,,
-E1,,,,1º Class. 1ª Div.,,,1º Class. 2ª Div. Gr. A,,,,,,,
-E1,,,,2º Class. 1ª Div.,,,1º Class. 2ª Div. Gr. B,,,,,,,
-E1,,,,3º Class. 1ª Div.,,,6º Class. 1ª Div.,,,,,,,
-E1,,,,4º Class. 1ª Div.,,,5º Class. 1ª Div.,,,,,,,
+LM1,,,,Contabilidade,,,Tecnologias de Informação,,,,,,,
+LM2,,,,Tecnologias de Informação,,,CBM,,,,,,,
+LM3,,,,CBM,,,Contabilidade,,,,,,,
+E1,,,,Fisioterapia,,,Eng. Materiais,,,,,,,
+E1,,,,EGI,,,Eng. Civil,,,,,,,
+E1,,,,Eng. Mecânica,,,EET,,,,,,,
+E1,,,,GPT,,,Biotecnologia,,,,,,,
 E2,,,,Vencedor QF1,,,Vencedor QF4,,,,,,,
 E2,,,,Vencedor QF2,,,Vencedor QF3,,,,,,,
 E3L,,,,Vencido MF1,,,Vencido MF2,,,,,,,
