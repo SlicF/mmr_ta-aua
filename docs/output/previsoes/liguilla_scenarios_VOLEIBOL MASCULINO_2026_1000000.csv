@@ -1,7 +1,0 @@
-﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Bioquímica,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,48.2439,0.0000,51.7561,LM2,Física,65.2436,0.0000,34.7564,65.1685,41.3689
-Ciências Biomédicas,LM1:Eng. Computadores e Telemática|LM2:Física,LM1,Eng. Computadores e Telemática,37.7845,0.0000,62.2155,LM2,Física,54.7728,0.0000,45.2272,34.8315,27.4576
-Eng. Computadores e Telemática,LM1:Bioquímica|LM3:Física,LM1,Bioquímica,51.7561,0.0000,48.2439,LM3,Física,64.3375,0.0000,35.6625,65.1685,42.1059
-Eng. Computadores e Telemática,LM1:Ciências Biomédicas|LM3:Física,LM1,Ciências Biomédicas,62.2155,0.0000,37.7845,LM3,Física,63.3846,0.0000,36.6154,34.8315,48.4871
-Física,LM2:Bioquímica|LM3:Eng. Computadores e Telemática,LM2,Bioquímica,34.7564,0.0000,65.2436,LM3,Eng. Computadores e Telemática,35.6625,0.0000,64.3375,65.1685,16.5252
-Física,LM2:Ciências Biomédicas|LM3:Eng. Computadores e Telemática,LM2,Ciências Biomédicas,45.2272,0.0000,54.7728,LM3,Eng. Computadores e Telemática,36.6154,0.0000,63.3846,34.8315,24.0552
