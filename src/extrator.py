@@ -1,24 +1,142 @@
-import pandas as pd
-import warnings
-import os
-import re
-import shutil
+# -*- coding: utf-8 -*-
+"""
+Extrator de resultados desportivos a partir de ficheiros Excel da Taça UA.
+
+Fluxo principal:
+  1. Descarregar (ou localizar) o Excel de resultados.
+  2. Selecionar as folhas da época mais recente.
+  3. Para cada folha: extrair jogos, datas, faltas e playoffs.
+  4. Guardar CSVs por modalidade em docs/output/csv_modalidades/.
+"""
+
+import argparse
 import hashlib
 import json
 import logging
-
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+import os
+import re
+import shutil
+import sys
+import warnings
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import pandas as pd
 import requests
 from openpyxl import load_workbook
-from pathlib import Path
-from typing import Dict, Tuple, Optional, List
 
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
+# ── Constantes ───────────────────────────────────────────────────────────────
+
+_INVALID_TEAM_SUBSTRINGS = [
+    "jornada",
+    "dia",
+    "hora",
+    "local",
+    "resultado",
+    "equipa visitada",
+    "equipa visitante",
+    "|",
+]
+
+_BANNED_ROW_TOKENS = {
+    "vs",
+    "v s",
+    "v.s.",
+    "x",
+    "jornada",
+    "resultado",
+    "equipa visitada",
+    "equipa visitante",
+    "playoffs",
+    "playoff",
+    "dia",
+    "hora",
+    "local",
+}
+
+
+# ── Mapeador de estágios de playoff ──────────────────────────────────────────
+
+
+class _StageMapper:
+    """Converte texto de estágio em código de jornada, mantendo o contexto.
+
+    O contexto ('E', 'PM', 'LM') é atualizado à medida que novos cabeçalhos
+    de secção são encontrados no PDF/Excel.
+
+    Exemplos:
+        mapper = _StageMapper("E")
+        mapper.map("Quartos de final")  → "E1"
+        mapper.map("Meia Final")        → "E2"
+        mapper.map("Final")             → "E3"
+    """
+
+    def __init__(self, initial_context: Optional[str] = None):
+        self.context = initial_context  # 'E', 'PM', 'LM', ou None
+
+    def map(self, stage: str) -> Optional[str]:
+        """Mapeia texto de estágio para código de jornada."""
+        s = (stage or "").strip().lower()
+        if not s:
+            return None
+
+        # Atualizar contexto pelo conteúdo do texto
+        if any(k in s for k in ["ligu", "ligui"]):
+            self.context = "LM"
+        elif any(k in s for k in ["manuten", "manutençao", "manutenção", "promo"]):
+            self.context = "PM"
+        elif "playoff" in s and self.context is None:
+            self.context = "E"
+
+        # Mapear pela fase dentro do contexto atual
+        if self.context == "PM":
+            if s.startswith("meia") or "semi" in s:
+                return "PM1"
+            if s.startswith("final"):
+                return "PM2"
+        elif self.context == "LM":
+            return "LM"
+        elif self.context == "E":
+            if s.startswith("quartos"):
+                return "E1"
+            if s.startswith("meia") or "semi" in s:
+                return "E2"
+            if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
+                return "E3L"
+            if s.startswith("final"):
+                return "E3"
+
+        # Fallback sem contexto definido
+        if s.startswith("quartos"):
+            self.context = "E"
+            return "E1"
+        if s.startswith("meias") or "semi" in s:
+            if self.context == "PM":
+                return "PM1"
+            self.context = "E"
+            return "E2"
+        if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
+            self.context = "E"
+            return "E3L"
+        if s.startswith("final"):
+            if self.context == "PM":
+                return "PM2"
+            self.context = "E"
+            return "E3"
+
+        return None
+
+
+# ── Funções utilitárias de ficheiros e época ─────────────────────────────────
+
+
 def get_file_hash(filepath: str) -> Optional[str]:
-    """Calcula o hash MD5 de um arquivo"""
+    """Calcula o hash MD5 de um ficheiro."""
     hash_md5 = hashlib.md5()
     try:
         with open(filepath, "rb") as f:
@@ -30,70 +148,53 @@ def get_file_hash(filepath: str) -> Optional[str]:
 
 
 def files_are_identical(file1: str, file2: str) -> bool:
-    """Verifica se dois arquivos são idênticos comparando seus hashes"""
+    """Verifica se dois ficheiros são idênticos pelos hashes MD5."""
     return get_file_hash(file1) == get_file_hash(file2)
 
 
 def extract_season_from_filename(filename: str) -> str:
-    """Extrai a época/temporada do nome do arquivo Excel"""
-    # Procura padrões como "24_25", "2024_25", "24-25", "2024-25", etc.
-    import re
-
-    # Padrão para capturar anos no formato XX_XX ou XXXX_XX
-    pattern = r"(\d{2,4})[_-](\d{2})"
-    match = re.search(pattern, filename)
-
+    """Extrai a época no formato 'YY_YY' do nome do ficheiro."""
+    match = re.search(r"(\d{2,4})[_-](\d{2})", filename)
     if match:
         year1, year2 = match.groups()
-        # Se o primeiro ano tem 4 dígitos, usa os últimos 2
         if len(year1) == 4:
             year1 = year1[-2:]
         return f"{year1}_{year2}"
 
-    # Se não encontrar o padrão, tenta extrair apenas o ano
-    year_pattern = r"(\d{4})"
-    year_match = re.search(year_pattern, filename)
+    year_match = re.search(r"(\d{4})", filename)
     if year_match:
-        year = year_match.group(1)
-        return year[-2:]  # Retorna os últimos 2 dígitos
+        return year_match.group(1)[-2:]
 
-    return ""  # Retorna string vazia se não encontrar nada
+    return ""
 
 
 def normalize_results_url(url: str) -> str:
-    """Normaliza links comuns (Google Sheets/Drive, OneDrive/SharePoint) para download direto em XLSX quando possível."""
+    """Normaliza links comuns (Google Sheets/Drive, OneDrive) para download direto em XLSX."""
     if not url:
         return url
-
     try:
         lower = url.lower()
 
-        # Google Sheets -> exportar como xlsx
         if "docs.google.com/spreadsheets" in lower:
-            # Formato: https://docs.google.com/spreadsheets/d/<ID>/edit#... -> export?format=xlsx
             m = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", url)
             if m:
-                file_id = m.group(1)
-                return f"https://docs.google.com/spreadsheets/d/{file_id}/export?format=xlsx"
+                return f"https://docs.google.com/spreadsheets/d/{m.group(1)}/export?format=xlsx"
 
-        # Google Drive file -> uc?export=download
         if "drive.google.com" in lower:
             m = re.search(r"/file/d/([a-zA-Z0-9-_]+)/", url)
             if m:
-                file_id = m.group(1)
-                return f"https://drive.google.com/uc?export=download&id={file_id}"
+                return f"https://drive.google.com/uc?export=download&id={m.group(1)}"
             m = re.search(r"[?&]id=([a-zA-Z0-9-_]+)", url)
             if m:
-                file_id = m.group(1)
-                return f"https://drive.google.com/uc?export=download&id={file_id}"
+                return f"https://drive.google.com/uc?export=download&id={m.group(1)}"
 
-        # OneDrive curto 1drv.ms -> ?download=1
         if "1drv.ms" in lower:
-            return url + ("&download=1" if "?" in url else "?download=1")
+            sep = "&" if "?" in url else "?"
+            return f"{url}{sep}download=1"
 
-        # OneDrive/SharePoint -> adicionar download=1
         if "sharepoint.com" in lower or "onedrive.live.com" in lower:
-            return url + ("&download=1" if "?" in url else "?download=1")
+            sep = "&" if "?" in url else "?"
+            return f"{url}{sep}download=1"
 
     except Exception as e:
         logging.error(f"Erro ao normalizar URL '{url}': {e}", exc_info=True)
@@ -102,18 +203,15 @@ def normalize_results_url(url: str) -> str:
 
 
 def download_results_excel(url: str, dest_dir: Optional[Path] = None) -> Path:
-    """Descarrega o ficheiro de resultados para o diretório atual (ou dado) e devolve o caminho."""
+    """Descarrega o ficheiro de resultados e devolve o caminho."""
     dest_dir = dest_dir or Path(".")
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    # Nome base a partir do URL
     basename = Path(re.sub(r"[?#].*$", "", url)).name or "Resultados_Taca_UA.xlsx"
-    # Garantir extensão .xlsx
     if not basename.lower().endswith(".xlsx"):
         basename += ".xlsx"
 
     target = dest_dir / basename
-
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     with requests.get(url, headers=headers, stream=True, timeout=60) as r:
         r.raise_for_status()
@@ -121,12 +219,11 @@ def download_results_excel(url: str, dest_dir: Optional[Path] = None) -> Path:
             for chunk in r.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
-
     return target
 
 
 def _parse_season_tokens(text: str) -> Optional[Tuple[int, int]]:
-    """Extrai tokens de época do texto, devolvendo (ano_inicial, ano_final) em forma completa (ex.: 2024, 2025)."""
+    """Extrai (ano_inicial, ano_final) como inteiros de 4 dígitos."""
     if not text:
         return None
     m = re.search(r"(\d{2,4})[_-](\d{2})", text)
@@ -134,13 +231,9 @@ def _parse_season_tokens(text: str) -> Optional[Tuple[int, int]]:
         return None
     y1, y2 = m.groups()
     try:
-        y1i = int(y1[-2:])  # usar últimos 2 dígitos se vier 4
-        y2i = int(y2)
-        # Normalizar para base 2000 para ordenação consistente
+        y1i, y2i = int(y1[-2:]), int(y2)
         start = 2000 + y1i if y1i < 100 else y1i
         end = 2000 + y2i if y2i < 100 else y2i
-        # Se o intervalo de dois dígitos cruza o século (ex.: 99_00), somar 100 ao ano final
-        # Regra clara: quando end < start, end += 100
         if end < start:
             end += 100
         return (start, end)
@@ -149,143 +242,103 @@ def _parse_season_tokens(text: str) -> Optional[Tuple[int, int]]:
 
 
 def detect_latest_season_from_sheet_names(sheet_names: List[str]) -> Optional[str]:
-    """Deteta a época mais recente com base nos nomes das folhas (ex.: '... 24_25')."""
+    """Devolve a época mais recente encontrada nos nomes das folhas."""
     best: Optional[Tuple[int, int]] = None
     for name in sheet_names:
         tokens = _parse_season_tokens(str(name))
-        if tokens:
-            if best is None or tokens > best:
-                best = tokens
+        if tokens and (best is None or tokens > best):
+            best = tokens
     if not best:
         return None
-    # Voltar a formato curto 24_25
-    y1_short = str(best[0])[-2:]
-    y2_short = str(best[1])[-2:]
-    return f"{y1_short}_{y2_short}"
+    return f"{str(best[0])[-2:]}_{str(best[1])[-2:]}"
 
 
 def choose_sheets_for_season(
     sheet_names: List[str], season: Optional[str]
 ) -> List[str]:
-    """Filtra folhas a processar pela época. Se nenhuma época for encontrada, devolve todas."""
+    """Filtra folhas pela época; se nenhuma for encontrada, devolve todas."""
     if not season:
-        # Ver se pelo menos alguma folha tem época; se sim, escolher a mais recente
         detected = detect_latest_season_from_sheet_names(sheet_names)
         if not detected:
             return list(sheet_names)
         season = detected
 
-    # Usar regex com word boundaries para evitar falsos positivos
     pattern = re.compile(r"\b" + re.escape(season) + r"\b", re.IGNORECASE)
     selected = [s for s in sheet_names if pattern.search(str(s))]
-    # Se não encontrar nenhuma com a época explícita, processar todas (compatibilidade)
     return selected if selected else list(sheet_names)
 
 
 def current_season_token(today: Optional[datetime] = None) -> str:
-    """Calcula a época atual no formato 'YY_YY' com base na data atual.
-
-    Regra: épocas começam em agosto. De ago a dez -> ano_atual_ano+1; de jan a jul -> ano-1_ano.
-    """
+    """Calcula a época atual no formato 'YY_YY'. Épocas começam em agosto."""
     d = today or datetime.today()
-    year = d.year
-    month = d.month
+    year, month = d.year, d.month
     if month >= 8:
-        y1 = year % 100
-        y2 = (year + 1) % 100
+        y1, y2 = year % 100, (year + 1) % 100
     else:
-        y1 = (year - 1) % 100
-        y2 = year % 100
+        y1, y2 = (year - 1) % 100, year % 100
     return f"{y1:02d}_{y2:02d}"
 
 
 def validate_and_fix_date_for_season(date_val, season: str) -> datetime:
-    """Valida e corrige datas que estão fora do intervalo esperado para a época.
+    """Valida e tenta corrigir datas fora do intervalo da época desportiva.
 
-    Época desportiva: setembro do primeiro ano até junho do segundo ano.
-    Se a data estiver fora deste intervalo, tenta corrigir trocando mês 01 por 10.
-
-    Args:
-        date_val: Data a validar (datetime ou Timestamp)
-        season: Época no formato 'YY_YY' (ex: '25_26')
-
-    Returns:
-        Data corrigida se necessário, ou a data original se estiver válida
+    Intervalo válido: setembro do 1.º ano até junho do 2.º ano.
+    Corrige casos comuns de inversão de mês (01↔10, ano errado).
     """
     if not isinstance(date_val, (datetime, pd.Timestamp)):
         return date_val
-
     if not season or "_" not in season:
         return date_val
 
     try:
-        # Extrair anos da época
         parts = season.split("_")
-        year1 = 2000 + int(parts[0])  # Ex: 25 -> 2025
-        year2 = 2000 + int(parts[1])  # Ex: 26 -> 2026
+        year1, year2 = 2000 + int(parts[0]), 2000 + int(parts[1])
+        start_date = datetime(year1, 9, 1)
+        end_date = datetime(year2, 6, 30)
 
-        # Definir intervalo válido: setembro do year1 até junho do year2
-        start_date = datetime(year1, 9, 1)  # 1 de setembro
-        end_date = datetime(year2, 6, 30)  # 30 de junho
-
-        # Verificar se a data está no intervalo válido
         if start_date <= date_val <= end_date:
-            return date_val  # Data válida, não precisa correção
+            return date_val
 
-        # Data fora do intervalo - tentar corrigir
-        # Caso 1: mês 01 (janeiro) do year1 em vez de 10 (outubro) do year1
-        # Ex: 2025-01-27 deveria ser 2025-10-27 para época 25_26
+        # Caso 1: mês 01 de year1 → deveria ser mês 10 de year1
         if date_val.month == 1 and date_val.year == year1:
             corrected = date_val.replace(month=10)
-            print(
-                f"  [!] Data corrigida: {date_val.strftime('%Y-%m-%d')} -> {corrected.strftime('%Y-%m-%d')} (janeiro -> outubro)"
+            logging.info(
+                f"  [!] Data corrigida: {date_val:%Y-%m-%d} → {corrected:%Y-%m-%d} (jan→out)"
             )
             return corrected
 
-        # Caso 1b: mês 12 (dezembro) do year2 em vez de year1
-        # Ex: 2026-12-17 deveria ser 2025-12-17 para época 25_26
+        # Caso 1b: mês 12 de year2 → deveria ser mês 12 de year1
         if date_val.month == 12 and date_val.year == year2:
             corrected = date_val.replace(year=year1)
             if start_date <= corrected <= end_date:
-                print(
-                    f"  [!] Data corrigida: {date_val.strftime('%Y-%m-%d')} -> {corrected.strftime('%Y-%m-%d')} (dezembro year2 -> dezembro year1)"
+                logging.info(
+                    f"  [!] Data corrigida: {date_val:%Y-%m-%d} → {corrected:%Y-%m-%d} (dez year2→year1)"
                 )
                 return corrected
 
-        # Caso 2: mês 01 (janeiro) do year2 em vez de 10 (outubro) do year1
-        # (menos provável, mas possível se o ano também estiver errado)
+        # Caso 2: mês 01 de year2 → deveria ser mês 10 de year1
         if date_val.month == 1 and date_val.year == year2:
-            # Trocar janeiro do year2 por outubro do year1
             corrected = date_val.replace(year=year1, month=10)
-            print(
-                f"  [!] Data corrigida: {date_val.strftime('%Y-%m-%d')} -> {corrected.strftime('%Y-%m-%d')} (janeiro year2 -> outubro year1)"
+            logging.info(
+                f"  [!] Data corrigida: {date_val:%Y-%m-%d} → {corrected:%Y-%m-%d} (jan year2→out year1)"
             )
             return corrected
 
-        # Caso 3: mês 10 (outubro) em vez de 01 (janeiro) - verificar se faz sentido
-        if date_val.month == 10 and date_val.year == year1:
-            # Verificar se deveria ser janeiro do year2
-            candidate = date_val.replace(year=year2, month=1)
-            if candidate <= end_date:
-                # Só corrige se a data resultante ainda estiver no intervalo
-                print(
-                    f"  [!] Data corrigida: {date_val.strftime('%Y-%m-%d')} -> {candidate.strftime('%Y-%m-%d')} (outubro year1 -> janeiro year2)"
-                )
-                return candidate
-
-        # Outros casos: apenas avisar mas não corrigir automaticamente
-        print(
-            f"  [!] Data fora do intervalo esperado ({start_date.strftime('%Y-%m-%d')} a {end_date.strftime('%Y-%m-%d')}): {date_val.strftime('%Y-%m-%d')}"
+        logging.warning(
+            f"  [!] Data fora do intervalo ({start_date:%Y-%m-%d} a {end_date:%Y-%m-%d}): {date_val:%Y-%m-%d}"
         )
         return date_val
 
     except Exception as e:
-        logging.error(f"  \[!\] Erro ao validar data: {e}")
+        logging.error(f"  [!] Erro ao validar data: {e}")
         return date_val
 
 
+# ── Processador principal ─────────────────────────────────────────────────────
+
+
 class ExcelProcessor:
-    """Classe para processar ficheiros Excel de resultados desportivos."""
+    """Processa ficheiros Excel de resultados desportivos da Taça UA."""
 
     def __init__(
         self,
@@ -299,28 +352,27 @@ class ExcelProcessor:
         self.output_dir.mkdir(exist_ok=True)
         self.xls = pd.ExcelFile(file_path)
 
-        # Extrai a época do nome do arquivo
+        # Época
         self.season = season_override or extract_season_from_filename(
             str(self.file_path)
         )
-        # Fallback: tentar detetar pelas folhas; se ainda assim vazio, usar época corrente
         if not self.season:
-            try:
-                detected = detect_latest_season_from_sheet_names(
-                    list(map(str, self.xls.sheet_names))
-                )
-            except Exception:
-                detected = None
+            detected = detect_latest_season_from_sheet_names(
+                list(map(str, self.xls.sheet_names))
+            )
             self.season = detected or current_season_token()
 
-        # Lista de folhas alvo (opcional)
+        # Raiz do repositório e sys.path (feito uma vez aqui)
+        self._repo_root = Path(__file__).resolve().parents[1]
+        _src = self._repo_root / "src"
+        if str(_src) not in sys.path:
+            sys.path.insert(0, str(_src))
+
         self._sheets_to_process = sheets_to_process
 
-        # Padrões regex compilados para melhor performance
         self.divisao_pattern = re.compile(r"(\d)ª DIVISÃO")
         self.grupo_pattern = re.compile(r"GRUPO [A-Z]")
 
-        # Cabeçalhos padrão
         self.base_headers = [
             "Jornada",
             "Dia",
@@ -333,29 +385,155 @@ class ExcelProcessor:
             "Falta de Comparência",
         ]
 
+    # ── Cache de calendários ──────────────────────────────────────────────────
+
+    def _get_calendarios(self):
+        """Carrega (e faz cache) calendário PDF e configuração de cursos.
+
+        O carregamento acontece apenas uma vez por instância, reutilizando
+        os resultados em _assign_date_placeholders e _assign_venue_placeholders.
+
+        Returns:
+            (calendario, config_cursos, calendario_playoffs)
+        """
+        if hasattr(self, "_cached_cal"):
+            return self._cached_cal, self._cached_config, self._cached_cal_playoffs
+
+        from calendario_parser import (
+            carregar_calendario_epoca,
+            carregar_calendario_playoffs,
+            carregar_config_cursos,
+            normalizar_nome_equipa,
+        )
+
+        self._normalizar = normalizar_nome_equipa
+        self._cached_config = carregar_config_cursos(self._repo_root)
+        self._cached_cal = carregar_calendario_epoca(
+            self.season, repo_root=self._repo_root
+        )
+        self._cached_cal_playoffs = carregar_calendario_playoffs(
+            self.season, repo_root=self._repo_root
+        )
+
+        return self._cached_cal, self._cached_config, self._cached_cal_playoffs
+
+    # ── Helpers estáticos de playoff ──────────────────────────────────────────
+
+    @staticmethod
+    def _extract_teams(
+        row: pd.Series,
+        col_home: Optional[str],
+        col_away: Optional[str],
+        df_columns,
+        extra_banned: Optional[set] = None,
+    ) -> Tuple[str, str]:
+        """Extrai par de equipas de uma linha, com fallback robusto.
+
+        Tenta primeiro pelas colunas identificadas (col_home / col_away).
+        Se falhar, varre a linha inteira e escolhe os dois primeiros textos
+        relevantes.
+        """
+        banned = _BANNED_ROW_TOKENS | (extra_banned or set())
+        cols_lower = {str(c).lower() for c in df_columns}
+
+        t1 = (
+            str(row.get(col_home)).strip()
+            if col_home and pd.notna(row.get(col_home))
+            else ""
+        )
+        t2 = (
+            str(row.get(col_away)).strip()
+            if col_away and pd.notna(row.get(col_away))
+            else ""
+        )
+
+        if t1 and t2:
+            return t1, t2
+
+        texts: List[str] = []
+        for c in df_columns:
+            val = row.get(c)
+            if pd.isna(val):
+                continue
+            s = str(val).strip()
+            if not s:
+                continue
+            sl, cl = s.lower(), str(c).lower()
+            if cl.startswith(("jornada", "dia", "hora", "local")):
+                continue
+            if "result" in cl or sl in banned or "|" in s:
+                continue
+            if s.isdigit() and len(s) <= 2:
+                continue
+            if sl.startswith(("quartos", "meias", "final")) or (
+                "3" in sl and "4" in sl
+            ):
+                continue
+            if sl in cols_lower:
+                continue
+            texts.append(s)
+
+        if len(texts) >= 2:
+            return texts[0] or t1, texts[-1] or t2
+        if len(texts) == 1:
+            return (t1 or texts[0]), t2
+        return t1, t2
+
+    @staticmethod
+    def _extract_lp_number(header_text: str) -> Optional[str]:
+        """Extrai o número de jornada de liguilha do cabeçalho."""
+        if not header_text:
+            return None
+        m = re.search(r"jornada\s*(\d+)", header_text, flags=re.I)
+        if m:
+            return m.group(1)
+        if re.match(r"^\d+$", header_text.strip()):
+            return header_text.strip()
+        return None
+
+    @staticmethod
+    def _is_valid_team(name: str) -> bool:
+        """Devolve False se o nome da equipa for inválido (cabeçalho, etc.)."""
+        if not name:
+            return False
+        nl = name.lower()
+        return not any(p in nl for p in _INVALID_TEAM_SUBSTRINGS)
+
+    @staticmethod
+    def _find_col(df_columns, *substrings: str) -> Optional[str]:
+        """Devolve o primeiro nome de coluna que contenha algum dos substrings."""
+        for c in df_columns:
+            cl = str(c).lower()
+            if any(s in cl for s in substrings):
+                return c
+        return None
+
+    # ── Células vermelhas (faltas de comparência) ─────────────────────────────
+
     def is_red_cell(self, cell) -> bool:
         """Verifica se uma célula tem fonte vermelha."""
         if not (cell.font.color and cell.value is not None):
             return False
-
         if hasattr(cell.font.color, "rgb") and cell.font.color.rgb:
-            color = str(cell.font.color.rgb).upper()
-            return color in ["FFFF0000", "FF0000", "FFCC0000", "CC0000"]
+            return str(cell.font.color.rgb).upper() in {
+                "FFFF0000",
+                "FF0000",
+                "FFCC0000",
+                "CC0000",
+            }
         return False
 
     def extract_red_cells(self, sheet_name: str) -> Dict[int, str]:
-        """Extrai células vermelhas de uma folha."""
+        """Extrai posições de células vermelhas (faltas) de uma folha."""
         wb = load_workbook(self.file_path, data_only=True)
         ws = wb[sheet_name]
-        linhas_faltas = {}
+        linhas_faltas: Dict[int, str] = {}
 
         for row in ws.iter_rows():
             for cell in row:
-                # Procura apenas nas colunas E e I (colunas 5 e 9, das equipas)
-                # Verifica se não é uma célula mesclada e se está nas colunas corretas
                 if (
                     hasattr(cell, "column")
-                    and cell.column in [5, 9]
+                    and cell.column in (5, 9)
                     and self.is_red_cell(cell)
                 ):
                     row_num = cell.row
@@ -366,411 +544,308 @@ class ExcelProcessor:
 
         return linhas_faltas
 
+    # ── Classificação de jornadas e equipas de playoff ────────────────────────
+
     def is_playoff_jornada(self, jornada_value) -> bool:
-        """Verifica se uma jornada é de playoff (qualquer tipo)."""
+        """Verifica se uma jornada é de playoff (E*, PM*, LM*, MP*, LP*)."""
         if not isinstance(jornada_value, str):
             return False
-
-        jornada_upper = jornada_value.upper().strip()
-
-        # Playoffs dos vencedores: E1, E2, E3L, E3
-        if jornada_upper.startswith("E") and jornada_upper[1:] in ["1", "2", "3L", "3"]:
-            return True
-
-        # Playoffs de manutenção/promoção: PM1, PM2 (compat: MP1, MP2)
-        if (
-            jornada_upper.startswith("PM") or jornada_upper.startswith("MP")
-        ) and re.match(r"^\d+$", jornada_upper[2:]):
-            return True
-
-        # Liguilhas: LM1, LM2, LM3, ... (compat: LP1, LP2, LP3, ...)
-        # Aceita qualquer número de jornadas
-        if (
-            jornada_upper.startswith("LM") or jornada_upper.startswith("LP")
-        ) and re.match(r"^\d+$", jornada_upper[2:]):
-            return True
-
-        return False
+        j = jornada_value.upper().strip()
+        if not j:
+            return False
+        return (
+            j.startswith("E")
+            or j.startswith("PM")
+            or j.startswith("MP")
+            or j.startswith("LM")
+            or j.startswith("LP")
+        )
 
     def is_playoff_team_name(self, team_name: str) -> bool:
-        """Verifica se o nome da equipa é uma legenda de playoff que deve ser removida."""
+        """Verifica se o nome é uma legenda de playoff (equipa ainda não definida)."""
         if not isinstance(team_name, str):
             return False
-
-        team_upper = team_name.upper().strip()
-
-        # Padrões de legendas de playoffs que devem ser removidas
-        # (indicam que os jogos ainda não foram definidos)
-        playoff_patterns = [
-            r"^\d+º CLASS\.",  # "1º Class.", "2º Class.", etc.
-            r"^VENCEDOR",  # "Vencedor QF1", "Vencedor SF1", etc.
-            r"^VENCIDO",  # "Vencido QF1", etc.
-            r"^FINALISTA",  # "Finalista A", etc.
-            r"^MELHOR",  # "Melhor 3º", etc.
-            r"^PIOR",  # "Pior classificado", etc.
+        t = team_name.upper().strip()
+        patterns = [
+            r"^\d+º CLASS\.",
+            r"^VENCEDOR",
+            r"^VENCIDO",
+            r"^FINALISTA",
+            r"^MELHOR",
+            r"^PIOR",
         ]
-
-        for pattern in playoff_patterns:
-            if re.search(pattern, team_upper):
-                return True
-
-        return False
+        return any(re.search(p, t) for p in patterns)
 
     def filter_playoff_games(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Remove apenas jogos que contêm legendas de playoffs nas equipas (jogos não definidos)
-        e que NÃO sejam linhas de playoff (E*/MP*/LP*). Mantém placeholders quando a jornada é de playoff.
-        """
+        """Remove jogos com legendas de playoff não definidas (exceto jornadas de playoff)."""
         if df.empty:
             return df
 
-        # Identifica linhas com legendas de playoffs (jogos não definidos)
         placeholder_mask = df["Equipa 1"].apply(self.is_playoff_team_name) | df[
             "Equipa 2"
         ].apply(self.is_playoff_team_name)
-
-        # Identifica linhas cujas jornadas já são playoffs (E*, MP*, LP*)
         jornada_is_playoff = df["Jornada"].apply(self.is_playoff_jornada)
-
-        # Remover apenas placeholders que NÃO pertençam a linhas de playoff
         remove_mask = placeholder_mask & ~jornada_is_playoff
-        filtered_df = df[~remove_mask].copy()
+        filtered = df[~remove_mask].copy()
 
-        # Log das linhas removidas para debug
         if remove_mask.any():
-            removed_count = remove_mask.sum()
-            print(
-                f"  - Removidos {removed_count} jogos de playoffs com legendas não definidas"
+            logging.info(
+                f"  - Removidos {remove_mask.sum()} jogos com legendas não definidas"
             )
 
-        # Log dos jogos de playoffs preservados
-        if not filtered_df.empty:
-            playoff_games = filtered_df[
-                filtered_df["Jornada"].apply(self.is_playoff_jornada)
-            ]
-            if not playoff_games.empty:
-                playoff_count = len(playoff_games)
-                playoff_types = playoff_games["Jornada"].unique()
-                print(
-                    f"  - Preservados {playoff_count} jogos de playoffs definidos: {list(playoff_types)}"
-                )
+        playoff_games = filtered[filtered["Jornada"].apply(self.is_playoff_jornada)]
+        if not playoff_games.empty:
+            logging.info(
+                f"  - Preservados {len(playoff_games)} jogos de playoff: "
+                f"{list(playoff_games['Jornada'].unique())}"
+            )
 
-        return filtered_df
+        return filtered
+
+    # ── Folhas de PLAYOFFS (Excel) ────────────────────────────────────────────
 
     def _detect_base_modality_for_playoffs(self, sheet_name: str) -> Optional[str]:
-        """Dada uma folha '* | PLAYOFFS', tenta descobrir a modalidade base (ex.: 'ANDEBOL MISTO')."""
+        """Descobre a modalidade base de uma folha '* | PLAYOFFS'."""
         if "|" not in sheet_name:
             return None
-        prefix = sheet_name.split("|")[0].strip()  # ex: 'ANDEBOL'
+        prefix = sheet_name.split("|")[0].strip()
 
-        # Procurar nas folhas desta workbook por nomes que comecem por este prefixo e tenham um sufixo mais específico
-        candidates: List[str] = []
-        for name in map(str, self.xls.sheet_names):
-            if name == sheet_name:
-                continue
-            if name.upper().startswith(prefix.upper() + " ") and "|" in name:
-                # Ex.: 'ANDEBOL MISTO | 1ª DIVISÃO' -> base 'ANDEBOL MISTO'
-                base = name.split("|")[0].strip()
-                candidates.append(base)
-
+        candidates = [
+            name.split("|")[0].strip()
+            for name in map(str, self.xls.sheet_names)
+            if name != sheet_name
+            and name.upper().startswith(prefix.upper() + " ")
+            and "|" in name
+        ]
         if not candidates:
-            # fallback: usa o próprio prefixo (menos desejável)
             return prefix
-
-        # Escolher o mais longo (maior especificidade), ex.: 'ANDEBOL MISTO' em vez de 'ANDEBOL'
         candidates.sort(key=len, reverse=True)
         return candidates[0]
 
     def _parse_playoffs_sheet(self, sheet_name: str) -> Optional[pd.DataFrame]:
-        """Transforma a folha de PLAYOFFS num DataFrame normalizado com jornadas E1/E2/E3L/E3, PM*, LM*."""
+        """Transforma folha de PLAYOFFS em DataFrame normalizado."""
         try:
             df_raw = pd.read_excel(self.xls, sheet_name=sheet_name)
         except Exception as e:
-            print(
-                f"Aviso: Não foi possível ler a folha de playoffs '{sheet_name}': {e}"
+            logging.warning(
+                f"Não foi possível ler a folha de playoffs '{sheet_name}': {e}"
             )
             return None
 
         if df_raw.empty:
             return None
 
-        # Detetar o contexto inicial a partir do nome da folha
+        # Contexto inicial a partir do nome da folha
         sheet_lower = sheet_name.lower()
-        initial_context = None
-        if any(
-            k in sheet_lower for k in ["manuten", "manutençao", "manutenção", "promo"]
-        ):
-            initial_context = "PM"
-        elif any(k in sheet_lower for k in ["ligu", "ligui"]):
+        if any(k in sheet_lower for k in ["ligu", "ligui"]):
             initial_context = "LM"
+        elif any(k in sheet_lower for k in ["manuten", "manutenção", "promo"]):
+            initial_context = "PM"
         else:
-            initial_context = "E"  # Playoffs de vencedores por defeito
+            initial_context = "E"
 
-        # Mapear colunas prováveis
-        cols_lower = {c: str(c).lower() for c in df_raw.columns}
-        col_first = df_raw.columns[0]
-
-        def find_col(substrs: List[str]) -> Optional[str]:
-            for c in df_raw.columns:
-                cl = str(c).lower()
-                if any(s in cl for s in substrs):
-                    return c
-            return None
-
-        col_dia = find_col(["dia"])  # opcional
-        col_hora = find_col(["hora"])  # opcional
-        col_local = find_col(["local"])  # opcional
-        col_home = (
-            find_col(["visitad"])
-            or find_col(["equipa visit"])
-            or find_col(["equipa 1"])
-        )  # equipa visitada
-        col_away = (
-            find_col(["visitant"])
-            or find_col(["equipa visitan"])
-            or find_col(["equipa 2"])
-        )  # equipa visitante
+        cols = df_raw.columns
+        col_first = cols[0]
+        col_dia = self._find_col(cols, "dia")
+        col_hora = self._find_col(cols, "hora")
+        col_local = self._find_col(cols, "local")
+        col_home = self._find_col(cols, "visitad", "equipa visit", "equipa 1")
+        col_away = self._find_col(cols, "visitant", "equipa visitan", "equipa 2")
 
         if not col_home or not col_away:
-            # tentar heurística por posições usuais
             try:
-                col_home = df_raw.columns[4]
-                col_away = (
-                    df_raw.columns[8] if len(df_raw.columns) > 8 else df_raw.columns[7]
-                )
+                col_home = col_home or (cols[4] if len(cols) > 4 else None)
+                col_away = col_away or (cols[8] if len(cols) > 8 else cols[-1])
             except Exception:
                 pass
 
-        # Helpers de mapeamento de estágios com contexto (principal E, manutenção PM, liguilha LM)
-        bracket_context = (
-            initial_context  # Usar contexto inicial detectado do nome da folha
-        )
+        # Tokens proibidos específicos desta folha
+        sheet_extra_banned = {
+            tok.strip() for tok in sheet_name.lower().split() if len(tok) > 3
+        }
 
-        def map_stage_to_jornada(stage: str) -> Optional[str]:
-            s = (stage or "").strip().lower()
-            if not s:
-                return None
-            nonlocal bracket_context
-
-            # Detetar contexto de bracket pelo nome da folha ou cabeçalho
-            # Manutenção/Promoção tem prioridade sobre outros contextos
-            if any(k in s for k in ["manuten", "manutençao", "promo"]):
-                bracket_context = "PM"
-            # Liguilha tem segunda prioridade
-            elif any(k in s for k in ["ligu", "ligui"]):
-                bracket_context = "LM"
-            # PLAYOFFS sem menção de manutenção/liguilha = playoffs de vencedores
-            elif "playoff" in s and bracket_context is None:
-                bracket_context = "E"
-
-            # Mapeamento de estágios baseado no contexto
-            if bracket_context == "PM":
-                # Playoff de Manutenção: PM1 = Meias Finais, PM2 = Final
-                if s.startswith("meias") or "semi" in s:
-                    return "PM1"
-                if s.startswith("final"):
-                    return "PM2"
-            elif bracket_context == "LM":
-                # Liguilha: LM + número da jornada (será extraído depois)
-                return "LM"
-            elif bracket_context == "E":
-                # Playoffs de vencedores: E1, E2, E3L, E3
-                if s.startswith("quartos"):
-                    return "E1"
-                if s.startswith("meias") or "semi" in s:
-                    return "E2"
-                if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
-                    return "E3L"
-                if s.startswith("final"):
-                    return "E3"
-
-            # Fallback: tentar detetar pelo padrão do texto
-            if s.startswith("quartos") and bracket_context != "PM":
-                bracket_context = "E"
-                return "E1"
-            if s.startswith("meias") or "semi" in s:
-                if bracket_context == "PM":
-                    return "PM1"
-                elif bracket_context == "E":
-                    return "E2"
-            if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
-                bracket_context = "E"
-                return "E3L"
-            if s.startswith("final"):
-                if bracket_context == "PM":
-                    return "PM2"
-                elif bracket_context == "E":
-                    return "E3"
-
-            return None
-
-        def extract_teams_from_row(row: pd.Series) -> Tuple[str, str]:
-            # Tenta pelos nomes de coluna mapeados
-            t1 = (
-                str(row.get(col_home)).strip()
-                if col_home and pd.notna(row.get(col_home))
-                else ""
-            )
-            t2 = (
-                str(row.get(col_away)).strip()
-                if col_away and pd.notna(row.get(col_away))
-                else ""
-            )
-            # Fallback robusto: procurar os dois primeiros textos relevantes na linha
-            if not t1 or not t2:
-                texts: List[str] = []
-                banned_tokens = {
-                    "vs",
-                    "v s",
-                    "v.s.",
-                    "x",
-                    "jornada",
-                    "resultado",
-                    "equipa visitada",
-                    "equipa visitante",
-                    "playoffs",
-                    "playoff",
-                    "dia",
-                    "hora",
-                    "local",
-                }
-                # Adicionar também o nome da modalidade aos banned tokens
-                sheet_tokens = sheet_name.lower().split()
-                for token in sheet_tokens:
-                    if len(token) > 3:  # Ignorar palavras muito curtas como "de"
-                        banned_tokens.add(token.strip())
-
-                colnames_lower = {str(c).lower() for c in df_raw.columns}
-                for c in df_raw.columns:
-                    val = row.get(c)
-                    if pd.isna(val):
-                        continue
-                    s = str(val).strip()
-                    if not s:
-                        continue
-                    s_low = s.lower()
-                    c_low = str(c).lower()
-                    if c_low.startswith(("jornada", "dia", "hora", "local")):
-                        continue
-                    if "result" in c_low or s_low in banned_tokens:
-                        continue
-                    # Ignorar números simples (números de jornada)
-                    if s.isdigit() and len(s) <= 2:
-                        continue
-                    # Ignorar se o texto contém o nome da modalidade ou pipeline
-                    if any(token in s_low for token in banned_tokens) or "|" in s:
-                        continue
-                    if s_low.startswith(("quartos", "meias", "final")) or (
-                        "3" in s_low and "4" in s_low
-                    ):
-                        continue
-                    if s_low in {cn.lower() for cn in map(str, df_raw.columns)}:
-                        continue
-                    texts.append(s)
-                if len(texts) >= 2:
-                    t1 = texts[0] or t1
-                    t2 = texts[-1] or t2
-                elif len(texts) == 1:
-                    t1 = t1 or texts[0]
-            return t1, t2
-
+        mapper = _StageMapper(initial_context)
         rows: List[dict] = []
-        current_stage = None  # guarda código (E1/E2/E3L/E3/MP1/MP2/LP)
+        current_stage: Optional[str] = None
 
         for _, row in df_raw.iterrows():
-            header_cell = row.get(col_first)
-            header_text = str(header_cell).strip() if pd.notna(header_cell) else ""
+            header_text = (
+                str(row.get(col_first, "")).strip()
+                if pd.notna(row.get(col_first))
+                else ""
+            )
 
-            # Troca de bloco/estágio
-            maybe_stage = map_stage_to_jornada(header_text)
+            maybe_stage = mapper.map(header_text)
             if maybe_stage:
                 current_stage = maybe_stage
-                # não dar continue aqui; a mesma linha pode já conter equipas (ex.: "Quartos de Final" + par)
 
-            # Para liguilha: 'Jornada 1' ou apenas '1' etc. no primeiro campo
-            lp_number = None
-            if (current_stage == "LM") and header_text:
-                # Tentar extrair número da jornada de diferentes formatos
-                m = re.search(r"jornada\s*(\d+)", header_text, flags=re.I)
-                if m:
-                    lp_number = m.group(1)
-                elif header_text.isdigit():
-                    # Se for apenas um número (1, 2, 3, etc.)
-                    lp_number = header_text
-                elif re.match(r"^\d+$", header_text.strip()):
-                    lp_number = header_text.strip()
+            lp_number = (
+                self._extract_lp_number(header_text) if current_stage == "LM" else None
+            )
 
-            # Ler equipas (robusto)
-            team1, team2 = extract_teams_from_row(row)
+            team1, team2 = self._extract_teams(
+                row, col_home, col_away, cols, sheet_extra_banned
+            )
 
             if not team1 and not team2:
-                continue  # linha informativa/vazia
-
-            # Validação adicional: ignorar se as equipas forem inválidas (cabeçalhos, etc.)
-            invalid_team_patterns = [
-                "jornada",
-                "dia",
-                "hora",
-                "local",
-                "resultado",
-                "equipa visitada",
-                "equipa visitante",
-                "|",  # Contém pipe (separador de título)
-            ]
-            team1_lower = team1.lower() if team1 else ""
-            team2_lower = team2.lower() if team2 else ""
-
-            if any(pattern in team1_lower for pattern in invalid_team_patterns):
                 continue
-            if any(pattern in team2_lower for pattern in invalid_team_patterns):
+            if not self._is_valid_team(team1) or not self._is_valid_team(team2):
                 continue
 
-            # Determinar Jornada
+            # Determinar código de jornada
             if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:
                 jornada_val = current_stage
             elif current_stage == "LM" and lp_number:
                 jornada_val = f"LM{lp_number}"
             else:
-                # fallback: se o próprio header_text for algo como 'E1' etc.
                 jornada_val = (
                     header_text if self.is_playoff_jornada(header_text) else ""
                 )
 
-            out_row = {
-                "Jornada": jornada_val,
-                "Dia": str(row.get(col_dia)) if col_dia else "",
-                "Hora": str(row.get(col_hora)) if col_hora else "",
-                "Local": str(row.get(col_local)) if col_local else "",
-                "Equipa 1": team1,
-                "Golos 1": pd.NA,
-                "Golos 2": pd.NA,
-                "Equipa 2": team2,
-                "Falta de Comparência": "",
-            }
-            rows.append(out_row)
+            rows.append(
+                {
+                    "Jornada": jornada_val,
+                    "Dia": str(row.get(col_dia)) if col_dia else "",
+                    "Hora": str(row.get(col_hora)) if col_hora else "",
+                    "Local": str(row.get(col_local)) if col_local else "",
+                    "Equipa 1": team1,
+                    "Golos 1": pd.NA,
+                    "Golos 2": pd.NA,
+                    "Equipa 2": team2,
+                    "Falta de Comparência": "",
+                }
+            )
 
         if not rows:
             return None
 
         df_out = pd.DataFrame(rows)
-        # Manter apenas linhas com Jornada válida de playoff
         df_out = df_out[df_out["Jornada"].apply(self.is_playoff_jornada)]
         return df_out.reset_index(drop=True)
+
+    def _extract_playoffs_from_dataframe(
+        self, df: pd.DataFrame
+    ) -> Optional[pd.DataFrame]:
+        """Extrai blocos de playoffs embutidos numa folha regular (Quartos, Meias, Final, …)."""
+        if df is None or df.empty:
+            return None
+
+        cols = df.columns
+        col_first = cols[0]
+        col_dia = self._find_col(cols, "dia")
+        col_hora = self._find_col(cols, "hora")
+        col_local = self._find_col(cols, "local")
+        col_home = self._find_col(cols, "visitad", "equipa visitad", "equipa 1")
+        col_away = self._find_col(cols, "visitant", "equipa visitan", "equipa 2")
+
+        if not col_home or not col_away:
+            try:
+                col_home = col_home or (cols[4] if len(cols) > 4 else None)
+                col_away = col_away or (cols[-1] if len(cols) > 5 else None)
+            except Exception:
+                pass
+
+        if not col_home or not col_away:
+            return None
+
+        mapper = _StageMapper()
+        rows: List[dict] = []
+        current_stage: Optional[str] = None
+
+        for _, row in df.iterrows():
+            # Detetar mudança de contexto por células com pipe ("|")
+            for val in row.values:
+                if pd.notna(val) and "|" in str(val):
+                    section_text = str(val).lower()
+                    if any(k in section_text for k in ["ligu", "ligui"]):
+                        mapper.context = "LM"
+                    elif any(
+                        k in section_text for k in ["manuten", "manutenção", "promo"]
+                    ):
+                        mapper.context = (
+                            "LM"
+                            if any(k in section_text for k in ["ligu", "ligui"])
+                            else "PM"
+                        )
+                    elif "playoff" in section_text:
+                        mapper.context = "E"
+                    break  # só precisa de um match
+
+            header_text = (
+                str(row.get(col_first, "")).strip()
+                if pd.notna(row.get(col_first))
+                else ""
+            )
+
+            # Ignorar linhas de cabeçalho de secção (contêm "|")
+            if any(pd.notna(v) and "|" in str(v) for v in row.values):
+                continue
+
+            maybe_stage = mapper.map(header_text)
+            if maybe_stage:
+                current_stage = maybe_stage
+
+            lp_number = (
+                self._extract_lp_number(header_text) if current_stage == "LM" else None
+            )
+
+            team1, team2 = self._extract_teams(row, col_home, col_away, cols)
+
+            if not team1 and not team2:
+                continue
+            if not self._is_valid_team(team1) or not self._is_valid_team(team2):
+                continue
+
+            # Determinar código de jornada
+            if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:
+                jornada_val = current_stage
+            elif current_stage == "LM" and lp_number:
+                jornada_val = f"LM{lp_number}"
+            else:
+                jornada_val = (
+                    header_text if self.is_playoff_jornada(header_text) else ""
+                )
+
+            if not jornada_val:
+                continue
+
+            rows.append(
+                {
+                    "Jornada": jornada_val,
+                    "Dia": str(row.get(col_dia)) if col_dia else "",
+                    "Hora": str(row.get(col_hora)) if col_hora else "",
+                    "Local": str(row.get(col_local)) if col_local else "",
+                    "Equipa 1": team1,
+                    "Golos 1": pd.NA,
+                    "Golos 2": pd.NA,
+                    "Equipa 2": team2,
+                    "Falta de Comparência": "",
+                }
+            )
+
+        if not rows:
+            return None
+
+        df_out = pd.DataFrame(rows)
+        df_out = df_out[df_out["Jornada"].apply(self.is_playoff_jornada)]
+        df_out = df_out.drop_duplicates(
+            subset=["Jornada", "Equipa 1", "Equipa 2"]
+        ).reset_index(drop=True)
+        return df_out
 
     def _append_playoffs_to_target_csv(
         self, base_modality: str, playoffs_df: pd.DataFrame
     ):
-        """Anexa as linhas de playoffs ao CSV da modalidade (no fim)."""
-        # Construir caminho do CSV alvo
-        if self.season:
-            target_filename = f"{base_modality}_{self.season}.csv"
-        else:
-            target_filename = f"{base_modality}.csv"
-        target_path = self.output_dir / target_filename
+        """Anexa linhas de playoffs ao CSV da modalidade alvo."""
+        filename = (
+            f"{base_modality}_{self.season}.csv"
+            if self.season
+            else f"{base_modality}.csv"
+        )
+        target_path = self.output_dir / filename
 
-        # Se não existir, criar com cabeçalho conforme base_headers
         if not target_path.exists():
-            empty = pd.DataFrame(columns=self.base_headers)
-            empty.to_csv(target_path, index=False)
+            pd.DataFrame(columns=self.base_headers).to_csv(target_path, index=False)
 
         try:
             base_df = pd.read_csv(target_path)
@@ -778,28 +853,28 @@ class ExcelProcessor:
             base_df = pd.DataFrame(columns=self.base_headers)
 
         base_df = self._coerce_integer_columns(base_df)
-
-        # Remover coluna 'Época' antiga se existir, para padronizar saída
         if "Época" in base_df.columns:
-            base_df = base_df.drop(columns=["Época"])  # normalizar
+            base_df = base_df.drop(columns=["Época"])
 
-        # Garantir que playoffs_df possui todas as colunas do base_df
+        # Inicializar colunas de metadados se não existirem
+        playoffs_df = playoffs_df.copy()
+        if "Data_Placeholder" not in playoffs_df.columns:
+            playoffs_df["Data_Placeholder"] = False
+        if "Fonte_Data" not in playoffs_df.columns:
+            playoffs_df["Fonte_Data"] = ""
+            
+        playoffs_df = self._assign_date_placeholders(playoffs_df, base_modality)
+        playoffs_df = self._assign_venue_placeholders(playoffs_df, base_modality)
+
         for c in base_df.columns:
             if c not in playoffs_df.columns:
-                # Preencher defaults: NA para golos, vazio para strings
-                if c in ("Golos 1", "Golos 2"):
-                    playoffs_df[c] = pd.NA
-                else:
-                    playoffs_df[c] = ""
-        # Ordem de colunas igual ao base_df
+                playoffs_df[c] = pd.NA if c in ("Golos 1", "Golos 2") else ""
         playoffs_df = playoffs_df[base_df.columns]
         playoffs_df = self._coerce_integer_columns(playoffs_df)
 
-        # Concatenar mantendo ordem
         combined = pd.concat([base_df, playoffs_df], ignore_index=True)
         combined = self._coerce_integer_columns(combined)
-        # Evitar duplicados caso este método seja chamado várias vezes
-        # Chave para duplicados: tudo exceto Data_Placeholder e Falta de Comparência
+
         dup_cols = [
             c
             for c in self.base_headers
@@ -809,464 +884,131 @@ class ExcelProcessor:
         combined.to_csv(target_path, index=False)
         logging.info(f"  - Playoffs adicionados ao ficheiro: {target_path}")
 
-    def _extract_playoffs_from_dataframe(
-        self, df: pd.DataFrame
-    ) -> Optional[pd.DataFrame]:
-        """Tenta extrair blocos de playoffs embutidos numa folha regular de modalidade.
-        Mapeia cabeçalhos como 'Quartos de Final', 'Meias Finais', '3º/4º Lugar', 'Final',
-        'Manutenção' e 'Liguilha/Jornada N' para jornadas E1/E2/E3L/E3, MP1/MP2, LP1-3.
-        """
-        if df is None or df.empty:
-            return None
-
-        # A primeira coluna costuma conter numeração de jornada ou cabeçalhos de estágio
-        col_first = df.columns[0]
-
-        def find_col(substrs: List[str]) -> Optional[str]:
-            for c in df.columns:
-                cl = str(c).lower()
-                if any(s in cl for s in substrs):
-                    return c
-            return None
-
-        col_dia = find_col(["dia"])  # opcional
-        col_hora = find_col(["hora"])  # opcional
-        col_local = find_col(["local"])  # opcional
-        col_home = find_col(["visitad", "equipa visitad", "equipa 1"])  # equipa casa
-        col_away = find_col(["visitant", "equipa visitan", "equipa 2"])  # visitante
-
-        # Fallback posicional: se não encontrou pelos nomes, tenta colunas típicas (4 e última)
-        if not col_home or not col_away:
-            try:
-                cols = list(df.columns)
-                if not col_home and len(cols) > 4:
-                    col_home = cols[4]
-                if not col_away and len(cols) > 5:
-                    col_away = cols[-1]
-            except Exception:
-                pass
-
-        # Se ainda assim não conseguir identificar colunas de equipa, abortar
-        if not col_home or not col_away:
-            return None
-
-        # Helpers de mapeamento de estágios com contexto (E/PM/LM)
-        bracket_context = None  # 'E', 'PM', 'LM'
-
-        def map_stage_to_jornada(stage: str) -> Optional[str]:
-            s = (stage or "").strip().lower()
-            if not s:
-                return None
-            nonlocal bracket_context
-
-            # Detetar contexto de bracket pelo nome da folha ou cabeçalho
-            # Manutenção/Promoção tem prioridade sobre outros contextos
-            if any(k in s for k in ["manuten", "manutençao", "promo"]):
-                bracket_context = "PM"
-            # Liguilha tem segunda prioridade
-            elif any(k in s for k in ["ligu", "ligui"]):
-                bracket_context = "LM"
-            # PLAYOFFS sem menção de manutenção/liguilha = playoffs de vencedores
-            elif "playoff" in s and bracket_context is None:
-                bracket_context = "E"
-
-            # Mapeamento de estágios baseado no contexto
-            if bracket_context == "PM":
-                # Playoff de Manutenção: PM1 = Meias Finais, PM2 = Final
-                if s.startswith("meias") or "semi" in s:
-                    return "PM1"
-                if s.startswith("final"):
-                    return "PM2"
-            elif bracket_context == "LM":
-                # Liguilha: LM + número da jornada (será extraído depois)
-                return "LM"
-            elif bracket_context == "E":
-                # Playoffs de vencedores: E1, E2, E3L, E3
-                if s.startswith("quartos"):
-                    return "E1"
-                if s.startswith("meias") or "semi" in s:
-                    return "E2"
-                if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
-                    return "E3L"
-                if s.startswith("final"):
-                    return "E3"
-
-            # Fallback: tentar detetar pelo padrão do texto
-            if s.startswith("quartos") and bracket_context != "PM":
-                bracket_context = "E"
-                return "E1"
-            if s.startswith("meias") or "semi" in s:
-                if bracket_context == "PM":
-                    return "PM1"
-                bracket_context = "E"
-                return "E2"
-            if ("3" in s and "4" in s) or "3º" in s or "3o" in s:
-                bracket_context = "E"
-                return "E3L"
-            if s.startswith("final"):
-                if bracket_context == "PM":
-                    return "PM2"
-                bracket_context = "E"
-                return "E3"
-
-            return None
-
-        def extract_teams_from_row(r: pd.Series) -> Tuple[str, str]:
-            # Primeiro tenta com nomes de colunas
-            t1 = (
-                str(r.get(col_home)).strip()
-                if col_home and pd.notna(r.get(col_home))
-                else ""
-            )
-            t2 = (
-                str(r.get(col_away)).strip()
-                if col_away and pd.notna(r.get(col_away))
-                else ""
-            )
-            # Fallback: varrer textos na linha e escolher os dois relevantes
-            if not t1 or not t2:
-                texts: List[str] = []
-                banned_tokens = {
-                    "vs",
-                    "v s",
-                    "v.s.",
-                    "x",
-                    "jornada",
-                    "resultado",
-                    "equipa visitada",
-                    "equipa visitante",
-                    "playoffs",
-                    "playoff",
-                    "dia",
-                    "hora",
-                    "local",
-                }
-                colnames_lower = {str(c).lower() for c in df.columns}
-                for c in df.columns:
-                    val = r.get(c)
-                    if pd.isna(val):
-                        continue
-                    s = str(val).strip()
-                    if not s:
-                        continue
-                    s_low = s.lower()
-                    c_low = str(c).lower()
-                    if c_low.startswith(("jornada", "dia", "hora", "local")):
-                        continue
-                    if "result" in c_low or s_low in banned_tokens:
-                        continue
-                    # Ignorar números simples (números de jornada)
-                    if s.isdigit() and len(s) <= 2:
-                        continue
-                    # Ignorar se o texto contém pipeline
-                    if "|" in s:
-                        continue
-                    if s_low.startswith(("quartos", "meias", "final")) or (
-                        "3" in s_low and "4" in s_low
-                    ):
-                        continue
-                    if s_low in colnames_lower:
-                        continue
-                    texts.append(s)
-                if len(texts) >= 2:
-                    t1 = texts[0] or t1
-                    t2 = texts[-1] or t2
-                elif len(texts) == 1:
-                    t1 = t1 or texts[0]
-            return t1, t2
-
-        rows: List[dict] = []
-        current_stage = None  # guarda código (E1/E2/E3L/E3/MP1/MP2/LP)
-
-        for _, r in df.iterrows():
-            header_cell = r.get(col_first)
-            header_text = str(header_cell).strip() if pd.notna(header_cell) else ""
-
-            # Verificar se esta linha é um cabeçalho de seção (contém "|")
-            # Se for, verificar todas as células da linha para detetar mudança de contexto
-            is_section_header = False
-            for val in r.values:
-                if pd.notna(val) and "|" in str(val):
-                    is_section_header = True
-                    section_text = str(val).lower()
-                    # Resetar contexto baseado no cabeçalho da seção
-                    if any(k in section_text for k in ["ligu", "ligui"]):
-                        bracket_context = "LM"
-                    elif any(
-                        k in section_text for k in ["manuten", "manutençao", "promo"]
-                    ):
-                        # Verificar se é liguilha ou playoff de manutenção
-                        if any(k in section_text for k in ["ligu", "ligui"]):
-                            bracket_context = "LM"
-                        else:
-                            bracket_context = "PM"
-                    elif "playoff" in section_text and not any(
-                        k in section_text
-                        for k in ["manuten", "manutençao", "promo", "ligu", "ligui"]
-                    ):
-                        bracket_context = "E"
-                    break
-
-            # Se for cabeçalho de seção, saltar esta linha
-            if is_section_header:
-                continue
-
-            # Troca de bloco/estágio se a primeira coluna trouxer um cabeçalho textual
-            maybe_stage = map_stage_to_jornada(header_text)
-            if maybe_stage:
-                current_stage = maybe_stage
-                # não saltar a linha; pode conter já o par de equipas na mesma linha do cabeçalho
-
-            # Para liguilha: 'Jornada 1' ou apenas '1' etc. na primeira coluna
-            lp_number = None
-            if current_stage == "LM" and header_text:
-                # Tentar extrair número da jornada de diferentes formatos
-                m = re.search(r"jornada\s*(\d+)", header_text, flags=re.I)
-                if m:
-                    lp_number = m.group(1)
-                elif header_text.isdigit():
-                    # Se for apenas um número (1, 2, 3, etc.)
-                    lp_number = header_text
-                elif re.match(r"^\d+$", header_text.strip()):
-                    lp_number = header_text.strip()
-
-            # Ler equipas (robusto)
-            team1, team2 = extract_teams_from_row(r)
-
-            # ignorar linhas sem equipas
-            if not team1 and not team2:
-                continue
-
-            # Validação adicional: ignorar se as equipas forem inválidas (cabeçalhos, etc.)
-            invalid_team_patterns = [
-                "jornada",
-                "dia",
-                "hora",
-                "local",
-                "resultado",
-                "equipa visitada",
-                "equipa visitante",
-                "|",  # Contém pipe (separador de título)
-            ]
-            team1_lower = team1.lower() if team1 else ""
-            team2_lower = team2.lower() if team2 else ""
-
-            if any(pattern in team1_lower for pattern in invalid_team_patterns):
-                continue
-            if any(pattern in team2_lower for pattern in invalid_team_patterns):
-                continue
-
-            # Determinar Jornada
-            if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:
-                jornada_val = current_stage
-            elif current_stage == "LM" and lp_number:
-                jornada_val = f"LM{lp_number}"
-            else:
-                # Se a própria célula já trouxer um código (ex.: E1)
-                jornada_val = (
-                    header_text if self.is_playoff_jornada(header_text) else ""
-                )
-
-            if not jornada_val:
-                # Não é linha de playoff
-                continue
-
-            out_row = {
-                "Jornada": jornada_val,
-                "Dia": str(r.get(col_dia)) if col_dia else "",
-                "Hora": str(r.get(col_hora)) if col_hora else "",
-                "Local": str(r.get(col_local)) if col_local else "",
-                "Equipa 1": team1,
-                "Golos 1": pd.NA,
-                "Golos 2": pd.NA,
-                "Equipa 2": team2,
-                "Falta de Comparência": "",
-            }
-            rows.append(out_row)
-
-        if not rows:
-            return None
-
-        df_out = pd.DataFrame(rows)
-        # Manter apenas linhas com Jornada válida de playoff
-        df_out = df_out[df_out["Jornada"].apply(self.is_playoff_jornada)]
-        # Remover duplicadas eventuais
-        df_out = df_out.drop_duplicates(
-            subset=["Jornada", "Equipa 1", "Equipa 2"]
-        ).reset_index(drop=True)
-        return df_out
+    # ── Resultados padrão e desistências ──────────────────────────────────────
 
     def get_sport_default_score(self, sheet_name: str) -> Tuple[int, int]:
-        """Retorna o resultado padrão baseado no desporto."""
+        """Resultado padrão (vencedor, perdedor) por desporto."""
         sheet_upper = sheet_name.upper()
-
         if "VOLEIBOL" in sheet_upper:
-            return (2, 0)  # 2-0 no voleibol
-        elif "FUTSAL" in sheet_upper or "FUTEBOL" in sheet_upper:
-            return (3, 0)  # 3-0 nos futebóis
-        elif "ANDEBOL" in sheet_upper:
-            return (15, 0)  # 15-0 no andebol
-        elif "BASQUETEBOL" in sheet_upper:
-            return (21, 0)  # 21-0 no basquetebol
-        else:
-            return (3, 0)  # Padrão para outros desportos
+            return (2, 0)
+        if "FUTSAL" in sheet_upper or "FUTEBOL" in sheet_upper:
+            return (3, 0)
+        if "ANDEBOL" in sheet_upper:
+            return (15, 0)
+        if "BASQUETEBOL" in sheet_upper:
+            return (21, 0)
+        return (3, 0)
 
     def _detect_withdrawn_teams(self, df: pd.DataFrame) -> set:
-        """Deteta equipas desistentes (todos os jogos com falta de comparência).
-
-        Uma equipa é considerada desistente se TODOS os seus jogos têm
-        "Falta de Comparência" registada no seu nome.
-
-        Returns:
-            Set contendo nomes das equipas desistentes
-        """
+        """Deteta equipas que desistiram (todos os jogos com falta de comparência)."""
         if "Falta de Comparência" not in df.columns:
             return set()
 
-        # Coletar todas as equipas e seus jogos
-        team_games = {}  # {equipa: {'total': count, 'with_absence': count}}
+        team_games: Dict[str, Dict[str, int]] = {}
 
         for _, row in df.iterrows():
-            equipa1 = row["Equipa 1"]
-            equipa2 = row["Equipa 2"]
             falta = row["Falta de Comparência"]
-
-            # Normalizar entrada de ausências
             has_absence = pd.notna(falta) and falta != ""
-            equipas_ausentes = set()
-            if has_absence:
-                equipas_ausentes = {
-                    equipa.strip() for equipa in falta.split(",") if equipa.strip()
-                }
+            equipas_ausentes = (
+                {e.strip() for e in falta.split(",") if e.strip()}
+                if has_absence
+                else set()
+            )
 
-            # Registar jogo para equipa1
-            if equipa1 not in team_games:
-                team_games[equipa1] = {"total": 0, "with_absence": 0}
-            team_games[equipa1]["total"] += 1
-            if equipa1 in equipas_ausentes:
-                team_games[equipa1]["with_absence"] += 1
+            for col in ("Equipa 1", "Equipa 2"):
+                equipa = row[col]
+                if equipa not in team_games:
+                    team_games[equipa] = {"total": 0, "with_absence": 0}
+                team_games[equipa]["total"] += 1
+                if equipa in equipas_ausentes:
+                    team_games[equipa]["with_absence"] += 1
 
-            # Registar jogo para equipa2
-            if equipa2 not in team_games:
-                team_games[equipa2] = {"total": 0, "with_absence": 0}
-            team_games[equipa2]["total"] += 1
-            if equipa2 in equipas_ausentes:
-                team_games[equipa2]["with_absence"] += 1
-
-        # Identificar desistentes (todos os jogos com falta de comparência)
-        withdrawn_teams = set()
-        for team, stats in team_games.items():
-            if stats["total"] > 0 and stats["with_absence"] == stats["total"]:
-                withdrawn_teams.add(team)
-                print(
-                    f"  [!] Equipa desistente detectada: {team} ({stats['total']} jogos com falta)"
-                )
-
-        return withdrawn_teams
+        withdrawn = {
+            team
+            for team, stats in team_games.items()
+            if stats["total"] > 0 and stats["with_absence"] == stats["total"]
+        }
+        for team in withdrawn:
+            logging.info(
+                f"  [!] Equipa desistente: {team} ({team_games[team]['total']} jogos)"
+            )
+        return withdrawn
 
     def apply_default_scores(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
-        """Aplica resultados padrão quando há falta de comparência de apenas uma equipa.
-
-        NÃO preenche scores para equipas desistentes (que desistiram completamente).
-        """
+        """Aplica resultados padrão quando uma equipa (não desistente) faltou."""
         if "Falta de Comparência" not in df.columns:
             return df
 
-        # Obtém o resultado padrão para este desporto
         golos_vencedor, golos_perdedor = self.get_sport_default_score(sheet_name)
-
-        # Detetar equipas desistentes
-        withdrawn_teams = self._detect_withdrawn_teams(df)
+        withdrawn = self._detect_withdrawn_teams(df)
 
         for idx, row in df.iterrows():
             falta = row["Falta de Comparência"]
+            if not (pd.notna(falta) and falta != ""):
+                continue
 
-            # Verifica se há falta de comparência e se não está vazio
-            if pd.notna(falta) and falta != "":
-                # Conta quantas equipas faltaram (separadas por vírgula)
-                equipas_faltaram = [
-                    equipa.strip() for equipa in falta.split(",") if equipa.strip()
-                ]
+            equipas_faltaram = [e.strip() for e in falta.split(",") if e.strip()]
+            if len(equipas_faltaram) != 1:
+                continue
 
-                # Só aplica resultado se apenas uma equipa faltou
-                if len(equipas_faltaram) == 1:
-                    equipa_faltou = equipas_faltaram[0]
-                    equipa1 = row["Equipa 1"]
-                    equipa2 = row["Equipa 2"]
-                    # usar o índice diretamente
-                    idx_i = idx
+            equipa_faltou = equipas_faltaram[0]
+            if row["Equipa 1"] in withdrawn or row["Equipa 2"] in withdrawn:
+                continue
 
-                    # NÃO preencher se qualquer uma das equipas é desistente
-                    if equipa1 in withdrawn_teams or equipa2 in withdrawn_teams:
-                        # Deixar scores vazios para equipas desistentes
-                        continue
-
-                    # Verifica qual equipa faltou e aplica o resultado
-                    if equipa_faltou == equipa1:
-                        # Equipa 1 faltou, Equipa 2 ganha
-                        mask = df.index == idx_i
-                        df.loc[mask, "Golos 1"] = golos_perdedor
-                        df.loc[mask, "Golos 2"] = golos_vencedor
-                    elif equipa_faltou == equipa2:
-                        # Equipa 2 faltou, Equipa 1 ganha
-                        mask = df.index == idx_i
-                        df.loc[mask, "Golos 1"] = golos_vencedor
-                        df.loc[mask, "Golos 2"] = golos_perdedor
+            mask = df.index == idx
+            if equipa_faltou == row["Equipa 1"]:
+                df.loc[mask, "Golos 1"] = golos_perdedor
+                df.loc[mask, "Golos 2"] = golos_vencedor
+            elif equipa_faltou == row["Equipa 2"]:
+                df.loc[mask, "Golos 1"] = golos_vencedor
+                df.loc[mask, "Golos 2"] = golos_perdedor
 
         return df
 
+    # ── Divisões e grupos ─────────────────────────────────────────────────────
+
     def extract_division_number(self, text: str) -> Optional[str]:
-        """Extrai número da divisão do texto."""
-        if not isinstance(text, str):
-            return None
-        match = self.divisao_pattern.search(text)
-        return match.group(1) if match else None
+        m = self.divisao_pattern.search(text) if isinstance(text, str) else None
+        return m.group(1) if m else None
 
     def extract_group(self, text: str) -> Optional[str]:
-        """Extrai grupo do texto."""
-        if not isinstance(text, str):
-            return None
-        match = self.grupo_pattern.search(text)
-        return match.group(0) if match else None
+        m = self.grupo_pattern.search(str(text)) if text else None
+        return m.group(0) if m else None
 
     def find_divisions_and_groups(
         self, df: pd.DataFrame
     ) -> Tuple[Dict[str, int], Dict[str, int]]:
-        """Encontra divisões e grupos no DataFrame."""
+        """Encontra divisões e grupos no DataFrame e devolve os seus índices de início."""
         primeira_coluna = df.columns[0]
-        divisoes = {}
-        grupos = {}
+        divisoes: Dict[str, int] = {}
+        grupos: Dict[str, int] = {}
 
-        # Verifica cabeçalho
-        num_divisao = self.extract_division_number(primeira_coluna)
-        if num_divisao:
-            divisoes[num_divisao] = 0
-
+        num_div = self.extract_division_number(primeira_coluna)
+        if num_div:
+            divisoes[num_div] = 0
         grupo = self.extract_group(primeira_coluna)
         if grupo:
             grupos[grupo] = 0
 
-        # Percorre dados
         for idx, valor in enumerate(df[primeira_coluna]):
             if isinstance(valor, str) and "DIVISÃO" in valor:
-                num_divisao = self.extract_division_number(valor)
-                if num_divisao and num_divisao not in divisoes:
-                    divisoes[num_divisao] = idx
-
-                grupo = self.extract_group(valor)
-                if grupo and grupo not in grupos:
-                    grupos[grupo] = idx
+                nd = self.extract_division_number(valor)
+                if nd and nd not in divisoes:
+                    divisoes[nd] = idx
+                g = self.extract_group(valor)
+                if g and g not in grupos:
+                    grupos[g] = idx
             else:
-                grupo = self.extract_group(str(valor))
-                if grupo and grupo not in grupos:
-                    grupos[grupo] = idx
+                g = self.extract_group(str(valor))
+                if g and g not in grupos:
+                    grupos[g] = idx
 
         return divisoes, grupos
 
     def fill_sections(
         self, df: pd.DataFrame, sections: Dict[str, int], column_name: str
     ) -> pd.DataFrame:
-        """Preenche colunas de seção (divisão ou grupo)."""
+        """Preenche a coluna de secção (Divisão ou Grupo) por intervalos."""
         if not sections:
             return df
 
@@ -1275,41 +1017,33 @@ class ExcelProcessor:
 
         for i, (name, start_idx) in enumerate(indices):
             end_idx = indices[i + 1][1] if i + 1 < len(indices) else len(df)
-
-            if column_name == "Grupo":
-                clean_name = name.replace("GRUPO ", "").strip()
-            else:
-                clean_name = name
-
+            clean_name = (
+                name.replace("GRUPO ", "").strip() if column_name == "Grupo" else name
+            )
             df.loc[start_idx : end_idx - 1, column_name] = clean_name
 
         return df
 
     def create_headers(self, has_divisions: bool, has_groups: bool) -> List[str]:
-        """Cria cabeçalhos baseado na presença de divisões e grupos."""
         headers = self.base_headers.copy()
-
         if has_divisions:
             headers.append("Divisão")
         if has_groups:
             headers.append("Grupo")
-
         return headers
+
+    # ── Atribuição de datas ───────────────────────────────────────────────────
 
     def _load_existing_csv_dates(
         self, modality: str
-    ) -> Dict[str, Tuple[str, str, bool]]:
-        """Carrega datas existentes do CSV anterior para preservar placeholders.
-
-        Returns:
-            Dict com chave (Equipa1, Equipa2, Jornada) -> (Dia, Hora, is_placeholder)
-        """
-        if self.season:
-            csv_filename = f"{modality.upper()}_{self.season}.csv"
-        else:
-            csv_filename = f"{modality.upper()}.csv"
-
-        csv_path = self.output_dir / csv_filename
+    ) -> Dict[Tuple[str, str, str], Tuple[str, str, bool]]:
+        """Carrega datas do CSV anterior para preservar placeholders."""
+        filename = (
+            f"{modality.upper()}_{self.season}.csv"
+            if self.season
+            else f"{modality.upper()}.csv"
+        )
+        csv_path = self.output_dir / filename
 
         if not csv_path.exists():
             return {}
@@ -1317,120 +1051,70 @@ class ExcelProcessor:
         try:
             df_old = pd.read_csv(csv_path)
             date_map = {}
-
             for _, row in df_old.iterrows():
-                # Criar chave única por jogo
                 key = (
                     str(row.get("Equipa 1", "")).strip(),
                     str(row.get("Equipa 2", "")).strip(),
                     str(row.get("Jornada", "")).strip(),
                 )
-
-                dia = row.get("Dia", "")
-                hora = row.get("Hora", "")
-                is_placeholder = row.get("Data_Placeholder", False)
-
-                # Converter para bool se vier como string
-                if isinstance(is_placeholder, str):
-                    is_placeholder = is_placeholder.lower() in ("true", "1", "yes")
-
-                date_map[key] = (dia, hora, bool(is_placeholder))
-
+                is_ph = row.get("Data_Placeholder", False)
+                if isinstance(is_ph, str):
+                    is_ph = is_ph.lower() in ("true", "1", "yes")
+                date_map[key] = (row.get("Dia", ""), row.get("Hora", ""), bool(is_ph))
             return date_map
-
         except Exception as e:
-            logging.error(f"  \[!\] Erro ao carregar datas antigas: {e}")
+            logging.error(f"  [!] Erro ao carregar datas antigas: {e}")
             return {}
 
     def _assign_date_placeholders(
         self, df: pd.DataFrame, modality: str
     ) -> pd.DataFrame:
-        """Atribui datas de calendário PDF e placeholders para jogos sem data.
-
-        Regras (em ordem de prioridade):
-        1. Se jogo tem data Excel real → usar e marcar Data_Placeholder=False
-        2. Se jogo não tem data Excel, procurar em calendário PDF
-        3. Se encontrado em PDF → usar e marcar Fonte_Data='Calendário PDF'
-        4. Se não encontrado mas tem resultado → atribuir placeholder baseado em jornada
-        5. Se não tem resultado e não tem data → manter vazio
+        """Atribui datas com prioridade corrigida: 
+        Para Playoffs: PDF Playoffs -> Excel -> Placeholder.
+        Para Regular: Excel -> PDF Regular -> Placeholder.
         """
-        import sys
+        cal, config, cal_playoffs = self._get_calendarios()
 
-        repo_root = Path(__file__).resolve().parents[1]
-        if str(repo_root / "src") not in sys.path:
-            sys.path.insert(0, str(repo_root / "src"))
-
-        from calendario_parser import (
-            carregar_calendario_epoca,
-            carregar_config_cursos,
-            normalizar_nome_equipa,
-        )
-
-        # Adicionar colunas se não existirem
         if "Data_Placeholder" not in df.columns:
             df["Data_Placeholder"] = False
         if "Fonte_Data" not in df.columns:
             df["Fonte_Data"] = ""
 
-        # Carregar calendário PDF
-        try:
-            repo_root = Path(__file__).resolve().parents[1]
-            calendario = carregar_calendario_epoca("25_26", repo_root=repo_root)
-            config_cursos = carregar_config_cursos(repo_root)
-            logging.debug(f"\[INFO\] Calendário PDF carregado para {modality}")
-        except Exception as e:
-            print(f"[WARN] Falha ao carregar calendário: {e}")
-            calendario = {}
-            config_cursos = {}
+        import re
+        modality_clean = re.sub(r"(_25_26|_24_25|\|.*|PLAYOFFS.*)$", "", modality, flags=re.I).strip()
 
-        # Carregar datas antigas (para manter placeholders antigos)
-        old_dates = self._load_existing_csv_dates(modality)
-
-        # Mapear nomes de modalidade (Excel → Calendário PDF)
         modality_map = {
             "ANDEBOL MISTO": "ANDEBOL",
             "FUTEBOL DE 7 MASCULINO": "FUTEBOL 7",
         }
+        pdf_modality = modality_map.get(modality_clean, modality_clean)
+        
+        logging.info(f"[PLAYOFFS] Modalidade: {modality} -> pdf_modality: {pdf_modality}")
+        if cal_playoffs:
+            keys_for_mod = [k for k in cal_playoffs.keys() if k[0] == pdf_modality]
+            logging.info(f"[PLAYOFFS] Chaves disponíveis para {pdf_modality}: {keys_for_mod}")
 
-        pdf_modality = modality_map.get(modality, modality)
+        def _lookup_pdf_date(equipa1: str, equipa2: str) -> Tuple[Optional[str], Optional[str]]:
+            if pdf_modality not in cal:
+                return None, None
+            e1n = self._normalizar(equipa1, config)
+            e2n = self._normalizar(equipa2, config)
+            games = cal[pdf_modality]
+            for key in ((e1n, e2n), (e2n, e1n)):
+                if key in games:
+                    v = games[key]
+                    if isinstance(v, (tuple, list)) and len(v) >= 2:
+                        return v[0], v[1]
+            return None, None
 
-        def _lookup_pdf_date(equipa1: str, equipa2: str):
-            """Retorna (data, hora) do calendário PDF para o jogo, se existir."""
-            if pdf_modality not in calendario:
-                return (None, None)
-
-            equipa1_normalized = normalizar_nome_equipa(equipa1, config_cursos)
-            equipa2_normalized = normalizar_nome_equipa(equipa2, config_cursos)
-            games_dict = calendario[pdf_modality]
-
-            chave_direta = (equipa1_normalized, equipa2_normalized)
-            chave_invertida = (equipa2_normalized, equipa1_normalized)
-
-            if chave_direta in games_dict:
-                value = games_dict[chave_direta]
-                if isinstance(value, (tuple, list)) and len(value) >= 2:
-                    return (value[0], value[1])
-                return (None, None)
-            if chave_invertida in games_dict:
-                value = games_dict[chave_invertida]
-                if isinstance(value, (tuple, list)) and len(value) >= 2:
-                    return (value[0], value[1])
-                return (None, None)
-            return (None, None)
-
-        def _parse_date_only(value) -> Optional[datetime.date]:
+        def _parse_date_only(value):
             if pd.isna(value):
                 return None
             dt = pd.to_datetime(str(value), errors="coerce")
-            if pd.isna(dt):
-                return None
-            return dt.date()
+            return dt.date() if not pd.isna(dt) else None
 
         def _is_day_month_swap(excel_date, pdf_date) -> bool:
-            """Deteta caso clássico de dia/mês trocado: 2026-04-03 vs 2026-03-04."""
-            if not excel_date or not pdf_date:
-                return False
-            if excel_date.year != pdf_date.year:
+            if not excel_date or not pdf_date or excel_date.year != pdf_date.year:
                 return False
             return (
                 excel_date.day == pdf_date.month
@@ -1439,240 +1123,216 @@ class ExcelProcessor:
                 and excel_date.month <= 12
             )
 
-        def _swap_day_month(date_value):
-            """Troca dia/mês se ambos <= 12, mantendo o ano."""
-            if not date_value:
-                return None
-            if date_value.day > 12 or date_value.month > 12:
+        def _swap_day_month(d):
+            if not d or d.day > 12 or d.month > 12:
                 return None
             try:
-                return date_value.replace(day=date_value.month, month=date_value.day)
+                return d.replace(day=d.month, month=d.day)
             except ValueError:
                 return None
 
-        # Games que precisam de placeholder (sem data em nenhuma fonte)
-        games_for_placeholder = []
+        games_for_placeholder: List[int] = []
+        playoff_indices = {}
 
-        logging.debug(f"\[DEBUG\] Processando {len(df)} jogos para {modality}")
-        logging.debug(f"\[DEBUG\] Calendário PDF tem modalidades: {list(calendario.keys())}")
-
-        # SINGLE LOOP: processar cada jogo uma vez
         for idx, row in df.iterrows():
             dia = row.get("Dia", "")
             hora = row.get("Hora", "")
-            golos1 = row.get("Golos 1", "")
-            golos2 = row.get("Golos 2", "")
+            golos1, golos2 = row.get("Golos 1", ""), row.get("Golos 2", "")
             desistencia = str(row.get("Desistência", "")).strip().upper()
-
-            # Verificar se tem resultado
-            has_result = (
-                pd.notna(golos1)
-                and str(golos1).strip() != ""
-                and pd.notna(golos2)
-                and str(golos2).strip() != ""
-            )
-
             equipa1 = str(row.get("Equipa 1", "")).strip()
             equipa2 = str(row.get("Equipa 2", "")).strip()
-            jornada = str(row.get("Jornada", "")).strip()
+            jornada = str(row.get("Jornada", "")).strip().upper()
 
-            # Verificar se tem data Excel
+            has_result = (
+                pd.notna(golos1) and str(golos1).strip() != "" 
+                and pd.notna(golos2) and str(golos2).strip() != ""
+            )
             has_excel_date = (
-                pd.notna(dia)
-                and str(dia).strip() != ""
-                and pd.notna(hora)
-                and str(hora).strip() != ""
+                pd.notna(dia) and str(dia).strip() != "" 
+                and pd.notna(hora) and str(hora).strip() != ""
             )
 
-            # PRIORIDADE 1: Data Excel existente
+# --- LÓGICA PARA JOGOS DE PLAYOFF (E*, PM*, LM*) ---
+            if self.is_playoff_jornada(jornada):
+                # Normalizar jornada para busca flexível
+                jornada_normalized = jornada.upper().strip()
+                
+                # PDF de Playoffs é a fonte de datas para playoffs
+                if cal_playoffs:
+                    playoff_key = (pdf_modality, jornada_normalized)
+                    
+                    logging.info(f"[PLAYOFFS] Procurando chave: {playoff_key} em {list(cal_playoffs.keys())[:5]}...")
+                    
+                    # Tentar chave exata primeiro
+                    if playoff_key in cal_playoffs and cal_playoffs[playoff_key]:
+                        idx_in_list = playoff_indices.get(playoff_key, 0)
+                        total_slots = len(cal_playoffs[playoff_key])
+                        logging.info(f"[PLAYOFFS] Encontrada chave {playoff_key} com {total_slots} slots, idx_atual={idx_in_list}")
+                        
+                        if idx_in_list < total_slots:
+                            slot = cal_playoffs[playoff_key][idx_in_list]
+                            playoff_indices[playoff_key] = idx_in_list + 1
+                            df.at[idx, "Dia"] = slot[0]
+                            df.at[idx, "Hora"] = slot[1]
+                            df.at[idx, "Fonte_Data"] = "Calendário PDF Playoffs"
+                            df.at[idx, "Data_Placeholder"] = False
+                            logging.info(f"[PLAYOFFS] OK {idx}: {jornada_normalized} -> {slot[0]} {slot[1]}")
+                            continue
+                        else:
+                            logging.warning(f"[PLAYOFFS] Índice excedido: {idx_in_list} >= {total_slots}, usando último slot")
+                            slot = cal_playoffs[playoff_key][-1]
+                            df.at[idx, "Dia"] = slot[0]
+                            df.at[idx, "Hora"] = slot[1]
+                            df.at[idx, "Fonte_Data"] = "Calendário PDF Playoffs"
+                            df.at[idx, "Data_Placeholder"] = False
+                            logging.info(f"[PLAYOFFS] ULTIMO SLOT {idx}: {jornada_normalized} -> {slot[0]} {slot[1]}")
+                            continue
+                    
+                    # Fallback: procurar por nomes de equipas (busca exata)
+                    e1_normalized = self._normalizar(equipa1, config) if self._normalizar else None
+                    e2_normalized = self._normalizar(equipa2, config) if self._normalizar else None
+                    
+                    logging.info(f"[PLAYOFFS] Fallback equipas: {e1_normalized} vs {e2_normalized}")
+                    
+                    if e1_normalized and e2_normalized:
+                        for key in cal_playoffs:
+                            if key[0] != pdf_modality:
+                                continue
+                            for slot_idx, slot in enumerate(cal_playoffs[key]):
+                                local = str(slot[2]).lower() if len(slot) >= 3 and slot[2] else ""
+                                e1_lower = e1_normalized.lower()
+                                e2_lower = e2_normalized.lower()
+                                if e1_lower in local or e2_lower in local:
+                                    df.at[idx, "Dia"] = slot[0]
+                                    df.at[idx, "Hora"] = slot[1]
+                                    df.at[idx, "Fonte_Data"] = "Calendário PDF Playoffs"
+                                    df.at[idx, "Data_Placeholder"] = False
+                                    logging.info(f"[PLAYOFFS-EQUIPAS] OK {idx}: {jornada_normalized} -> {slot[0]} (local={local})")
+                                    break
+                            else:
+                                continue
+                            break
+
+                    # Fallback: procurar qualquer jogo disponível nesta fase (sem depender de índice)
+                    fase_prefix = jornada_normalized[:2] if len(jornada_normalized) >= 2 else jornada_normalized
+                    logging.info(f"[PLAYOFFS] Fallback fase: {fase_prefix}")
+                    
+                    for key in cal_playoffs:
+                        if key[0] == pdf_modality and key[1].startswith(fase_prefix):
+                            available_slots = [i for i, s in enumerate(cal_playoffs[key]) 
+                                             if i >= playoff_indices.get(key, 0)]
+                            if available_slots:
+                                next_idx = available_slots[0]
+                                slot = cal_playoffs[key][next_idx]
+                                playoff_indices[key] = next_idx + 1
+                            else:
+                                slot = cal_playoffs[key][-1]
+                            df.at[idx, "Dia"] = slot[0]
+                            df.at[idx, "Hora"] = slot[1]
+                            df.at[idx, "Fonte_Data"] = "Calendário PDF Playoffs"
+                            df.at[idx, "Data_Placeholder"] = False
+                            logging.info(f"[PLAYOFFS-FALLBACK] OK {idx}: {jornada_normalized} -> {slot[0]} (chave {key})")
+                            break
+                    else:
+                        logging.warning(f"[PLAYOFFS] Nenhuma chave encontrada para fase {fase_prefix} em {pdf_modality}")
+
+                # Se chegou aqui sem encontrar data no PDF, usar placeholder se tiver resultado
+                if has_result:
+                    games_for_placeholder.append(idx)
+                else:
+                    df.at[idx, "Data_Placeholder"] = False
+                    df.at[idx, "Fonte_Data"] = ""
+                continue
+
+            # --- LÓGICA PARA JOGOS REGULARES ---
+            # Prioridade 1: Data Excel
             if has_excel_date:
-                logging.debug(f"\[INFO\] {idx}: Data Excel encontrada")
                 df.at[idx, "Data_Placeholder"] = False
                 if not df.at[idx, "Fonte_Data"]:
                     df.at[idx, "Fonte_Data"] = "Excel"
 
-                corrected_from_pdf = False
-
-                # Validar incoerência típica de dia/mês trocado contra calendário PDF
                 if desistencia != "SIM":
                     pdf_data, pdf_hora = _lookup_pdf_date(equipa1, equipa2)
                     if pdf_data:
                         excel_date = _parse_date_only(dia)
                         pdf_date = _parse_date_only(pdf_data)
                         if excel_date and excel_date >= datetime.now().date():
-                            print(
-                                f"[CORRECAO] {idx}: Excel {dia} no futuro. A usar PDF {pdf_data} (Prioridade PDF para jogos futuros)."
-                            )
                             df.at[idx, "Dia"] = pdf_data
-                            df.at[idx, "Hora"] = pdf_hora if pdf_hora else hora
+                            df.at[idx, "Hora"] = pdf_hora or hora
                             df.at[idx, "Fonte_Data"] = "Calendário PDF (Futuro)"
-                            df.at[idx, "Data_Placeholder"] = False
-                            corrected_from_pdf = True
-                        elif _is_day_month_swap(excel_date, pdf_date):
-                            print(
-                                f"[CORRECAO] {idx}: Excel {dia} vs PDF {pdf_data} (dia/mês trocado). A usar PDF."
-                            )
+                            continue
+                        if _is_day_month_swap(excel_date, pdf_date):
                             df.at[idx, "Dia"] = pdf_data
-                            df.at[idx, "Hora"] = pdf_hora if pdf_hora else hora
+                            df.at[idx, "Hora"] = pdf_hora or hora
                             df.at[idx, "Fonte_Data"] = "Calendário PDF (corrigido)"
-                            df.at[idx, "Data_Placeholder"] = False
-                            corrected_from_pdf = True
+                            continue
 
-                # Fallback: se não houve match exato no PDF mas a data Excel está no futuro
-                # e o jogo já tem resultado, corrigir possível dia/mês invertido.
-                if not corrected_from_pdf and has_result:
+                if has_result:
                     excel_date = _parse_date_only(dia)
-                    if excel_date:
-                        today = datetime.now().date()
-                        if excel_date > today:
-                            swapped = _swap_day_month(excel_date)
-                            if swapped and swapped <= today:
-                                print(
-                                    f"[CORRECAO-FALLBACK] {idx}: Excel {dia} -> {swapped.strftime('%Y-%m-%d 00:00:00')} (dia/mês invertido provável)."
-                                )
-                                df.at[idx, "Dia"] = swapped.strftime(
-                                    "%Y-%m-%d 00:00:00"
-                                )
-                                df.at[idx, "Fonte_Data"] = "Excel (dia/mês corrigido)"
-                                df.at[idx, "Data_Placeholder"] = False
+                    if excel_date and excel_date > datetime.now().date():
+                        swapped = _swap_day_month(excel_date)
+                        if swapped and swapped <= datetime.now().date():
+                            df.at[idx, "Dia"] = swapped.strftime("%Y-%m-%d 00:00:00")
+                            df.at[idx, "Fonte_Data"] = "Excel (dia/mês corrigido)"
                 continue
 
-            # PRIORIDADE 2: Procurar em calendário PDF
-            # Skip desistências
+            # Prioridade 2: Calendário PDF Regular
             if desistencia == "SIM":
-                logging.debug(f"\[INFO\] {idx}: Desistência detectada, skip PDF lookup")
                 df.at[idx, "Data_Placeholder"] = False
                 df.at[idx, "Fonte_Data"] = ""
                 continue
 
-            # Procurar no calendário PDF
-            pdf_date_found = False
             pdf_data, pdf_hora = _lookup_pdf_date(equipa1, equipa2)
             if pdf_data:
-                logging.debug(f"\[PDF\] Data de calendário: {equipa1} vs {equipa2} -> {pdf_data}")
                 df.at[idx, "Dia"] = pdf_data
                 df.at[idx, "Hora"] = pdf_hora
                 df.at[idx, "Fonte_Data"] = "Calendário PDF"
                 df.at[idx, "Data_Placeholder"] = False
-                pdf_date_found = True
-
-            if pdf_date_found:
                 continue
 
-            # PRIORIDADE 3: Criar placeholder se tem resultado
+            # Prioridade 3: Placeholder se tem resultado
             if has_result:
-                print(
-                    f"[INFO] {idx}: Sem data mas com resultado, agendando placeholder"
-                )
                 games_for_placeholder.append(idx)
             else:
-                # PRIORIDADE 4: Sem resultado e sem data → manter vazio
-                logging.debug(f"\[INFO\] {idx}: Sem data, sem resultado, mantendo vazio")
                 df.at[idx, "Data_Placeholder"] = False
                 df.at[idx, "Fonte_Data"] = ""
 
-        # Segunda fase: atribuir placeholders para jogos que precisam
+        # --- Segunda fase: Atribuir placeholders ---
         if games_for_placeholder:
-            print(
-                f"\n[INFO] Atribuindo placeholders para {len(games_for_placeholder)} jogos"
-            )
-            # Agrupar por jornada
             jornadas_sem_data = df.loc[games_for_placeholder, "Jornada"].unique()
-
-            # Filtrar apenas jornadas numéricas
-            jornadas_numericas = []
-            for j in jornadas_sem_data:
-                try:
-                    jornadas_numericas.append((int(j), j))
-                except (ValueError, TypeError):
-                    # Jornadas não-numéricas (playoffs) não entram no sistema de ordenação
-                    pass
+            jornadas_numericas = sorted(
+                ((int(j), j) for j in jornadas_sem_data if str(j).isdigit()),
+                key=lambda x: x[0],
+            )
 
             if jornadas_numericas:
-                # Ordenar jornadas (menor para maior)
-                jornadas_numericas.sort(key=lambda x: x[0])
-
-                # Data base: hoje
                 base_date = datetime.now()
-
-                # Intervalos de horas de jogo: 15h00 a 02h00 da madrugada
-                START_HOUR = 15
-                END_HOUR = 2  # 02h00 significa 02:00 do dia seguinte em termos lógicos
-
-                # Calcular o número de horas disponíveis (15h, 16h, ..., 23h, 00h, 01h)
-                # Isso é 11 horas (15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 1)
-                available_hours = list(range(START_HOUR, 24)) + list(
-                    range(0, END_HOUR + 1)
-                )
-
-                # Distribuir jornadas por essas horas
-                # Se temos mais jornadas que horas, começar a reutilizar
-                jornadas_count = len(jornadas_numericas)
-
+                available_hours = list(range(15, 24)) + list(range(0, 3))
                 jornada_dates = {}
-                for idx, (jornada_num, jornada_str) in enumerate(jornadas_numericas):
-                    # Calcular a hora para esta jornada
-                    hour_idx = idx % len(available_hours)
-                    hour = available_hours[hour_idx]
 
-                    # Calcular a data (jornadas menores são dias anteriores)
+                for i, (jornada_num, jornada_str) in enumerate(jornadas_numericas):
+                    hour = available_hours[i % len(available_hours)]
                     days_ago = jornadas_numericas[-1][0] - jornada_num
-                    jornada_date = base_date - pd.Timedelta(days=days_ago)
-
-                    # Ajustar a hora
-                    jornada_date = jornada_date.replace(hour=hour, minute=0, second=0)
-
+                    jornada_date = (base_date - pd.Timedelta(days=days_ago)).replace(
+                        hour=hour, minute=0, second=0
+                    )
                     jornada_dates[jornada_str] = jornada_date
 
-                # Atribuir datas aos jogos
                 for idx in games_for_placeholder:
                     jornada = df.at[idx, "Jornada"]
-
-                    if jornada in jornada_dates:
-                        placeholder_date = jornada_dates[jornada]
-                        df.at[idx, "Dia"] = placeholder_date.strftime(
-                            "%Y-%m-%d 00:00:00"
-                        )
-                        df.at[idx, "Hora"] = placeholder_date.strftime("%Hh%M")
-                        df.at[idx, "Data_Placeholder"] = True
-                        df.at[idx, "Fonte_Data"] = (
-                            ""  # Placeholder não tem fonte definida
-                        )
-                        print(
-                            f"  [*] Placeholder atribuido: Jornada {jornada} -> {placeholder_date.strftime('%Y-%m-%d %Hh%M')}"
-                        )
-                    else:
-                        # Jornada não-numérica: usar data de hoje
-                        df.at[idx, "Dia"] = base_date.strftime("%Y-%m-%d 00:00:00")
-                        df.at[idx, "Hora"] = base_date.strftime("%Hh%M")
-                        df.at[idx, "Data_Placeholder"] = True
-                        df.at[idx, "Fonte_Data"] = (
-                            ""  # Placeholder não tem fonte definida
-                        )
-                        print(
-                            f"  [*] Placeholder atribuido: Jornada {jornada} (nao-numerica) -> {base_date.strftime('%Y-%m-%d %Hh%M')}"
-                        )
+                    ph_date = jornada_dates.get(jornada, base_date)
+                    df.at[idx, "Dia"] = ph_date.strftime("%Y-%m-%d 00:00:00")
+                    df.at[idx, "Hora"] = ph_date.strftime("%Hh%M")
+                    df.at[idx, "Data_Placeholder"] = True
+                    df.at[idx, "Fonte_Data"] = ""
 
         return df
 
     def _assign_venue_placeholders(
         self, df: pd.DataFrame, modality: str
     ) -> pd.DataFrame:
-        """Atribui locais com prioridade: Excel -> Calendário PDF -> Placeholder.
-
-        Também marca a origem em Fonte_Local e indica placeholder em Local_Placeholder.
-        """
-        import sys
-
-        repo_root = Path(__file__).resolve().parents[1]
-        if str(repo_root / "src") not in sys.path:
-            sys.path.insert(0, str(repo_root / "src"))
-
-        from calendario_parser import (
-            carregar_calendario_epoca,
-            carregar_config_cursos,
-            normalizar_nome_equipa,
-        )
+        """Atribui locais com prioridade: Excel → Calendário PDF → Playoffs PDF → Placeholder."""
+        cal, config, cal_playoffs = self._get_calendarios()
 
         if "Fonte_Local" not in df.columns:
             df["Fonte_Local"] = ""
@@ -1681,19 +1341,14 @@ class ExcelProcessor:
         if "Local" not in df.columns:
             df["Local"] = ""
 
-        try:
-            calendario = carregar_calendario_epoca("25_26", repo_root=repo_root)
-            config_cursos = carregar_config_cursos(repo_root)
-        except Exception as e:
-            print(f"[WARN] Falha ao carregar calendário para locais: {e}")
-            calendario = {}
-            config_cursos = {}
+        import re
+        modality_clean = re.sub(r"(_25_26|_24_25|\|.*|PLAYOFFS.*)$", "", modality, flags=re.I).strip()
 
         modality_map = {
             "ANDEBOL MISTO": "ANDEBOL",
             "FUTEBOL DE 7 MASCULINO": "FUTEBOL 7",
         }
-        pdf_modality = modality_map.get(modality, modality)
+        pdf_modality = modality_map.get(modality_clean, modality_clean)
 
         def _normalize_modality(text: str) -> str:
             return " ".join(str(text or "").upper().split())
@@ -1701,73 +1356,48 @@ class ExcelProcessor:
         def _extract_division_number(value) -> Optional[int]:
             if pd.isna(value):
                 return None
-            raw = str(value).strip()
-            if not raw:
-                return None
-            m = re.search(r"(\d+)", raw)
-            if not m:
-                return None
-            try:
-                return int(m.group(1))
-            except ValueError:
-                return None
+            m = re.search(r"(\d+)", str(value).strip())
+            return int(m.group(1)) if m else None
 
         def _venue_placeholder(modality_name: str, division_value) -> str:
             norm = _normalize_modality(modality_name)
             div_num = _extract_division_number(division_value)
-
             if "FUTEBOL DE 7" in norm:
                 return "Sintético"
-
             if "FUTSAL FEMININO" in norm:
                 return "Caixa UA"
-
             if "FUTSAL MASCULINO" in norm:
-                if div_num == 2:
-                    return "PAH (Aristides Hall)"
-                # 1ª divisão e fallback sem divisão -> Caixa UA
-                return "Caixa UA"
-
-            if "BASQUETEBOL" in norm or "VOLEIBOL" in norm or "ANDEBOL" in norm:
+                return "PAH (Aristides Hall)" if div_num == 2 else "Caixa UA"
+            if any(s in norm for s in ("BASQUETEBOL", "VOLEIBOL", "ANDEBOL")):
                 return "PAH (Aristides Hall)"
-
             return ""
 
         def _clean_text(value) -> str:
             if pd.isna(value):
                 return ""
             text = str(value).strip()
-            if not text:
-                return ""
-            if text.lower() in ("nan", "none", "null"):
-                return ""
-            return text
+            return "" if text.lower() in ("nan", "none", "null") else text
 
         def _lookup_pdf_venue(equipa1: str, equipa2: str) -> Optional[str]:
-            if pdf_modality not in calendario:
+            if pdf_modality not in cal:
                 return None
-
-            equipa1_normalized = normalizar_nome_equipa(equipa1, config_cursos)
-            equipa2_normalized = normalizar_nome_equipa(equipa2, config_cursos)
-            games_dict = calendario[pdf_modality]
-
-            chave_direta = (equipa1_normalized, equipa2_normalized)
-            chave_invertida = (equipa2_normalized, equipa1_normalized)
-
-            for key in (chave_direta, chave_invertida):
-                if key not in games_dict:
-                    continue
-                value = games_dict[key]
-                if isinstance(value, (tuple, list)) and len(value) >= 3:
-                    local = str(value[2]).strip()
-                    if local:
-                        return local
+            e1n = self._normalizar(equipa1, config)
+            e2n = self._normalizar(equipa2, config)
+            games = cal[pdf_modality]
+            for key in ((e1n, e2n), (e2n, e1n)):
+                if key in games:
+                    v = games[key]
+                    if isinstance(v, (tuple, list)) and len(v) >= 3:
+                        local = str(v[2]).strip()
+                        if local:
+                            return local
             return None
+
+        playoff_indices = {}
 
         for idx, row in df.iterrows():
             local_excel = _clean_text(row.get("Local", ""))
-            golos1 = row.get("Golos 1", "")
-            golos2 = row.get("Golos 2", "")
+            golos1, golos2 = row.get("Golos 1", ""), row.get("Golos 2", "")
             has_result = (
                 pd.notna(golos1)
                 and str(golos1).strip() != ""
@@ -1775,19 +1405,33 @@ class ExcelProcessor:
                 and str(golos2).strip() != ""
             )
             has_date = _clean_text(row.get("Dia", "")) != ""
-
             equipa1 = str(row.get("Equipa 1", "")).strip()
             equipa2 = str(row.get("Equipa 2", "")).strip()
+            jornada = str(row.get("Jornada", "")).strip()
             divisao = row.get("Divisão", row.get("Divisao", ""))
 
-            # Prioridade 1: Local vindo da folha de resultados
+            # Prioridade 1: Local do Excel
             if local_excel:
                 df.at[idx, "Local"] = local_excel
                 df.at[idx, "Fonte_Local"] = "Excel"
                 df.at[idx, "Local_Placeholder"] = False
                 continue
 
-            # Prioridade 2: Local vindo do calendário PDF
+            # Prioridade 2: Local do calendário PDF playoffs
+            if self.is_playoff_jornada(jornada) and cal_playoffs:
+                playoff_key = (pdf_modality, jornada)
+                if playoff_key in cal_playoffs and cal_playoffs[playoff_key]:
+                    idx_in_list = playoff_indices.get(playoff_key, 0)
+                    if idx_in_list < len(cal_playoffs[playoff_key]):
+                        slot_local = cal_playoffs[playoff_key][idx_in_list][2]
+                        playoff_indices[playoff_key] = idx_in_list + 1
+                        if slot_local:
+                            df.at[idx, "Local"] = slot_local
+                            df.at[idx, "Fonte_Local"] = "Calendário PDF Playoffs"
+                            df.at[idx, "Local_Placeholder"] = False
+                            continue
+
+            # Prioridade 3: Local do calendário PDF regular
             pdf_local = _lookup_pdf_venue(equipa1, equipa2)
             if pdf_local:
                 df.at[idx, "Local"] = pdf_local
@@ -1795,7 +1439,7 @@ class ExcelProcessor:
                 df.at[idx, "Local_Placeholder"] = False
                 continue
 
-            # Prioridade 3: Placeholder quando há resultado OU data agendada
+            # Prioridade 4: Placeholder quando há resultado ou data agendada
             if has_result or has_date:
                 placeholder_local = _venue_placeholder(modality, divisao)
                 if placeholder_local:
@@ -1806,164 +1450,99 @@ class ExcelProcessor:
                     df.at[idx, "Fonte_Local"] = ""
                     df.at[idx, "Local_Placeholder"] = False
             else:
-                # Sem resultado mantém vazio e sem marcador
                 df.at[idx, "Fonte_Local"] = ""
                 df.at[idx, "Local_Placeholder"] = False
 
         return df
 
+    # ── Limpeza e ordenação do DataFrame ─────────────────────────────────────
+
     def clean_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Limpa e processa o DataFrame."""
-        # Remove linhas vazias
+        """Remove linhas inválidas, preenche jornadas e converte golos para Int64."""
         df = df.dropna(how="all").reset_index(drop=True)
 
-        # Filtra linhas válidas (que começam por número, mesmo que venham como texto,
-        # ou estão vazias). Isto evita perder jogos quando o Excel guarda a jornada
-        # como string "1" em vez de valor numérico.
         primeira_coluna = df.columns[0]
         jornada_numerica = pd.to_numeric(df[primeira_coluna], errors="coerce")
         df = df[df[primeira_coluna].isna() | jornada_numerica.notna()].copy()
         df[primeira_coluna] = jornada_numerica.loc[df.index].astype("Int64")
 
-        # Remove linhas com equipas zeradas
         df = df[~((df["Equipa 1"] == 0) | (df["Equipa 2"] == 0))]
-
-        # Preenche jornadas
         df["Jornada"] = df["Jornada"].ffill()
 
-        # Converte golos para inteiros
-        for col in ["Golos 1", "Golos 2"]:
+        for col in ("Golos 1", "Golos 2"):
             if col in df.columns:
                 df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) else pd.NA)
 
         return df
 
     def adjust_journeys(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Ajusta números das jornadas para evitar duplicações."""
+        """Ajusta números de jornada para evitar duplicações."""
+        aparicoes: set = set()
 
         def ajustar_jornada(row):
-            jornada = row["Jornada"]
-            equipa1 = row["Equipa 1"]
-            equipa2 = row["Equipa 2"]
+            j = row["Jornada"]
+            e1, e2 = row["Equipa 1"], row["Equipa 2"]
+            if (j, e1) in aparicoes or (j, e2) in aparicoes:
+                return j + 1
+            aparicoes.add((j, e1))
+            aparicoes.add((j, e2))
+            return j
 
-            if (jornada, equipa1) in aparicoes or (jornada, equipa2) in aparicoes:
-                return jornada + 1
-
-            aparicoes.add((jornada, equipa1))
-            aparicoes.add((jornada, equipa2))
-            return jornada
-
-        aparicoes = set()
         df["Jornada"] = df.apply(ajustar_jornada, axis=1)
         df["Jornada"] = (
             df["Jornada"].astype(str).str.replace(".1", " (2ª)", regex=False)
         )
-
         return df
 
     def sort_by_datetime(self, df: pd.DataFrame, modality: str = "") -> pd.DataFrame:
-        """Ordena por data e hora, tratando jogos da madrugada (0h-1h) como do dia seguinte.
-
-        Args:
-            df: DataFrame a ordenar
-            modality: Nome da modalidade para sistema de placeholders
-        """
-        # ANTES de ordenar, aplicar sistema de placeholders se fornecida modalidade
+        """Ordena por data/hora. Se modality fornecida, atribui datas e locais antes."""
         if modality:
             df = self._assign_date_placeholders(df, modality)
             df = self._assign_venue_placeholders(df, modality)
 
         def parse_data_hora(row):
             dia, hora = row["Dia"], row["Hora"]
-
             if pd.isna(dia):
                 return pd.Timestamp.max
-            if pd.isna(hora):
-                hora = "00:00"
-
             try:
-                data_hora = pd.to_datetime(f"{dia} {hora}", errors="coerce")
-                if pd.isna(data_hora):
+                dt = pd.to_datetime(
+                    f"{dia} {hora if not pd.isna(hora) else '00:00'}", errors="coerce"
+                )
+                if pd.isna(dt):
                     return pd.Timestamp.max
-
-                # Se a hora está entre 0h00 e 0h59, adiciona 24 horas para ordenar depois
-                if (
-                    data_hora.time() >= pd.to_datetime("00:00").time()
-                    and data_hora.time() < pd.to_datetime("01:00").time()
-                ):
-                    data_hora += pd.Timedelta(hours=24)
-
-                return data_hora
+                # Horas da madrugada (0h-1h) ordenam depois da meia-noite
+                if dt.time() < pd.to_datetime("01:00").time():
+                    dt += pd.Timedelta(hours=24)
+                return dt
             except Exception:
                 return pd.Timestamp.max
 
-        # Coluna auxiliar para data/hora
-        df["DataHoraSort"] = df.apply(parse_data_hora, axis=1)
-
-        # Coluna auxiliar para ordenar por jornada quando não há data
         def parse_jornada_sort(val):
-            if pd.isna(val):
-                return 10**9
             if isinstance(val, (int, float)):
-                try:
-                    return int(val)
-                except Exception:
-                    return 10**9
+                return int(val)
             if isinstance(val, str):
-                s = val.strip()
-                m = re.match(r"^(\d+)", s)
+                m = re.match(r"^(\d+)", val.strip())
                 if m:
-                    try:
-                        return int(m.group(1))
-                    except Exception:
-                        return 10**9
-                # Jornadas tipo 'E...' (eliminatórias) vão para o fim do grupo sem data
-                return 10**9
+                    return int(m.group(1))
             return 10**9
 
-        df["JornadaSort"] = df["Jornada"].apply(parse_jornada_sort)
-
-        # Colunas auxiliares para Divisão e Grupo (caso existam)
         def parse_divisao_sort(val):
             if pd.isna(val):
                 return 10**6
-            if isinstance(val, (int, float)):
-                try:
-                    return int(val)
-                except Exception:
-                    return 10**6
-            if isinstance(val, str):
-                m = re.search(r"(\d+)", val)
-                if m:
-                    try:
-                        return int(m.group(1))
-                    except Exception:
-                        return 10**6
-            return 10**6
+            m = re.search(r"(\d+)", str(val))
+            return int(m.group(1)) if m else 10**6
 
         def parse_grupo_sort(val):
             if pd.isna(val):
                 return 10**6
-            # Aceita letras (A->1, B->2, ...) ou números diretamente
-            if isinstance(val, (int, float)):
-                try:
-                    return int(val)
-                except Exception:
-                    return 10**6
-            if isinstance(val, str) and val:
-                v = val.strip().upper()
-                # Se começar por letra
-                if v[0].isalpha():
-                    return ord(v[0]) - ord("A") + 1
-                # Se contiver número
-                m = re.search(r"(\d+)", v)
-                if m:
-                    try:
-                        return int(m.group(1))
-                    except Exception:
-                        return 10**6
-            return 10**6
+            v = str(val).strip().upper()
+            if v and v[0].isalpha():
+                return ord(v[0]) - ord("A") + 1
+            m = re.search(r"(\d+)", v)
+            return int(m.group(1)) if m else 10**6
 
+        df["DataHoraSort"] = df.apply(parse_data_hora, axis=1)
+        df["JornadaSort"] = df["Jornada"].apply(parse_jornada_sort)
         df["DivisaoSort"] = (
             df["Divisão"].apply(parse_divisao_sort)
             if "Divisão" in df.columns
@@ -1973,7 +1552,6 @@ class ExcelProcessor:
             df["Grupo"].apply(parse_grupo_sort) if "Grupo" in df.columns else 10**6
         )
 
-        # Ordenar por data/hora, depois jornada, depois Divisão e Grupo, e por fim nomes de equipas
         df = df.sort_values(
             [
                 "DataHoraSort",
@@ -1983,17 +1561,15 @@ class ExcelProcessor:
                 "Equipa 1",
                 "Equipa 2",
             ],
-            ascending=[True, True, True, True, True, True],
+            ascending=True,
         )
         df = df.drop(
             columns=["DataHoraSort", "JornadaSort", "DivisaoSort", "GrupoSort"]
         )
-
         return df
 
     def finalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Finalizações finais do DataFrame."""
-        # Remove linhas vazias nas colunas principais
+        """Últimas limpezas e reordenação de colunas."""
         colunas_principais = [
             "Dia",
             "Hora",
@@ -2005,76 +1581,53 @@ class ExcelProcessor:
         ]
         df = df.dropna(subset=colunas_principais, how="all")
 
-        # Garantir coluna "Data_Placeholder" presente
-        if "Data_Placeholder" not in df.columns:
-            df["Data_Placeholder"] = False
-        if "Local_Placeholder" not in df.columns:
-            df["Local_Placeholder"] = False
-        if "Fonte_Local" not in df.columns:
-            df["Fonte_Local"] = ""
+        for col, default in [
+            ("Data_Placeholder", False),
+            ("Local_Placeholder", False),
+            ("Fonte_Local", ""),
+            ("Falta de Comparência", ""),
+        ]:
+            if col not in df.columns:
+                df[col] = default
 
-        # Garantir coluna "Falta de Comparência" presente e no fim, mesmo vazia
-        if "Falta de Comparência" not in df.columns:
-            df["Falta de Comparência"] = ""
-
-        # Reordenar colunas: principais, depois marcadores/fontes e por fim Falta de Comparência
-        colunas = [
-            col
-            for col in df.columns
-            if col
-            not in (
-                "Data_Placeholder",
-                "Local_Placeholder",
-                "Fonte_Data",
-                "Fonte_Local",
-                "Falta de Comparência",
-            )
-        ]
-        if "Fonte_Data" in df.columns:
-            colunas.append("Fonte_Data")
-        colunas.append("Fonte_Local")
-        colunas.append("Data_Placeholder")
-        colunas.append("Local_Placeholder")
+        # Reordenar: colunas principais → metadados → Falta de Comparência
+        meta = ["Fonte_Data", "Fonte_Local", "Data_Placeholder", "Local_Placeholder"]
+        colunas = [c for c in df.columns if c not in meta + ["Falta de Comparência"]]
+        colunas += [c for c in meta if c in df.columns]
         colunas.append("Falta de Comparência")
         df = df[colunas]
 
-        df = self._coerce_integer_columns(df)
-
-        return df
+        return self._coerce_integer_columns(df)
 
     def _coerce_integer_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Garante que golos e divisões ficam serializados como inteiros no CSV."""
+        """Garante que golos e divisões ficam como Int64 no CSV."""
         df = df.copy()
-
         for col in ("Golos 1", "Golos 2", "Divisão", "Divisao"):
             if col in df.columns:
-                numeric = pd.to_numeric(df[col], errors="coerce")
-                df[col] = numeric.astype("Int64")
-
+                df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
         return df
 
+    # ── Processamento por folha ───────────────────────────────────────────────
+
     def process_sheet(self, sheet_name: str) -> bool:
-        """Processa uma folha específica."""
+        """Processa uma folha do Excel e guarda o CSV correspondente."""
         if sheet_name == "CASTIGOS":
             return False
 
-        print(f"A processar a folha: {sheet_name}")
+        logging.info(f"A processar a folha: {sheet_name}")
 
-        # Verifica se tem divisões
         sample = self.xls.parse(sheet_name, nrows=1)
         has_div = "DIVISÃO" in str(sample.columns[0])
 
-        # Extrai células vermelhas
         linhas_faltas = self.extract_red_cells(sheet_name)
 
-        # Carrega dados (mantendo cabeçalhos originais para reconhecer estágios)
         df = pd.read_excel(
             self.xls, sheet_name=sheet_name, usecols=[0, 1, 2, 3, 4, 5, 7, 8]
         )
         df["Falta de Comparência"] = ""
 
-        # Validar e corrigir datas fora do intervalo da época
-        dia_col = df.columns[1]  # Coluna "Dia"
+        # Validar datas fora do intervalo da época
+        dia_col = df.columns[1]
         if self.season:
             df[dia_col] = df[dia_col].apply(
                 lambda x: (
@@ -2084,19 +1637,16 @@ class ExcelProcessor:
                 )
             )
 
-        # Preenche faltas de comparência
         for row_idx, value in linhas_faltas.items():
-            df_idx = row_idx - 2  # Ajusta índice
+            df_idx = row_idx - 2
             if 0 <= df_idx < len(df):
                 df.at[df_idx, "Falta de Comparência"] = value
 
-        # Limpa DataFrame inicial
         df = df.dropna(how="all").reset_index(drop=True)
 
-        # Antes de qualquer limpeza, tentar extrair blocos de playoffs embutidos
+        # Extrair playoffs embutidos antes de qualquer limpeza
         playoffs_df_embedded = self._extract_playoffs_from_dataframe(df.copy())
 
-        # Processa divisões e grupos
         if has_div:
             divisoes, grupos = self.find_divisions_and_groups(df)
             df = self.fill_sections(df, divisoes, "Divisão")
@@ -2107,197 +1657,181 @@ class ExcelProcessor:
             df = self.fill_sections(df, grupos, "Grupo")
             headers = self.create_headers(False, bool(grupos))
 
-        # Ajusta cabeçalhos
         df = df.iloc[:, : len(headers)]
         df.columns = headers
 
-        # Processa dados
         df = self.clean_dataframe(df)
         df = self.adjust_journeys(df)
         df = self.sort_by_datetime(df, modality=sheet_name)
         df = self.apply_default_scores(df, sheet_name)
-        df = self.filter_playoff_games(df)  # Filtrar jogos de playoffs
+        df = self.filter_playoff_games(df)
         df = self.finalize_dataframe(df)
 
-        # Garantir que não existe coluna 'Época' nos CSVs
         if "Época" in df.columns:
-            df = df.drop(columns=["Época"])  # normalizar
-
+            df = df.drop(columns=["Época"])
         df = self._coerce_integer_columns(df)
 
-        # Salva resultado
-        if self.season:
-            filename = f"{sheet_name}_{self.season}.csv"
-        else:
-            filename = f"{sheet_name}.csv"
-
+        filename = (
+            f"{sheet_name}_{self.season}.csv" if self.season else f"{sheet_name}.csv"
+        )
         output_file = self.output_dir / filename
         df.to_csv(output_file, index=False)
+        logging.info(f"Folha '{sheet_name}' processada → '{output_file}'")
 
-        print(f"Folha '{sheet_name}' processada e salva em '{output_file}'")
-
-        # Se foram encontrados playoffs embutidos, anexar ao CSV desta modalidade
         if playoffs_df_embedded is not None and not playoffs_df_embedded.empty:
-            # Garantir colunas esperadas e ordem
             expected_cols = self.base_headers
             for c in expected_cols:
                 if c not in playoffs_df_embedded.columns:
                     playoffs_df_embedded[c] = (
-                        "" if c not in ("Golos 1", "Golos 2") else pd.NA
+                        pd.NA if c in ("Golos 1", "Golos 2") else ""
                     )
             playoffs_df_embedded = playoffs_df_embedded[expected_cols]
             self._append_playoffs_to_target_csv(sheet_name, playoffs_df_embedded)
+
         return True
 
     def process_all_sheets(self):
-        """Processa todas as folhas do Excel."""
+        """Processa todas as folhas: regulares primeiro, PLAYOFFS depois."""
         processed_count = 0
-        target_sheets = (
-            self._sheets_to_process if self._sheets_to_process else self.xls.sheet_names
-        )
+        target_sheets = self._sheets_to_process or list(map(str, self.xls.sheet_names))
 
-        playoffs_accumulator: List[Tuple[str, pd.DataFrame]] = []
-
-        # 1) Processar folhas normais (com divisões/grupos)
-        for sheet in map(str, target_sheets):
+        # 1) Folhas regulares
+        for sheet in target_sheets:
             if "PLAYOFFS" in sheet.upper():
-                # Adiar para a 2ª fase
                 continue
             if self.process_sheet(sheet):
                 processed_count += 1
 
-        # 2) Processar folhas de PLAYOFFS e anexar aos CSVs alvo
-        for sheet in map(str, target_sheets):
+        # 2) Folhas de PLAYOFFS → anexar ao CSV da modalidade base
+        for sheet in target_sheets:
             if "PLAYOFFS" not in sheet.upper():
                 continue
 
             base_modality = self._detect_base_modality_for_playoffs(sheet)
             if not base_modality:
-                print(
-                    f"Aviso: Não foi possível determinar a modalidade base para '{sheet}'. Ignorado."
+                logging.warning(
+                    f"Não foi possível determinar modalidade base para '{sheet}'. Ignorado."
                 )
                 continue
 
             df_playoffs = self._parse_playoffs_sheet(sheet)
             if df_playoffs is None or df_playoffs.empty:
-                logging.warning(f"Aviso: Folha de playoffs '{sheet}' sem linhas válidas.")
+                logging.warning(f"Folha de playoffs '{sheet}' sem linhas válidas.")
                 continue
 
-            # Garantir colunas esperadas e ordem
             expected_cols = self.base_headers
             for c in expected_cols:
                 if c not in df_playoffs.columns:
-                    df_playoffs[c] = "" if c != "Golos 1" and c != "Golos 2" else pd.NA
+                    df_playoffs[c] = pd.NA if c in ("Golos 1", "Golos 2") else ""
             df_playoffs = df_playoffs[expected_cols]
-
             self._append_playoffs_to_target_csv(base_modality, df_playoffs)
 
-        print(
-            f"\nProcessamento concluído! {processed_count} folhas processadas e playoffs anexados (se existirem)."
+        logging.info(
+            f"\nProcessamento concluído! {processed_count} folhas processadas"
+            + (
+                " e playoffs anexados."
+                if any("PLAYOFFS" in s.upper() for s in target_sheets)
+                else "."
+            )
         )
 
 
+# ── Ponto de entrada ─────────────────────────────────────────────────────────
+
+
 def main():
-    """Função principal."""
     repo_root = Path(__file__).resolve().parents[1]
-    # 1) Ler config/env para obter a URL do documento de resultados
+
+    # argumentos de linha de comando
+    parser = argparse.ArgumentParser(description="Extrator de resultados Taça UA")
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Forçar reprocessamento mesmo se o ficheiro não mudou",
+    )
+    args = parser.parse_args()
+
+    # 1) Ler URL de resultados de config.json ou variável de ambiente
     config_url: Optional[str] = None
     config_path = repo_root / "docs" / "config" / "config.json"
     if config_path.exists():
         try:
             with open(config_path, "r", encoding="utf-8") as f:
-                cfg = json.load(f)
-                config_url = cfg.get("results_url")
+                config_url = json.load(f).get("results_url")
         except Exception as e:
-            logging.warning(f"Aviso: Não foi possível ler config.json: {e}")
+            logging.warning(f"Não foi possível ler config.json: {e}")
 
-    # Variável de ambiente como fallback
-    env_url = os.environ.get("RESULTS_URL")
-    if not config_url and env_url:
-        config_url = env_url
+    config_url = config_url or os.environ.get("RESULTS_URL")
 
     downloaded_file: Optional[Path] = None
     season_detected: Optional[str] = None
 
-    # 2) Se houver URL, descarregar o ficheiro atualizado
+    # 2) Descarregar ficheiro se URL disponível
     if config_url:
         try:
             url = normalize_results_url(config_url)
             downloaded_file = download_results_excel(url)
-            print(f"Documento descarregado para: {downloaded_file}")
+            logging.info(f"Documento descarregado para: {downloaded_file}")
 
-            # Abrir para detetar época mais recente a partir das folhas
             xls_temp = pd.ExcelFile(str(downloaded_file))
             season_detected = detect_latest_season_from_sheet_names(
                 list(map(str, xls_temp.sheet_names))
             )
-            # Fechar o handler do Excel antes de renomear em Windows
             try:
                 xls_temp.close()
             except Exception:
                 pass
 
-            # Definir o nome alvo do Excel como 'Resultados Taça UA <época>.xlsx'
             if not season_detected:
-                # fallback se não houver época nas folhas -> tentar a partir do nome
-                extracted = extract_season_from_filename(downloaded_file.name)
-                if not extracted:
-                    extracted = current_season_token()
-                season_detected = extracted
-            target_name = f"Resultados Taça UA {season_detected}.xlsx"
+                season_detected = (
+                    extract_season_from_filename(downloaded_file.name)
+                    or current_season_token()
+                )
 
+            target_name = f"Resultados Taça UA {season_detected}.xlsx"
             target_path = downloaded_file.parent / target_name
             if downloaded_file.name != target_name:
                 try:
-                    # Substitui se já existir
                     if target_path.exists():
                         target_path.unlink()
                     downloaded_file.rename(target_path)
                     downloaded_file = target_path
                 except Exception as e:
-                    print(
-                        f"Aviso: Não foi possível renomear o ficheiro descarregado: {e}"
-                    )
-                    # fallback: copiar para o destino com o nome correto, mantendo o original
+                    logging.warning(f"Não foi possível renomear: {e}")
                     try:
                         shutil.copy2(downloaded_file, target_path)
                         downloaded_file = target_path
                     except Exception as e2:
-                        logging.warning(f"Aviso: Falhou também o fallback de cópia: {e2}")
+                        logging.warning(f"Fallback de cópia falhou: {e2}")
 
         except Exception as e:
-            print(f"Erro ao descarregar o documento: {e}")
+            logging.error(f"Erro ao descarregar o documento: {e}")
             downloaded_file = None
 
-    # 3) Determinar o caminho do ficheiro a processar
+    # 3) Determinar caminho do ficheiro a processar
     if downloaded_file and downloaded_file.exists():
         file_path = str(downloaded_file)
     else:
-        # fallback: usar ficheiro local existente (compatibilidade antiga)
-        # tentar usar padrão com época corrente
         default_local = (
             repo_root / "data" / f"Resultados Taça UA {current_season_token()}.xlsx"
         )
         if default_local.exists():
             file_path = str(default_local)
         else:
-            # fallback final: procurar qualquer Excel local em data/ ou na raiz
-            candidates = list((repo_root / "data").glob("Resultados Taça UA*.xlsx"))
-            candidates += list(repo_root.glob("Resultados Taça UA*.xlsx"))
+            candidates = sorted(
+                list((repo_root / "data").glob("Resultados Taça UA*.xlsx"))
+                + list(repo_root.glob("Resultados Taça UA*.xlsx")),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )
             if not candidates:
-                print(
-                    "Erro: Nenhum ficheiro local encontrado e URL não disponível/valida."
-                )
-                print(
-                    "Defina 'results_url' em config.json ou a variável de ambiente RESULTS_URL."
-                )
+                logging.error("Nenhum ficheiro local encontrado e URL não disponível.")
+                logging.error("Defina 'results_url' em config.json ou RESULTS_URL.")
                 return
-            # escolher o mais recente por data de modificação
-            latest = max(candidates, key=lambda p: p.stat().st_mtime)
-            file_path = str(latest)
+            file_path = str(candidates[0])
 
-    # 4) Preparar backup e verificação de mudanças
-    # Tenta inferir época para nome do backup
+    # 4) Backup e verificação de mudanças
     season_for_backup = (
         season_detected
         or extract_season_from_filename(Path(file_path).name)
@@ -2308,23 +1842,28 @@ def main():
     )
 
     if os.path.exists(backup_file) and files_are_identical(file_path, backup_file):
-        print(
-            "O arquivo Excel não mudou desde a última execução. Nenhum processamento necessário."
-        )
-        if os.getenv("GITHUB_OUTPUT"):
-            with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-                print(f"data_changed=false", file=fh)
-        return
+        if not args.force:
+            logging.info(
+                "Ficheiro Excel não mudou desde a última execução. Nada a processar."
+            )
+            if os.getenv("GITHUB_OUTPUT"):
+                with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+                    print("data_changed=false", file=fh)
+            return
+        else:
+            logging.info(
+                "Ficheiro Excel igual ao backup, mas forçando reprocessamento (--force)."
+            )
 
-    print("Arquivo Excel mudou ou primeira execução. Processando dados...")
+    logging.info("Ficheiro alterado ou primeira execução. A processar...")
 
     try:
         shutil.copy2(file_path, backup_file)
-        print(f"Backup criado: {backup_file}")
+        logging.info(f"Backup criado: {backup_file}")
     except Exception as e:
-        logging.warning(f"Aviso: Não foi possível criar backup: {e}")
+        logging.warning(f"Não foi possível criar backup: {e}")
 
-    # 5) Selecionar folhas a processar com base na época
+    # 5) Selecionar folhas e processar
     xls_all = pd.ExcelFile(file_path)
     if not season_detected:
         season_detected = detect_latest_season_from_sheet_names(
@@ -2335,7 +1874,6 @@ def main():
         list(map(str, xls_all.sheet_names)), season_detected
     )
 
-    # 6) Processar o ficheiro
     processor = ExcelProcessor(
         file_path,
         output_dir=str(repo_root / "docs" / "output" / "csv_modalidades"),
@@ -2346,7 +1884,7 @@ def main():
 
     if os.getenv("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-            print(f"data_changed=true", file=fh)
+            print("data_changed=true", file=fh)
 
 
 if __name__ == "__main__":

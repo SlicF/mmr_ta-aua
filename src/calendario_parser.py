@@ -1,4 +1,5 @@
 import logging
+
 # -*- coding: utf-8 -*-
 """
 Módulo para extração de calendários de jogos a partir de PDFs da Taça UA.
@@ -17,7 +18,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from difflib import SequenceMatcher
 from PyPDF2 import PdfReader
-
 
 # Cache global para evitar leitura repetida de PDFs
 _calendario_cache: Dict[str, Dict] = {}
@@ -165,6 +165,11 @@ def mapear_modalidade_pdf_para_excel(modalidade_pdf: str) -> Tuple[str, Optional
 
     # Converter para maiúsculas (padrão do Excel)
     modalidade_normalizada = modalidade.upper()
+    
+    if "FUTEBOL" in modalidade_normalizada and "7" in modalidade_normalizada:
+        modalidade_normalizada = "FUTEBOL 7"
+    elif "ANDEBOL" in modalidade_normalizada:
+        modalidade_normalizada = "ANDEBOL"
 
     return (modalidade_normalizada, divisao)
 
@@ -443,8 +448,12 @@ def carregar_calendario_epoca(
                     or hora_existente != hora
                     or local_existente != local
                 ):
-                    logging.debug(f"      [!] Conflito: {equipa1} vs {equipa2} em {modalidade}")
-                    logging.debug(f"          Anterior: {data_existente} {hora_existente}")
+                    logging.debug(
+                        f"      [!] Conflito: {equipa1} vs {equipa2} em {modalidade}"
+                    )
+                    logging.debug(
+                        f"          Anterior: {data_existente} {hora_existente}"
+                    )
                     logging.debug(f"          Nova: {data_formatada} {hora}")
                     print(f"          Mantendo a mais recente (PDF mais recente)")
                     # Armazenar (PDF mais recente sobrescreve)
@@ -486,6 +495,134 @@ def carregar_calendario_epoca(
     )
 
     return resultado
+
+
+def carregar_calendario_playoffs(
+    epoca: str, repo_root: Optional[Path] = None
+) -> Dict[Tuple[str, str], List[Tuple[str, str, str]]]:
+    """Carrega calendários de playoffs de um PDF estruturado.
+
+    Returns:
+        {(modalidade_norm, jornada): [(data_formatada, hora, local), ...]}
+    """
+    if repo_root is None:
+        repo_root = Path(__file__).resolve().parents[1]
+
+    calendarios_dir = repo_root / "docs" / "calendários" / epoca
+    if not calendarios_dir.exists():
+        return {}
+
+    # Procurar PDF de playoffs
+    pdfs = sorted(calendarios_dir.glob("*Playoff*.pdf"))
+    if not pdfs:
+        pdfs = sorted(calendarios_dir.glob("Calendário Taça UA Playoffs*.pdf"))
+    if not pdfs:
+        pdfs = sorted(calendarios_dir.glob("*layoff*.pdf"))
+
+    if not pdfs:
+        print(f"  [INFO] Nenhum PDF de playoffs encontrado para a época {epoca}")
+        return {}
+
+    pdf_path = pdfs[-1]
+
+    from playoffs_parser import parse_playoffs
+    from extrator import _StageMapper
+
+    jogos_brutos = parse_playoffs(str(pdf_path))
+
+    try:
+        ano_base = 2000 + int(epoca.split("_")[0])
+    except (ValueError, IndexError):
+        ano_base = datetime.now().year
+
+    resultado = defaultdict(list)
+
+    for jogo in jogos_brutos:
+        modalidade_norm, _ = mapear_modalidade_pdf_para_excel(jogo["modalidade"])
+
+        divisao_lower = (jogo.get("divisao") or "").lower()
+        if any(k in divisao_lower for k in ["ligu", "ligui"]):
+            context = "LM"
+        elif any(k in divisao_lower for k in ["manuten", "manutenção", "promo"]):
+            context = "PM"
+        else:
+            context = "E"
+
+        mapper = _StageMapper(context)
+        fase = jogo.get("fase", "")
+        
+        # Se a fase for vazia mas o jogo tiver dados, usar a fase atual do mapper
+        if not fase and jogo.get("data"):
+            # Manter a fase anterior (do mapper.context atual)
+            fase = ""
+        
+        jornada = mapper.map(fase)
+
+        # Se a fase é "Meia Final" e contexto E, verificar se há 4 jogos consecutivos
+        # para dividir em E2 (2 jogos) + E3L (1 jogo) + E3 (1 jogo)
+        fase_lower = fase.lower()
+        if context == "E" and ("meia" in fase_lower or "semi" in fase_lower):
+            current_key = (modalidade_norm, jornada) if jornada else None
+            if current_key and current_key in resultado:
+                existing_count = len(resultado[current_key])
+                # Se já temos 2 jogos em E2, o próximo vai para E3L, depois E3
+                if existing_count >= 2:
+                    if existing_count == 2:
+                        jornada = "E3L"
+                    elif existing_count == 3:
+                        jornada = "E3"
+
+        # Se ainda não tem jornada mas tem data e contexto E, usar a fase atual
+        if not jornada and jogo.get("data") and context == "E":
+            # Usar a fase baseada no número de jogos anteriores desta modalidade
+            if (modalidade_norm, "E1") in resultado:
+                if (modalidade_norm, "E2") in resultado:
+                    jornada = "E3"
+                else:
+                    jornada = "E2"
+            else:
+                jornada = "E1"
+
+        if context == "LM":
+            import re
+            fase_lower = jogo["fase"].lower()
+            m = re.search(r"jornada\s*(\d+)", fase_lower)
+            if m:
+                jornada = f"LM{m.group(1)}"
+            elif re.match(r"^\d+$", jogo["fase"].strip()):
+                jornada = f"LM{jogo['fase'].strip()}"
+            else:
+                m = re.search(r"(\d+)[a-záéíóúãõ]*\s*jornada", fase_lower)
+                if m:
+                    jornada = f"LM{m.group(1)}"
+                else:
+                    m = re.search(r"^lm\s*(\d+)", fase_lower, re.I)
+                    if m:
+                        jornada = f"LM{m.group(1)}"
+                    else:
+                        jornada = "LM"
+
+        if not jornada:
+            continue
+
+        data_str = jogo.get("data")
+        if not data_str:
+            continue
+
+        try:
+            dia, mes = map(int, data_str.split("/"))
+            ano = ano_base if mes >= 9 else ano_base + 1
+            data_formatada = datetime(ano, mes, dia).strftime("%Y-%m-%d 00:00:00")
+        except ValueError:
+            continue
+
+        clave = (modalidade_norm, jornada)
+        resultado[clave].append(
+            (data_formatada, jogo.get("hora", ""), jogo.get("local", ""))
+        )
+
+    print(f"  [INFO] Calendário Playoffs carregado: {len(resultado)} jornadas mapeadas")
+    return dict(resultado)
 
 
 def limpar_cache():
