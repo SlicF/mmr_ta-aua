@@ -62,8 +62,8 @@
       "tie_points": 9,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "MTC",
-        "Marketing"
+        "Marketing",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,13 +112,13 @@
       "tie_points": 0,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações",
         "Gestão e Planeamento em Turismo",
         "Tecnologias de Informação",
-        "Eng. e Gestão Industrial",
-        "Eng. Eletrónica e Telecomunicações",
-        "Contabilidade",
         "Biotecnologia",
-        "Eng. Mecânica"
+        "Contabilidade",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -132,7 +132,7 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Gestão e Planeamento em Turismo",
+          "team": "Eng. Mecânica",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -144,7 +144,7 @@
           }
         },
         {
-          "team": "Tecnologias de Informação",
+          "team": "Eng. Eletrónica e Telecomunicações",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -156,7 +156,7 @@
           }
         },
         {
-          "team": "Eng. e Gestão Industrial",
+          "team": "Gestão e Planeamento em Turismo",
           "rank_in_tiebreak": 3,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -168,7 +168,7 @@
           }
         },
         {
-          "team": "Eng. Eletrónica e Telecomunicações",
+          "team": "Tecnologias de Informação",
           "rank_in_tiebreak": 4,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -180,7 +180,7 @@
           }
         },
         {
-          "team": "Contabilidade",
+          "team": "Biotecnologia",
           "rank_in_tiebreak": 5,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -192,7 +192,7 @@
           }
         },
         {
-          "team": "Biotecnologia",
+          "team": "Contabilidade",
           "rank_in_tiebreak": 6,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -204,7 +204,7 @@
           }
         },
         {
-          "team": "Eng. Mecânica",
+          "team": "Eng. e Gestão Industrial",
           "rank_in_tiebreak": 7,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -227,9 +227,9 @@
       "tie_points": 0,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Contabilidade",
         "Tecnologias de Informação",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -243,7 +243,7 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Contabilidade",
+          "team": "Tecnologias de Informação",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -255,7 +255,7 @@
           }
         },
         {
-          "team": "Tecnologias de Informação",
+          "team": "Ciências Biomédicas",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -267,7 +267,7 @@
           }
         },
         {
-          "team": "Ciências Biomédicas",
+          "team": "Contabilidade",
           "rank_in_tiebreak": 3,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -352,8 +352,8 @@
       "tie_type": "head_to_head",
       "tie_points": 9,
       "tied_teams": [
-        "MTC",
-        "Marketing"
+        "Marketing",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -383,8 +383,8 @@
       "tie_type": "head_to_head",
       "tie_points": 9,
       "tied_teams": [
-        "MTC",
-        "Marketing"
+        "Marketing",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -407,20 +407,20 @@
       "rank_in_tiebreak": 2,
       "final_position": 6
     },
-    "2ª Divisão - Grupo B::Gestão e Planeamento em Turismo": {
+    "2ª Divisão - Grupo B::Eng. Mecânica": {
       "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Gestão e Planeamento em Turismo",
+      "team": "Eng. Mecânica",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações",
         "Gestão e Planeamento em Turismo",
         "Tecnologias de Informação",
-        "Eng. e Gestão Industrial",
-        "Eng. Eletrónica e Telecomunicações",
-        "Contabilidade",
         "Biotecnologia",
-        "Eng. Mecânica"
+        "Contabilidade",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -443,20 +443,20 @@
       "rank_in_tiebreak": 1,
       "final_position": 10
     },
-    "2ª Divisão - Grupo B::Tecnologias de Informação": {
+    "2ª Divisão - Grupo B::Eng. Eletrónica e Telecomunicações": {
       "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Tecnologias de Informação",
+      "team": "Eng. Eletrónica e Telecomunicações",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações",
         "Gestão e Planeamento em Turismo",
         "Tecnologias de Informação",
-        "Eng. e Gestão Industrial",
-        "Eng. Eletrónica e Telecomunicações",
-        "Contabilidade",
         "Biotecnologia",
-        "Eng. Mecânica"
+        "Contabilidade",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -479,20 +479,20 @@
       "rank_in_tiebreak": 2,
       "final_position": 11
     },
-    "2ª Divisão - Grupo B::Eng. e Gestão Industrial": {
+    "2ª Divisão - Grupo B::Gestão e Planeamento em Turismo": {
       "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. e Gestão Industrial",
+      "team": "Gestão e Planeamento em Turismo",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações",
         "Gestão e Planeamento em Turismo",
         "Tecnologias de Informação",
-        "Eng. e Gestão Industrial",
-        "Eng. Eletrónica e Telecomunicações",
-        "Contabilidade",
         "Biotecnologia",
-        "Eng. Mecânica"
+        "Contabilidade",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -515,20 +515,20 @@
       "rank_in_tiebreak": 3,
       "final_position": 12
     },
-    "2ª Divisão - Grupo B::Eng. Eletrónica e Telecomunicações": {
+    "2ª Divisão - Grupo B::Tecnologias de Informação": {
       "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. Eletrónica e Telecomunicações",
+      "team": "Tecnologias de Informação",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações",
         "Gestão e Planeamento em Turismo",
         "Tecnologias de Informação",
-        "Eng. e Gestão Industrial",
-        "Eng. Eletrónica e Telecomunicações",
-        "Contabilidade",
         "Biotecnologia",
-        "Eng. Mecânica"
+        "Contabilidade",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -551,20 +551,20 @@
       "rank_in_tiebreak": 4,
       "final_position": 13
     },
-    "2ª Divisão - Grupo B::Contabilidade": {
+    "2ª Divisão - Grupo B::Biotecnologia": {
       "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Contabilidade",
+      "team": "Biotecnologia",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações",
         "Gestão e Planeamento em Turismo",
         "Tecnologias de Informação",
-        "Eng. e Gestão Industrial",
-        "Eng. Eletrónica e Telecomunicações",
-        "Contabilidade",
         "Biotecnologia",
-        "Eng. Mecânica"
+        "Contabilidade",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -587,20 +587,20 @@
       "rank_in_tiebreak": 5,
       "final_position": 14
     },
-    "2ª Divisão - Grupo B::Biotecnologia": {
+    "2ª Divisão - Grupo B::Contabilidade": {
       "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Biotecnologia",
+      "team": "Contabilidade",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações",
         "Gestão e Planeamento em Turismo",
         "Tecnologias de Informação",
-        "Eng. e Gestão Industrial",
-        "Eng. Eletrónica e Telecomunicações",
-        "Contabilidade",
         "Biotecnologia",
-        "Eng. Mecânica"
+        "Contabilidade",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -623,20 +623,20 @@
       "rank_in_tiebreak": 6,
       "final_position": 15
     },
-    "2ª Divisão - Grupo B::Eng. Mecânica": {
+    "2ª Divisão - Grupo B::Eng. e Gestão Industrial": {
       "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. Mecânica",
+      "team": "Eng. e Gestão Industrial",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Eng. Mecânica",
+        "Eng. Eletrónica e Telecomunicações",
         "Gestão e Planeamento em Turismo",
         "Tecnologias de Informação",
-        "Eng. e Gestão Industrial",
-        "Eng. Eletrónica e Telecomunicações",
-        "Contabilidade",
         "Biotecnologia",
-        "Eng. Mecânica"
+        "Contabilidade",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -659,16 +659,16 @@
       "rank_in_tiebreak": 7,
       "final_position": 16
     },
-    "ª Divisão::Contabilidade": {
+    "ª Divisão::Tecnologias de Informação": {
       "event_id": 4,
       "ranking_key": "ª Divisão",
-      "team": "Contabilidade",
+      "team": "Tecnologias de Informação",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Contabilidade",
         "Tecnologias de Informação",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -691,16 +691,16 @@
       "rank_in_tiebreak": 1,
       "final_position": null
     },
-    "ª Divisão::Tecnologias de Informação": {
+    "ª Divisão::Ciências Biomédicas": {
       "event_id": 4,
       "ranking_key": "ª Divisão",
-      "team": "Tecnologias de Informação",
+      "team": "Ciências Biomédicas",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Contabilidade",
         "Tecnologias de Informação",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -723,16 +723,16 @@
       "rank_in_tiebreak": 2,
       "final_position": null
     },
-    "ª Divisão::Ciências Biomédicas": {
+    "ª Divisão::Contabilidade": {
       "event_id": 4,
       "ranking_key": "ª Divisão",
-      "team": "Ciências Biomédicas",
+      "team": "Contabilidade",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Contabilidade",
         "Tecnologias de Informação",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Contabilidade"
       ],
       "criteria_order": [
         "faltas_comparencia",

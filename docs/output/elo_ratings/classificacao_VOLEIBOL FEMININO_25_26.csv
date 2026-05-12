@@ -33,14 +33,15 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,B,9,Marketing,6,10,1,0,9,5,18,-13,0,0,0,0
 2,B,10,Matemática,5,10,2,0,8,4,17,-13,0,0,0,0
 2,B,11,Economia,5,10,2,0,8,4,17,-13,0,0,0,0
-2,B,12,Eng. Informática,0,0,0,0,0,0,0,0,0,0,0,0
-2,B,13,Biologia,0,0,0,0,0,0,0,0,0,0,0,0
-2,B,14,Ciências Biomédicas,0,0,0,0,0,0,0,0,0,0,0,0
-2,B,15,Eng. Eletrónica e Telecomunicações,0,0,0,0,0,0,0,0,0,0,0,0
-2,B,16,Fisioterapia,0,0,0,0,0,0,0,0,0,0,0,0
-2,B,17,Eng. do Ambiente,0,0,0,0,0,0,0,0,0,0,0,0
+2,B,12,Fisioterapia,0,0,0,0,0,0,0,0,0,0,0,0
+2,B,13,Ciências Biomédicas,0,0,0,0,0,0,0,0,0,0,0,0
+2,B,14,Biologia,0,0,0,0,0,0,0,0,0,0,0,0
+2,B,15,Eng. do Ambiente,0,0,0,0,0,0,0,0,0,0,0,0
+2,B,16,Eng. Informática,0,0,0,0,0,0,0,0,0,0,0,0
+2,B,17,Eng. Civil,0,0,0,0,0,0,0,0,0,0,0,0
 2,B,18,Psicologia,0,0,0,0,0,0,0,0,0,0,0,0
-2,B,19,Eng. Civil,0,0,0,0,0,0,0,0,0,0,0,0
-,,1,Eng. Física,0,0,0,0,0,0,0,0,0,0,0,0
-,,2,Eng. Civil,0,0,0,0,0,0,0,0,0,0,0,0
-,,3,Psicologia,0,0,0,0,0,0,0,0,0,0,0,0
+2,B,19,Eng. Eletrónica e Telecomunicações,0,0,0,0,0,0,0,0,0,0,0,0
+,,1,Eng. Civil,0,0,0,0,0,0,0,0,0,0,0,0
+,,2,Psicologia,0,0,0,0,0,0,0,0,0,0,0,0
+,,3,Eng. Física,0,0,0,0,0,0,0,0,0,0,0,0
+,,1,2026-05-13 00:00:00,0,4,0,0,0,0,0,0,4,,,

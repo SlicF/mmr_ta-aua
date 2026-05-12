@@ -59,6 +59,56 @@
         "Grupo": "A",
         "ranking_key": "2ª Divisão - Grupo A"
       },
+      "tie_points": 24,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Ciências Biomédicas",
+        "Bioquímica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Ciências Biomédicas",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 2,
+            "golos_marcados_h2h": 2,
+            "diferenca_golos": 12,
+            "golos_marcados": 17
+          }
+        },
+        {
+          "team": "Bioquímica",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": 12,
+            "golos_marcados": 17
+          }
+        }
+      ],
+      "event_id": 2
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": "A",
+        "ranking_key": "2ª Divisão - Grupo A"
+      },
       "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
@@ -101,7 +151,7 @@
           }
         }
       ],
-      "event_id": 2
+      "event_id": 3
     },
     {
       "context": {
@@ -151,7 +201,7 @@
           }
         }
       ],
-      "event_id": 3
+      "event_id": 4
     },
     {
       "context": {
@@ -201,7 +251,7 @@
           }
         }
       ],
-      "event_id": 4
+      "event_id": 5
     },
     {
       "context": {
@@ -212,12 +262,12 @@
       "tie_points": 0,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Ciências Biomédicas",
         "Eng. Computadores e Telemática",
-        "Tecnologias de Informação",
-        "Design",
-        "Bioquímica",
         "Eng. e Gestão Industrial",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Tecnologias de Informação",
+        "Design"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -231,7 +281,7 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Eng. Computadores e Telemática",
+          "team": "Ciências Biomédicas",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -243,32 +293,8 @@
           }
         },
         {
-          "team": "Tecnologias de Informação",
+          "team": "Eng. Computadores e Telemática",
           "rank_in_tiebreak": 2,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 0,
-            "golos_marcados": 0
-          }
-        },
-        {
-          "team": "Design",
-          "rank_in_tiebreak": 3,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": 0,
-            "golos_marcados_h2h": 0,
-            "diferenca_golos": 0,
-            "golos_marcados": 0
-          }
-        },
-        {
-          "team": "Bioquímica",
-          "rank_in_tiebreak": 4,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 0,
@@ -280,7 +306,7 @@
         },
         {
           "team": "Eng. e Gestão Industrial",
-          "rank_in_tiebreak": 5,
+          "rank_in_tiebreak": 3,
           "criteria_values": {
             "faltas_comparencia": 0,
             "pontos_h2h": 0,
@@ -292,6 +318,30 @@
         },
         {
           "team": "Eng. Mecânica",
+          "rank_in_tiebreak": 4,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": 0,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": 0,
+            "golos_marcados": 0
+          }
+        },
+        {
+          "team": "Tecnologias de Informação",
+          "rank_in_tiebreak": 5,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": 0,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": 0,
+            "golos_marcados": 0
+          }
+        },
+        {
+          "team": "Design",
           "rank_in_tiebreak": 6,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -303,7 +353,7 @@
           }
         }
       ],
-      "event_id": 5
+      "event_id": 6
     },
     {
       "context": {
@@ -314,9 +364,9 @@
       "tie_points": 0,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Bioquímica",
-        "Física"
+        "Física",
+        "Ciências Biomédicas",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -330,7 +380,7 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Eng. Computadores e Telemática",
+          "team": "Física",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -342,7 +392,7 @@
           }
         },
         {
-          "team": "Bioquímica",
+          "team": "Ciências Biomédicas",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -354,7 +404,7 @@
           }
         },
         {
-          "team": "Física",
+          "team": "Eng. Computadores e Telemática",
           "rank_in_tiebreak": 3,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -366,7 +416,7 @@
           }
         }
       ],
-      "event_id": 6
+      "event_id": 7
     }
   ],
   "indexByContextTeam": {
@@ -432,8 +482,70 @@
       "rank_in_tiebreak": 2,
       "final_position": 5
     },
-    "2ª Divisão - Grupo A::Geologia": {
+    "2ª Divisão - Grupo A::Ciências Biomédicas": {
       "event_id": 2,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Ciências Biomédicas",
+      "tie_type": "head_to_head",
+      "tie_points": 24,
+      "tied_teams": [
+        "Ciências Biomédicas",
+        "Bioquímica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 2,
+        "golos_marcados_h2h": 2,
+        "diferenca_golos": 12,
+        "golos_marcados": 17
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 2
+    },
+    "2ª Divisão - Grupo A::Bioquímica": {
+      "event_id": 2,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Bioquímica",
+      "tie_type": "head_to_head",
+      "tie_points": 24,
+      "tied_teams": [
+        "Ciências Biomédicas",
+        "Bioquímica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 0,
+        "diferenca_golos": 12,
+        "golos_marcados": 17
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 3
+    },
+    "2ª Divisão - Grupo A::Geologia": {
+      "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo A",
       "team": "Geologia",
       "tie_type": "head_to_head",
@@ -464,7 +576,7 @@
       "final_position": 8
     },
     "2ª Divisão - Grupo A::Biotecnologia": {
-      "event_id": 2,
+      "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo A",
       "team": "Biotecnologia",
       "tie_type": "head_to_head",
@@ -495,7 +607,7 @@
       "final_position": 9
     },
     "2ª Divisão - Grupo B::Eng. Informática B": {
-      "event_id": 3,
+      "event_id": 4,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Informática B",
       "tie_type": "head_to_head",
@@ -526,7 +638,7 @@
       "final_position": 3
     },
     "2ª Divisão - Grupo B::Eng. Física": {
-      "event_id": 3,
+      "event_id": 4,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Física",
       "tie_type": "head_to_head",
@@ -557,7 +669,7 @@
       "final_position": 4
     },
     "2ª Divisão - Grupo B::Eng. Computacional": {
-      "event_id": 4,
+      "event_id": 5,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Computacional",
       "tie_type": "head_to_head",
@@ -588,7 +700,7 @@
       "final_position": 8
     },
     "2ª Divisão - Grupo B::Eng. Eletrónica e Telecomunicações B": {
-      "event_id": 4,
+      "event_id": 5,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Eletrónica e Telecomunicações B",
       "tie_type": "head_to_head",
@@ -618,19 +730,19 @@
       "rank_in_tiebreak": 2,
       "final_position": 9
     },
-    "2ª Divisão - Grupo B::Eng. Computadores e Telemática": {
-      "event_id": 5,
+    "2ª Divisão - Grupo B::Ciências Biomédicas": {
+      "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. Computadores e Telemática",
+      "team": "Ciências Biomédicas",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Eng. Computadores e Telemática",
-        "Tecnologias de Informação",
-        "Design",
-        "Bioquímica",
         "Eng. e Gestão Industrial",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Tecnologias de Informação",
+        "Design"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -653,19 +765,19 @@
       "rank_in_tiebreak": 1,
       "final_position": 12
     },
-    "2ª Divisão - Grupo B::Tecnologias de Informação": {
-      "event_id": 5,
+    "2ª Divisão - Grupo B::Eng. Computadores e Telemática": {
+      "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Tecnologias de Informação",
+      "team": "Eng. Computadores e Telemática",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Eng. Computadores e Telemática",
-        "Tecnologias de Informação",
-        "Design",
-        "Bioquímica",
         "Eng. e Gestão Industrial",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Tecnologias de Informação",
+        "Design"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -688,19 +800,19 @@
       "rank_in_tiebreak": 2,
       "final_position": 13
     },
-    "2ª Divisão - Grupo B::Design": {
-      "event_id": 5,
+    "2ª Divisão - Grupo B::Eng. e Gestão Industrial": {
+      "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Design",
+      "team": "Eng. e Gestão Industrial",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Eng. Computadores e Telemática",
-        "Tecnologias de Informação",
-        "Design",
-        "Bioquímica",
         "Eng. e Gestão Industrial",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Tecnologias de Informação",
+        "Design"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -723,19 +835,19 @@
       "rank_in_tiebreak": 3,
       "final_position": 14
     },
-    "2ª Divisão - Grupo B::Bioquímica": {
-      "event_id": 5,
+    "2ª Divisão - Grupo B::Eng. Mecânica": {
+      "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Bioquímica",
+      "team": "Eng. Mecânica",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Eng. Computadores e Telemática",
-        "Tecnologias de Informação",
-        "Design",
-        "Bioquímica",
         "Eng. e Gestão Industrial",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Tecnologias de Informação",
+        "Design"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -758,19 +870,19 @@
       "rank_in_tiebreak": 4,
       "final_position": 15
     },
-    "2ª Divisão - Grupo B::Eng. e Gestão Industrial": {
-      "event_id": 5,
+    "2ª Divisão - Grupo B::Tecnologias de Informação": {
+      "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. e Gestão Industrial",
+      "team": "Tecnologias de Informação",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Eng. Computadores e Telemática",
-        "Tecnologias de Informação",
-        "Design",
-        "Bioquímica",
         "Eng. e Gestão Industrial",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Tecnologias de Informação",
+        "Design"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -793,19 +905,19 @@
       "rank_in_tiebreak": 5,
       "final_position": 16
     },
-    "2ª Divisão - Grupo B::Eng. Mecânica": {
-      "event_id": 5,
+    "2ª Divisão - Grupo B::Design": {
+      "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. Mecânica",
+      "team": "Design",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
+        "Ciências Biomédicas",
         "Eng. Computadores e Telemática",
-        "Tecnologias de Informação",
-        "Design",
-        "Bioquímica",
         "Eng. e Gestão Industrial",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Tecnologias de Informação",
+        "Design"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -828,16 +940,16 @@
       "rank_in_tiebreak": 6,
       "final_position": 17
     },
-    "ª Divisão::Eng. Computadores e Telemática": {
-      "event_id": 6,
+    "ª Divisão::Física": {
+      "event_id": 7,
       "ranking_key": "ª Divisão",
-      "team": "Eng. Computadores e Telemática",
+      "team": "Física",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Bioquímica",
-        "Física"
+        "Física",
+        "Ciências Biomédicas",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -860,16 +972,16 @@
       "rank_in_tiebreak": 1,
       "final_position": null
     },
-    "ª Divisão::Bioquímica": {
-      "event_id": 6,
+    "ª Divisão::Ciências Biomédicas": {
+      "event_id": 7,
       "ranking_key": "ª Divisão",
-      "team": "Bioquímica",
+      "team": "Ciências Biomédicas",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Bioquímica",
-        "Física"
+        "Física",
+        "Ciências Biomédicas",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -892,16 +1004,16 @@
       "rank_in_tiebreak": 2,
       "final_position": null
     },
-    "ª Divisão::Física": {
-      "event_id": 6,
+    "ª Divisão::Eng. Computadores e Telemática": {
+      "event_id": 7,
       "ranking_key": "ª Divisão",
-      "team": "Física",
+      "team": "Eng. Computadores e Telemática",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Bioquímica",
-        "Física"
+        "Física",
+        "Ciências Biomédicas",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",

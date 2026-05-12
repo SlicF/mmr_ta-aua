@@ -12,8 +12,8 @@
       "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão Comercial",
-        "Tradução"
+        "Tradução",
+        "Gestão Comercial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -225,8 +225,8 @@
       "tie_points": 5,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -275,14 +275,14 @@
       "tie_points": 0,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -296,7 +296,7 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Eng. Informática",
+          "team": "Fisioterapia",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -308,7 +308,7 @@
           }
         },
         {
-          "team": "Biologia",
+          "team": "Ciências Biomédicas",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -320,7 +320,7 @@
           }
         },
         {
-          "team": "Ciências Biomédicas",
+          "team": "Biologia",
           "rank_in_tiebreak": 3,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -332,7 +332,7 @@
           }
         },
         {
-          "team": "Eng. Eletrónica e Telecomunicações",
+          "team": "Eng. do Ambiente",
           "rank_in_tiebreak": 4,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -344,7 +344,7 @@
           }
         },
         {
-          "team": "Fisioterapia",
+          "team": "Eng. Informática",
           "rank_in_tiebreak": 5,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -356,7 +356,7 @@
           }
         },
         {
-          "team": "Eng. do Ambiente",
+          "team": "Eng. Civil",
           "rank_in_tiebreak": 6,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -380,7 +380,7 @@
           }
         },
         {
-          "team": "Eng. Civil",
+          "team": "Eng. Eletrónica e Telecomunicações",
           "rank_in_tiebreak": 8,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -403,9 +403,9 @@
       "tie_points": 0,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Física",
         "Eng. Civil",
-        "Psicologia"
+        "Psicologia",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -419,7 +419,7 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Eng. Física",
+          "team": "Eng. Civil",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -431,7 +431,7 @@
           }
         },
         {
-          "team": "Eng. Civil",
+          "team": "Psicologia",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -443,7 +443,7 @@
           }
         },
         {
-          "team": "Psicologia",
+          "team": "Eng. Física",
           "rank_in_tiebreak": 3,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -466,8 +466,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -497,8 +497,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Gestão e Planeamento em Turismo",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Gestão e Planeamento em Turismo"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -590,8 +590,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Gestão Comercial",
-        "Tradução"
+        "Tradução",
+        "Gestão Comercial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -621,8 +621,8 @@
       "tie_type": "head_to_head",
       "tie_points": 10,
       "tied_teams": [
-        "Gestão Comercial",
-        "Tradução"
+        "Tradução",
+        "Gestão Comercial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -748,8 +748,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -779,8 +779,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -803,21 +803,21 @@
       "rank_in_tiebreak": 2,
       "final_position": 11
     },
-    "2ª Divisão - Grupo B::Eng. Informática": {
+    "2ª Divisão - Grupo B::Fisioterapia": {
       "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. Informática",
+      "team": "Fisioterapia",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -840,21 +840,21 @@
       "rank_in_tiebreak": 1,
       "final_position": 12
     },
-    "2ª Divisão - Grupo B::Biologia": {
+    "2ª Divisão - Grupo B::Ciências Biomédicas": {
       "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Biologia",
+      "team": "Ciências Biomédicas",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -877,21 +877,21 @@
       "rank_in_tiebreak": 2,
       "final_position": 13
     },
-    "2ª Divisão - Grupo B::Ciências Biomédicas": {
+    "2ª Divisão - Grupo B::Biologia": {
       "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Ciências Biomédicas",
+      "team": "Biologia",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -914,21 +914,21 @@
       "rank_in_tiebreak": 3,
       "final_position": 14
     },
-    "2ª Divisão - Grupo B::Eng. Eletrónica e Telecomunicações": {
+    "2ª Divisão - Grupo B::Eng. do Ambiente": {
       "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. Eletrónica e Telecomunicações",
+      "team": "Eng. do Ambiente",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -951,21 +951,21 @@
       "rank_in_tiebreak": 4,
       "final_position": 15
     },
-    "2ª Divisão - Grupo B::Fisioterapia": {
+    "2ª Divisão - Grupo B::Eng. Informática": {
       "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Fisioterapia",
+      "team": "Eng. Informática",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -988,21 +988,21 @@
       "rank_in_tiebreak": 5,
       "final_position": 16
     },
-    "2ª Divisão - Grupo B::Eng. do Ambiente": {
+    "2ª Divisão - Grupo B::Eng. Civil": {
       "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. do Ambiente",
+      "team": "Eng. Civil",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1032,14 +1032,14 @@
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1062,21 +1062,21 @@
       "rank_in_tiebreak": 7,
       "final_position": 18
     },
-    "2ª Divisão - Grupo B::Eng. Civil": {
+    "2ª Divisão - Grupo B::Eng. Eletrónica e Telecomunicações": {
       "event_id": 6,
       "ranking_key": "2ª Divisão - Grupo B",
-      "team": "Eng. Civil",
+      "team": "Eng. Eletrónica e Telecomunicações",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Informática",
-        "Biologia",
-        "Ciências Biomédicas",
-        "Eng. Eletrónica e Telecomunicações",
         "Fisioterapia",
+        "Ciências Biomédicas",
+        "Biologia",
         "Eng. do Ambiente",
+        "Eng. Informática",
+        "Eng. Civil",
         "Psicologia",
-        "Eng. Civil"
+        "Eng. Eletrónica e Telecomunicações"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1099,16 +1099,16 @@
       "rank_in_tiebreak": 8,
       "final_position": 19
     },
-    "ª Divisão::Eng. Física": {
+    "ª Divisão::Eng. Civil": {
       "event_id": 7,
       "ranking_key": "ª Divisão",
-      "team": "Eng. Física",
+      "team": "Eng. Civil",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Física",
         "Eng. Civil",
-        "Psicologia"
+        "Psicologia",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1131,16 +1131,16 @@
       "rank_in_tiebreak": 1,
       "final_position": null
     },
-    "ª Divisão::Eng. Civil": {
+    "ª Divisão::Psicologia": {
       "event_id": 7,
       "ranking_key": "ª Divisão",
-      "team": "Eng. Civil",
+      "team": "Psicologia",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Física",
         "Eng. Civil",
-        "Psicologia"
+        "Psicologia",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -1163,16 +1163,16 @@
       "rank_in_tiebreak": 2,
       "final_position": null
     },
-    "ª Divisão::Psicologia": {
+    "ª Divisão::Eng. Física": {
       "event_id": 7,
       "ranking_key": "ª Divisão",
-      "team": "Psicologia",
+      "team": "Eng. Física",
       "tie_type": "mini_league",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Física",
         "Eng. Civil",
-        "Psicologia"
+        "Psicologia",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",

@@ -3,10 +3,10 @@
     "global": {
       "draw": {
         "base_draw_rate": 0.05286343612334802,
-        "elo_sensitivity": 0.00406415269479039,
-        "model_intercept": -2.296240123310715,
-        "model_coef_linear": -0.00406415269479039,
-        "model_coef_quadratic": -1.027611950427592e-05,
+        "elo_sensitivity": 0.004064152694791301,
+        "model_intercept": -2.296240123310448,
+        "model_coef_linear": -0.004064152694791301,
+        "model_coef_quadratic": -1.0276119504285997e-05,
         "n_games": 227,
         "median_elo_diff": 104.0,
         "status": "calibrated"
@@ -37,10 +37,10 @@
     "division_1": {
       "draw": {
         "base_draw_rate": 0.07017543859649122,
-        "elo_sensitivity": 0.011913039578697856,
-        "model_intercept": -2.5211385043246732,
-        "model_coef_linear": 0.011913039578697856,
-        "model_coef_quadratic": -7.595771500216027e-05,
+        "elo_sensitivity": 0.01191303957836222,
+        "model_intercept": -2.5211385043102768,
+        "model_coef_linear": 0.01191303957836222,
+        "model_coef_quadratic": -7.595771500090335e-05,
         "n_games": 114,
         "median_elo_diff": 110.0,
         "status": "calibrated"
@@ -173,9 +173,9 @@
       "margin": {
         "mean_margin": 5.4638783269961975,
         "margin_std": 4.329317706369697,
-        "margin_elo_slope": 0.004989701107785214,
-        "margin_elo_intercept": 4.864677832368135,
-        "margin_elo_r2": 0.014282921950450053,
+        "margin_elo_slope": 0.004989701107785207,
+        "margin_elo_intercept": 4.864677832368136,
+        "margin_elo_r2": 0.014282921950450023,
         "mean_margin_small_diff": 5.1911764705882355,
         "mean_margin_large_diff": 6.0,
         "n_games": 263,
@@ -258,10 +258,10 @@
     "global": {
       "draw": {
         "base_draw_rate": 0.11450381679389313,
-        "elo_sensitivity": 0.012378451597306047,
-        "model_intercept": -2.5347757736377843,
-        "model_coef_linear": 0.012378451597306047,
-        "model_coef_quadratic": -4.395366155781745e-05,
+        "elo_sensitivity": 0.012378451597306005,
+        "model_intercept": -2.534775773637761,
+        "model_coef_linear": 0.012378451597306005,
+        "model_coef_quadratic": -4.395366155781751e-05,
         "n_games": 262,
         "median_elo_diff": 116.5,
         "status": "calibrated"
@@ -292,10 +292,10 @@
     "division_1": {
       "draw": {
         "base_draw_rate": 0.12698412698412698,
-        "elo_sensitivity": 0.017289003043004205,
-        "model_intercept": -2.692461968715115,
-        "model_coef_linear": 0.017289003043004205,
-        "model_coef_quadratic": -5.779795720582147e-05,
+        "elo_sensitivity": 0.0172890030430042,
+        "model_intercept": -2.6924619687151146,
+        "model_coef_linear": 0.0172890030430042,
+        "model_coef_quadratic": -5.779795720582146e-05,
         "n_games": 126,
         "median_elo_diff": 116.5,
         "status": "calibrated"
@@ -326,10 +326,10 @@
     "division_2": {
       "draw": {
         "base_draw_rate": 0.10294117647058823,
-        "elo_sensitivity": 0.007765324651191041,
-        "model_intercept": -2.4030818452071774,
-        "model_coef_linear": 0.007765324651191041,
-        "model_coef_quadratic": -3.062699606518273e-05,
+        "elo_sensitivity": 0.007765324651191027,
+        "model_intercept": -2.4030818452071765,
+        "model_coef_linear": 0.007765324651191027,
+        "model_coef_quadratic": -3.062699606518269e-05,
         "n_games": 136,
         "median_elo_diff": 117.0,
         "status": "calibrated"
@@ -425,33 +425,33 @@
   "FUTSAL MASCULINO": {
     "global": {
       "draw": {
-        "base_draw_rate": 0.11466666666666667,
-        "elo_sensitivity": 0.0028316515769912926,
-        "model_intercept": -1.6266826330523114,
-        "model_coef_linear": -0.0028316515769912926,
-        "model_coef_quadratic": -5.091413402015929e-06,
+        "base_draw_rate": 0.112,
+        "elo_sensitivity": 0.0029232532146324848,
+        "model_intercept": -1.638216538553394,
+        "model_coef_linear": -0.0029232532146324848,
+        "model_coef_quadratic": -5.578169038503711e-06,
         "n_games": 375,
-        "median_elo_diff": 102.0,
+        "median_elo_diff": 101.0,
         "status": "calibrated"
       },
       "margin": {
-        "mean_margin": 3.6626506024096384,
-        "margin_std": 3.021118872101379,
-        "margin_elo_slope": 0.004867973635752771,
-        "margin_elo_intercept": 3.0196382053545117,
-        "margin_elo_r2": 0.03116745340043751,
-        "mean_margin_small_diff": 3.1464968152866244,
-        "mean_margin_large_diff": 4.454545454545454,
-        "n_games": 332,
+        "mean_margin": 3.6486486486486487,
+        "margin_std": 3.021391149810933,
+        "margin_elo_slope": 0.004818521086385053,
+        "margin_elo_intercept": 3.0137904079758027,
+        "margin_elo_r2": 0.030042628162515215,
+        "mean_margin_small_diff": 3.1645569620253164,
+        "mean_margin_large_diff": 4.379746835443038,
+        "n_games": 333,
         "distribution": "poisson",
-        "lambda": 3.6626506024096384,
+        "lambda": 3.6486486486486487,
         "status": "calibrated"
       },
       "goals": {
-        "base_goals_per_team": 3.352,
-        "base_goals_per_team_std": 2.7959666187802266,
-        "total_goals_mean": 6.704,
-        "total_goals_std": 3.3633887673000276,
+        "base_goals_per_team": 3.3346666666666667,
+        "base_goals_per_team_std": 2.785438006649742,
+        "total_goals_mean": 6.669333333333333,
+        "total_goals_std": 3.3326655331064283,
         "dispersion_k": 3.0,
         "n_games": 375,
         "status": "calibrated"
@@ -460,10 +460,10 @@
     "division_1": {
       "draw": {
         "base_draw_rate": 0.10948905109489052,
-        "elo_sensitivity": 0.008336231069194915,
-        "model_intercept": -2.418151512057585,
-        "model_coef_linear": 0.008336231069194915,
-        "model_coef_quadratic": -2.9098410097522915e-05,
+        "elo_sensitivity": 0.008398280651319324,
+        "model_intercept": -2.421561523341044,
+        "model_coef_linear": 0.008398280651319324,
+        "model_coef_quadratic": -2.9271304220111953e-05,
         "n_games": 137,
         "median_elo_diff": 111.0,
         "status": "calibrated"
@@ -471,9 +471,9 @@
       "margin": {
         "mean_margin": 3.3524590163934427,
         "margin_std": 2.415530797817654,
-        "margin_elo_slope": 0.003964834480107155,
-        "margin_elo_intercept": 2.811649093578171,
-        "margin_elo_r2": 0.034481162680131856,
+        "margin_elo_slope": 0.003968841815772968,
+        "margin_elo_intercept": 2.811427801326883,
+        "margin_elo_r2": 0.034580268074730976,
         "mean_margin_small_diff": 2.6545454545454548,
         "mean_margin_large_diff": 3.75,
         "n_games": 122,
@@ -493,33 +493,33 @@
     },
     "division_2": {
       "draw": {
-        "base_draw_rate": 0.11764705882352941,
-        "elo_sensitivity": 0.00866100495605925,
-        "model_intercept": -1.275404377704306,
-        "model_coef_linear": -0.00866100495605925,
-        "model_coef_quadratic": 6.412122893569165e-06,
+        "base_draw_rate": 0.1134453781512605,
+        "elo_sensitivity": 0.008982726701705433,
+        "model_intercept": -1.2801012985417557,
+        "model_coef_linear": -0.008982726701705433,
+        "model_coef_quadratic": 5.461615180046279e-06,
         "n_games": 238,
-        "median_elo_diff": 95.5,
+        "median_elo_diff": 93.0,
         "status": "calibrated"
       },
       "margin": {
-        "mean_margin": 3.842857142857143,
-        "margin_std": 3.309304549091766,
-        "margin_elo_slope": 0.005564351346207472,
-        "margin_elo_intercept": 3.121796699122172,
-        "margin_elo_r2": 0.032586332158693006,
-        "mean_margin_small_diff": 3.411764705882353,
-        "mean_margin_large_diff": 4.955555555555556,
-        "n_games": 210,
+        "mean_margin": 3.8199052132701423,
+        "margin_std": 3.3095842425165816,
+        "margin_elo_slope": 0.005497772926449782,
+        "margin_elo_intercept": 3.1100671666574815,
+        "margin_elo_r2": 0.030951300136516972,
+        "mean_margin_small_diff": 3.436893203883495,
+        "mean_margin_large_diff": 4.808510638297872,
+        "n_games": 211,
         "distribution": "poisson",
-        "lambda": 3.842857142857143,
+        "lambda": 3.8199052132701423,
         "status": "calibrated"
       },
       "goals": {
-        "base_goals_per_team": 3.4600840336134455,
-        "base_goals_per_team_std": 2.9867500101599487,
-        "total_goals_mean": 6.920168067226891,
-        "total_goals_std": 3.604084513692408,
+        "base_goals_per_team": 3.4327731092436973,
+        "base_goals_per_team_std": 2.9721567655958,
+        "total_goals_mean": 6.8655462184873945,
+        "total_goals_std": 3.5619944600712308,
         "dispersion_k": 3.0,
         "n_games": 238,
         "status": "calibrated"
@@ -539,7 +539,7 @@
         "margin_std": 0.44422676976158315,
         "margin_elo_slope": 0.0009817311208302954,
         "margin_elo_intercept": 1.604120097725464,
-        "margin_elo_r2": 0.060605120875170275,
+        "margin_elo_r2": 0.0606051208751707,
         "mean_margin_small_diff": 1.6375,
         "mean_margin_large_diff": 1.9113924050632911,
         "n_games": 329,
@@ -623,29 +623,29 @@
       "draw": {
         "base_draw_rate": 0.0,
         "elo_sensitivity": 0.0,
-        "n_games": 349,
+        "n_games": 350,
         "status": "single_class"
       },
       "margin": {
-        "mean_margin": 1.6991404011461317,
-        "margin_std": 0.4586317701940826,
-        "margin_elo_slope": 0.0004719436605259423,
-        "margin_elo_intercept": 1.6354077228636457,
-        "margin_elo_r2": 0.013259682665448948,
-        "mean_margin_small_diff": 1.6467065868263473,
+        "mean_margin": 1.7,
+        "margin_std": 0.458257569495584,
+        "margin_elo_slope": 0.00046401648001289156,
+        "margin_elo_intercept": 1.6374704649148342,
+        "margin_elo_r2": 0.012831476130968666,
+        "mean_margin_small_diff": 1.6488095238095237,
         "mean_margin_large_diff": 1.7578947368421052,
-        "n_games": 349,
+        "n_games": 350,
         "distribution": "poisson",
-        "lambda": 1.6991404011461317,
+        "lambda": 1.7,
         "status": "calibrated"
       },
       "goals": {
-        "base_goals_per_team": 1.1504297994269341,
-        "base_goals_per_team_std": 0.9093630056349545,
-        "total_goals_mean": 2.3008595988538683,
-        "total_goals_std": 0.4586317701940826,
+        "base_goals_per_team": 1.15,
+        "base_goals_per_team_std": 0.9096702699330126,
+        "total_goals_mean": 2.3,
+        "total_goals_std": 0.45825756949558405,
         "dispersion_k": 10.0,
-        "n_games": 349,
+        "n_games": 350,
         "status": "calibrated"
       }
     },
@@ -683,29 +683,29 @@
       "draw": {
         "base_draw_rate": 0.0,
         "elo_sensitivity": 0.0,
-        "n_games": 212,
+        "n_games": 213,
         "status": "single_class"
       },
       "margin": {
-        "mean_margin": 1.6981132075471699,
-        "margin_std": 0.45907641738099775,
-        "margin_elo_slope": 0.0005923683522217027,
-        "margin_elo_intercept": 1.6230780201388604,
-        "margin_elo_r2": 0.018705631716946853,
-        "mean_margin_small_diff": 1.6460176991150441,
+        "mean_margin": 1.699530516431925,
+        "margin_std": 0.45846218275056155,
+        "margin_elo_slope": 0.0005787712531196696,
+        "margin_elo_intercept": 1.6264667595064095,
+        "margin_elo_r2": 0.017883157737961796,
+        "mean_margin_small_diff": 1.6491228070175439,
         "mean_margin_large_diff": 1.7924528301886793,
-        "n_games": 212,
+        "n_games": 213,
         "distribution": "poisson",
-        "lambda": 1.6981132075471699,
+        "lambda": 1.699530516431925,
         "status": "calibrated"
       },
       "goals": {
-        "base_goals_per_team": 1.150943396226415,
-        "base_goals_per_team_std": 0.9089954317317662,
-        "total_goals_mean": 2.30188679245283,
-        "total_goals_std": 0.45907641738099775,
+        "base_goals_per_team": 1.1502347417840375,
+        "base_goals_per_team_std": 0.9095024906931514,
+        "total_goals_mean": 2.300469483568075,
+        "total_goals_std": 0.45846218275056155,
         "dispersion_k": 10.0,
-        "n_games": 212,
+        "n_games": 213,
         "status": "calibrated"
       }
     }
