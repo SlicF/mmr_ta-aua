@@ -59,6 +59,56 @@
         "Grupo": "A",
         "ranking_key": "2ª Divisão - Grupo A"
       },
+      "tie_points": 24,
+      "tie_type": "head_to_head",
+      "tied_teams": [
+        "Ciências Biomédicas",
+        "Bioquímica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "standings": [
+        {
+          "team": "Ciências Biomédicas",
+          "rank_in_tiebreak": 1,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 3,
+            "diferenca_golos_h2h": 2,
+            "golos_marcados_h2h": 2,
+            "diferenca_golos": 12,
+            "golos_marcados": 17
+          }
+        },
+        {
+          "team": "Bioquímica",
+          "rank_in_tiebreak": 2,
+          "criteria_values": {
+            "faltas_comparencia": 0,
+            "pontos_h2h": 0,
+            "diferenca_golos_h2h": -2,
+            "golos_marcados_h2h": 0,
+            "diferenca_golos": 12,
+            "golos_marcados": 17
+          }
+        }
+      ],
+      "event_id": 2
+    },
+    {
+      "context": {
+        "Divisao": 2,
+        "Grupo": "A",
+        "ranking_key": "2ª Divisão - Grupo A"
+      },
       "tie_points": 10,
       "tie_type": "head_to_head",
       "tied_teams": [
@@ -101,7 +151,7 @@
           }
         }
       ],
-      "event_id": 2
+      "event_id": 3
     },
     {
       "context": {
@@ -151,7 +201,7 @@
           }
         }
       ],
-      "event_id": 3
+      "event_id": 4
     },
     {
       "context": {
@@ -267,8 +317,70 @@
       "rank_in_tiebreak": 2,
       "final_position": 5
     },
-    "2ª Divisão - Grupo A::Geologia": {
+    "2ª Divisão - Grupo A::Ciências Biomédicas": {
       "event_id": 2,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Ciências Biomédicas",
+      "tie_type": "head_to_head",
+      "tie_points": 24,
+      "tied_teams": [
+        "Ciências Biomédicas",
+        "Bioquímica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 3,
+        "diferenca_golos_h2h": 2,
+        "golos_marcados_h2h": 2,
+        "diferenca_golos": 12,
+        "golos_marcados": 17
+      },
+      "rank_in_tiebreak": 1,
+      "final_position": 2
+    },
+    "2ª Divisão - Grupo A::Bioquímica": {
+      "event_id": 2,
+      "ranking_key": "2ª Divisão - Grupo A",
+      "team": "Bioquímica",
+      "tie_type": "head_to_head",
+      "tie_points": 24,
+      "tied_teams": [
+        "Ciências Biomédicas",
+        "Bioquímica"
+      ],
+      "criteria_order": [
+        "faltas_comparencia",
+        "pontos_h2h",
+        "diferenca_golos_h2h",
+        "golos_marcados_h2h",
+        "diferenca_golos",
+        "golos_marcados"
+      ],
+      "deciding_criterion": "pontos_h2h",
+      "used_global_fallback": false,
+      "criteria_values": {
+        "faltas_comparencia": 0,
+        "pontos_h2h": 0,
+        "diferenca_golos_h2h": -2,
+        "golos_marcados_h2h": 0,
+        "diferenca_golos": 12,
+        "golos_marcados": 17
+      },
+      "rank_in_tiebreak": 2,
+      "final_position": 3
+    },
+    "2ª Divisão - Grupo A::Geologia": {
+      "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo A",
       "team": "Geologia",
       "tie_type": "head_to_head",
@@ -299,7 +411,7 @@
       "final_position": 8
     },
     "2ª Divisão - Grupo A::Biotecnologia": {
-      "event_id": 2,
+      "event_id": 3,
       "ranking_key": "2ª Divisão - Grupo A",
       "team": "Biotecnologia",
       "tie_type": "head_to_head",
@@ -330,7 +442,7 @@
       "final_position": 9
     },
     "2ª Divisão - Grupo B::Eng. Informática B": {
-      "event_id": 3,
+      "event_id": 4,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Informática B",
       "tie_type": "head_to_head",
@@ -361,7 +473,7 @@
       "final_position": 3
     },
     "2ª Divisão - Grupo B::Eng. Física": {
-      "event_id": 3,
+      "event_id": 4,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Física",
       "tie_type": "head_to_head",
@@ -392,7 +504,7 @@
       "final_position": 4
     },
     "2ª Divisão - Grupo B::Eng. Computacional": {
-      "event_id": 4,
+      "event_id": 5,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Computacional",
       "tie_type": "head_to_head",
@@ -423,7 +535,7 @@
       "final_position": 8
     },
     "2ª Divisão - Grupo B::Eng. Eletrónica e Telecomunicações B": {
-      "event_id": 4,
+      "event_id": 5,
       "ranking_key": "2ª Divisão - Grupo B",
       "team": "Eng. Eletrónica e Telecomunicações B",
       "tie_type": "head_to_head",
