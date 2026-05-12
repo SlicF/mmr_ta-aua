@@ -1,0 +1,76 @@
+﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
+Administração Pública,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,45.4905,0.0000,54.5095,LM3,Biotecnologia,46.1454,0.0000,53.8546,14.6580,34.4044
+Administração Pública,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,45.3202,0.0000,54.6798,LM3,Biotecnologia,46.5594,0.0000,53.4406,12.9920,34.6598
+Administração Pública,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,46.3318,0.0000,53.6682,LM3,Biotecnologia,46.5706,0.0000,53.4294,12.1450,34.8786
+Administração Pública,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,45.5162,0.0000,54.4838,LM3,Biotecnologia,47.3149,0.0000,52.6851,3.8360,34.6194
+Administração Pública,LM2:Design|LM3:Biotecnologia,LM2,Design,46.1187,0.0000,53.8813,LM3,Biotecnologia,47.0320,0.0000,52.9680,0.2190,35.1598
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Administração Pública,LM1,Línguas e Relações Empresariais,53.8818,0.0000,46.1182,LM3,Administração Pública,53.8546,0.0000,46.1454,14.6580,30.3111
+Biotecnologia,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,55.6188,0.0000,44.3812,LM3,Administração Pública,53.4406,0.0000,46.5594,12.9920,31.3193
+Biotecnologia,LM1:Eng. Civil|LM3:Administração Pública,LM1,Eng. Civil,56.6735,0.0000,43.3265,LM3,Administração Pública,53.4294,0.0000,46.5706,12.1450,32.0873
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Biomédica,LM1,Línguas e Relações Empresariais,53.1585,0.0000,46.8415,LM3,Eng. Biomédica,55.0421,0.0000,44.9579,9.6090,42.6579
+Biotecnologia,LM1:Contabilidade|LM3:Eng. Biomédica,LM1,Contabilidade,56.3743,0.0000,43.6257,LM3,Eng. Biomédica,55.2443,0.0000,44.7557,8.4950,45.4032
+Biotecnologia,LM1:Eng. Civil|LM3:Eng. Biomédica,LM1,Eng. Civil,56.0025,0.0000,43.9975,LM3,Eng. Biomédica,55.3885,0.0000,44.6115,7.9800,45.5890
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Computacional,LM1,Línguas e Relações Empresariais,53.1100,0.0000,46.8900,LM3,Eng. Computacional,53.6268,0.0000,46.3732,5.2250,42.2392
+Biotecnologia,LM1:Contabilidade|LM3:Eng. Computacional,LM1,Contabilidade,55.2081,0.0000,44.7919,LM3,Eng. Computacional,53.2456,0.0000,46.7544,4.6370,44.1665
+Biotecnologia,LM1:Eng. Civil|LM3:Eng. Computacional,LM1,Eng. Civil,55.0046,0.0000,44.9954,LM3,Eng. Computacional,52.9194,0.0000,47.0806,4.3160,43.1418
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Administração Pública,LM1,Gestão e Planeamento em Turismo,51.7466,0.0000,48.2534,LM3,Administração Pública,52.6851,0.0000,47.3149,3.8360,29.2753
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Eng. Física,LM1,Línguas e Relações Empresariais,53.7613,0.0000,46.2387,LM3,Eng. Física,53.7289,0.0000,46.2711,3.0840,43.6770
+Biotecnologia,LM1:Contabilidade|LM3:Eng. Física,LM1,Contabilidade,55.4226,0.0000,44.5774,LM3,Eng. Física,53.5527,0.0000,46.4473,2.6740,43.9791
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Biomédica,LM1,Gestão e Planeamento em Turismo,51.7544,0.0000,48.2456,LM3,Eng. Biomédica,55.5821,0.0000,44.4179,2.5080,42.6635
+Biotecnologia,LM1:Eng. Civil|LM3:Eng. Física,LM1,Eng. Civil,58.0400,0.0000,41.9600,LM3,Eng. Física,53.0400,0.0000,46.9600,2.5000,45.1600
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Computacional,LM1,Gestão e Planeamento em Turismo,52.5899,0.0000,47.4101,LM3,Eng. Computacional,53.4532,0.0000,46.5468,1.3900,42.3022
+Biotecnologia,LM1:Línguas e Relações Empresariais|LM3:Gestão,LM1,Línguas e Relações Empresariais,55.1535,0.0000,44.8465,LM3,Gestão,54.2763,0.0000,45.7237,0.9120,43.3114
+Biotecnologia,LM1:Contabilidade|LM3:Gestão,LM1,Contabilidade,56.0494,0.0000,43.9506,LM3,Gestão,54.1975,0.0000,45.8025,0.8100,47.2840
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Eng. Física,LM1,Gestão e Planeamento em Turismo,50.0637,0.0000,49.9363,LM3,Eng. Física,55.6688,0.0000,44.3312,0.7850,40.2548
+Biotecnologia,LM1:Eng. Civil|LM3:Gestão,LM1,Eng. Civil,56.6406,0.0000,43.3594,LM3,Gestão,54.8177,0.0000,45.1823,0.7680,45.3125
+Biotecnologia,LM1:Design|LM3:Administração Pública,LM1,Design,58.9041,0.0000,41.0959,LM3,Administração Pública,52.9680,0.0000,47.0320,0.2190,33.3333
+Biotecnologia,LM1:Gestão e Planeamento em Turismo|LM3:Gestão,LM1,Gestão e Planeamento em Turismo,53.4562,0.0000,46.5438,LM3,Gestão,49.7696,0.0000,50.2304,0.2170,44.2396
+Biotecnologia,LM1:Design|LM3:Eng. Biomédica,LM1,Design,59.5041,0.0000,40.4959,LM3,Eng. Biomédica,50.4132,0.0000,49.5868,0.1210,48.7603
+Biotecnologia,LM1:Design|LM3:Eng. Computacional,LM1,Design,56.7164,0.0000,43.2836,LM3,Eng. Computacional,59.7015,0.0000,40.2985,0.0670,49.2537
+Biotecnologia,LM1:Design|LM3:Eng. Física,LM1,Design,62.1622,0.0000,37.8378,LM3,Eng. Física,54.0541,0.0000,45.9459,0.0370,54.0541
+Biotecnologia,LM1:Design|LM3:Gestão,LM1,Design,46.6667,0.0000,53.3333,LM3,Gestão,66.6667,0.0000,33.3333,0.0150,46.6667
+Contabilidade,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,44.3812,0.0000,55.6188,LM2,Administração Pública,54.6798,0.0000,45.3202,12.9920,34.0209
+Contabilidade,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,43.6257,0.0000,56.3743,LM2,Eng. Biomédica,55.6327,0.0000,44.3673,8.4950,24.1083
+Contabilidade,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,44.7919,0.0000,55.2081,LM2,Eng. Computacional,53.6769,0.0000,46.3231,4.6370,24.3908
+Contabilidade,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,44.5774,0.0000,55.4226,LM2,Eng. Física,53.8893,0.0000,46.1107,2.6740,25.2805
+Contabilidade,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,43.9506,0.0000,56.0494,LM2,Gestão,58.6420,0.0000,41.3580,0.8100,25.4321
+Design,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,41.0959,0.0000,58.9041,LM2,Administração Pública,53.8813,0.0000,46.1187,0.2190,31.5068
+Design,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,40.4959,0.0000,59.5041,LM2,Eng. Biomédica,52.8926,0.0000,47.1074,0.1210,19.8347
+Design,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,43.2836,0.0000,56.7164,LM2,Eng. Computacional,50.7463,0.0000,49.2537,0.0670,20.8955
+Design,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,37.8378,0.0000,62.1622,LM2,Eng. Física,54.0541,0.0000,45.9459,0.0370,21.6216
+Design,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,53.3333,0.0000,46.6667,LM2,Gestão,53.3333,0.0000,46.6667,0.0150,26.6667
+Eng. Biomédica,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,43.8547,0.0000,56.1453,LM3,Biotecnologia,44.9579,0.0000,55.0421,9.6090,20.3767
+Eng. Biomédica,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,44.3673,0.0000,55.6327,LM3,Biotecnologia,44.7557,0.0000,55.2443,8.4950,30.4885
+Eng. Biomédica,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,43.3709,0.0000,56.6291,LM3,Biotecnologia,44.6115,0.0000,55.3885,7.9800,19.6366
+Eng. Biomédica,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,44.0191,0.0000,55.9809,LM3,Biotecnologia,44.4179,0.0000,55.5821,2.5080,19.6571
+Eng. Biomédica,LM2:Design|LM3:Biotecnologia,LM2,Design,47.1074,0.0000,52.8926,LM3,Biotecnologia,49.5868,0.0000,50.4132,0.1210,31.4050
+Eng. Civil,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,43.3265,0.0000,56.6735,LM2,Administração Pública,53.6682,0.0000,46.3318,12.1450,33.0342
+Eng. Civil,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,43.9975,0.0000,56.0025,LM2,Eng. Biomédica,56.6291,0.0000,43.3709,7.9800,34.7744
+Eng. Civil,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,44.9954,0.0000,55.0046,LM2,Eng. Computacional,53.2901,0.0000,46.7099,4.3160,25.6719
+Eng. Civil,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,41.9600,0.0000,58.0400,LM2,Eng. Física,52.6400,0.0000,47.3600,2.5000,22.9200
+Eng. Civil,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,43.3594,0.0000,56.6406,LM2,Gestão,55.2083,0.0000,44.7917,0.7680,26.0417
+Eng. Computacional,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,45.0909,0.0000,54.9091,LM3,Biotecnologia,46.3732,0.0000,53.6268,5.2250,21.7033
+Eng. Computacional,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,46.3231,0.0000,53.6769,LM3,Biotecnologia,46.7544,0.0000,53.2456,4.6370,31.4427
+Eng. Computacional,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,46.7099,0.0000,53.2901,LM3,Biotecnologia,47.0806,0.0000,52.9194,4.3160,31.1863
+Eng. Computacional,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,44.6763,0.0000,55.3237,LM3,Biotecnologia,46.5468,0.0000,53.4532,1.3900,22.1583
+Eng. Computacional,LM2:Design|LM3:Biotecnologia,LM2,Design,49.2537,0.0000,50.7463,LM3,Biotecnologia,40.2985,0.0000,59.7015,0.0670,29.8507
+Eng. Física,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,44.1310,0.0000,55.8690,LM3,Biotecnologia,46.2711,0.0000,53.7289,3.0840,20.7523
+Eng. Física,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,46.1107,0.0000,53.8893,LM3,Biotecnologia,46.4473,0.0000,53.5527,2.6740,30.7405
+Eng. Física,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,47.3600,0.0000,52.6400,LM3,Biotecnologia,46.9600,0.0000,53.0400,2.5000,31.9200
+Eng. Física,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,46.3694,0.0000,53.6306,LM3,Biotecnologia,44.3312,0.0000,55.6688,0.7850,21.1465
+Eng. Física,LM2:Design|LM3:Biotecnologia,LM2,Design,45.9459,0.0000,54.0541,LM3,Biotecnologia,45.9459,0.0000,54.0541,0.0370,24.3243
+Gestão,LM2:Línguas e Relações Empresariais|LM3:Biotecnologia,LM2,Línguas e Relações Empresariais,43.2018,0.0000,56.7982,LM3,Biotecnologia,45.7237,0.0000,54.2763,0.9120,21.7105
+Gestão,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,41.3580,0.0000,58.6420,LM3,Biotecnologia,45.8025,0.0000,54.1975,0.8100,27.2840
+Gestão,LM2:Eng. Civil|LM3:Biotecnologia,LM2,Eng. Civil,44.7917,0.0000,55.2083,LM3,Biotecnologia,45.1823,0.0000,54.8177,0.7680,28.6458
+Gestão,LM2:Gestão e Planeamento em Turismo|LM3:Biotecnologia,LM2,Gestão e Planeamento em Turismo,42.3963,0.0000,57.6037,LM3,Biotecnologia,50.2304,0.0000,49.7696,0.2170,20.7373
+Gestão,LM2:Design|LM3:Biotecnologia,LM2,Design,46.6667,0.0000,53.3333,LM3,Biotecnologia,33.3333,0.0000,66.6667,0.0150,26.6667
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,48.2534,0.0000,51.7466,LM2,Administração Pública,54.4838,0.0000,45.5162,3.8360,36.1053
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,48.2456,0.0000,51.7544,LM2,Eng. Biomédica,55.9809,0.0000,44.0191,2.5080,37.6794
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,47.4101,0.0000,52.5899,LM2,Eng. Computacional,55.3237,0.0000,44.6763,1.3900,35.5396
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,49.9363,0.0000,50.0637,LM2,Eng. Física,53.6306,0.0000,46.3694,0.7850,38.5987
+Gestão e Planeamento em Turismo,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,46.5438,0.0000,53.4562,LM2,Gestão,57.6037,0.0000,42.3963,0.2170,35.0230
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,46.1182,0.0000,53.8818,LM2,Administração Pública,54.5095,0.0000,45.4905,14.6580,35.2845
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Eng. Biomédica,LM1,Biotecnologia,46.8415,0.0000,53.1585,LM2,Eng. Biomédica,56.1453,0.0000,43.8547,9.6090,36.9653
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Eng. Computacional,LM1,Biotecnologia,46.8900,0.0000,53.1100,LM2,Eng. Computacional,54.9091,0.0000,45.0909,5.2250,36.0574
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Eng. Física,LM1,Biotecnologia,46.2387,0.0000,53.7613,LM2,Eng. Física,55.8690,0.0000,44.1310,3.0840,35.5707
+Línguas e Relações Empresariais,LM1:Biotecnologia|LM2:Gestão,LM1,Biotecnologia,44.8465,0.0000,55.1535,LM2,Gestão,56.7982,0.0000,43.2018,0.9120,34.9781
