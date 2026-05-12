@@ -238,6 +238,16 @@ const translations = {
         eloCurrentTitle: 'ELO atual e posição no ranking geral',
         unknownDate: 'Data desconhecida',
         lastGame: 'último jogo',
+
+        // === Dias da Semana ===
+        weekdayShortSun: 'Dom',
+        weekdayShortMon: 'Seg',
+        weekdayShortTue: 'Ter',
+        weekdayShortWed: 'Qua',
+        weekdayShortThu: 'Qui',
+        weekdayShortFri: 'Sex',
+        weekdayShortSat: 'Sáb',
+
         form: 'Forma',
         placeLabel: 'lugar',
 
@@ -652,6 +662,15 @@ const translations = {
         eloCurrentTitle: 'Current ELO and overall ranking position',
         unknownDate: 'Unknown date',
         lastGame: 'last game',
+
+        // === Weekdays ===
+        weekdayShortSun: 'Sun',
+        weekdayShortMon: 'Mon',
+        weekdayShortTue: 'Tue',
+        weekdayShortWed: 'Wed',
+        weekdayShortThu: 'Thu',
+        weekdayShortFri: 'Fri',
+        weekdayShortSat: 'Sat',
         form: 'Form',
         placeLabel: 'place',
 
@@ -1065,9 +1084,19 @@ translations.es = {
     favoriteRemoved: 'Equipo favorito eliminado',
     favoriteSet: 'Equipo favorito:',
     eloCurrentTitle: 'ELO actual y posición en el ranking general',
-    unknownDate: 'Fecha desconocida',
-    lastGame: 'último partido',
-    placeLabel: 'lugar',
+unknownDate: 'Fecha desconocida',
+        lastGame: 'último partido',
+
+        // === Días de la semana ===
+        weekdayShortSun: 'Dom',
+        weekdayShortMon: 'Lun',
+        weekdayShortTue: 'Mar',
+        weekdayShortWed: 'Mié',
+        weekdayShortThu: 'Jue',
+        weekdayShortFri: 'Vie',
+        weekdayShortSat: 'Sáb',
+
+        placeLabel: 'lugar',
 
     // === Form (W/D/L) ===
     formWin: 'Victoria',

@@ -1460,6 +1460,16 @@ body {
   border: 1px solid #e5e7eb;
 }
 
+.bracket-match-datetime {
+  font-size: 0.75em;
+  color: #666;
+  padding: 2px 4px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+
 .bracket-match:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

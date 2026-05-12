@@ -54,14 +54,14 @@ COURSES_CONFIG = load_courses_config()
 
 
 def is_playoff_jornada(jornada_value) -> bool:
-    """Determina se a jornada é um jogo de playoff (E*, MP*, LP*)."""
+    """Determina se a jornada é um jogo de playoff (E*, MP*, LP*, LM*)."""
     try:
         s = str(jornada_value).strip().upper()
     except Exception:
         return False
     if not s:
         return False
-    return s.startswith("E") or s.startswith("MP") or s.startswith("LP")
+    return s.startswith("E") or s.startswith("MP") or s.startswith("LP") or s.startswith("LM")
 
 
 def detect_latest_season_from_csv_files(input_dir: str = None):
@@ -571,18 +571,33 @@ class StandingsCalculator:
             # Filtrar jogos do grupo atual
             df_grp = df_group[df_group[group_key_col] == group]
 
-            # Obter equipas deste grupo
-            teams_grp = set()
+            # Obter equipas deste grupo: apenas incluir equipas com pelo menos um
+            # resultado registado (Golos 1 e Golos 2 não-NaN), ou que sejam
+            # desistentes conhecidas. Isto evita que linhas de calendário não
+            # disputadas com metadados de divisão/grupo incorretos adicionem
+            # equipas de outras divisões ou de playoffs à classificação.
+            df_grp_com_resultado = df_grp[
+                df_grp["Golos 1"].notna() & df_grp["Golos 2"].notna()
+            ]
+            teams_com_resultado = set()
             for col in ["Equipa 1", "Equipa 2"]:
-                # Filtrar None values que podem vir de normalize_team_name
-                teams_grp.update(
+                teams_com_resultado.update(
                     t
                     for t in (
                         normalize_team_name(team)
-                        for team in df_grp[col].dropna().unique()
+                        for team in df_grp_com_resultado[col].dropna().unique()
                     )
                     if t is not None
                 )
+
+            teams_grp = set()
+            for col in ["Equipa 1", "Equipa 2"]:
+                for team in df_grp[col].dropna().unique():
+                    t = normalize_team_name(team)
+                    if t is not None and (
+                        t in teams_com_resultado or t in self.withdrawn_teams
+                    ):
+                        teams_grp.add(t)
 
             # Pular grupos vazios (podem resultar de placeholders de playoff)
             if not teams_grp:

@@ -21,6 +21,13 @@
       "emblem": "assets/Logos/NEAP-07.png",
       "colors": ["#1e4395", "#6c757d"]
     },
+    "Administação Pública": {
+      "displayName": "Administração Pública",
+      "shortName": "AP",
+      "nucleus": "NEAP",
+      "emblem": "assets/Logos/NEAP-07.png",
+      "colors": ["#1e4395", "#6c757d"]
+    },
     "Traduçao": {
       "displayName": "Tradução",
       "shortName": "Tradução",

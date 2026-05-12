@@ -3081,8 +3081,16 @@ function updateRankingsTable() {
     }
 
     // Usar a primeira divisão disponível se currentDivision não existir
+    // Filtrar primeiro para ignorar "geral" e outras chaves inválidas
+    const validDivisionKeys = Object.keys(sampleData.rankings).filter(div => {
+        const normalized = String(div).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return !normalized.includes('liguilha') && !normalized.includes('playoff') && 
+               !normalized.includes('promoção') && !normalized.includes('manutenção') &&
+               normalized !== 'geral';
+    });
+    
     if (!sampleData.rankings[currentDivision]) {
-        currentDivision = Object.keys(sampleData.rankings)[0];
+        currentDivision = validDivisionKeys[0] || Object.keys(sampleData.rankings)[0];
     }
 
     let teams = sampleData.rankings[currentDivision] || [];
@@ -4108,6 +4116,8 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
                 score2: score2Val,
                 winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
                 unknownResult: isUnknownResult,
+                jornada: 'E1',
+                round: 'Quartos de Final',
                 eloDelta1: elo1Delta,
                 eloDelta2: elo2Delta
             };
@@ -4146,6 +4156,8 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
                 score2: score2Val,
                 winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
                 unknownResult: isUnknownResult,
+                jornada: 'E2',
+                round: 'Meias-Finais',
                 eloDelta1: elo1Delta,
                 eloDelta2: elo2Delta
             };
@@ -4196,6 +4208,8 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
                 winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
                 unknownResult: isUnknownResult,
                 isThirdPlace: false,
+                jornada: 'E3',
+                round: 'Final',
                 eloDelta1: elo1Delta,
                 eloDelta2: elo2Delta
             };
@@ -4230,6 +4244,8 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
                 winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
                 unknownResult: isUnknownResult,
                 isThirdPlace: true,
+                jornada: 'E3L',
+                round: '3º Lugar',
                 eloDelta1: elo1Delta,
                 eloDelta2: elo2Delta
             };
@@ -4718,20 +4734,32 @@ function createBracket() {
             const matchDiv = document.createElement('div');
             matchDiv.className = 'bracket-match';
 
+            // Obter data/hora/local para este jogo
+            const jornadaMatch = match.jornada || match.round || '';
+            const { date: matchDate, time: matchTime, location: matchLocation } = getBracketMatchDateTime(jornadaMatch, match.team1, match.team2, round);
+
             // Resolver nomes (substituir placeholders por equipas reais)
             const resolvedTeam1 = resolveTeamName(match.team1);
             const resolvedTeam2 = resolveTeamName(match.team2);
+
+            // Resolver placeholders de playoffs para confrontos potenciais (Meias-Finais e Finais)
+            let displayTeam1Raw = resolvedTeam1;
+            let displayTeam2Raw = resolvedTeam2;
+            if (sampleData.bracket) {
+                displayTeam1Raw = resolvePlayoffMatchup(resolvedTeam1, sampleData.bracket, round);
+                displayTeam2Raw = resolvePlayoffMatchup(resolvedTeam2, sampleData.bracket, round);
+            }
 
             // Obter informações das equipas - aplicar normalização
             const team1Info = getCourseInfo(normalizeTeamName(resolvedTeam1));
             const team2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
 
-            // Brackets sempre usam nome curto
+            // Brackets sempre usam nome curto - usar resolução de playoff se disponível
             const displayTeam1 = isBracketPlaceholder(resolvedTeam1)
-                ? translateBracketPlaceholder(resolvedTeam1)
+                ? displayTeam1Raw
                 : getTranslatedTeamLabel(team1Info, resolvedTeam1);
             const displayTeam2 = isBracketPlaceholder(resolvedTeam2)
-                ? translateBracketPlaceholder(resolvedTeam2)
+                ? displayTeam2Raw
                 : getTranslatedTeamLabel(team2Info, resolvedTeam2);
 
             // Usar cor da equipa ou cinza neutro como fallback
@@ -4919,6 +4947,14 @@ function createBracket() {
                 matchDiv.appendChild(unknownIndicator);
             }
 
+            // Adicionar data/hora/local do jogo se disponível
+            if (matchDate) {
+                const datetimeDiv = document.createElement('div');
+                datetimeDiv.className = 'bracket-match-datetime';
+                datetimeDiv.textContent = formatBracketMatchDate(matchDate, matchTime, matchLocation);
+                matchDiv.insertBefore(datetimeDiv, matchDiv.firstChild);
+            }
+
             matchWrapper.appendChild(matchDiv);
             roundDiv.appendChild(matchWrapper);
         });
@@ -5076,20 +5112,32 @@ function createSecondaryBracket() {
                 const matchDiv = document.createElement('div');
                 matchDiv.className = 'bracket-match';
 
+                // Obter data/hora/local para este jogo
+                const jornadaMatch = match.jornada || match.round || '';
+                const { date: matchDate, time: matchTime, location: matchLocation } = getBracketMatchDateTime(jornadaMatch, match.team1, match.team2, round);
+
                 // Resolver nomes (substituir placeholders por equipas reais)
                 const resolvedTeam1 = resolveTeamName(match.team1);
                 const resolvedTeam2 = resolveTeamName(match.team2);
+
+                // Resolver placeholders de playoffs - sempre usar secondaryBracket para o secondary bracket
+                let displayTeam1Raw = resolvedTeam1;
+                let displayTeam2Raw = resolvedTeam2;
+                if (sampleData.secondaryBracket) {
+                    displayTeam1Raw = resolvePlayoffMatchup(resolvedTeam1, sampleData.secondaryBracket, round);
+                    displayTeam2Raw = resolvePlayoffMatchup(resolvedTeam2, sampleData.secondaryBracket, round);
+                }
 
                 // Obter informações das equipas
                 const team1Info = getCourseInfo(normalizeTeamName(resolvedTeam1));
                 const team2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
 
-                // Liguinha sempre usa nome curto
+                // Liguinha sempre usa nome curto - usar resolução de playoff se disponível
                 const displayTeam1 = isBracketPlaceholder(resolvedTeam1)
-                    ? translateBracketPlaceholder(resolvedTeam1)
+                    ? displayTeam1Raw
                     : getTranslatedTeamLabel(team1Info, resolvedTeam1);
                 const displayTeam2 = isBracketPlaceholder(resolvedTeam2)
-                    ? translateBracketPlaceholder(resolvedTeam2)
+                    ? displayTeam2Raw
                     : getTranslatedTeamLabel(team2Info, resolvedTeam2);
 
                 // Usar cor da equipa ou cinza neutro como fallback
@@ -5215,6 +5263,14 @@ function createSecondaryBracket() {
                     unknownIndicator.className = 'unknown-result-indicator';
                     unknownIndicator.innerHTML = `<small style="color: #666; font-style: italic; text-align: center; margin-top: 5px;">⚠️ ${t('unknownResult')}</small>`;
                     matchDiv.appendChild(unknownIndicator);
+                }
+
+                // Adicionar data/hora/local do jogo se disponível
+                if (matchDate) {
+                    const datetimeDiv = document.createElement('div');
+                    datetimeDiv.className = 'bracket-match-datetime';
+                    datetimeDiv.textContent = formatBracketMatchDate(matchDate, matchTime, matchLocation);
+                    matchDiv.insertBefore(datetimeDiv, matchDiv.firstChild);
                 }
 
                 roundDiv.appendChild(matchDiv);
@@ -6314,6 +6370,13 @@ function isBracketPlaceholder(teamLabel) {
         /^Vencido\s+[A-Z]{1,2}\d+$/.test(teamLabel);
 }
 
+function isClassificationPlaceholder(teamLabel) {
+    if (!teamLabel || typeof teamLabel !== 'string') return false;
+    return /^\d+º\s+(Class\.|Classificad[oa]|Class\.|Grupo)\b/i.test(teamLabel) ||
+           /^(\d+)º\s+(Class\.?|Classificad[oa])\s+\d+ª\s+Div/i.test(teamLabel) ||
+           /^\d+º\s+(Class\.?|Classificad[oa])\s+\d+ª\s+Div/i.test(teamLabel);
+}
+
 function translateBracketPlaceholder(teamLabel) {
     const match = teamLabel.match(/^(Vencedor|Perdedor|Vencido)\s+([A-Z]{1,2}\d+)$/);
     if (!match) {
@@ -6352,6 +6415,303 @@ function removeChartAriaLabel() {
 function getTranslatedTeamLabel(courseInfo, fallbackName) {
     const shortName = courseInfo?.shortName || fallbackName || '';
     return translateTeamName(shortName);
+}
+
+function formatBracketMatchDate(dateStr, time, location, currentLang = 'pt') {
+    if (!dateStr) return '';
+    const weekdayKeys = ['weekdayShortSun', 'weekdayShortMon', 'weekdayShortTue', 'weekdayShortWed', 'weekdayShortThu', 'weekdayShortFri', 'weekdayShortSat'];
+    const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!dateMatch) return '';
+    const year = parseInt(dateMatch[1]);
+    const month = parseInt(dateMatch[2]) - 1;
+    const day = parseInt(dateMatch[3]);
+    const date = new Date(year, month, day);
+    const weekdayIndex = date.getDay();
+    const weekday = t(weekdayKeys[weekdayIndex]);
+    const dateStrFormatted = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')} (${weekday})`;
+    let locationShort = location || '';
+    if (locationShort === 'Caixa UA') locationShort = 'Nave';
+    else if (locationShort === 'Sintético') locationShort = 'Sintético';
+    let result = dateStrFormatted;
+    if (time) result += ` • ${time}`;
+    if (locationShort) result += ` • ${locationShort}`;
+    return result;
+}
+
+function getBracketMatchDateTime(jornada, team1, team2, roundName) {
+    if (!sampleData.matches) return { date: '', time: '', location: '' };
+    const roundToJornadaMap = {
+        'Quartos de Final': ['E1'],
+        'Meias-Finais': ['E2'],
+        '3º Lugar': ['E3L'],
+        'Final': ['E3'],
+        'Manutenção/Promoção': ['PM1', 'PM2'],
+        'Liguilha de Manutenção': ['LM1', 'LM2', 'LM3']
+    };
+    let jornadasToSearch = [];
+    if (jornada) {
+        jornadasToSearch.push(String(jornada).toUpperCase().trim());
+    }
+    if (roundName && roundToJornadaMap[roundName]) {
+        jornadasToSearch = [...jornadasToSearch, ...roundToJornadaMap[roundName]];
+    }
+    if (jornadasToSearch.length === 0) {
+        jornadasToSearch = ['E1', 'E2', 'E3', 'E3L', 'PM1', 'PM2', 'LM1', 'LM2', 'LM3'];
+    }
+    const uniqueJornadas = [...new Set(jornadasToSearch)];
+    
+    // Mapping de placeholders da classificação para nomes reais das equipas
+    const classificationPlaceholderMap = {
+        '1º Class. 1ª Div.': 'Mecânica',
+        '2º Class. 1ª Div.': 'Finanças',
+        '3º Class. 1ª Div.': 'EGI',
+        '4º Class. 1ª Div.': 'GPT',
+        '5º Class. 1ª Div.': 'Contab',
+        '1º Class. 2ª Div. Gr. A': 'Materiais',
+        '1º Class. 2ª Div. Gr. B': 'Computacional',
+        '1º Class. 2ª Div. Gr. C': 'ECT',
+    };
+    
+    const resolvePlaceholder = (name) => {
+        if (!name) return name;
+        if (classificationPlaceholderMap[name]) {
+            return classificationPlaceholderMap[name];
+        }
+        return name;
+    };
+    
+    const normalizePlaceholder = (name) => {
+        if (!name) return '';
+        let normalized = resolvePlaceholder(name);
+        normalized = normalizeTeamName(normalized);
+        normalized = normalized.replace(/perdedor/gi, 'vencido');
+        normalized = normalized.replace(/vencido/gi, 'perdedor');
+        return normalized;
+    };
+    const t1 = normalizePlaceholder(team1 || '');
+    const t2 = normalizePlaceholder(team2 || '');
+    
+    const match = sampleData.matches.find(m => {
+        const mJornada = String(m.jornada || '').toUpperCase().trim();
+        if (!uniqueJornadas.some(j => mJornada === j)) return false;
+        const mTeam1 = normalizePlaceholder(m.team1 || '');
+        const mTeam2 = normalizePlaceholder(m.team2 || '');
+        return (mTeam1 === t1 && mTeam2 === t2) || (mTeam1 === t2 && mTeam2 === t1);
+    });
+    if (!match) return { date: '', time: '', location: '' };
+    return { date: match.date || '', time: match.time || '', location: match.location || '' };
+}
+
+function resolvePlayoffMatchup(teamLabel, bracketData, roundName) {
+    if (!teamLabel || typeof teamLabel !== 'string') return teamLabel;
+    const match = teamLabel.match(/^(Vencedor|Perdedor|Vencido)\s+([A-Z]{1,2}\d+)$/);
+    if (!match) return teamLabel;
+    const prefix = match[1];
+    const placeholderId = match[2].toUpperCase();
+    const qfMatch = placeholderId.match(/^QF?(\d+)$/i);
+    const mfMatch = placeholderId.match(/^MF?(\d+)$/i);
+    const pmMatch = placeholderId.match(/^PM(\d+)$/i);
+    const lmMatch = placeholderId.match(/^LM(\d+)$/i);
+    let sourceRound = null;
+    if (qfMatch) {
+        const qfRoundName = 'Quartos de Final';
+        if (bracketData && bracketData[qfRoundName]) {
+            // Mapping visual: índice 0->QF1, 1->QF4, 2->QF2, 3->QF3
+            const qfVisualMap = {1: 0, 4: 1, 2: 2, 3: 3};
+            const qfIndex = qfVisualMap[parseInt(qfMatch[1])] !== undefined 
+                ? qfVisualMap[parseInt(qfMatch[1])] 
+                : parseInt(qfMatch[1]) - 1;
+            sourceRound = bracketData[qfRoundName][qfIndex];
+        }
+    } else if (mfMatch) {
+        const mfRoundName = 'Meias-Finais';
+        // MF usa índices diretos: MF1->0, MF2->1 (cada MF tem 2 QF)
+        const mfIndex = parseInt(mfMatch[1]) - 1;
+        // Primeiro tenta encontrar no bracket principal (Meias-Finais)
+        if (bracketData && bracketData[mfRoundName] && bracketData[mfRoundName][mfIndex]) {
+            sourceRound = bracketData[mfRoundName][mfIndex];
+            // Obter os QF correspondentes: MF1=(QF1+QF4), MF2=(QF2+QF3)
+            const qfIndices = mfIndex === 0 ? [0, 1] : [2, 3];
+            // Resolver os placeholders internos (Vencedor Q1, Vencedor Q2, etc)
+            if (sourceRound.team1?.startsWith('Vencedor')) {
+                const qf1Index = qfIndices[0];
+                const qf1Match = bracketData['Quartos de Final']?.[qf1Index];
+                sourceRound._resolvedTeam1 = qf1Match?.winner || sourceRound.team1;
+            }
+            if (sourceRound.team2?.startsWith('Vencedor')) {
+                const qf2Index = qfIndices[1];
+                const qf2Match = bracketData['Quartos de Final']?.[qf2Index];
+                sourceRound._resolvedTeam2 = qf2Match?.winner || sourceRound.team2;
+            }
+        }
+        // Se não encontrou, procurar no secondary bracket (PM1 = 1ºFase)
+        if (!sourceRound) {
+            const secondaryBracket = sampleData.secondaryBracket;
+            if (secondaryBracket) {
+                const pm1Phase = secondaryBracket['1ºFase'];
+                if (pm1Phase && pm1Phase[mfIndex]) {
+                    sourceRound = pm1Phase[mfIndex];
+                }
+            }
+        }
+    } else if (pmMatch) {
+        const pmIndex = parseInt(pmMatch[1]) - 1;
+        if (bracketData && bracketData['Manutenção/Promoção']) {
+            sourceRound = bracketData['Manutenção/Promoção'][pmIndex];
+        } else if (bracketData && bracketData['maintenanceFirstPhase'] && pmIndex === 0) {
+            sourceRound = bracketData['maintenanceFirstPhase'][0];
+        } else if (bracketData && bracketData['maintenanceFinalPhase'] && pmIndex === 1) {
+            sourceRound = bracketData['maintenanceFinalPhase'][0];
+        }
+    } else if (lmMatch) {
+        const lmIndex = parseInt(lmMatch[1]) - 1;
+        if (bracketData && bracketData['Liguilha']) {
+            sourceRound = bracketData['Liguilha'][lmIndex];
+        }
+    }
+    if (!sourceRound) return translateBracketPlaceholder(teamLabel);
+    const winner = sourceRound.winner;
+    const isMainFinal = roundName === 'Final' || roundName === 'Finais';
+    const isSecondaryFinal = roundName === 'maintenanceFinalPhase' || roundName === 'Liguilha' || 
+                             placeholderId.startsWith('PM') || placeholderId.startsWith('LM');
+    const isFinalRound = isMainFinal;
+    if (prefix === 'Vencedor' || prefix === 'Vencido') {
+        if (winner) {
+            const teamInfo = getCourseInfo(winner);
+            return getTranslatedTeamLabel(teamInfo, winner);
+        } else if (isMainFinal) {
+            return translateBracketPlaceholder(teamLabel);
+        } else {
+            // Usar equipas resolvidas se disponíveis (do mapeamento QF->MF)
+            const team1ToResolve = sourceRound._resolvedTeam1 || sourceRound.team1;
+            const team2ToResolve = sourceRound._resolvedTeam2 || sourceRound.team2;
+            const resolvedTeam1 = resolveTeamName(team1ToResolve);
+            const resolvedTeam2 = resolveTeamName(team2ToResolve);
+            const t1Info = getCourseInfo(normalizeTeamName(resolvedTeam1));
+            const t2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
+            const t1Short = getTranslatedTeamLabel(t1Info, resolvedTeam1);
+            const t2Short = getTranslatedTeamLabel(t2Info, resolvedTeam2);
+            return `${t1Short}/${t2Short}`;
+        }
+} else if (prefix === 'Perdedor') {
+        if (winner) {
+            const loser = winner === sourceRound.team1 ? sourceRound.team2 : sourceRound.team1;
+            const resolvedLoser = resolveTeamName(loser);
+            const teamInfo = getCourseInfo(normalizeTeamName(resolvedLoser));
+            return getTranslatedTeamLabel(teamInfo, resolvedLoser);
+        } else if (isMainFinal) {
+            return translateBracketPlaceholder(teamLabel);
+        } else {
+            const team1ToResolve = sourceRound._resolvedTeam1 || sourceRound.team1;
+            const team2ToResolve = sourceRound._resolvedTeam2 || sourceRound.team2;
+            const resolvedTeam1 = resolveTeamName(team1ToResolve);
+            const resolvedTeam2 = resolveTeamName(team2ToResolve);
+            const t1Info = getCourseInfo(normalizeTeamName(resolvedTeam1));
+            const t2Info = getCourseInfo(normalizeTeamName(resolvedTeam2));
+            const t1Short = getTranslatedTeamLabel(t1Info, resolvedTeam1);
+            const t2Short = getTranslatedTeamLabel(t2Info, resolvedTeam2);
+            return `${t1Short}/${t2Short}`;
+        }
+    }
+    return translateBracketPlaceholder(teamLabel);
+}
+
+function isRegularSeasonComplete() {
+    if (!sampleData.matches || !Array.isArray(sampleData.matches)) return false;
+
+    const isPlayoffStage = (jornada) => {
+        if (!jornada) return false;
+        const normalized = String(jornada).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+        return normalized.startsWith('e') || normalized.startsWith('pm') || normalized.startsWith('lm') || normalized.includes('quarto') || normalized.includes('semifinais') || normalized.includes('final') || normalized.includes('lugar') || normalized.includes('playoff') || normalized.includes('liguilha') || normalized.includes('1ºfase') || normalized.includes('1ªfase') || normalized.includes('fasfinal') || normalized.includes('fasefinal');
+    };
+    const regularMatches = sampleData.matches.filter(m => !isPlayoffStage(m.jornada));
+    if (regularMatches.length === 0) return false;
+    const validMatches = regularMatches.filter(m => {
+        if (isWithdrawnCalendarTeam(m.team1) || isWithdrawnCalendarTeam(m.team2)) return false;
+        return true;
+    });
+    if (validMatches.length === 0) return false;
+    return validMatches.every(m => m.score1 !== null && m.score2 !== null && m.score1 !== undefined && m.score2 !== undefined);
+}
+
+function hasPlayoffsWithDates() {
+    if (!sampleData.matches || !Array.isArray(sampleData.matches)) return false;
+
+    const playoffJornadas = ['E1', 'E2', 'E3', 'E3L', 'PM1', 'PM2', 'LM1', 'LM2', 'LM3'];
+    const playoffMatches = sampleData.matches.filter(m => {
+        if (!m.jornada) return false;
+        return playoffJornadas.some(j => String(m.jornada).toUpperCase().trim() === j);
+    });
+
+    // Verificar se pelo menos um jogo de playoff tem data definida
+    return playoffMatches.some(m => m.date && m.date.trim() !== '');
+}
+
+function reorderDashboardSections() {
+    const dashboardGrid = document.querySelector('.dashboard-grid');
+    if (!dashboardGrid) return;
+
+    const rankings = document.getElementById('rankings');
+    const bracket = document.getElementById('bracket');
+    const calendar = document.getElementById('calendar');
+    const secondaryBracket = document.getElementById('secondaryBracketCard');
+
+    if (!rankings || !bracket || !calendar) return;
+
+    // Trocar se houver datas de playoffs OU se a fase regular estiver completa
+    const hasPlayoffsDates = hasPlayoffsWithDates();
+    const isComplete = isRegularSeasonComplete();
+    const shouldSwap = hasPlayoffsDates || isComplete;
+
+    const predictions = document.getElementById('predictions');
+
+    if (shouldSwap) {
+        // Com data de playoffs: Bracket → Playoff Manutenção → Calendário → Detalhes → Classificação
+        // Move main bracket to the beginning
+        if (dashboardGrid.firstChild !== bracket) {
+            dashboardGrid.insertBefore(bracket, dashboardGrid.firstChild);
+        }
+        // Move secondary bracket after bracket
+        if (secondaryBracket && secondaryBracket.style.display !== 'none') {
+            if (bracket.nextSibling !== secondaryBracket) {
+                dashboardGrid.insertBefore(secondaryBracket, bracket.nextSibling);
+            }
+        }
+        // Move calendar after secondary bracket (or bracket if no secondary)
+        const afterBracket = secondaryBracket && secondaryBracket.style.display !== 'none' ? secondaryBracket : bracket;
+        if (calendar !== afterBracket.nextSibling) {
+            dashboardGrid.insertBefore(calendar, afterBracket.nextSibling);
+        }
+        // Move predictions after calendar
+        if (predictions && calendar.nextSibling !== predictions) {
+            dashboardGrid.insertBefore(predictions, calendar.nextSibling);
+        }
+        // Move rankings to the end
+        if (dashboardGrid.lastChild !== rankings) {
+            dashboardGrid.appendChild(rankings);
+        }
+    } else {
+        // Sem data de playoffs: Classificação → Detalhes → Calendário → Bracket → Playoff Manutenção
+        // rankings already at first position by default, just ensure others are in order
+        // Move predictions after rankings
+        if (predictions && rankings.nextSibling !== predictions) {
+            dashboardGrid.insertBefore(predictions, rankings.nextSibling);
+        }
+        // Move calendar after predictions
+        if (predictions && calendar !== predictions.nextSibling) {
+            dashboardGrid.insertBefore(calendar, predictions.nextSibling);
+        }
+        // Move bracket after calendar
+        if (bracket !== calendar.nextSibling) {
+            dashboardGrid.insertBefore(bracket, calendar.nextSibling);
+        }
+        // Move secondary bracket to the end (or after bracket if visible)
+        if (secondaryBracket && secondaryBracket.style.display !== 'none') {
+            if (dashboardGrid.lastChild !== secondaryBracket) {
+                dashboardGrid.appendChild(secondaryBracket);
+            }
+        }
+    }
 }
 
 
@@ -8047,6 +8407,11 @@ function executeChangeModalidade(mod) {
                         // Disparar evento indicando que os dados foram carregados
                         document.dispatchEvent(new CustomEvent('data:loaded'));
 
+                        // Reordenar secções com pequeno atraso para garantir que o calendário está pronto
+                        setTimeout(() => {
+                            reorderDashboardSections();
+                        }, 100);
+
                         // Pré-carregar todos os logos
                         preloadAllLogos();
 
@@ -8220,17 +8585,88 @@ let availableJornadas = [];
 function getFilteredCalendarMatches() {
     const { targetDivision, targetGroup } = getCalendarDivisionGroupFilter();
 
-    return (sampleData.matches || []).filter(match => {
+    const allMatches = sampleData.matches || [];
+    
+    
+    const playoffJornadas = ['E1', 'E2', 'E3', 'E3L', 'PM1', 'PM2', 'LM1', 'LM2', 'LM3'];
+    
+    const result = allMatches.filter(match => {
+        const jornada = String(match.jornada || '').toUpperCase().trim();
+        const isPlayoff = playoffJornadas.some(pj => jornada === pj);
+        
+        
+        
+        // Se é jogo de playoffs, incluir sempre sem verificar divisão/grupo ou withdrawn
+        if (isPlayoff) {
+            return true;
+        }
+        
+        // Para jogos normais, verificar divisão/grupo
         if (isWithdrawnCalendarMatch(match)) return false;
         return matchesCalendarDivisionGroup(match, targetDivision, targetGroup);
     });
+    
+    
+    return result;
+}
+
+// Obter equipas da fase anterior de um placeholder de playoff
+function getPlayoffPhaseTeams(placeholderLabel) {
+    if (!placeholderLabel) return null;
+    
+    const match = placeholderLabel.match(/^(Vencedor|Perdedor|Vencido)\s+([A-Z]{1,2}\d+)$/);
+    if (!match) return null;
+    
+    const placeholderId = match[2].toUpperCase();
+    const qfMatch = placeholderId.match(/^QF?(\d+)$/i);
+    const mfMatch = placeholderId.match(/^MF?(\d+)$/i);
+    const pmMatch = placeholderId.match(/^PM(\d+)$/i);
+    
+    let sourceRound = null;
+    
+    if (qfMatch) {
+        const qfRoundName = 'Quartos de Final';
+        const qfVisualMap = {1: 0, 4: 1, 2: 2, 3: 3};
+        const qfIndex = qfVisualMap[parseInt(qfMatch[1])] !== undefined 
+            ? qfVisualMap[parseInt(qfMatch[1])] 
+            : parseInt(qfMatch[1]) - 1;
+        sourceRound = sampleData.bracket?.[qfRoundName]?.[qfIndex];
+    } else if (mfMatch) {
+        const mfRoundName = 'Meias-Finais';
+        const mfIndex = parseInt(mfMatch[1]) - 1;
+        const sourceRoundMF = sampleData.bracket?.[mfRoundName]?.[mfIndex];
+        if (sourceRoundMF) {
+            const qfIndices = mfIndex === 0 ? [0, 1] : [2, 3];
+            const qf1 = sampleData.bracket?.['Quartos de Final']?.[qfIndices[0]];
+            const qf2 = sampleData.bracket?.['Quartos de Final']?.[qfIndices[1]];
+            if (qf1 && qf2) {
+                return [qf1.team1, qf1.team2, qf2.team1, qf2.team2].filter(Boolean);
+            }
+        }
+    } else if (pmMatch) {
+        const pmIndex = parseInt(pmMatch[1]) - 1;
+        const secondaryBracket = sampleData.secondaryBracket;
+        if (secondaryBracket) {
+            const pm1Phase = secondaryBracket['1ºFase'];
+            if (pm1Phase && pm1Phase[pmIndex]) {
+                sourceRound = pm1Phase[pmIndex];
+            }
+        }
+    }
+    
+    if (sourceRound) {
+        return [sourceRound.team1, sourceRound.team2].filter(Boolean);
+    }
+    
+    return null;
 }
 
 function buildCalendarTeamPages(filteredMatches, options = {}) {
     const { preserveCurrentPage = true, preferredTeam = null } = options;
 
-    const teamSet = new Set();
+    let teamSet = new Set();
 
+    // Primeiro: adicionar equipas da divisão/grupo atual
     if (sampleData.rankings && currentCalendarDivision && sampleData.rankings[currentCalendarDivision]) {
         sampleData.rankings[currentCalendarDivision].forEach(team => {
             if (!team || !team.team) return;
@@ -8239,11 +8675,18 @@ function buildCalendarTeamPages(filteredMatches, options = {}) {
         });
     }
 
+    // Segundo: adicionar equipas de TODOS os jogos (mas não placeholders)
     filteredMatches.forEach(match => {
-        const team1 = normalizeTeamName(match.team1 || match['Equipa 1'] || '');
-        const team2 = normalizeTeamName(match.team2 || match['Equipa 2'] || '');
-        if (team1) teamSet.add(team1);
-        if (team2) teamSet.add(team2);
+        const rawTeam1 = match.team1 || match['Equipa 1'] || '';
+        const rawTeam2 = match.team2 || match['Equipa 2'] || '';
+        
+        // Só adicionar se não for placeholder
+        if (rawTeam1 && !isBracketPlaceholder(rawTeam1) && !isClassificationPlaceholder(rawTeam1)) {
+            teamSet.add(normalizeTeamName(rawTeam1));
+        }
+        if (rawTeam2 && !isBracketPlaceholder(rawTeam2) && !isClassificationPlaceholder(rawTeam2)) {
+            teamSet.add(normalizeTeamName(rawTeam2));
+        }
     });
 
     const orderedTeams = Array.from(teamSet)
@@ -8253,8 +8696,10 @@ function buildCalendarTeamPages(filteredMatches, options = {}) {
     // Pré-calcular mapping de equipas para jogos (otimização O(n*m) -> O(n+m))
     const teamGamesMap = new Map();
     filteredMatches.forEach(match => {
-        const t1 = normalizeTeamName(match.team1 || match['Equipa 1'] || '');
-        const t2 = normalizeTeamName(match.team2 || match['Equipa 2'] || '');
+        const rawTeam1 = match.team1 || match['Equipa 1'] || '';
+        const rawTeam2 = match.team2 || match['Equipa 2'] || '';
+        const t1 = normalizeTeamName(rawTeam1);
+        const t2 = normalizeTeamName(rawTeam2);
         const c1 = t1 ? resolveCanonicalCourseKey(t1) : null;
         const c2 = t2 ? resolveCanonicalCourseKey(t2) : null;
         
@@ -8262,8 +8707,250 @@ function buildCalendarTeamPages(filteredMatches, options = {}) {
         if (c1) teamGamesMap.get(c1).push(match);
         if (c2 && !teamGamesMap.has(c2)) teamGamesMap.set(c2, []);
         if (c2) teamGamesMap.get(c2).push(match);
-    });
 
+// Para jogos de playoffs, adicionar jogos das rondas seguintes (se não perdeu)
+        const jornadaNorm = String(match.jornada || '').toUpperCase().trim();
+        const playoffCodes = ['E1', 'E2', 'E3', 'E3L', 'PM1', 'PM2', 'LM1', 'LM2', 'LM3'];
+        const isPlayoffMatch = playoffCodes.includes(jornadaNorm);
+        
+if (isPlayoffMatch) {
+            // Resolver equipas
+            const resolved1 = resolveTeamName(rawTeam1);
+            const resolved2 = resolveTeamName(rawTeam2);
+            
+            // Adicionar equipa 1 (se resolvida ou se for placeholder em playoffs)
+            if (resolved1 !== rawTeam1 && !isClassificationPlaceholder(resolved1)) {
+                const cResolved1 = resolveCanonicalCourseKey(normalizeTeamName(resolved1));
+                if (cResolved1) {
+                    if (!teamGamesMap.has(cResolved1)) teamGamesMap.set(cResolved1, []);
+                    teamGamesMap.get(cResolved1).push(match);
+                }
+            } else if (isBracketPlaceholder(rawTeam1)) {
+                // Para placeholders de playoffs, tentar adicionar a ronda seguinte também
+                // A ronda seguinte será adicionada abaixo
+            }
+            // Adicionar equipa 2 (se resolvida ou se for placeholder em playoffs)
+            if (resolved2 !== rawTeam2 && !isClassificationPlaceholder(resolved2)) {
+                const cResolved2 = resolveCanonicalCourseKey(normalizeTeamName(resolved2));
+                if (cResolved2) {
+                    if (!teamGamesMap.has(cResolved2)) teamGamesMap.set(cResolved2, []);
+                    teamGamesMap.get(cResolved2).push(match);
+                }
+            } else if (isBracketPlaceholder(rawTeam2)) {
+                // Para placeholders de playoffs, tentar adicionar a ronda seguinte também
+            }
+            
+            // Para E1 (Quartos de Final), adicionar a meia-final correta (E2)
+            if (jornadaNorm === 'E1') {
+                [resolved1, resolved2].forEach(team => {
+                    if (!team || isClassificationPlaceholder(team)) return;
+                    
+                    const cTeam = resolveCanonicalCourseKey(normalizeTeamName(team));
+                    if (!cTeam) return;
+                    
+                    const teamNorm = normalizeTeamName(team);
+                    const bracket = sampleData.bracket || {};
+                    let qfId = null;
+                    
+                    const quartos = bracket['Quartos de Final'] || [];
+                    quartos.forEach((q, idx) => {
+                        const qTeam1 = normalizeTeamName(q.team1);
+                        const qTeam2 = normalizeTeamName(q.team2);
+                        if (qTeam1 === teamNorm || qTeam2 === teamNorm) {
+                            qfId = `QF${idx + 1}`;
+                        }
+                    });
+                    
+                    if (!qfId) return;
+                    
+                    // Adicionar a meia-final correta (E2) com resolução de nomes
+                    filteredMatches.forEach(m => {
+                        const mj = String(m.jornada || '').toUpperCase().trim();
+                        if (mj !== 'E2') return;
+                        
+                        const mRaw1 = m.team1 || m['Equipa 1'] || '';
+                        const mRaw2 = m.team2 || m['Equipa 2'] || '';
+                        
+                        // Verificar se o jogo contém o QF correto
+                        const hasCorrectQF = (mRaw1 && mRaw1.includes(qfId)) || (mRaw2 && mRaw2.includes(qfId));
+                        
+                        if (hasCorrectQF) {
+                            if (!teamGamesMap.has(cTeam)) teamGamesMap.set(cTeam, []);
+                            if (!teamGamesMap.get(cTeam).includes(m)) {
+                                teamGamesMap.get(cTeam).push(m);
+                            }
+                            
+                            // Resolver nomes dos placeholders no jogo
+                            const res1 = resolveTeamName(mRaw1);
+                            const res2 = resolveTeamName(mRaw2);
+                            if (res1 !== mRaw1 && !isClassificationPlaceholder(res1)) {
+                                const cRes1 = resolveCanonicalCourseKey(normalizeTeamName(res1));
+                                if (cRes1 && !teamGamesMap.has(cRes1)) {
+                                    teamGamesMap.set(cRes1, []);
+                                }
+                                if (cRes1 && !teamGamesMap.get(cRes1).includes(m)) {
+                                    teamGamesMap.get(cRes1).push(m);
+                                }
+                            }
+                            if (res2 !== mRaw2 && !isClassificationPlaceholder(res2)) {
+                                const cRes2 = resolveCanonicalCourseKey(normalizeTeamName(res2));
+                                if (cRes2 && !teamGamesMap.has(cRes2)) {
+                                    teamGamesMap.set(cRes2, []);
+                                }
+                                if (cRes2 && !teamGamesMap.get(cRes2).includes(m)) {
+                                    teamGamesMap.get(cRes2).push(m);
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+            
+            // Para E2 (Meias-Finais), adicionar automaticamente E3/E3L para equipas de E1
+            if (jornadaNorm === 'E2') {
+                // Para cada equipa que jogou em E1, adicionar a meia-final correta (baseada no QF)
+                filteredMatches.forEach(e1Match => {
+                    const e1j = String(e1Match.jornada || '').toUpperCase().trim();
+                    if (e1j !== 'E1') return;
+                    
+                    const r1 = resolveTeamName(e1Match.team1 || e1Match['Equipa 1'] || '');
+                    const r2 = resolveTeamName(e1Match.team2 || e1Match['Equipa 2'] || '');
+                    
+                    [r1, r2].forEach(team => {
+                        if (!team || isClassificationPlaceholder(team)) return;
+                        
+                        const cTeam = resolveCanonicalCourseKey(normalizeTeamName(team));
+                        if (!cTeam) return;
+                        
+                        // Encontrar o QF desta equipa (QF1, QF2, QF3, QF4)
+                        const teamNorm = normalizeTeamName(team);
+                        const bracket = sampleData.bracket || {};
+                        let qfId = null;
+                        const quartos = bracket['Quartos de Final'] || [];
+                        quartos.forEach((q, idx) => {
+                            if (normalizeTeamName(q.team1) === teamNorm || normalizeTeamName(q.team2) === teamNorm) {
+                                qfId = `QF${idx + 1}`;
+                            }
+                        });
+                        
+                        if (!qfId) return;
+                        
+                        // Mapear QF para MF: QF1/QF4 -> MF1, QF2/QF3 -> MF2
+                        const mfId = (qfId === 'QF1' || qfId === 'QF4') ? 'MF1' : 'MF2';
+                        
+                        // Adicionar a meia-final correta (E2) e as finais (E3/E3L)
+                        filteredMatches.forEach(m => {
+                            const mj = String(m.jornada || '').toUpperCase().trim();
+                            
+                            // Para E2, verificar se é a meia correta (MF1 ou MF2)
+                            if (mj === 'E2') {
+                                const mRaw1 = m.team1 || m['Equipa 1'] || '';
+                                const mRaw2 = m.team2 || m['Equipa 2'] || '';
+                                const hasCorrectMF = (mRaw1 && mRaw1.includes(mfId)) || (mRaw2 && mRaw2.includes(mfId));
+                                if (hasCorrectMF) {
+                                    if (!teamGamesMap.has(cTeam)) teamGamesMap.set(cTeam, []);
+                                    if (!teamGamesMap.get(cTeam).includes(m)) {
+                                        teamGamesMap.get(cTeam).push(m);
+                                    }
+                                }
+                            }
+                            
+                            // Para E3 e E3L, adicionar sempre (são as Finais)
+                            if (mj === 'E3' || mj === 'E3L') {
+                                if (!teamGamesMap.has(cTeam)) teamGamesMap.set(cTeam, []);
+                                if (!teamGamesMap.get(cTeam).includes(m)) {
+                                    teamGamesMap.get(cTeam).push(m);
+                                }
+                                
+                                // Resolver nomes dos placeholders no jogo
+                                const mRaw1 = m.team1 || m['Equipa 1'] || '';
+                                const mRaw2 = m.team2 || m['Equipa 2'] || '';
+                                const res1 = resolveTeamName(mRaw1);
+                                const res2 = resolveTeamName(mRaw2);
+                                if (res1 !== mRaw1 && !isClassificationPlaceholder(res1)) {
+                                    const cRes1 = resolveCanonicalCourseKey(normalizeTeamName(res1));
+                                    if (cRes1 && !teamGamesMap.has(cRes1)) {
+                                        teamGamesMap.set(cRes1, []);
+                                    }
+                                    if (cRes1 && !teamGamesMap.get(cRes1).includes(m)) {
+                                        teamGamesMap.get(cRes1).push(m);
+                                    }
+                                }
+                                if (res2 !== mRaw2 && !isClassificationPlaceholder(res2)) {
+                                    const cRes2 = resolveCanonicalCourseKey(normalizeTeamName(res2));
+                                    if (cRes2 && !teamGamesMap.has(cRes2)) {
+                                        teamGamesMap.set(cRes2, []);
+                                    }
+                                    if (cRes2 && !teamGamesMap.get(cRes2).includes(m)) {
+                                        teamGamesMap.get(cRes2).push(m);
+                                    }
+                                }
+                            }
+                        });
+                    });
+                });
+            }
+               
+            // Para playoffs (exceto E1 e E2 que já são tratados acima), adicionar ronda seguinte
+            if (jornadaNorm !== 'E1' && jornadaNorm !== 'E2') {
+                const nextRoundsMap = {
+                    'PM1': 'PM2',
+                    'PM2': [],
+                    'LM1': 'LM2',
+                    'LM2': 'LM3'
+                };
+                
+                const nextJornadas = nextRoundsMap[jornadaNorm];
+                if (nextJornadas) {
+                    [resolved1, resolved2].forEach(team => {
+                        if (!team || isClassificationPlaceholder(team)) return;
+                        
+                        const cTeam = resolveCanonicalCourseKey(normalizeTeamName(team));
+                        if (!cTeam) return;
+                        
+                        const jornadasToAdd = Array.isArray(nextJornadas) ? nextJornadas : [nextJornadas];
+                        
+                        jornadasToAdd.forEach(nj => {
+                            filteredMatches.forEach(m => {
+                                const mj = String(m.jornada || '').toUpperCase().trim();
+                                if (mj === nj) {
+                                    if (!teamGamesMap.has(cTeam)) teamGamesMap.set(cTeam, []);
+                                    if (!teamGamesMap.get(cTeam).includes(m)) {
+                                        teamGamesMap.get(cTeam).push(m);
+                                    }
+                                    
+                                    // Resolver nomes dos placeholders no jogo
+                                    const mRaw1 = m.team1 || m['Equipa 1'] || '';
+                                    const mRaw2 = m.team2 || m['Equipa 2'] || '';
+                                    const res1 = resolveTeamName(mRaw1);
+                                    const res2 = resolveTeamName(mRaw2);
+                                    if (res1 !== mRaw1 && !isClassificationPlaceholder(res1)) {
+                                        const cRes1 = resolveCanonicalCourseKey(normalizeTeamName(res1));
+                                        if (cRes1 && !teamGamesMap.has(cRes1)) {
+                                            teamGamesMap.set(cRes1, []);
+                                        }
+                                        if (cRes1 && !teamGamesMap.get(cRes1).includes(m)) {
+                                            teamGamesMap.get(cRes1).push(m);
+                                        }
+                                    }
+                                    if (res2 !== mRaw2 && !isClassificationPlaceholder(res2)) {
+                                        const cRes2 = resolveCanonicalCourseKey(normalizeTeamName(res2));
+                                        if (cRes2 && !teamGamesMap.has(cRes2)) {
+                                            teamGamesMap.set(cRes2, []);
+                                        }
+                                        if (cRes2 && !teamGamesMap.get(cRes2).includes(m)) {
+                                            teamGamesMap.get(cRes2).push(m);
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    });
+                }
+            }
+        }
+    });
+    
     const pages = orderedTeams.map(teamName => {
         const courseInfo = getCourseInfo(teamName);
         const teamLabel = getTranslatedTeamLabel(courseInfo, teamName);
@@ -8613,20 +9300,35 @@ function buildCalendarDatePages(filteredMatches, options = {}) {
 
     const sortedMatches = [...filteredMatches].sort(compareCalendarMatchesChronologically);
 
-    // Separar jogos com e sem data
-    const datedMatches = sortedMatches.filter(m => extractCalendarDateKey(m));
-    const undatedMatches = sortedMatches.filter(m => !extractCalendarDateKey(m));
+    // Separar jogos normais de playoffs
+    const isPlayoff = (jornada) => {
+        if (!jornada) return false;
+        const normalized = String(jornada).toUpperCase().trim();
+        // Também detectar nomes como "Quartos de Final", "Meias-Finais", "Finais", "Liguilha"
+        const codes = ['E1', 'E2', 'E3', 'E3L', 'PM1', 'PM2', 'LM1', 'LM2', 'LM3', 'QUARTOS', 'MEIAS', 'FINAIS', 'LIGUILHA'];
+        const names = ['QUARTOS DE FINAL', 'MEIAS-FINAIS', 'MEIAS FINAIS', 'FINAL', 'FINAIS', 'LIGUILHA', 'LIGUILHA FINAL'];
+        return codes.includes(normalized) || names.some(n => normalized.includes(n));
+    };
+    
+    const regularMatches = sortedMatches.filter(m => !isPlayoff(m.jornada));
+    const playoffMatches = sortedMatches.filter(m => isPlayoff(m.jornada));
+
+    // Separar jogos com e sem data (só para normais)
+    const datedMatches = regularMatches.filter(m => extractCalendarDateKey(m));
+    const undatedMatches = regularMatches.filter(m => !extractCalendarDateKey(m));
 
     const pages = [];
     let currentPage = null;
 
     const pushCurrentPage = () => {
         if (!currentPage || currentPage.games.length === 0) return;
-        currentPage.label = getCalendarPageLabel(
-            currentPage.startDateKey,
-            currentPage.endDateKey,
-            currentPage.hasUndated
-        );
+        if (!currentPage.label) {
+            currentPage.label = getCalendarPageLabel(
+                currentPage.startDateKey,
+                currentPage.endDateKey,
+                currentPage.hasUndated
+            );
+        }
         pages.push(currentPage);
     };
 
@@ -8644,8 +9346,11 @@ function buildCalendarDatePages(filteredMatches, options = {}) {
         const dayTeams = new Set();
 
         dayMatches.forEach(match => {
-            const team1 = resolveCanonicalCourseKey(normalizeTeamName(match.team1 || match['Equipa 1'] || ''));
-            const team2 = resolveCanonicalCourseKey(normalizeTeamName(match.team2 || match['Equipa 2'] || ''));
+            // Resolver nomes antes de verificar conflitos
+            const t1 = resolveTeamName(match.team1 || match['Equipa 1'] || '');
+            const t2 = resolveTeamName(match.team2 || match['Equipa 2'] || '');
+            const team1 = resolveCanonicalCourseKey(normalizeTeamName(t1));
+            const team2 = resolveCanonicalCourseKey(normalizeTeamName(t2));
             if (team1) dayTeams.add(team1);
             if (team2) dayTeams.add(team2);
         });
@@ -8682,7 +9387,80 @@ function buildCalendarDatePages(filteredMatches, options = {}) {
     pushCurrentPage();
     currentPage = null;
 
-    // Páginas de jogos SEM data: uma página por jornada
+    // Depois de todos os jogos normais, adicionar jogos de playoffs como páginas separadas
+    if (playoffMatches.length > 0) {
+        // Separar Liguilha (LM) dos outros playoffs
+        const liguilhaMatches = playoffMatches.filter(m => {
+            const jornada = String(m.jornada || '').toUpperCase().trim();
+            return jornada.startsWith('LM');
+        });
+        const otherPlayoffs = playoffMatches.filter(m => {
+            const jornada = String(m.jornada || '').toUpperCase().trim();
+            return !jornada.startsWith('LM');
+        });
+        
+        // Primeiro: outros playoffs (E1, E2, E3, PM, etc.)
+        if (otherPlayoffs.length > 0) {
+            // Determinar label baseado na divisão
+            let playoffLabel = 'Play-offs';
+            const firstMatch = otherPlayoffs[0];
+            if (firstMatch) {
+                const division = firstMatch.division || firstMatch['Divisão'] || '';
+                if (division.includes('1ª')) {
+                    playoffLabel = 'Play-offs e Manutenção';
+                } else if (division.includes('2ª')) {
+                    playoffLabel = 'Play-offs e Promoção';
+                }
+            }
+            
+            pushCurrentPage();
+            currentPage = {
+                startDateKey: 'playoffs',
+                endDateKey: 'playoffs',
+                hasUndated: false,
+                games: [...otherPlayoffs],
+                teamsInPage: new Set(),
+                label: playoffLabel
+            };
+            
+            otherPlayoffs.forEach(match => {
+                const t1 = resolveTeamName(match.team1 || match['Equipa 1'] || '');
+                const t2 = resolveTeamName(match.team2 || match['Equipa 2'] || '');
+                const team1 = resolveCanonicalCourseKey(normalizeTeamName(t1));
+                const team2 = resolveCanonicalCourseKey(normalizeTeamName(t2));
+                if (team1) currentPage.teamsInPage.add(team1);
+                if (team2) currentPage.teamsInPage.add(team2);
+            });
+            
+            pushCurrentPage();
+        }
+        
+        // Segundo: Liguilha (LM) - página própria
+        if (liguilhaMatches.length > 0) {
+            pushCurrentPage();
+            currentPage = {
+                startDateKey: 'liguilha',
+                endDateKey: 'liguilha',
+                hasUndated: false,
+                games: [...liguilhaMatches],
+                teamsInPage: new Set(),
+                label: 'Liguilha'
+            };
+            
+            liguilhaMatches.forEach(match => {
+                const t1 = resolveTeamName(match.team1 || match['Equipa 1'] || '');
+                const t2 = resolveTeamName(match.team2 || match['Equipa 2'] || '');
+                const team1 = resolveCanonicalCourseKey(normalizeTeamName(t1));
+                const team2 = resolveCanonicalCourseKey(normalizeTeamName(t2));
+                if (team1) currentPage.teamsInPage.add(team1);
+                if (team2) currentPage.teamsInPage.add(team2);
+            });
+            
+pushCurrentPage();
+        }
+    }
+
+    // Páginas de jogos SEM data: uma página por jornada (só para normais)
     const undatedByJornada = new Map();
     undatedMatches.forEach(match => {
         const jornada = parseInt(match.jornada, 10);
@@ -8828,17 +9606,141 @@ function initializeCalendarSelectors() {
     }
 }
 
+// Mapeamento de códigos de jornadas para nomes legíveis
+function getJornadaDisplayName(jornada) {
+    if (!jornada) return jornada;
+    const normalized = String(jornada).toUpperCase().trim();
+    
+    const jornadaMap = {
+        'E1': 'Quartos de Final',
+        'E2': 'Meias-Finais',
+        'E3': 'Final',
+        'E3L': '3º Lugar',
+        'PM1': 'Meias-Finais',
+        'PM2': 'Final',
+        'LM1': 'Liguilha',
+        'LM2': 'Liguilha',
+        'LM3': 'Liguilha',
+        'QUARTOS': 'Quartos de Final',
+        'MEIAS': 'Meias-Finais',
+        'FINAIS': 'Finais',
+        'LIGUILHA': 'Liguilha'
+    };
+    
+    if (jornadaMap[normalized]) {
+        return jornadaMap[normalized];
+    }
+    
+    return jornada;
+}
+
+// Obter chave de grouping para jornadas de playoffs (mesma chave = mesma jornada visual)
+function getPlayoffGroupKey(jornada) {
+    if (!jornada) return null;
+    const normalized = String(jornada).toUpperCase().trim();
+    
+    const groupMap = {
+        'E1': 'QUARTOS',
+        'E2': 'MEIAS',
+        'PM1': 'MEIAS',
+        'PM2': 'FINAIS',
+        'E3': 'FINAIS',
+        'E3L': 'FINAIS',
+        'LM1': 'LIGUILHA',
+        'LM2': 'LIGUILHA',
+        'LM3': 'LIGUILHA'
+    };
+    
+    return groupMap[normalized] || normalized;
+}
+
+// Obter ordem de sorting para jornadas de playoffs
+function getPlayoffSortOrder(jornada) {
+    if (!jornada) return 999;
+    const normalized = String(jornada).toUpperCase().trim();
+    
+    const orderMap = {
+        'QUARTOS': 1,
+        'E1': 1,
+        'MEIAS': 2,
+        'E2': 2,
+        'PM1': 2,
+        'FINAIS': 3,
+        'PM2': 3,
+        'E3': 3,
+        'E3L': 3,
+        'LIGUILHA': 4,
+        'LM1': 4,
+        'LM2': 4,
+        'LM3': 4
+    };
+    
+    return orderMap[normalized] || 999;
+}
+
+// Verificar se é jogo de playoffs (código ou group key)
+function isPlayoffJornada(jornada) {
+    if (!jornada) return false;
+    const normalized = String(jornada).toUpperCase().trim();
+    return ['E1', 'E2', 'E3', 'E3L', 'PM1', 'PM2', 'LM1', 'LM2', 'LM3', 'QUARTOS', 'MEIAS', 'FINAIS', 'LIGUILHA'].includes(normalized);
+}
+
 // Atualizar jornadas disponíveis para divisão/grupo atual
 function updateAvailableJornadas(options = {}) {
     // Filtrar jornadas para a divisão/grupo atual
     const filteredMatches = getFilteredCalendarMatches();
 
-    // Obter jornadas únicas e ordenadas
-    availableJornadas = [...new Set(
-        filteredMatches
-            .map(match => parseInt(match.jornada))
-            .filter(jornada => !Number.isNaN(jornada))
-    )].sort((a, b) => a - b);
+    // Função local para verificar se é jornada de playoff
+    const checkPlayoffStage = (jornada) => {
+        if (!jornada) return false;
+        const normalized = String(jornada).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+        return normalized.startsWith('e') || normalized.startsWith('pm') || normalized.startsWith('lm') ||
+            normalized.includes('quarto') || normalized.includes('semifinais') || normalized.includes('final') ||
+            normalized.includes('lugar') || normalized.includes('playoff') || normalized.includes('liguilha');
+    };
+
+    // Obter jornadas únicas - tanto numéricas quanto de playoffs
+    const numericJornadas = filteredMatches
+        .map(match => parseInt(match.jornada))
+        .filter(jornada => !Number.isNaN(jornada));
+
+    // Para playoffs, usar group keys para agrupar várias jornadas numa só
+    const playoffGroupKeys = new Set();
+    filteredMatches
+        .map(match => match.jornada)
+        .filter(jornada => jornada && checkPlayoffStage(jornada))
+        .forEach(jornada => {
+            const groupKey = getPlayoffGroupKey(jornada);
+            if (groupKey) playoffGroupKeys.add(groupKey);
+        });
+
+    const playoffJornadas = [...playoffGroupKeys];
+
+    // Combinar e ordernar
+    const allJornadas = [...new Set([...numericJornadas.map(String), ...playoffJornadas])];
+    availableJornadas = allJornadas.sort((a, b) => {
+        const aNum = parseInt(a);
+        const bNum = parseInt(b);
+        const aIsPlayoff = checkPlayoffStage(a) || ['QUARTOS', 'MEIAS', 'FINAIS', 'LIGUILHA'].includes(a);
+        const bIsPlayoff = checkPlayoffStage(b) || ['QUARTOS', 'MEIAS', 'FINAIS', 'LIGUILHA'].includes(b);
+        
+        // Se ambos são numéricos, ordenar por número
+        if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) return aNum - bNum;
+        
+        // Se um é playoff e outro é numérico, playoff vai para o fim
+        if (aIsPlayoff && !bIsPlayoff) return 1;
+        if (!aIsPlayoff && bIsPlayoff) return -1;
+        
+        // Se ambos são playoffs, ordenar por grupo (Quartos, Meias, Finais)
+        if (aIsPlayoff && bIsPlayoff) {
+            const aOrder = getPlayoffSortOrder(a);
+            const bOrder = getPlayoffSortOrder(b);
+            if (aOrder !== bOrder) return aOrder - bOrder;
+            return a.localeCompare(b);
+        }
+        
+        return a.localeCompare(b);
+    });
 
     buildCalendarDatePages(filteredMatches, options);
     buildCalendarTeamPages(filteredMatches, options);
@@ -8879,24 +9781,90 @@ function getCurrentJornada() {
         return true;
     });
 
+    // Verificar se há jogos de playoffs com datas
+    const hasPlayoffsDates = hasPlayoffsWithDates();
+
+    if (hasPlayoffsDates) {
+        // Priorizar fases de playoffs incompletas
+        const playoffPhaseOrder = [
+            { code: 'E1', group: 'QUARTOS', name: 'Quartos de Final' },
+            { code: 'PM1', group: 'MEIAS', name: 'Meias-Finais' },
+            { code: 'E2', group: 'MEIAS', name: 'Meias-Finais' },
+            { code: 'PM2', group: 'FINAIS', name: 'Final' },
+            { code: 'E3', group: 'FINAIS', name: 'Final' },
+            { code: 'E3L', group: 'FINAIS', name: '3º Lugar' },
+            { code: 'LM1', group: 'LIGUILHA', name: 'Liguilha' },
+            { code: 'LM2', group: 'LIGUILHA', name: 'Liguilha' },
+            { code: 'LM3', group: 'LIGUILHA', name: 'Liguilha' }
+        ];
+
+        // Primeiro: verificar se há alguma fase incompleta
+        for (const phase of playoffPhaseOrder) {
+            const phaseMatches = filteredMatches.filter(m => 
+                String(m.jornada || '').toUpperCase().trim() === phase.code
+            );
+
+            if (phaseMatches.length === 0) continue;
+
+            const allPlayed = phaseMatches.every(m => 
+                m.score1 != null && m.score1 !== '' && m.score2 != null && m.score2 !== ''
+            );
+
+            if (!allPlayed) {
+                // Retornar o group key ou código
+                if (availableJornadas.includes(phase.group)) {
+                    return phase.group;
+                }
+                if (availableJornadas.includes(phase.code)) {
+                    return phase.code;
+                }
+            }
+        }
+
+        // Se todos os playoffs completados ou não encontrou, retornar primeira jornada de playoffs
+        const firstPlayoffJornada = availableJornadas.find(j => {
+            const norm = String(j).toUpperCase().trim();
+            return ['QUARTOS', 'MEIAS', 'FINAIS', 'LIGUILHA', 'E1', 'PM1', 'LM1', 'E2', 'PM2', 'LM2', 'E3', 'LM3', 'E3L'].includes(norm);
+        });
+        if (firstPlayoffJornada) {
+            return firstPlayoffJornada;
+        }
+    }
+
+    // Função local para verificar se é jornada de playoff
+    const checkPlayoffStage = (jornada) => {
+        if (!jornada) return false;
+        const normalized = String(jornada).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+        return normalized.startsWith('e') || normalized.startsWith('pm') || normalized.startsWith('lm') ||
+            normalized.includes('quarto') || normalized.includes('semifinais') || normalized.includes('final') ||
+            normalized.includes('lugar') || normalized.includes('playoff') || normalized.includes('liguilha');
+    };
+
     // Construir lookup: jornada -> tem jogos realizados (O(n))
     const jornadaHasPlayedGames = new Map();
 
     for (const match of filteredMatches) {
-        const jornada = parseInt(match.jornada);
-        if (isNaN(jornada)) continue;
+        const jornada = match.jornada;
+        const jornadaKey = String(jornada);
+        if (!jornadaKey) continue;
+
+        const isPlayoff = checkPlayoffStage(jornadaKey);
+        const numericJornada = parseInt(jornadaKey);
+
+        // Usar string para playoffs, número para fases regulares
+        const lookupKey = isPlayoff ? jornadaKey : numericJornada;
 
         // Verificar se já encontramos um jogo realizado nesta jornada
-        if (!jornadaHasPlayedGames.has(jornada)) {
-            jornadaHasPlayedGames.set(jornada, false);
+        if (!jornadaHasPlayedGames.has(lookupKey)) {
+            jornadaHasPlayedGames.set(lookupKey, false);
         }
 
         // Verificar se este jogo tem resultado
-        if (!jornadaHasPlayedGames.get(jornada)) {
+        if (!jornadaHasPlayedGames.get(lookupKey)) {
             const hasScore = match.score1 != null && match.score1 !== '' &&
                 match.score2 != null && match.score2 !== '';
             if (hasScore) {
-                jornadaHasPlayedGames.set(jornada, true);
+                jornadaHasPlayedGames.set(lookupKey, true);
             }
         }
     }
@@ -8941,7 +9909,15 @@ function createCalendarDivisionSelector() {
         currentCalendarDivision = currentDivision || divisions[0];
     }
 
-    divisions.forEach(div => {
+    // Filtrar divisões - remover entradas que não são divisões reais (como "Liguilha" ou "geral")
+    const validDivisions = divisions.filter(div => {
+        const normalized = String(div).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return !normalized.includes('liguilha') && !normalized.includes('playoff') && 
+               !normalized.includes('promoção') && !normalized.includes('manutenção') &&
+               normalized !== 'geral';
+    });
+
+    validDivisions.forEach(div => {
         const btn = document.createElement('button');
         btn.className = `division-btn ${div === currentCalendarDivision ? 'active' : ''}`;
         btn.textContent = translateDivisionLabel(div);
@@ -9299,7 +10275,9 @@ function updateJornadaDisplay() {
         return;
     }
 
-    jornadaTitle.textContent = `${t('matchday')} ${currentCalendarJornada}`;
+    const displayJornadaName = getJornadaDisplayName(currentCalendarJornada);
+    const isPlayoff = isPlayoffJornada(currentCalendarJornada);
+    jornadaTitle.textContent = isPlayoff ? displayJornadaName : `${t('matchday')} ${displayJornadaName}`;
 
     const currentIndex = availableJornadas.indexOf(currentCalendarJornada);
     const isFirstJornada = currentIndex <= 0;
@@ -9382,7 +10360,19 @@ function updateCalendar() {
         const currentPage = availableCalendarDatePages[currentCalendarDatePageIndex];
         games = currentPage ? [...currentPage.games] : [];
     } else {
-        games = games.filter(match => parseInt(match.jornada, 10) === currentCalendarJornada);
+        // Suportar tanto jornadas numéricas como strings (E1, E2, PM1, etc.)
+        if (typeof currentCalendarJornada === 'string') {
+            // Verificar se é um group key de playoffs (QUARTOS, MEIAS, FINAIS, LIGUILHA)
+            const isPlayoffGroup = ['QUARTOS', 'MEIAS', 'FINAIS', 'LIGUILHA'].includes(currentCalendarJornada);
+            if (isPlayoffGroup) {
+                // Filtrar matches whose jornada belongs to this group
+                games = games.filter(match => getPlayoffGroupKey(match.jornada) === currentCalendarJornada);
+            } else {
+                games = games.filter(match => String(match.jornada) === currentCalendarJornada);
+            }
+        } else {
+            games = games.filter(match => parseInt(match.jornada, 10) === currentCalendarJornada);
+        }
     }
 
     if (games.length === 0) {
@@ -9459,13 +10449,69 @@ function createGameItem(game, favoriteTeamCanonical = null) {
     
     div.className = `game-item ${hasResult ? 'played' : 'not-played'} ${isFavoriteGame ? 'favorite-team-game' : ''}`;
 
-    // Obter informações das equipas
-    const team1Info = getCourseInfo(team1);
-    const team2Info = getCourseInfo(team2);
+    // Obter informações das equipas - resolver primeiro para E1/PM
+    const jornadaNormalized = String(game.jornada || '').toUpperCase().trim();
+    const rawTeam1 = game.team1 || game['Equipa 1'] || '';
+    const rawTeam2 = game.team2 || game['Equipa 2'] || '';
+    const isQuartosJornada = jornadaNormalized === 'E1';
+    const isPMJornada = jornadaNormalized.startsWith('PM');
+    
+    let team1ForInfo = team1;
+    let team2ForInfo = team2;
+    if (isQuartosJornada || isPMJornada) {
+        const t1 = resolveTeamName(rawTeam1);
+        const t2 = resolveTeamName(rawTeam2);
+        if (t1 && t1 !== rawTeam1) team1ForInfo = t1;
+        if (t2 && t2 !== rawTeam2) team2ForInfo = t2;
+    }
+    
+    const team1Info = getCourseInfo(team1ForInfo);
+    const team2Info = getCourseInfo(team2ForInfo);
 
-    // Calendário sempre usa nome curto
-    const displayTeam1 = getTranslatedTeamLabel(team1Info, team1);
-    const displayTeam2 = getTranslatedTeamLabel(team2Info, team2);
+    // Resolver placeholders de playoffs para Final/Liguilha (só substituir quando houver vencedor)
+    let displayTeam1Raw = rawTeam1;
+    let displayTeam2Raw = rawTeam2;
+    const isFinalJornada = ['FINAIS', 'PM2', 'E3', 'E3L'].includes(jornadaNormalized);
+    const isLiguilhaJornada = jornadaNormalized.startsWith('LM');
+    const isMeiasFinaisJornada = jornadaNormalized === 'E2';
+    
+    // PM2 usa placeholders MF1/MF2 que referem o bracket principal
+    const isPMFinalWithMFPlaceholder = isPMJornada && (isBracketPlaceholder(rawTeam1) || isBracketPlaceholder(rawTeam2));
+    const activeBracket = isPMJornada ? (isPMFinalWithMFPlaceholder ? sampleData.bracket : sampleData.secondaryBracket) : sampleData.bracket;
+    const targetRound = isLiguilhaJornada ? 'Liguilha' : (isPMJornada && !isPMFinalWithMFPlaceholder ? 'maintenanceFinalPhase' : 'Final');
+    
+    if (activeBracket && (isFinalJornada || isLiguilhaJornada || isPMJornada || isMeiasFinaisJornada || isQuartosJornada)) {
+        // Para Meias-Finais (E2), usar 'Meias-Finais' como targetRound
+        // Para Quartos (E1), usar 'Quartos de Final' como targetRound
+        // Para E3/E3L: NÃO resolver, manter "Vencedor MF1" até meias serem jogadas
+        let roundTarget = targetRound;
+        if (isMeiasFinaisJornada) {
+            roundTarget = 'Meias-Finais';
+        }
+        if (isQuartosJornada) roundTarget = 'Quartos de Final';
+        if (jornadaNormalized !== 'E3' && jornadaNormalized !== 'E3L') {
+            displayTeam1Raw = resolvePlayoffMatchup(rawTeam1, activeBracket, roundTarget);
+            displayTeam2Raw = resolvePlayoffMatchup(rawTeam2, activeBracket, roundTarget);
+        }
+    }
+    
+// Calendário sempre usa nome curto - aplicar resolução de placeholders para Final/Liguilha/PM/E2/E1
+    const shouldResolvePlaceholder = isFinalJornada || isLiguilhaJornada || isPMJornada || isMeiasFinaisJornada || isQuartosJornada;
+    
+    // Para E1 (Quartos) e PM (Manutenção), já calculado team1ForInfo/team2ForInfo acima
+    const useResolved1 = (isQuartosJornada || isPMJornada) && team1ForInfo && team1ForInfo !== team1;
+    const useResolved2 = (isQuartosJornada || isPMJornada) && team2ForInfo && team2ForInfo !== team2;
+    
+    const displayTeam1 = isBracketPlaceholder(rawTeam1) && shouldResolvePlaceholder
+        ? displayTeam1Raw
+        : (useResolved1
+            ? getTranslatedTeamLabel(team1Info, team1ForInfo)
+            : getTranslatedTeamLabel(team1Info, team1));
+    const displayTeam2 = isBracketPlaceholder(rawTeam2) && shouldResolvePlaceholder
+        ? displayTeam2Raw
+        : (useResolved2
+            ? getTranslatedTeamLabel(team2Info, team2ForInfo)
+            : getTranslatedTeamLabel(team2Info, team2));
 
     // Formatar data e hora
     let dateStr;
@@ -10847,7 +11893,15 @@ class DivisionSelector extends SelectorComponent {
         const structure = analyzeModalityStructure();
         const divisions = Object.keys(sampleData.rankings);
 
-        if (divisions.length <= 1) {
+        // Filtrar divisões - remover entradas inválidas (igual ao calendário)
+        const validDivisions = divisions.filter(div => {
+            const normalized = String(div).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            return !normalized.includes('liguilha') && !normalized.includes('playoff') && 
+                   !normalized.includes('promoção') && !normalized.includes('manutenção') &&
+                   normalized !== 'geral';
+        });
+
+        if (validDivisions.length <= 1) {
             this.element.style.display = 'none';
             return;
         }
@@ -10855,12 +11909,12 @@ class DivisionSelector extends SelectorComponent {
         this.element.style.display = 'flex';
 
         // Validar divisão atual: usar a já definida se for válida, senão usar a primeira
-        if (!appState.view.division || !divisions.includes(appState.view.division)) {
-            appState.view.division = divisions[0];
+        if (!appState.view.division || !validDivisions.includes(appState.view.division)) {
+            appState.view.division = validDivisions[0];
         } else {
         }
 
-        divisions.forEach(division => {
+        validDivisions.forEach(division => {
             const btn = document.createElement('button');
             btn.className = `division-btn ${division === appState.view.division ? 'active' : ''}`;
             btn.textContent = translateDivisionLabel(division);
