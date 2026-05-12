@@ -41,6 +41,13 @@ _INVALID_TEAM_SUBSTRINGS = [
     "equipa visitada",
     "equipa visitante",
     "|",
+    "pah",
+    "pavilhão",
+    "pav.",
+    "campo",
+    "pista",
+    "complexo",
+    "multiusos",
 ]
 
 _BANNED_ROW_TOKENS = {
@@ -57,6 +64,9 @@ _BANNED_ROW_TOKENS = {
     "dia",
     "hora",
     "local",
+    "pah",
+    "pavilhão",
+    "pav.",
 }
 
 
@@ -447,9 +457,13 @@ class ExcelProcessor:
             else ""
         )
 
-        if t1 and t2:
+        t1_valid = ExcelProcessor._is_valid_team(t1)
+        t2_valid = ExcelProcessor._is_valid_team(t2)
+
+        if t1 and t2 and t1_valid and t2_valid:
             return t1, t2
 
+        # Se pelo menos um for inválido, tentar fallback para encontrar outros nomes
         texts: List[str] = []
         for c in df_columns:
             val = row.get(c)
@@ -471,13 +485,27 @@ class ExcelProcessor:
                 continue
             if sl in cols_lower:
                 continue
-            texts.append(s)
+            
+            # Filtrar por validade
+            if not ExcelProcessor._is_valid_team(s):
+                continue
+                
+            if s not in texts:
+                texts.append(s)
 
-        if len(texts) >= 2:
-            return texts[0] or t1, texts[-1] or t2
-        if len(texts) == 1:
-            return (t1 or texts[0]), t2
-        return t1, t2
+        # Reconstruir par de equipas
+        # Se tínhamos uma válida originalmente, usá-la
+        final_t1 = t1 if t1_valid else ""
+        final_t2 = t2 if t2_valid else ""
+
+        # Preencher vazios com o que foi encontrado no fallback
+        for t in texts:
+            if not final_t1 and t != final_t2:
+                final_t1 = t
+            elif not final_t2 and t != final_t1:
+                final_t2 = t
+
+        return final_t1, final_t2
 
     @staticmethod
     def _extract_lp_number(header_text: str) -> Optional[str]:
@@ -493,10 +521,27 @@ class ExcelProcessor:
 
     @staticmethod
     def _is_valid_team(name: str) -> bool:
-        """Devolve False se o nome da equipa for inválido (cabeçalho, etc.)."""
+        """Devolve False se o nome da equipa for inválido (cabeçalho, data, etc.)."""
         if not name:
             return False
-        nl = name.lower()
+        
+        # Se for um objeto de data/hora
+        if hasattr(name, "year") and hasattr(name, "month"):
+            return False
+
+        s = str(name).strip()
+        if not s:
+            return False
+
+        # Rejeitar se parecer uma data (YYYY-MM-DD ou DD/MM/YYYY)
+        if re.match(r"^\d{4}-\d{2}-\d{2}", s) or re.match(r"^\d{2}/\d{2}/\d{4}", s):
+            return False
+
+        # Rejeitar se parecer uma hora (ex: 12h30, 12:30, 12h)
+        if re.match(r"^\d{1,2}[h:]\d{0,2}$", s.lower()):
+            return False
+
+        nl = s.lower()
         return not any(p in nl for p in _INVALID_TEAM_SUBSTRINGS)
 
     @staticmethod
@@ -689,8 +734,12 @@ class ExcelProcessor:
 
             if not team1 and not team2:
                 continue
-            if not self._is_valid_team(team1) or not self._is_valid_team(team2):
-                continue
+
+            # Se uma equipa for inválida (ex: data), substituir por placeholder em vez de saltar a linha
+            if not self._is_valid_team(team1) and team1 != "":
+                team1 = "Equipa Indefinida"
+            if not self._is_valid_team(team2) and team2 != "":
+                team2 = "Equipa Indefinida"
 
             # Determinar código de jornada
             if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:
@@ -793,8 +842,12 @@ class ExcelProcessor:
 
             if not team1 and not team2:
                 continue
-            if not self._is_valid_team(team1) or not self._is_valid_team(team2):
-                continue
+
+            # Se uma equipa for inválida (ex: data), substituir por placeholder em vez de saltar a linha
+            if not self._is_valid_team(team1) and team1 != "":
+                team1 = "Equipa Indefinida"
+            if not self._is_valid_team(team2) and team2 != "":
+                team2 = "Equipa Indefinida"
 
             # Determinar código de jornada
             if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:

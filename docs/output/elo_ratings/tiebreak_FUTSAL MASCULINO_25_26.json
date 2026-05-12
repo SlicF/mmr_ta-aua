@@ -12,8 +12,8 @@
       "tie_points": 16,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -62,8 +62,8 @@
       "tie_points": 18,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -148,56 +148,6 @@
             "golos_marcados_h2h": 0,
             "diferenca_golos": 18,
             "golos_marcados": 41
-          }
-        }
-      ],
-      "event_id": 2
-    },
-    {
-      "context": {
-        "Divisao": 2,
-        "Grupo": "B",
-        "ranking_key": "2ª Divisão - Grupo B"
-      },
-      "tie_points": 21,
-      "tie_type": "head_to_head",
-      "tied_teams": [
-        "Eng. e Gestão Industrial B",
-        "Eng. Computacional"
-      ],
-      "criteria_order": [
-        "faltas_comparencia",
-        "pontos_h2h",
-        "diferenca_golos_h2h",
-        "golos_marcados_h2h",
-        "diferenca_golos",
-        "golos_marcados"
-      ],
-      "deciding_criterion": "pontos_h2h",
-      "used_global_fallback": false,
-      "standings": [
-        {
-          "team": "Eng. e Gestão Industrial B",
-          "rank_in_tiebreak": 1,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 3,
-            "diferenca_golos_h2h": 2,
-            "golos_marcados_h2h": 3,
-            "diferenca_golos": 22,
-            "golos_marcados": 39
-          }
-        },
-        {
-          "team": "Eng. Computacional",
-          "rank_in_tiebreak": 2,
-          "criteria_values": {
-            "faltas_comparencia": 0,
-            "pontos_h2h": 0,
-            "diferenca_golos_h2h": -2,
-            "golos_marcados_h2h": 1,
-            "diferenca_golos": 30,
-            "golos_marcados": 51
           }
         }
       ],
@@ -262,7 +212,7 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. do Ambiente",
+        "Gestão",
         "Matemática"
       ],
       "criteria_order": [
@@ -375,8 +325,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -406,8 +356,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -437,8 +387,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -468,8 +418,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -499,8 +449,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Economia",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -530,8 +480,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Economia",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -561,8 +511,8 @@
       "tie_type": "head_to_head",
       "tie_points": 7,
       "tied_teams": [
-        "Eng. e Gestão Industrial B",
-        "Eng. Computacional"
+        "Biologia e Geologia",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -592,8 +542,8 @@
       "tie_type": "head_to_head",
       "tie_points": 7,
       "tied_teams": [
-        "Eng. e Gestão Industrial B",
-        "Eng. Computacional"
+        "Biologia e Geologia",
+        "Automação e Sistemas de Produção"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -623,7 +573,7 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. do Ambiente",
+        "Gestão",
         "Matemática"
       ],
       "criteria_order": [
@@ -654,7 +604,7 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. do Ambiente",
+        "Gestão",
         "Matemática"
       ],
       "criteria_order": [

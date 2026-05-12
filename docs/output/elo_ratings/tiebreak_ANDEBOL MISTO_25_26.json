@@ -13,8 +13,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Eng. Civil",
-        "Eng. e Gestão Industrial",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -175,8 +175,8 @@
       "tie_points": 23,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Administração Pública",
-        "Matemática"
+        "Matemática",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -225,8 +225,8 @@
       "tie_points": 17,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "MTC",
-        "DPT"
+        "DPT",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -276,8 +276,8 @@
       "tie_points": 17,
       "tied_teams": [
         "Eng. Civil",
-        "Eng. e Gestão Industrial",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -308,8 +308,8 @@
       "tie_points": 17,
       "tied_teams": [
         "Eng. Civil",
-        "Eng. e Gestão Industrial",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -340,8 +340,8 @@
       "tie_points": 17,
       "tied_teams": [
         "Eng. Civil",
-        "Eng. e Gestão Industrial",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -495,8 +495,8 @@
       "tie_type": "head_to_head",
       "tie_points": 23,
       "tied_teams": [
-        "Administração Pública",
-        "Matemática"
+        "Matemática",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -526,8 +526,8 @@
       "tie_type": "head_to_head",
       "tie_points": 23,
       "tied_teams": [
-        "Administração Pública",
-        "Matemática"
+        "Matemática",
+        "Administração Pública"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -557,8 +557,8 @@
       "tie_type": "head_to_head",
       "tie_points": 17,
       "tied_teams": [
-        "MTC",
-        "DPT"
+        "DPT",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -588,8 +588,8 @@
       "tie_type": "head_to_head",
       "tie_points": 17,
       "tied_teams": [
-        "MTC",
-        "DPT"
+        "DPT",
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",

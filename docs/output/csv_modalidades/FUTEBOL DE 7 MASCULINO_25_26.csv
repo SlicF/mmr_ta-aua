@@ -135,13 +135,13 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 9,,,,EET,,,Finanças,1,,,,False,False,Finanças
 10,,,,Contabilidade,,,Finanças,1,,,,False,False,Finanças
 11,,,,Finanças,,,Eng. Mecânica,1,,,,False,False,Finanças
-LM1,2026-05-13 00:00:00,21h00,Sintético,2026-05-13 00:00:00,,,Tecnologias de Informação,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
+LM1,2026-05-13 00:00:00,21h00,Sintético,Contabilidade,,,Sintético,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
 LM2,2026-05-20 00:00:00,21h00,Sintético,Tecnologias de Informação,,,CBM,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
 LM3,2026-05-28 00:00:00,21h00,Sintético,CBM,,,Contabilidade,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
-E1,2026-05-13 00:00:00,22h00,Sintético,2026-05-13 00:00:00,,,Eng. Materiais,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
-E1,2026-05-13 00:00:00,23h00,Sintético,2026-05-13 00:00:00,,,Eng. Civil,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
-E1,2026-05-14 00:00:00,21h00,Sintético,2026-05-14 00:00:00,,,EET,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
-E1,2026-05-14 00:00:00,23h00,Sintético,2026-05-14 00:00:00,,,Biotecnologia,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
+E1,2026-05-13 00:00:00,22h00,Sintético,Fisioterapia,,,Sintético,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
+E1,2026-05-13 00:00:00,23h00,Sintético,EGI,,,Sintético,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
+E1,2026-05-14 00:00:00,21h00,Sintético,Eng. Mecânica,,,Sintético,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
+E1,2026-05-14 00:00:00,23h00,Sintético,GPT,,,Sintético,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
 E2,2026-05-20 00:00:00,22h00,Sintético,Vencedor QF1,,,Vencedor QF4,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
 E2,2026-05-20 00:00:00,23h00,Sintético,Vencedor QF2,,,Vencedor QF3,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,
 E3L,2026-05-28 00:00:00,22h00,Sintético,Vencido MF1,,,Vencido MF2,,,Calendário PDF Playoffs,Calendário PDF Playoffs,False,False,

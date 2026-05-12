@@ -222,12 +222,28 @@ def normalize_team_name(team_name):
     if not team_name or pd.isna(team_name):
         return None
 
+    # Ignorar se for um objeto de data/hora (Timestamp ou datetime)
+    if hasattr(team_name, "year") and hasattr(team_name, "month") and hasattr(team_name, "day"):
+        return None
+
     # Remover espaços em branco
     normalized = str(team_name).strip()
 
     # Se ficou vazio após strip, retornar None
     if not normalized:
         return None
+
+    # Filtrar datas em formato string (comum quando vêm do Excel/CSV)
+    # Padrões como YYYY-MM-DD, DD/MM/YYYY, etc.
+    date_patterns = [
+        r"^\d{4}-\d{2}-\d{2}",  # 2026-05-13
+        r"^\d{2}/\d{2}/\d{4}",  # 13/05/2026
+        r"^\d{2}-\d{2}-\d{4}",  # 13-05-2026
+    ]
+
+    for pattern in date_patterns:
+        if re.match(pattern, normalized):
+            return None
 
     # Filtrar placeholders de playoffs (ex: "1º Class. 1ª Div.", "Vencedor QF1", etc.)
     placeholder_patterns = [
