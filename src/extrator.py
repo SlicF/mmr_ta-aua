@@ -533,6 +533,10 @@ class ExcelProcessor:
         if not s:
             return False
 
+        # Rejeitar tokens de um unico caracter (letras de grupo: A, B, C...)
+        if len(s) == 1:
+            return False
+
         # Rejeitar se parecer uma data (YYYY-MM-DD ou DD/MM/YYYY)
         if re.match(r"^\d{4}-\d{2}-\d{2}", s) or re.match(r"^\d{2}/\d{2}/\d{4}", s):
             return False
@@ -741,6 +745,10 @@ class ExcelProcessor:
             if not self._is_valid_team(team2) and team2 != "":
                 team2 = "Equipa Indefinida"
 
+            # Descartar se uma das equipas ficou vazia (artefacto de parsing)
+            if not team1 or not team2:
+                continue
+
             # Determinar código de jornada
             if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:
                 jornada_val = current_stage
@@ -849,6 +857,10 @@ class ExcelProcessor:
             if not self._is_valid_team(team2) and team2 != "":
                 team2 = "Equipa Indefinida"
 
+            # Descartar se uma das equipas ficou vazia (artefacto de parsing)
+            if not team1 or not team2:
+                continue
+
             # Determinar código de jornada
             if current_stage in {"E1", "E2", "E3L", "E3", "PM1", "PM2"}:
                 jornada_val = current_stage
@@ -909,6 +921,16 @@ class ExcelProcessor:
         if "Época" in base_df.columns:
             base_df = base_df.drop(columns=["Época"])
 
+        # Remover linhas de playoff ja existentes no CSV base para que
+        # a versao recentemente processada (com datas do PDF) as substitua.
+        # Evita acumulacao entre execucoes.
+        if "Jornada" in base_df.columns:
+            base_df = base_df[
+                ~base_df["Jornada"].apply(
+                    lambda j: self.is_playoff_jornada(str(j))
+                )
+            ].copy()
+
         # Inicializar colunas de metadados se não existirem
         playoffs_df = playoffs_df.copy()
         if "Data_Placeholder" not in playoffs_df.columns:
@@ -916,8 +938,12 @@ class ExcelProcessor:
         if "Fonte_Data" not in playoffs_df.columns:
             playoffs_df["Fonte_Data"] = ""
             
+        # Partilhar o contador de slots entre datas e locais para que
+        # cada jogo consuma o slot correcto nas duas operações
+        self._shared_playoff_indices: dict = {}
         playoffs_df = self._assign_date_placeholders(playoffs_df, base_modality)
         playoffs_df = self._assign_venue_placeholders(playoffs_df, base_modality)
+        del self._shared_playoff_indices
 
         for c in base_df.columns:
             if c not in playoffs_df.columns:
@@ -928,12 +954,12 @@ class ExcelProcessor:
         combined = pd.concat([base_df, playoffs_df], ignore_index=True)
         combined = self._coerce_integer_columns(combined)
 
-        dup_cols = [
-            c
-            for c in self.base_headers
-            if c not in ("Data_Placeholder", "Falta de Comparência")
-        ]
-        combined = combined.drop_duplicates(subset=dup_cols)
+        # Deduplicar apenas por identidade do jogo (Jornada + equipas).
+        # Não incluir Dia/Hora/Local/Golos para que versões com e sem data
+        # não escapem à deduplicação; keep="last" preserva a versão mais
+        # recente (com dados do PDF de playoffs, adicionada no final).
+        dup_cols = ["Jornada", "Equipa 1", "Equipa 2"]
+        combined = combined.drop_duplicates(subset=dup_cols, keep="last")
         combined.to_csv(target_path, index=False)
         logging.info(f"  - Playoffs adicionados ao ficheiro: {target_path}")
 
@@ -1185,7 +1211,9 @@ class ExcelProcessor:
                 return None
 
         games_for_placeholder: List[int] = []
-        playoff_indices = {}
+        # Usar contador partilhado (criado em _append_playoffs_to_target_csv)
+        # para sincronizar com _assign_venue_placeholders
+        playoff_indices = getattr(self, "_shared_playoff_indices", {})
 
         for idx, row in df.iterrows():
             dia = row.get("Dia", "")
@@ -1446,7 +1474,9 @@ class ExcelProcessor:
                             return local
             return None
 
-        playoff_indices = {}
+        # Usar contador partilhado (criado em _append_playoffs_to_target_csv)
+        # para continuar do ponto onde _assign_date_placeholders parou
+        playoff_indices = getattr(self, "_shared_playoff_indices", {})
 
         for idx, row in df.iterrows():
             local_excel = _clean_text(row.get("Local", ""))
@@ -1529,11 +1559,18 @@ class ExcelProcessor:
         return df
 
     def adjust_journeys(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Ajusta números de jornada para evitar duplicações."""
+        """Ajusta números de jornada para evitar duplicações.
+
+        Linhas de playoff (jornada E*, PM*, LM*\u2026) não são alteradas \u2014
+        a sua jornada já é um código de fase, não um número sequencial.
+        """
         aparicoes: set = set()
 
         def ajustar_jornada(row):
             j = row["Jornada"]
+            # Não modificar jornadas de playoff
+            if self.is_playoff_jornada(str(j)):
+                return j
             e1, e2 = row["Equipa 1"], row["Equipa 2"]
             if (j, e1) in aparicoes or (j, e2) in aparicoes:
                 return j + 1
@@ -1697,9 +1734,6 @@ class ExcelProcessor:
 
         df = df.dropna(how="all").reset_index(drop=True)
 
-        # Extrair playoffs embutidos antes de qualquer limpeza
-        playoffs_df_embedded = self._extract_playoffs_from_dataframe(df.copy())
-
         if has_div:
             divisoes, grupos = self.find_divisions_and_groups(df)
             df = self.fill_sections(df, divisoes, "Divisão")
@@ -1713,11 +1747,33 @@ class ExcelProcessor:
         df = df.iloc[:, : len(headers)]
         df.columns = headers
 
+        # Extrair playoffs embutidos DEPOIS do rename de colunas
+        playoffs_df_embedded = self._extract_playoffs_from_dataframe(df.copy())
+
+        # Remover do df principal todas as linhas que fazem parte de blocos
+        # de playoff embutidos, ANTES do clean_dataframe. Se o fizermos
+        # depois, o ffill da jornada ja lhes atribuiu um numero regular
+        # (ex: 4) e is_playoff_jornada nao as remove.
+        # Estrategia: percorrer a primeira coluna; assim que encontramos
+        # um cabecalho de fase (mapeavel pelo _StageMapper), todas as linhas
+        # seguintes sao de playoff e devem ser excluidas do df regular.
+        col_jornada = df.columns[0]
+        _playoff_stage_seen = False
+        _playoff_row_mask = []
+        _mapper_temp = _StageMapper()
+        for _, row in df.iterrows():
+            cell = str(row.get(col_jornada, "")).strip()
+            if _mapper_temp.map(cell):
+                _playoff_stage_seen = True
+            _playoff_row_mask.append(_playoff_stage_seen)
+        df = df[~pd.Series(_playoff_row_mask, index=df.index)].copy()
+
         df = self.clean_dataframe(df)
         df = self.adjust_journeys(df)
         df = self.sort_by_datetime(df, modality=sheet_name)
         df = self.apply_default_scores(df, sheet_name)
         df = self.filter_playoff_games(df)
+
         df = self.finalize_dataframe(df)
 
         if "Época" in df.columns:
@@ -1731,7 +1787,15 @@ class ExcelProcessor:
         df.to_csv(output_file, index=False)
         logging.info(f"Folha '{sheet_name}' processada → '{output_file}'")
 
-        if playoffs_df_embedded is not None and not playoffs_df_embedded.empty:
+        # Só anexar playoffs embutidos se não existir folha dedicada de PLAYOFFS
+        # para esta modalidade. Se existir, o segundo loop de process_all_sheets
+        # trata disso, e não queremos duplicar.
+        dedicated = getattr(self, "_modalities_with_dedicated_playoffs", set())
+        # Comparar pelo prefixo da folha (antes do "|") porque dedicated
+        # guarda o prefixo devolvido por _detect_base_modality_for_playoffs
+        sheet_prefix = sheet_name.split("|")[0].strip() if "|" in sheet_name else sheet_name
+        if playoffs_df_embedded is not None and not playoffs_df_embedded.empty \
+                and sheet_prefix not in dedicated:
             expected_cols = self.base_headers
             for c in expected_cols:
                 if c not in playoffs_df_embedded.columns:
@@ -1747,6 +1811,16 @@ class ExcelProcessor:
         """Processa todas as folhas: regulares primeiro, PLAYOFFS depois."""
         processed_count = 0
         target_sheets = self._sheets_to_process or list(map(str, self.xls.sheet_names))
+
+        # Pre-calcular quais modalidades base têm folha dedicada de PLAYOFFS.
+        # Para essas, o process_sheet não deve fazer o append dos playoffs
+        # embutidos (evitar dupla inserção).
+        self._modalities_with_dedicated_playoffs: set = set()
+        for sheet in target_sheets:
+            if "PLAYOFFS" in sheet.upper():
+                bm = self._detect_base_modality_for_playoffs(sheet)
+                if bm:
+                    self._modalities_with_dedicated_playoffs.add(bm)
 
         # 1) Folhas regulares
         for sheet in target_sheets:

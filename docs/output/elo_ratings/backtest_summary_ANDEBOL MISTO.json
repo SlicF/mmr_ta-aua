@@ -1,38 +1,38 @@
 {
   "modalidade": "ANDEBOL MISTO",
   "num_seasons": 2,
-  "avg_brier_score": 0.020118800054347828,
-  "avg_rmse_place": 13.60961279378647,
-  "avg_rmse_points": 3.7669344692250792,
+  "avg_brier_score": 0.020243990869565215,
+  "avg_rmse_place": 13.591858097910368,
+  "avg_rmse_points": 3.223899586787212,
   "seasons": [
     {
       "season": "24_25",
       "cutoff_jornada": 8,
       "num_teams": 24,
-      "brier_score_champion": 0.040097257500000004,
-      "rmse_expected_place": 7.256079554989274,
-      "rmse_expected_points": 2.42493836877761,
+      "brier_score_champion": 0.04031434,
+      "rmse_expected_place": 7.25562542187095,
+      "rmse_expected_points": 2.42305401963398,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.00086,
+          "predicted": 0.0007850000000000001,
           "observed": 0.0,
           "count": 20,
           "calibrated": true
         },
         "40-50%": {
-          "predicted": 0.4782,
+          "predicted": 0.4708,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
         },
         "10-20%": {
-          "predicted": 0.14500000000000002,
+          "predicted": 0.14705,
           "observed": 0.5,
           "count": 2,
           "calibrated": false
         },
         "20-30%": {
-          "predicted": 0.2146,
+          "predicted": 0.2194,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
@@ -40,7 +40,7 @@
       },
       "calibration_playoffs": {
         "0-10%": {
-          "predicted": 0.005433333333333333,
+          "predicted": 0.005406666666666667,
           "observed": 0.13333333333333333,
           "count": 15,
           "calibrated": true
@@ -52,13 +52,13 @@
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.1893,
+          "predicted": 0.1924,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
         },
         "70-80%": {
-          "predicted": 0.7292,
+          "predicted": 0.7265,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
@@ -69,18 +69,18 @@
       "season": "25_26",
       "cutoff_jornada": 8,
       "num_teams": 22,
-      "brier_score_champion": 0.00014034260869565235,
-      "rmse_expected_place": 19.963146032583666,
-      "rmse_expected_points": 5.108930569672548,
+      "brier_score_champion": 0.00017364173913043482,
+      "rmse_expected_place": 19.928090773949787,
+      "rmse_expected_points": 4.024745153940445,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.0023227272727272723,
+          "predicted": 0.0025636363636363634,
           "observed": 0.0,
           "count": 22,
           "calibrated": true
         },
         "90-100%": {
-          "predicted": 0.9489,
+          "predicted": 0.9436,
           "observed": 1.0,
           "count": 1,
           "calibrated": true
@@ -88,34 +88,28 @@
       },
       "calibration_playoffs": {
         "0-10%": {
-          "predicted": 0.0009307692307692308,
-          "observed": 0.23076923076923078,
-          "count": 13,
+          "predicted": 0.007378571428571429,
+          "observed": 0.2857142857142857,
+          "count": 14,
           "calibrated": false
         },
         "90-100%": {
-          "predicted": 0.9974,
-          "observed": 0.8333333333333334,
+          "predicted": 0.9979666666666668,
+          "observed": 0.6666666666666666,
           "count": 6,
           "calibrated": false
         },
         "80-90%": {
-          "predicted": 0.81785,
+          "predicted": 0.8492999999999999,
           "observed": 0.0,
           "count": 2,
           "calibrated": false
         },
         "20-30%": {
-          "predicted": 0.2659,
+          "predicted": 0.2103,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
-        },
-        "10-20%": {
-          "predicted": 0.1019,
-          "observed": 0.0,
-          "count": 1,
-          "calibrated": true
         }
       }
     }

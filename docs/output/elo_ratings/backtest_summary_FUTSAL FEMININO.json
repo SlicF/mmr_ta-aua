@@ -1,66 +1,84 @@
 {
   "modalidade": "FUTSAL FEMININO",
   "num_seasons": 1,
-  "avg_brier_score": 0.04975874266666667,
-  "avg_rmse_place": 31.94195951194395,
-  "avg_rmse_points": 5.966288322233183,
+  "avg_brier_score": 0.048420221333333326,
+  "avg_rmse_place": 31.840163616895353,
+  "avg_rmse_points": 4.7248335932088565,
   "seasons": [
     {
       "season": "25_26",
       "cutoff_jornada": 8,
       "num_teams": 13,
-      "brier_score_champion": 0.04975874266666667,
-      "rmse_expected_place": 31.94195951194395,
-      "rmse_expected_points": 5.966288322233183,
+      "brier_score_champion": 0.048420221333333326,
+      "rmse_expected_place": 31.840163616895353,
+      "rmse_expected_points": 4.7248335932088565,
       "calibration_champion": {
         "20-30%": {
-          "predicted": 0.2087,
-          "observed": 1.0,
-          "count": 1,
+          "predicted": 0.219,
+          "observed": 0.5,
+          "count": 2,
           "calibrated": false
         },
         "0-10%": {
-          "predicted": 0.01376,
+          "predicted": 0.013750000000000002,
           "observed": 0.0,
           "count": 10,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.163425,
+          "predicted": 0.14150000000000001,
           "observed": 0.0,
-          "count": 4,
-          "calibrated": false
+          "count": 3,
+          "calibrated": true
         }
       },
       "calibration_playoffs": {
         "90-100%": {
-          "predicted": 0.9820833333333333,
-          "observed": 1.0,
-          "count": 6,
-          "calibrated": true
+          "predicted": 0.9934,
+          "observed": 0.8,
+          "count": 5,
+          "calibrated": false
         },
-        "0-10%": {
-          "predicted": 0.022125,
-          "observed": 0.0,
-          "count": 4,
-          "calibrated": true
+        "50-60%": {
+          "predicted": 0.5503,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "60-70%": {
+          "predicted": 0.6576,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
         },
         "20-30%": {
-          "predicted": 0.23506666666666665,
-          "observed": 0.6666666666666666,
-          "count": 3,
+          "predicted": 0.2121,
+          "observed": 1.0,
+          "count": 1,
           "calibrated": false
         },
         "80-90%": {
-          "predicted": 0.8811,
+          "predicted": 0.8536,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": true
+        },
+        "0-10%": {
+          "predicted": 0.016933333333333335,
+          "observed": 0.0,
+          "count": 3,
+          "calibrated": true
+        },
+        "30-40%": {
+          "predicted": 0.3801,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
         },
-        "40-50%": {
-          "predicted": 0.4327,
+        "10-20%": {
+          "predicted": 0.16425,
           "observed": 0.0,
-          "count": 1,
+          "count": 2,
           "calibrated": false
         }
       }

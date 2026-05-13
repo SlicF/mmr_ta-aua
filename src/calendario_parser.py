@@ -666,4 +666,4 @@ if __name__ == "__main__":
             #print(f"  {data} {hora}{local_str} - {eq1} vs {eq2}")
 
         if len(jogos_unicos) > 5:
-            #print(f"  ... e mais {len(jogos_unicos) - 5} jogos")
+            print(f"  ... e mais {len(jogos_unicos) - 5} jogos")

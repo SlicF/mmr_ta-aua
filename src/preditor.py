@@ -135,6 +135,27 @@ DIR_ELO_RATINGS: str = "elo_ratings"
 DIR_CALIBRATION: str = "calibration"
 
 
+def normalize_team_name(team_name: str, mapping: Dict[str, str]) -> str:
+    """
+    Normaliza o nome do curso usando o mapeamento.
+    Se não encontrar, retorna o nome original (trimmed).
+    """
+    if not mapping:
+        return team_name.strip()
+    normalized = team_name.strip()
+    return mapping.get(normalized, normalized)
+
+
+def get_team_short_name(team_name: str, mapping_short: Dict[str, str]) -> str:
+    """
+    Retorna o nome curto da equipa para usar em match_id.
+    """
+    if not mapping_short:
+        return team_name.strip()
+    normalized = team_name.strip()
+    return mapping_short.get(normalized, normalized)
+
+
 class SimulationResult(TypedDict):
     """Resultado devolvido por _run_single_simulation_worker.
 
@@ -1058,6 +1079,27 @@ class SportScoreSimulator:
             return max(1, int(base + abs(elo_diff) / 300))
 
 
+def load_playoff_rules(docs_dir: str = None) -> Dict:
+    """Carrega as regras de playoff do ficheiro JSON."""
+    if docs_dir:
+        path = Path(docs_dir) / "config" / "playoff_rules.json"
+    else:
+        path = Path("..") / "docs" / "config" / "playoff_rules.json"
+
+    if not path.exists():
+        # Tentar no diretório local como fallback
+        path = Path("playoff_rules.json")
+        if not path.exists():
+            return {}
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Erro ao carregar playoff_rules.json: {e}")
+        return {}
+
+
 def load_course_mapping(docs_dir: str = None) -> Tuple[Dict[str, str], Dict[str, str]]:
     """
     Carrega o mapeamento de nomes de cursos do config_cursos.json.
@@ -1179,8 +1221,9 @@ def parse_playoff_slots(csv_rows: List[Dict]) -> Tuple[Dict[Tuple[int, str], int
     """
 
     slots = defaultdict(int)
+    # Regex flexível para capturar 1º Class. 2ª Div. Gr. A, Grupo B, etc.
     pattern = re.compile(
-        r"(\d+)[ºo]?\s*Class\.\s*(\d+)[ªa]?\s*Div\.?\s*(?:Gr\.\s*)?([A-Za-z0-9]+)?",
+        r"(\d+)[ºo]?\s*Class\.\s*(\d+)[ªa]?\s*Div\.?\s*(?:Gr\.?|Grupo)?\s*([A-Za-z0-9]+)?",
         re.IGNORECASE,
     )
 
@@ -1204,8 +1247,122 @@ def parse_playoff_slots(csv_rows: List[Dict]) -> Tuple[Dict[Tuple[int, str], int
     return slots, total_slots
 
 
+def infer_slots_from_rules(
+    modalidade: str, playoff_rules: Dict, epoch: str = "25_26"
+) -> Tuple[Dict[Tuple[int, str], int], int]:
+    """Inferir vagas de playoff a partir do playoff_rules.json."""
+    if not playoff_rules:
+        return {}, 0
+
+    epoch_data = playoff_rules.get("epochs", {}).get(epoch, {})
+    modalidade_rules = epoch_data.get("modalidades", {}).get(modalidade, {})
+    if not modalidade_rules:
+        return {}, 0
+
+    fmt = modalidade_rules.get("format")
+    slots = defaultdict(int)
+
+    if fmt == "divisions-and-groups":
+        # Rule: 1st of each 2nd div group + Top N of 1st div
+        n_groups_2nd = modalidade_rules.get("n_groups_2nd_div", 0)
+        total_slots = 8  # Default for this format
+        # 1 slot for each group in 2nd div (A, B, C...)
+        for i in range(n_groups_2nd):
+            grp_name = chr(ord("A") + i)
+            slots[(2, grp_name)] = 1
+        # Remaining slots for 1st div
+        slots[(1, "")] = max(0, total_slots - n_groups_2nd)
+
+    elif fmt == "divisions-only":
+        # Rule: Top 7 of 1st + 1st of 2nd
+        slots[(1, "")] = 7
+        slots[(2, "")] = 1
+
+    elif fmt == "groups-only":
+        # Rule: 4 of each group (assuming 2 groups A/B)
+        n_groups = modalidade_rules.get("n_groups", 2)
+        for i in range(n_groups):
+            grp_name = chr(ord("A") + i)
+            slots[(1, grp_name)] = 4
+
+    elif fmt == "single-league":
+        # Rule: Top 8
+        slots[(1, "")] = 8
+
+    total_slots = sum(slots.values())
+    if total_slots > 0:
+        logger.info(
+            f"Vagas de playoff inferidas das regras para {modalidade}: {dict(slots)} (Total: {total_slots})"
+        )
+
+    return slots, total_slots
+
+
+def infer_secondary_brackets_from_rules(
+    modalidade: str, playoff_rules: Dict, epoch: str = "25_26"
+) -> Tuple[List[Tuple[Dict, Dict]], List[Dict]]:
+    """Inferir liguilhas (LM) ou playoffs (PM) das regras quando não há no CSV."""
+    if not playoff_rules:
+        return [], []
+
+    epoch_data = playoff_rules.get("epochs", {}).get(epoch, {})
+    mod_rules = epoch_data.get("modalidades", {}).get(modalidade, {})
+    if not mod_rules:
+        return [], []
+
+    bracket_type = mod_rules.get("secondary_bracket")
+    n_groups_2nd = mod_rules.get("n_groups_2nd_div", 0)
+    direct_relegation = mod_rules.get("directRelegation", 3)
+
+    pm1 = []
+    lm = []
+
+    # O "maintenance slot" da 1ª divisão é geralmente o 1º acima da zona de descida direta.
+    # Ex: se descem 3 (pos 12, 11, 10), a manutenção é o 9º (pos total - 3).
+    # Como não sabemos o total aqui, usamos kind: "maintenance" para resolver depois.
+    maintenance_slot = {"kind": "maintenance", "div": 1, "offset": direct_relegation}
+
+    if bracket_type == "LM":
+        # LM: 2º de cada grupo da 2ª + maintenance da 1ª
+        participants = []
+        for i in range(n_groups_2nd):
+            grp_name = chr(ord("A") + i)
+            participants.append({"kind": "slot", "pos": 2, "div": 2, "grp": grp_name})
+        participants.append(maintenance_slot)
+
+        # Gerar confrontos todos-contra-todos (round-robin)
+        for i in range(len(participants)):
+            for j in range(i + 1, len(participants)):
+                lm.append({"a": participants[i], "b": participants[j], "jornada": "LM"})
+
+    elif bracket_type == "PM":
+        # PM: Geralmente Meias-Finais: (Maint 1ª vs 2º Gr.C) e (2º Gr.A vs 2º Gr.B)?
+        # Regras Tacaua: 2º de cada grupo 2ª + 4º pior 1ª.
+        # Se 3 grupos (A, B, C):
+        # MF1: Maintenance vs 2º Gr.C
+        # MF2: 2º Gr.A vs 2º Gr.B
+        if n_groups_2nd == 3:
+            pm1.append(
+                (maintenance_slot, {"kind": "slot", "pos": 2, "div": 2, "grp": "C"})
+            )
+            pm1.append(
+                (
+                    {"kind": "slot", "pos": 2, "div": 2, "grp": "A"},
+                    {"kind": "slot", "pos": 2, "div": 2, "grp": "B"},
+                )
+            )
+        elif n_groups_2nd == 2:
+            # Se fosse PM com 2 grupos, seria Maint vs 2ºA e 2ºB? (Pouco comum)
+            pm1.append(
+                (maintenance_slot, {"kind": "slot", "pos": 2, "div": 2, "grp": "A"})
+            )
+            # Faltaria um adversário para 2ºB se for playoff. Se for liguilha, usa LM.
+
+    return pm1, lm
+
+
 def parse_secondary_playoff_structure(
-    csv_rows: List[Dict],
+    csv_rows: List[Dict], course_mapping: Dict[str, str] = None
 ) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
     """Extrai os confrontos PM1 definidos no CSV.
 
@@ -1243,7 +1400,8 @@ def parse_secondary_playoff_structure(
                 "grp": (match.group(3) or "").upper(),
             }
 
-        return {"kind": "team", "name": raw}
+        name_norm = normalize_team_name(raw, course_mapping) if course_mapping else raw
+        return {"kind": "team", "name": name_norm}
 
     pm1_pairs: List[Tuple[Dict[str, Any], Dict[str, Any]]] = []
     for row in csv_rows:
@@ -1260,7 +1418,7 @@ def parse_secondary_playoff_structure(
 
 
 def parse_secondary_liguilla_structure(
-    csv_rows: List[Dict],
+    csv_rows: List[Dict], course_mapping: Dict[str, str] = None
 ) -> List[Dict[str, Any]]:
     """Extrai os jogos da liguilha (LM) definidos no CSV.
 
@@ -1295,7 +1453,8 @@ def parse_secondary_liguilla_structure(
                 "grp": (match.group(3) or "").upper(),
             }
 
-        return {"kind": "team", "name": raw}
+        name_norm = normalize_team_name(raw, course_mapping) if course_mapping else raw
+        return {"kind": "team", "name": name_norm}
 
     liguilla_matches: List[Dict[str, Any]] = []
     for row in csv_rows:
@@ -1322,28 +1481,7 @@ def parse_secondary_liguilla_structure(
 
 
 # Normalizar nome do curso usando o mapeamento
-def normalize_team_name(team_name: str, mapping: Dict[str, str]) -> str:
-    """
-    Normaliza o nome do curso usando o mapeamento.
-    Se não encontrar, retorna o nome original (trimmed).
-    """
-    normalized = team_name.strip()
-    return mapping.get(normalized, normalized)
-
-
-def get_team_short_name(team_name: str, mapping_short: Dict[str, str]) -> str:
-    """
-    Retorna o nome curto da equipa para usar em match_id.
-
-    Exemplos:
-    - "Eng. e Gestão Industrial" -> "EGI"
-    - "EGI" -> "EGI"
-    - "Direito" -> "Direito" (se não encontrar mapping)
-    """
-    normalized = team_name.strip()
-    return mapping_short.get(normalized, normalized)
-
-
+# Normalizar nome do curso usando o mapeamento
 def is_valid_team(team_name: str) -> bool:
     """Verifica se o nome é de uma equipa válida."""
     invalid_keywords = [
@@ -1409,18 +1547,31 @@ def calculate_real_points(
         if team_a in withdrawn_teams or team_b in withdrawn_teams:
             continue
 
-        golos_1_str = row.get(COL_GOLOS_1, "").strip()
-        golos_2_str = row.get(COL_GOLOS_2, "").strip()
+        golos_1_str = str(row.get(COL_GOLOS_1, "")).strip()
+        golos_2_str = str(row.get(COL_GOLOS_2, "")).strip()
+        falta = str(row.get(COL_FALTA_COMPARENCIA, "")).strip()
 
         if not golos_1_str or not golos_2_str:
-            continue
-
-        try:
-            # Converter para float primeiro (CSV pode ter "4.0"), depois int
-            golos_1 = int(float(golos_1_str))
-            golos_2 = int(float(golos_2_str))
-        except ValueError:
-            continue
+            if falta:
+                # Se há falta mas não há golos, inferir 3-0 ou 0-3 (ou 2-0 para volei)
+                # O nome na coluna falta é a equipa que FALTOU.
+                falta_norm = normalize_team_name(falta, course_mapping)
+                if falta_norm == team_a:
+                    golos_1, golos_2 = (0, 3 if not is_volei else 2)
+                elif falta_norm == team_b:
+                    golos_1, golos_2 = (3 if not is_volei else 2, 0)
+                else:
+                    # Caso estranho onde a equipa na coluna falta não bate com as do jogo
+                    continue
+            else:
+                continue
+        else:
+            try:
+                # Converter para float primeiro (CSV pode ter "4.0"), depois int
+                golos_1 = int(float(golos_1_str))
+                golos_2 = int(float(golos_2_str))
+            except ValueError:
+                continue
 
         # Distribuir pontos de acordo com a modalidade.
         # No voleibol o CSV guarda sets (2-0, 2-1, 1-2, 0-2), não uma regra 3/1/0.
@@ -1456,6 +1607,7 @@ def extract_played_matches_for_tiebreak(
     past_matches_rows: List[Dict],
     course_mapping: Dict[str, str],
     withdrawn_teams: Set[str] = None,
+    modalidade: str | None = None,
 ) -> List[Tuple[str, str, int, int]]:
     """Extrai jogos concluídos para desempates (h2h e critérios gerais)."""
     if withdrawn_teams is None:
@@ -1476,14 +1628,26 @@ def extract_played_matches_for_tiebreak(
 
         score_a_raw = row.get(COL_GOLOS_1, "").strip()
         score_b_raw = row.get(COL_GOLOS_2, "").strip()
-        if not score_a_raw or not score_b_raw:
-            continue
+        falta = str(row.get(COL_FALTA_COMPARENCIA, "")).strip()
+        is_volei = bool(modalidade and str(modalidade).upper().startswith("VOLEIBOL"))
 
-        try:
-            score_a = int(float(score_a_raw))
-            score_b = int(float(score_b_raw))
-        except ValueError:
-            continue
+        if not score_a_raw or not score_b_raw:
+            if falta:
+                falta_norm = normalize_team_name(falta, course_mapping)
+                if falta_norm == team_a:
+                    score_a, score_b = (0, 3 if not is_volei else 2)
+                elif falta_norm == team_b:
+                    score_a, score_b = (3 if not is_volei else 2, 0)
+                else:
+                    continue
+            else:
+                continue
+        else:
+            try:
+                score_a = int(float(score_a_raw))
+                score_b = int(float(score_b_raw))
+            except ValueError:
+                continue
 
         played_matches.append((team_a, team_b, score_a, score_b))
 
@@ -1502,11 +1666,12 @@ def separate_past_and_future_matches(
     future_matches = []
 
     for row in csv_rows:
-        golos_1 = row.get(COL_GOLOS_1, "").strip()
-        golos_2 = row.get(COL_GOLOS_2, "").strip()
+        golos_1 = str(row.get(COL_GOLOS_1, "")).strip()
+        golos_2 = str(row.get(COL_GOLOS_2, "")).strip()
+        falta = str(row.get(COL_FALTA_COMPARENCIA, "")).strip()
 
-        # Se ambos os scores estão preenchidos, é um jogo passado
-        if golos_1 and golos_2:
+        # Se ambos os scores estão preenchidos OU há falta de comparência, é um jogo passado
+        if (golos_1 and golos_2) or falta:
             past_matches.append(row)
         else:
             future_matches.append(row)
@@ -1667,11 +1832,15 @@ def simulate_season(
         division,
         is_future,
         total_games_a,
-        _jornada,
+        jornada,
         _dia,
         _hora,
         _grupo,
     ) in preprocessed_fixtures:
+
+        # Jogos de playoff/eliminatórias não contam para os pontos da fase regular
+        # (Jornadas que começam por E, PM, LM)
+        is_regular_season = not str(jornada).upper().startswith(("E", "PM", "LM"))
 
         elo_a_before = teams[a].elo
         elo_b_before = teams[b].elo
@@ -1684,8 +1853,9 @@ def simulate_season(
             )
             p_a_adj = p_a * (1 - p_draw)
             p_b_adj = (1 - p_a) * (1 - p_draw)
-            expected_points[a] += p_a_adj * 3 + p_draw
-            expected_points[b] += p_b_adj * 3 + p_draw
+            if is_regular_season:
+                expected_points[a] += p_a_adj * 3 + p_draw
+                expected_points[b] += p_b_adj * 3 + p_draw
 
         winner, margin, score_a, score_b = simulate_match(
             teams[a],
@@ -1709,19 +1879,22 @@ def simulate_season(
             )
 
         if winner == a:
-            points[a] += 3
-            if use_hardset:
-                expected_points[a] += 3
+            if is_regular_season:
+                points[a] += 3
+                if use_hardset:
+                    expected_points[a] += 3
         elif winner == b:
-            points[b] += 3
-            if use_hardset:
-                expected_points[b] += 3
+            if is_regular_season:
+                points[b] += 3
+                if use_hardset:
+                    expected_points[b] += 3
         elif winner == "Draw":
-            points[a] += 1
-            points[b] += 1
-            if use_hardset:
-                expected_points[a] += 1
-                expected_points[b] += 1
+            if is_regular_season:
+                points[a] += 1
+                points[b] += 1
+                if use_hardset:
+                    expected_points[a] += 1
+                    expected_points[b] += 1
 
     final_elos = {team: teams[team].elo for team in teams}
     return points, dict(expected_points), final_elos, season_results
@@ -2303,6 +2476,7 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         hardset_manager,
         withdrawn_teams,
         modalidade,
+        playoff_rules,
     ) = args_tuple
 
     sim_teams = {
@@ -2451,11 +2625,26 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
     def _resolve_secondary_slot(
         entry: Dict[str, Any], standings: Dict[Tuple[int, str], List[str]]
     ) -> str | None:
-        if entry.get("kind") == "team":
+        kind = entry.get("kind")
+        if kind == "team":
             name = str(entry.get("name", "")).strip()
             return name if name in sim_teams and not is_b_team(name) else None
 
-        if entry.get("kind") != "slot":
+        if kind == "maintenance":
+            div = int(entry.get("div", 1))
+            offset = int(entry.get("offset", 3))
+            # No Tacaua, manutenção é o 1º acima dos descidos diretos
+            candidates = [
+                t for t in standings.get((div, ""), []) if not is_b_team(t)
+            ]
+            if not candidates:
+                return None
+            pos = len(candidates) - offset
+            if pos < 1:
+                return None
+            return candidates[pos - 1]
+
+        if kind != "slot":
             return None
 
         div = int(entry.get("div", 1))
@@ -2517,6 +2706,7 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
 
     liguilla_stats_sim: Dict[str, Dict[str, int]] = {}
     liguilla_scenarios_sim: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    secondary_liguilla_top_team: str | None = None
 
     if secondary_liguilla_rows and team_division:
         standings_by_group: Dict[Tuple[int, str], List[str]] = defaultdict(list)
@@ -2697,33 +2887,10 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
             div, grp = team_division.get(team, (1, ""))
             standings_by_group[(div, grp)].append(team)
 
-        def resolve_slot(entry: Dict[str, Any]) -> str | None:
-            if entry.get("kind") == "team":
-                name = str(entry.get("name", "")).strip()
-                return name if name in sim_teams and not is_b_team(name) else None
-
-            if entry.get("kind") != "slot":
-                return None
-
-            div = int(entry.get("div", 1))
-            grp = str(entry.get("grp", "")).upper()
-            pos = int(entry.get("pos", 0))
-            if pos <= 0:
-                return None
-
-            candidates = [
-                team_name
-                for team_name in standings_by_group.get((div, grp), [])
-                if not is_b_team(team_name)
-            ]
-            if len(candidates) < pos:
-                return None
-            return candidates[pos - 1]
-
         pm1_winners: List[str] = []
         for idx, (slot_a, slot_b) in enumerate(secondary_playoff_pm1, start=1):
-            team_a_name = resolve_slot(slot_a)
-            team_b_name = resolve_slot(slot_b)
+            team_a_name = _resolve_secondary_slot(slot_a, standings_by_group)
+            team_b_name = _resolve_secondary_slot(slot_b, standings_by_group)
 
             if not team_a_name or not team_b_name or team_a_name == team_b_name:
                 continue
@@ -2776,6 +2943,7 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
                 _accumulate_simulated_match(
                     mid, t1, t2, winner, score_a, score_b, elo_t1, elo_t2
                 )
+                secondary_liguilla_top_team = winner
 
     for pm in playoff_matches:
         mid = pm["id"]
@@ -2842,6 +3010,7 @@ def monte_carlo_forecast(
     hardset_manager: "HardsetManager | None" = None,
     withdrawn_teams: Set[str] = None,
     modalidade: str | None = None,
+    playoff_rules: Dict | None = None,
 ) -> Tuple[
     Dict[str, Dict[str, float]],
     Dict[str, Dict[str, float]],
@@ -2955,6 +3124,7 @@ def monte_carlo_forecast(
                         hardset_manager,
                         withdrawn_teams,
                         modalidade,
+                        playoff_rules,
                     )
                 )
 
@@ -3697,6 +3867,12 @@ def _build_teams_and_fixtures(
         if team_a in withdrawn_teams or team_b in withdrawn_teams:
             continue
 
+        jornada_val = str(row.get(COL_JORNADA, "")).strip().upper()
+        # Se for jogo de playoff (E), PM ou LM, saltamos pois são simulados
+        # por lógica especializada no worker (evita duplicação no output)
+        if jornada_val.startswith(("E", "PM", "LM")):
+            continue
+
         all_teams_in_epoch.add(team_a)
         all_teams_in_epoch.add(team_b)
         _register_team(team_a)
@@ -4176,9 +4352,14 @@ def main(
     os.makedirs(Path(docs_dir) / "output" / "cenarios", exist_ok=True)
 
     course_mapping, course_mapping_short = load_course_mapping(docs_dir)
+    playoff_rules = load_playoff_rules(docs_dir)
     print(
-        f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos\n"
+        f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos"
     )
+    if playoff_rules:
+        print("✅ Regras de playoff carregadas do ficheiro JSON\n")
+    else:
+        print("⚠️ Aviso: playoff_rules.json não encontrado ou inválido\n")
 
     hardset_manager = _build_hardset_manager(
         hardset_args, hardset_csv, course_mapping_short
@@ -4297,10 +4478,6 @@ def main(
                 f"{', '.join(sorted(withdrawn_teams))}"
             )
 
-        if not fixtures:
-            print(f"Nenhum fixture encontrado para {modalidade}\n")
-            continue
-
         # --- Correr simulação ---
         teams_with_fixtures = {t: teams[t] for t in all_teams_in_epoch if t in teams}
 
@@ -4309,8 +4486,29 @@ def main(
             for row in all_csv_rows
         )
         playoff_slots, total_playoff_slots = parse_playoff_slots(all_csv_rows)
-        secondary_playoff_pm1 = parse_secondary_playoff_structure(all_csv_rows)
-        secondary_liguilla_rows = parse_secondary_liguilla_structure(all_csv_rows)
+
+        # Se não encontramos vagas via placeholders, tentamos via regras
+        if not playoff_slots and playoff_rules:
+            playoff_slots, total_playoff_slots = infer_slots_from_rules(
+                modalidade, playoff_rules
+            )
+
+        secondary_playoff_pm1 = parse_secondary_playoff_structure(
+            all_csv_rows, course_mapping
+        )
+        secondary_liguilla_rows = parse_secondary_liguilla_structure(
+            all_csv_rows, course_mapping
+        )
+
+        # Fallback para regras se o CSV não tem liguilhas/playoffs secundários definidos
+        if not secondary_playoff_pm1 and not secondary_liguilla_rows and playoff_rules:
+            pm1_inferred, lm_inferred = infer_secondary_brackets_from_rules(modalidade, playoff_rules)
+            if pm1_inferred:
+                secondary_playoff_pm1 = pm1_inferred
+                has_liguilla = True
+            if lm_inferred:
+                secondary_liguilla_rows = lm_inferred
+                has_liguilla = True
         real_points = calculate_real_points(
             past_matches_rows,
             course_mapping,
@@ -4321,7 +4519,12 @@ def main(
             past_matches_rows,
             course_mapping,
             withdrawn_teams=withdrawn_teams,
+            modalidade=modalidade,
         )
+
+        if not fixtures and not playoff_slots and not secondary_playoff_pm1 and not secondary_liguilla_rows:
+            print(f"Nenhum jogo futuro ou estrutura de playoff encontrada para {modalidade}\n")
+            continue
 
         (
             results,
@@ -4351,6 +4554,7 @@ def main(
             hardset_manager=hardset_manager,
             withdrawn_teams=withdrawn_teams,
             modalidade=modalidade,
+            playoff_rules=playoff_rules,
         )
 
         # --- Diagnóstico de baselines ---
