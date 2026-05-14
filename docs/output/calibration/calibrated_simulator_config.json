@@ -56,9 +56,9 @@
   },
   "BASQUETEBOL MASCULINO": {
     "sport_type": "basquete",
-    "base_goals": 9.684782608695652,
-    "base_goals_std": 4.650687999187271,
-    "dispersion_k": 7.852821603442306,
+    "base_goals": 9.754448398576512,
+    "base_goals_std": 4.719934607900125,
+    "dispersion_k": 7.597758013055503,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
     "draw_multiplier": 1.0,
@@ -67,20 +67,20 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.004588684360850536,
-    "margin_elo_intercept": 4.990541795387076,
+    "margin_elo_slope": 0.0049272825619517124,
+    "margin_elo_intercept": 5.068658162846135,
     "elo_adjustment_limit": 0.5,
-    "base_score": 9.684782608695652,
-    "sigma": 4.650687999187271,
+    "base_score": 9.754448398576512,
+    "sigma": 4.719934607900125,
     "division_params": {
       "1": {
         "base_goals": 10.218487394957982,
-        "dispersion_k": 10.993071044101466,
+        "dispersion_k": 10.993071044101463,
         "base_draw_rate": 0.0
       },
       "2": {
-        "base_goals": 9.280254777070065,
-        "dispersion_k": 6.418346954016213,
+        "base_goals": 9.41358024691358,
+        "dispersion_k": 6.123691659535253,
         "base_draw_rate": 0.0
       }
     }
@@ -91,15 +91,15 @@
     "base_goals_std": 2.268572705452281,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.11450381679389313,
-    "draw_elo_sensitivity": 0.012378451597306005,
+    "draw_elo_sensitivity": 0.0025355626631546405,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.534775773637761,
-      "coef_linear": 0.012378451597306005,
-      "coef_quadratic": -4.395366155781751e-05
+      "intercept": -1.9636387418406644,
+      "coef_linear": 0.0025355626631546405,
+      "coef_quadratic": -1.6613094810081466e-05
     },
-    "margin_elo_slope": 0.0025702895977105155,
-    "margin_elo_intercept": 2.759030826204124,
+    "margin_elo_slope": 0.002518786773410029,
+    "margin_elo_intercept": 2.7833672915872327,
     "elo_adjustment_limit": 1.0,
     "division_params": {
       "1": {
@@ -141,18 +141,18 @@
   "FUTSAL MASCULINO": {
     "sport_type": "futsal",
     "base_goals": 3.3386243386243386,
-    "base_goals_std": 2.785856229770769,
+    "base_goals_std": 2.7858562297707694,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.1111111111111111,
-    "draw_elo_sensitivity": 0.0036317510370636103,
+    "draw_elo_sensitivity": 0.0014594345435523627,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.6095727879207566,
-      "coef_linear": -0.0036317510370636103,
-      "coef_quadratic": -3.4518195013494354e-06
+      "intercept": -1.6759639068022292,
+      "coef_linear": -0.0014594345435523627,
+      "coef_quadratic": -1.5480960360463328e-05
     },
-    "margin_elo_slope": 0.004823965462505832,
-    "margin_elo_intercept": 3.0179926730357183,
+    "margin_elo_slope": 0.004768159273711175,
+    "margin_elo_intercept": 3.0770688850916867,
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
