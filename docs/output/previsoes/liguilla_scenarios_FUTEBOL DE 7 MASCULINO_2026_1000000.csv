@@ -1,4 +1,0 @@
-﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Ciências Biomédicas,LM2:Tecnologias de Informação|LM3:Contabilidade,LM2,Tecnologias de Informação,48.1048,19.3253,32.5699,LM3,Contabilidade,47.2270,15.9305,36.8425,100.0000,36.4845
-Contabilidade,LM1:Tecnologias de Informação|LM3:Ciências Biomédicas,LM1,Tecnologias de Informação,46.8299,12.6319,40.5382,LM3,Ciências Biomédicas,36.8425,15.9305,47.2270,100.0000,36.4228
-Tecnologias de Informação,LM1:Contabilidade|LM2:Ciências Biomédicas,LM1,Contabilidade,40.5382,12.6319,46.8299,LM2,Ciências Biomédicas,32.5699,19.3253,48.1048,100.0000,27.0927

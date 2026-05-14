@@ -20,12 +20,12 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 2,A,7,Economia,2,6,1,0,5,31,80,-49,0
 2,A,8,Música,2,6,1,0,5,21,70,-49,0
 2,A,9,Biologia e Geologia,2,5,1,0,4,33,47,-14,0
-2,B,1,Administração Pública,12,7,6,0,1,88,65,23,0
-2,B,2,Eng. Biomédica,10,6,5,0,1,85,57,28,0
-2,B,3,Eng. Computacional,8,6,4,0,2,75,73,2,0
-2,B,4,Gestão,6,6,3,0,3,60,52,8,0
-2,B,5,Eng. Física,6,6,3,0,3,40,53,-13,0
-2,B,6,Ciências do Mar,6,6,3,0,3,57,55,2,0
-2,B,7,Psicologia,4,6,2,0,4,62,61,1,0
-2,B,8,"Línguas, Literaturas e Culturas",2,6,1,0,5,56,76,-20,0
-2,B,9,Eng. Mecânica B,2,7,1,0,6,45,76,-31,0
+2,B,1,Eng. Biomédica,12,7,6,0,1,99,69,30,0
+2,B,2,Administração Pública,12,7,6,0,1,88,65,23,0
+2,B,3,Eng. Computacional,10,7,5,0,2,90,80,10,0
+2,B,4,Gestão,8,7,4,0,3,67,58,9,0
+2,B,5,Eng. Física,6,7,3,0,4,47,68,-21,0
+2,B,6,Ciências do Mar,6,7,3,0,4,63,62,1,0
+2,B,7,Psicologia,6,8,3,0,5,90,80,10,0
+2,B,8,"Línguas, Literaturas e Culturas",4,8,2,0,6,72,101,-29,0
+2,B,9,Eng. Mecânica B,2,8,1,0,7,54,87,-33,0

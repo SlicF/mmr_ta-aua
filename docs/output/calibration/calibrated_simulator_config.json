@@ -56,9 +56,9 @@
   },
   "BASQUETEBOL MASCULINO": {
     "sport_type": "basquete",
-    "base_goals": 9.652091254752852,
-    "base_goals_std": 4.6101501298558,
-    "dispersion_k": 8.030317210242174,
+    "base_goals": 9.662313432835822,
+    "base_goals_std": 4.59637242008825,
+    "dispersion_k": 8.143549035949425,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
     "draw_multiplier": 1.0,
@@ -67,11 +67,11 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.004995584363863847,
-    "margin_elo_intercept": 4.863401488612822,
+    "margin_elo_slope": 0.004663178342062108,
+    "margin_elo_intercept": 4.895530319456834,
     "elo_adjustment_limit": 0.5,
-    "base_score": 9.652091254752852,
-    "sigma": 4.6101501298558,
+    "base_score": 9.662313432835822,
+    "sigma": 4.59637242008825,
     "division_params": {
       "1": {
         "base_goals": 10.218487394957982,
@@ -79,8 +79,8 @@
         "base_draw_rate": 0.0
       },
       "2": {
-        "base_goals": 9.184027777777779,
-        "dispersion_k": 6.561354920576566,
+        "base_goals": 9.218120805369127,
+        "dispersion_k": 6.749301234389016,
         "base_draw_rate": 0.0
       }
     }
