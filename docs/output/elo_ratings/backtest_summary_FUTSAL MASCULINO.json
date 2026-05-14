@@ -1,32 +1,32 @@
 {
   "modalidade": "FUTSAL MASCULINO",
   "num_seasons": 2,
-  "avg_brier_score": 0.015082948769841271,
-  "avg_rmse_place": 19.891867738657425,
-  "avg_rmse_points": 1.885018966251173,
+  "avg_brier_score": 0.018050662833333335,
+  "avg_rmse_place": 16.107390149022166,
+  "avg_rmse_points": 1.7987695632292708,
   "seasons": [
     {
       "season": "24_25",
       "cutoff_jornada": 8,
       "num_teams": 36,
-      "brier_score_champion": 0.020516276111111113,
-      "rmse_expected_place": 14.282359196789272,
-      "rmse_expected_points": 2.055144077906103,
+      "brier_score_champion": 0.020226056666666666,
+      "rmse_expected_place": 14.282882885040323,
+      "rmse_expected_points": 2.0573867567793678,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.011766666666666667,
+          "predicted": 0.011842424242424243,
           "observed": 0.0,
           "count": 33,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.1491,
+          "predicted": 0.1467,
           "observed": 0.0,
           "count": 1,
           "calibrated": true
         },
         "20-30%": {
-          "predicted": 0.2313,
+          "predicted": 0.23125,
           "observed": 0.5,
           "count": 2,
           "calibrated": false
@@ -34,19 +34,19 @@
       },
       "calibration_playoffs": {
         "0-10%": {
-          "predicted": 0.0020555555555555557,
+          "predicted": 0.0021111111111111113,
           "observed": 0.07407407407407407,
           "count": 27,
           "calibrated": true
         },
         "90-100%": {
-          "predicted": 0.9708125000000001,
+          "predicted": 0.9707749999999999,
           "observed": 0.75,
           "count": 8,
           "calibrated": false
         },
         "10-20%": {
-          "predicted": 0.178,
+          "predicted": 0.1768,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
@@ -57,24 +57,30 @@
       "season": "25_26",
       "cutoff_jornada": 8,
       "num_teams": 40,
-      "brier_score_champion": 0.009649621428571429,
-      "rmse_expected_place": 25.501376280525573,
-      "rmse_expected_points": 1.7148938545962424,
+      "brier_score_champion": 0.015875269,
+      "rmse_expected_place": 17.931897413004013,
+      "rmse_expected_points": 1.5401523696791741,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.007882051282051283,
+          "predicted": 0.004605555555555555,
           "observed": 0.0,
-          "count": 39,
+          "count": 36,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.14105,
+          "predicted": 0.11465,
           "observed": 0.0,
           "count": 2,
           "calibrated": true
         },
-        "40-50%": {
-          "predicted": 0.4105,
+        "30-40%": {
+          "predicted": 0.3148,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "20-30%": {
+          "predicted": 0.2901,
           "observed": 1.0,
           "count": 1,
           "calibrated": false
@@ -82,55 +88,49 @@
       },
       "calibration_playoffs": {
         "50-60%": {
-          "predicted": 0.5335333333333333,
-          "observed": 0.6666666666666666,
-          "count": 3,
+          "predicted": 0.5885,
+          "observed": 0.5,
+          "count": 2,
           "calibrated": true
         },
         "0-10%": {
-          "predicted": 0.0012137931034482759,
-          "observed": 0.06896551724137931,
-          "count": 29,
+          "predicted": 0.003925,
+          "observed": 0.03571428571428571,
+          "count": 28,
           "calibrated": true
-        },
-        "10-20%": {
-          "predicted": 0.1703,
-          "observed": 0.0,
-          "count": 1,
-          "calibrated": false
-        },
-        "20-30%": {
-          "predicted": 0.2623,
-          "observed": 0.0,
-          "count": 1,
-          "calibrated": false
         },
         "90-100%": {
-          "predicted": 0.9908666666666667,
+          "predicted": 0.9872000000000001,
           "observed": 1.0,
-          "count": 3,
+          "count": 4,
           "calibrated": true
         },
-        "80-90%": {
-          "predicted": 0.8494,
+        "70-80%": {
+          "predicted": 0.7842,
           "observed": 1.0,
           "count": 1,
-          "calibrated": false
-        },
-        "60-70%": {
-          "predicted": 0.65225,
-          "observed": 0.0,
-          "count": 2,
           "calibrated": false
         },
         "40-50%": {
-          "predicted": 0.4285,
+          "predicted": 0.44965,
+          "observed": 0.5,
+          "count": 2,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.1584,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
         },
         "30-40%": {
-          "predicted": 0.3766,
+          "predicted": 0.3073,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "60-70%": {
+          "predicted": 0.6151,
           "observed": 0.0,
           "count": 1,
           "calibrated": false

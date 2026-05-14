@@ -1,16 +1,16 @@
 {
   "modalidade": "BASQUETEBOL MASCULINO",
   "num_seasons": 2,
-  "avg_brier_score": 0.027657738999999997,
-  "avg_rmse_place": 12.029823994133466,
-  "avg_rmse_points": 2.313891276667196,
+  "avg_brier_score": 0.02777833166666667,
+  "avg_rmse_place": 11.90163807136543,
+  "avg_rmse_points": 1.8301287596564442,
   "seasons": [
     {
       "season": "24_25",
       "cutoff_jornada": 8,
       "num_teams": 30,
-      "brier_score_champion": 0.02724302933333333,
-      "rmse_expected_place": 11.925271873937856,
+      "brier_score_champion": 0.02760336666666667,
+      "rmse_expected_place": 11.925238047882594,
       "rmse_expected_points": 1.3504924046833746,
       "calibration_champion": {
         "10-20%": {
@@ -45,65 +45,71 @@
       "season": "25_26",
       "cutoff_jornada": 8,
       "num_teams": 30,
-      "brier_score_champion": 0.028072448666666663,
-      "rmse_expected_place": 12.134376114329076,
-      "rmse_expected_points": 3.277290148651018,
+      "brier_score_champion": 0.02795329666666667,
+      "rmse_expected_place": 11.878038094848266,
+      "rmse_expected_points": 2.3097651146295135,
       "calibration_champion": {
         "0-10%": {
-          "predicted": 0.0161,
+          "predicted": 0.010291666666666666,
           "observed": 0.0,
-          "count": 25,
+          "count": 24,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.11949999999999998,
-          "observed": 0.2,
-          "count": 5,
+          "predicted": 0.1255,
+          "observed": 0.16666666666666666,
+          "count": 6,
           "calibrated": true
         }
       },
       "calibration_playoffs": {
         "0-10%": {
-          "predicted": 0.02043888888888889,
+          "predicted": 0.009305555555555556,
           "observed": 0.0,
           "count": 18,
           "calibrated": true
         },
-        "40-50%": {
-          "predicted": 0.44932500000000003,
-          "observed": 0.75,
-          "count": 4,
-          "calibrated": false
-        },
         "90-100%": {
           "predicted": 1.0,
           "observed": 1.0,
-          "count": 3,
+          "count": 4,
           "calibrated": true
         },
         "50-60%": {
-          "predicted": 0.541,
+          "predicted": 0.5481,
           "observed": 0.0,
           "count": 1,
           "calibrated": false
         },
         "80-90%": {
-          "predicted": 0.88185,
+          "predicted": 0.88415,
           "observed": 1.0,
           "count": 2,
           "calibrated": true
         },
-        "20-30%": {
-          "predicted": 0.2221,
-          "observed": 0.0,
+        "40-50%": {
+          "predicted": 0.4916,
+          "observed": 1.0,
           "count": 1,
           "calibrated": false
         },
-        "30-40%": {
-          "predicted": 0.308,
+        "20-30%": {
+          "predicted": 0.25805,
           "observed": 0.0,
+          "count": 2,
+          "calibrated": false
+        },
+        "30-40%": {
+          "predicted": 0.3691,
+          "observed": 1.0,
           "count": 1,
           "calibrated": false
+        },
+        "10-20%": {
+          "predicted": 0.1393,
+          "observed": 0.0,
+          "count": 1,
+          "calibrated": true
         }
       }
     }

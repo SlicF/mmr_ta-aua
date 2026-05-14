@@ -12,8 +12,8 @@
       "tie_points": 20,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Informática",
-        "Marketing"
+        "Marketing",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -62,8 +62,8 @@
       "tie_points": 13,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. de Materiais"
+        "Eng. de Materiais",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 29,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -212,9 +212,9 @@
       "tie_points": 18,
       "tie_type": "mini_league",
       "tied_teams": [
-        "DPT",
         "MTC",
-        "Gestão"
+        "Gestão",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -275,8 +275,8 @@
       "tie_type": "head_to_head",
       "tie_points": 20,
       "tied_teams": [
-        "Eng. Informática",
-        "Marketing"
+        "Marketing",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -306,8 +306,8 @@
       "tie_type": "head_to_head",
       "tie_points": 20,
       "tied_teams": [
-        "Eng. Informática",
-        "Marketing"
+        "Marketing",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -337,8 +337,8 @@
       "tie_type": "head_to_head",
       "tie_points": 13,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. de Materiais"
+        "Eng. de Materiais",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -368,8 +368,8 @@
       "tie_type": "head_to_head",
       "tie_points": 13,
       "tied_teams": [
-        "Eng. Computadores e Telemática",
-        "Eng. de Materiais"
+        "Eng. de Materiais",
+        "Eng. Computadores e Telemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -399,8 +399,8 @@
       "tie_type": "head_to_head",
       "tie_points": 29,
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -430,8 +430,8 @@
       "tie_type": "head_to_head",
       "tie_points": 29,
       "tied_teams": [
-        "Economia",
-        "Biologia e Geologia"
+        "Biologia e Geologia",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -523,9 +523,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "DPT",
         "MTC",
-        "Gestão"
+        "Gestão",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -555,9 +555,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "DPT",
         "MTC",
-        "Gestão"
+        "Gestão",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -587,9 +587,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "DPT",
         "MTC",
-        "Gestão"
+        "Gestão",
+        "DPT"
       ],
       "criteria_order": [
         "faltas_comparencia",

@@ -1,4 +1,4 @@
 ﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Administração Pública,LM2:Contabilidade|LM3:Tecnologias de Informação,LM2,Contabilidade,47.7050,0.0000,52.2950,LM3,Tecnologias de Informação,47.6210,0.0000,52.3790,100.0000,35.6990
-Contabilidade,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,43.3590,0.0000,56.6410,LM2,Administração Pública,52.2950,0.0000,47.7050,100.0000,24.4530
-Tecnologias de Informação,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,56.6410,0.0000,43.3590,LM3,Administração Pública,52.3790,0.0000,47.6210,100.0000,39.8480
+Administração Pública,LM2:Contabilidade|LM3:Tecnologias de Informação,LM2,Contabilidade,47.9930,0.0000,52.0070,LM3,Tecnologias de Informação,47.5380,0.0000,52.4620,100.0000,35.5860
+Contabilidade,LM1:Tecnologias de Informação|LM2:Administração Pública,LM1,Tecnologias de Informação,43.5170,0.0000,56.4830,LM2,Administração Pública,52.0070,0.0000,47.9930,100.0000,24.5620
+Tecnologias de Informação,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,56.4830,0.0000,43.5170,LM3,Administração Pública,52.4620,0.0000,47.5380,100.0000,39.8520
