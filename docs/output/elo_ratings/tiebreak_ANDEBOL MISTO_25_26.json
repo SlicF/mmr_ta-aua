@@ -12,8 +12,8 @@
       "tie_points": 20,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Marketing",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Marketing"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -62,8 +62,8 @@
       "tie_points": 13,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -213,8 +213,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "MTC",
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -275,8 +275,8 @@
       "tie_type": "head_to_head",
       "tie_points": 20,
       "tied_teams": [
-        "Marketing",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Marketing"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -306,8 +306,8 @@
       "tie_type": "head_to_head",
       "tie_points": 20,
       "tied_teams": [
-        "Marketing",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Marketing"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -337,8 +337,8 @@
       "tie_type": "head_to_head",
       "tie_points": 13,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -368,8 +368,8 @@
       "tie_type": "head_to_head",
       "tie_points": 13,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -524,8 +524,8 @@
       "tie_points": 18,
       "tied_teams": [
         "MTC",
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -556,8 +556,8 @@
       "tie_points": 18,
       "tied_teams": [
         "MTC",
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -588,8 +588,8 @@
       "tie_points": 18,
       "tied_teams": [
         "MTC",
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
