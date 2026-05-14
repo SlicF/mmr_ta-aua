@@ -1,5 +1,4 @@
 Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Data,Fonte_Local,Data_Placeholder,Local_Placeholder,Falta de Comparência
-1,2025-10-22 00:00:00,19h20,PAH,Eng. Civil,,,Contabilidade,2,A,Calendário PDF (Futuro),Excel,False,False,
 1,2025-10-22 00:00:00,19h20,Caixa UA,Música,0,9,GPT,2,A,Excel,Excel,False,False,
 1,2025-10-22 00:00:00,19h40,Caixa UA,Física,7,10,LRE,2,A,Excel,Excel,False,False,
 2,2025-10-22 00:00:00,20h00,Caixa UA,Contabilidade,7,2,Música,2,A,Excel,Excel,False,False,
@@ -107,7 +106,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 10,2026-05-06 00:00:00,20h00,PAH,EGI,6,9,EET,1,,Excel,Excel,False,False,
 10,2026-05-06 00:00:00,20h20,PAH,Biotecnologia,14,8,Matemática,1,,Excel,Excel,False,False,
 10,2026-05-06 00:00:00,20h40,PAH,Biologia,1,20,Eng. Mecânica,1,,Excel,Excel,False,False,
-10,2026-05-06 00:00:00,21h00,PAH,Tecnologias de Informação,17,4,Eng. Informática,1,,Excel,Excel,False,False,
+10,2026-05-06 00:00:00,21h00,PAH,Tecnologias de Informação,4,17,Eng. Informática,1,,Excel,Excel,False,False,
 10,2026-05-06 00:00:00,21h20,PAH,MTC,12,9,Eng. Aeroespacial,1,,Excel,Excel,False,False,
 10,2026-05-06 00:00:00,21h40,PAH,Eng. Materiais,9,7,ECT,1,,Excel,Excel,False,False,
 11,2026-05-06 00:00:00,22h00,PAH,EET,16,6,Biotecnologia,1,,Excel,Excel,False,False,
@@ -121,6 +120,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 11,2026-05-06 00:00:00,23h20,PAH,Eng. Aeroespacial,9,21,Eng. Materiais,1,,Excel,Excel,False,False,
 1,2026-05-06 00:00:00,23h40,Caixa UA,Economia,5,15,Design,2,A,Excel,Excel,False,False,
 11,2026-05-06 00:00:00,23h40,PAH,ECT,10,7,EGI,1,,Excel,Excel,False,False,
+1,2026-05-13 00:00:00,16h30,PAH,Eng. Civil,,,Contabilidade,2,A,Excel,Excel,False,False,
 8,2026-05-13 00:00:00,16h30,PAH,Eng. Mecânica B,,,LLC,2,B,Excel,Excel,False,False,
 8,2026-05-13 00:00:00,16h50,PAH,Contabilidade,,,GPT,2,A,Excel,Excel,False,False,
 8,2026-05-13 00:00:00,16h50,PAH,Psicologia,,,Eng. Biomédica,2,B,Excel,Excel,False,False,
