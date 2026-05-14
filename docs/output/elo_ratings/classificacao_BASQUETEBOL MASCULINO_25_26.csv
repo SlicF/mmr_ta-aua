@@ -11,21 +11,21 @@ Divisao,Grupo,Posicao,Equipa,pontos,jogos,vitorias,empates,derrotas,golos_marcad
 1,,10,Eng. Aeroespacial,6,11,3,0,8,94,118,-24,0
 1,,11,Matemática,6,11,3,0,8,84,126,-42,0
 1,,12,MTC,4,11,2,0,9,98,120,-22,0
-2,A,1,Eng. Civil,10,5,5,0,0,76,30,46,0
-2,A,2,Contabilidade,10,6,5,0,1,68,32,36,0
-2,A,3,Línguas e Relações Empresariais,8,6,4,0,2,65,51,14,0
-2,A,4,Design,6,6,3,0,3,66,60,6,0
+2,A,1,Eng. Civil,14,7,7,0,0,95,47,48,0
+2,A,2,Contabilidade,12,8,6,0,2,86,44,42,0
+2,A,3,Línguas e Relações Empresariais,10,7,5,0,2,86,51,35,0
+2,A,4,Design,6,7,3,0,4,78,73,5,0
 2,A,5,Física,6,7,3,0,4,77,81,-4,0
-2,A,6,Gestão e Planeamento em Turismo,6,5,3,0,2,53,39,14,0
-2,A,7,Economia,2,6,1,0,5,31,80,-49,0
-2,A,8,Música,2,6,1,0,5,21,70,-49,0
-2,A,9,Biologia e Geologia,2,5,1,0,4,33,47,-14,0
-2,B,1,Eng. Biomédica,12,7,6,0,1,99,69,30,0
-2,B,2,Administração Pública,12,7,6,0,1,88,65,23,0
-2,B,3,Eng. Computacional,10,7,5,0,2,90,80,10,0
-2,B,4,Gestão,8,7,4,0,3,67,58,9,0
-2,B,5,Eng. Física,6,7,3,0,4,47,68,-21,0
-2,B,6,Ciências do Mar,6,7,3,0,4,63,62,1,0
+2,A,6,Gestão e Planeamento em Turismo,6,6,3,0,3,59,52,7,0
+2,A,7,Economia,4,7,2,0,5,44,86,-42,0
+2,A,8,Música,2,7,1,0,6,21,91,-70,0
+2,A,9,Biologia e Geologia,2,6,1,0,5,39,60,-21,0
+2,B,1,Eng. Biomédica,14,8,7,0,1,120,69,51,0
+2,B,2,Administração Pública,14,8,7,0,1,103,76,27,0
+2,B,3,Eng. Computacional,12,8,6,0,2,106,89,17,0
+2,B,4,Gestão,8,8,4,0,4,76,74,2,0
+2,B,5,Eng. Física,6,8,3,0,5,47,89,-42,0
+2,B,6,Ciências do Mar,6,8,3,0,5,74,77,-3,0
 2,B,7,Psicologia,6,8,3,0,5,90,80,10,0
 2,B,8,"Línguas, Literaturas e Culturas",4,8,2,0,6,72,101,-29,0
 2,B,9,Eng. Mecânica B,2,8,1,0,7,54,87,-33,0
