@@ -1,4 +1,0 @@
-﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Administração Pública,LM2:Contabilidade|LM3:Biotecnologia,LM2,Contabilidade,47.9900,0.0000,52.0100,LM3,Biotecnologia,48.0694,0.0000,51.9306,100.0000,35.5346
-Biotecnologia,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,54.9522,0.0000,45.0478,LM3,Administração Pública,51.9306,0.0000,48.0694,100.0000,30.5868
-Contabilidade,LM1:Biotecnologia|LM2:Administração Pública,LM1,Biotecnologia,45.0478,0.0000,54.9522,LM2,Administração Pública,52.0100,0.0000,47.9900,100.0000,33.8786
