@@ -155,6 +155,62 @@ function scheduleLowPriorityTask(task, timeout = 1000) {
     setTimeout(task, 0);
 }
 
+function getNormalizedEloJornada(jornada) {
+    return String(jornada ?? '').trim().toUpperCase();
+}
+
+function buildEloMatchKey(jornada, team1, team2) {
+    return `${getNormalizedEloJornada(jornada)}|${normalizeTeamName(team1)}|${normalizeTeamName(team2)}`;
+}
+
+function getParsedEloDelta(value) {
+    const parsed = parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function getDisplayEloChange(match, side) {
+    if (!match) return 0;
+
+    const changeKey = side === 2 ? 'Elo Change 2' : 'Elo Change 1';
+    const deltaKey = side === 2 ? 'Elo Delta 2' : 'Elo Delta 1';
+
+    // Preferir o campo inteiro explícito ('Elo Delta') quando disponível
+    const deltaValue = parseInt(match[deltaKey], 10);
+    if (Number.isFinite(deltaValue) && !Number.isNaN(deltaValue)) {
+        return deltaValue;
+    }
+
+    // Caso não exista, usar o campo 'Elo Change' (pode ser fracionário) e arredondar
+    const changeValue = parseFloat(match[changeKey]);
+    if (Number.isFinite(changeValue) && !Number.isNaN(changeValue)) {
+        return Math.round(changeValue);
+    }
+
+    return 0;
+}
+
+function getRawEloMatch(jornada, team1, team2) {
+    if (!Array.isArray(sampleData.rawEloData) || sampleData.rawEloData.length === 0) {
+        return null;
+    }
+
+    const jornadaKey = getNormalizedEloJornada(jornada);
+    const normalizedTeam1 = normalizeTeamName(team1);
+    const normalizedTeam2 = normalizeTeamName(team2);
+
+    return sampleData.rawEloData.find(match => {
+        if (getNormalizedEloJornada(match.Jornada) !== jornadaKey) return false;
+
+        const matchTeam1 = normalizeTeamName(match['Equipa 1']);
+        const matchTeam2 = normalizeTeamName(match['Equipa 2']);
+
+        return (
+            (matchTeam1 === normalizedTeam1 && matchTeam2 === normalizedTeam2) ||
+            (matchTeam1 === normalizedTeam2 && matchTeam2 === normalizedTeam1)
+        );
+    }) || null;
+}
+
 function buildCalendarEloLookup() {
     calendarEloLookup = new Map();
 
@@ -163,24 +219,34 @@ function buildCalendarEloLookup() {
     }
 
     sampleData.rawEloData.forEach(match => {
-        const jornada = parseInt(match.Jornada, 10);
-        if (!Number.isFinite(jornada)) return;
-
+        const jornada = getNormalizedEloJornada(match.Jornada);
         const team1 = normalizeTeamName(match['Equipa 1']);
         const team2 = normalizeTeamName(match['Equipa 2']);
         if (!team1 || !team2) return;
 
-        const key = `${jornada}|${team1}|${team2}`;
+        const key = buildEloMatchKey(jornada, team1, team2);
         calendarEloLookup.set(key, match);
+
+        const reverseKey = buildEloMatchKey(jornada, team2, team1);
+        calendarEloLookup.set(reverseKey, match);
     });
+
+    // DEBUG: mostrar resumo do lookup para diagnóstico
+    try {
+        const keys = Array.from(calendarEloLookup.keys()).slice(0, 12);
+    } catch (e) {
+        console.warn('[BRACKET-DEBUG] erro ao inspecionar calendarEloLookup', e);
+    }
 }
 
 function getCalendarEloMatch(jornada, team1, team2) {
-    const jornadaInt = parseInt(jornada, 10);
-    if (!Number.isFinite(jornadaInt)) return null;
+    const key = buildEloMatchKey(jornada, team1, team2);
+    if (calendarEloLookup.has(key)) {
+        return calendarEloLookup.get(key) || null;
+    }
 
-    const key = `${jornadaInt}|${normalizeTeamName(team1)}|${normalizeTeamName(team2)}`;
-    return calendarEloLookup.get(key) || null;
+    const reverseKey = buildEloMatchKey(jornada, team2, team1);
+    return calendarEloLookup.get(reverseKey) || null;
 }
 
 // ==================== FAVORITE TEAM SYSTEM ====================
@@ -4101,14 +4167,10 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
 
             // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
-            const eloMatch = sampleData.rawEloData ? sampleData.rawEloData.find(m =>
-                m.Jornada === match.Jornada &&
-                normalizeTeamName(m['Equipa 1']) === normalizeTeamName(team1) &&
-                normalizeTeamName(m['Equipa 2']) === normalizeTeamName(team2)
-            ) : null;
+            const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
 
-            const elo1Delta = eloMatch && eloMatch['Elo Delta 1'] ? parseInt(eloMatch['Elo Delta 1']) : 0;
-            const elo2Delta = eloMatch && eloMatch['Elo Delta 2'] ? parseInt(eloMatch['Elo Delta 2']) : 0;
+            const elo1Delta = getDisplayEloChange(eloMatch, 1);
+            const elo2Delta = getDisplayEloChange(eloMatch, 2);
 
             return {
                 team1: team1,
@@ -4141,14 +4203,10 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
 
             // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
-            const eloMatch = sampleData.rawEloData ? sampleData.rawEloData.find(m =>
-                m.Jornada === match.Jornada &&
-                normalizeTeamName(m['Equipa 1']) === normalizeTeamName(team1) &&
-                normalizeTeamName(m['Equipa 2']) === normalizeTeamName(team2)
-            ) : null;
+            const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
 
-            const elo1Delta = eloMatch && eloMatch['Elo Delta 1'] ? parseInt(eloMatch['Elo Delta 1']) : 0;
-            const elo2Delta = eloMatch && eloMatch['Elo Delta 2'] ? parseInt(eloMatch['Elo Delta 2']) : 0;
+            const elo1Delta = getDisplayEloChange(eloMatch, 1);
+            const elo2Delta = getDisplayEloChange(eloMatch, 2);
 
             return {
                 team1: team1,
@@ -4192,14 +4250,10 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
 
             // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
-            const eloMatch = sampleData.rawEloData ? sampleData.rawEloData.find(m =>
-                m.Jornada === match.Jornada &&
-                normalizeTeamName(m['Equipa 1']) === normalizeTeamName(team1) &&
-                normalizeTeamName(m['Equipa 2']) === normalizeTeamName(team2)
-            ) : null;
+            const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
 
-            const elo1Delta = eloMatch && eloMatch['Elo Delta 1'] ? parseInt(eloMatch['Elo Delta 1']) : 0;
-            const elo2Delta = eloMatch && eloMatch['Elo Delta 2'] ? parseInt(eloMatch['Elo Delta 2']) : 0;
+            const elo1Delta = getDisplayEloChange(eloMatch, 1);
+            const elo2Delta = getDisplayEloChange(eloMatch, 2);
 
             return {
                 team1: team1,
@@ -4228,14 +4282,10 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
 
             // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
-            const eloMatch = sampleData.rawEloData ? sampleData.rawEloData.find(m =>
-                m.Jornada === match.Jornada &&
-                normalizeTeamName(m['Equipa 1']) === normalizeTeamName(team1) &&
-                normalizeTeamName(m['Equipa 2']) === normalizeTeamName(team2)
-            ) : null;
+            const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
 
-            const elo1Delta = eloMatch && eloMatch['Elo Delta 1'] ? parseInt(eloMatch['Elo Delta 1']) : 0;
-            const elo2Delta = eloMatch && eloMatch['Elo Delta 2'] ? parseInt(eloMatch['Elo Delta 2']) : 0;
+            const elo1Delta = getDisplayEloChange(eloMatch, 1);
+            const elo2Delta = getDisplayEloChange(eloMatch, 2);
 
             return {
                 team1: team1,
@@ -4301,14 +4351,10 @@ function processSecondaryMatches(secondaryMatches) {
                 const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
 
                 // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
-                const eloMatch = sampleData.rawEloData ? sampleData.rawEloData.find(m =>
-                    m.Jornada === match.Jornada &&
-                    normalizeTeamName(m['Equipa 1']) === normalizeTeamName(team1) &&
-                    normalizeTeamName(m['Equipa 2']) === normalizeTeamName(team2)
-                ) : null;
+                const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
 
-                const elo1Delta = eloMatch && eloMatch['Elo Delta 1'] ? parseInt(eloMatch['Elo Delta 1']) : 0;
-                const elo2Delta = eloMatch && eloMatch['Elo Delta 2'] ? parseInt(eloMatch['Elo Delta 2']) : 0;
+                const elo1Delta = getDisplayEloChange(eloMatch, 1);
+                const elo2Delta = getDisplayEloChange(eloMatch, 2);
 
                 return {
                     team1: team1,
@@ -4334,14 +4380,10 @@ function processSecondaryMatches(secondaryMatches) {
                 const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
 
                 // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
-                const eloMatch = sampleData.rawEloData ? sampleData.rawEloData.find(m =>
-                    m.Jornada === match.Jornada &&
-                    normalizeTeamName(m['Equipa 1']) === normalizeTeamName(team1) &&
-                    normalizeTeamName(m['Equipa 2']) === normalizeTeamName(team2)
-                ) : null;
+                const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
 
-                const elo1Delta = eloMatch && eloMatch['Elo Delta 1'] ? parseInt(eloMatch['Elo Delta 1']) : 0;
-                const elo2Delta = eloMatch && eloMatch['Elo Delta 2'] ? parseInt(eloMatch['Elo Delta 2']) : 0;
+                const elo1Delta = getDisplayEloChange(eloMatch, 1);
+                const elo2Delta = getDisplayEloChange(eloMatch, 2);
 
                 return {
                     team1: team1,
@@ -4704,12 +4746,10 @@ function createBracket() {
             `;
 
             // Adicionar identificador do jogo ANTES do card (QF1-4, MF1-2)
-            // Estrutura do bracket: QF1 vs QF4 -> MF1, QF2 vs QF3 -> MF2
+            // Ordem sequencial por chave do bracket: QF1, QF2, QF3, QF4
             let matchIdentifier = '';
             if (round === 'Quartos de Final') {
-                // Mapear visualmente: índice 0->QF1, 1->QF4, 2->QF2, 3->QF3
-                const qfMapping = [1, 4, 2, 3];
-                matchIdentifier = `QF${qfMapping[index]}`;
+                matchIdentifier = `QF${index + 1}`;
             } else if (round === 'Meias-Finais') {
                 matchIdentifier = `MF${index + 1}`;
             } else if (round === 'Final') {
@@ -4796,8 +4836,10 @@ function createBracket() {
                 }
                             <span>${displayTeam1}</span>
                         </div>
-                        <span class="score">${showScore ? match.score1 : '-'}</span>
-                        ${elo1Html}
+                        <div class="bracket-team-meta">
+                            <span class="score">${showScore ? match.score1 : '-'}</span>
+                            ${elo1Html}
+                        </div>
                     `;
 
             // Adicionar label de qualificação acima da equipa 1 (com fallback por seed em liga única)
@@ -4876,8 +4918,10 @@ function createBracket() {
                 }
                             <span>${displayTeam2}</span>
                         </div>
-                        <span class="score">${showScore ? match.score2 : '-'}</span>
-                        ${elo2Html}
+                        <div class="bracket-team-meta">
+                            <span class="score">${showScore ? match.score2 : '-'}</span>
+                            ${elo2Html}
+                        </div>
                     `;
 
             matchDiv.appendChild(team1Div);
@@ -5187,8 +5231,10 @@ function createSecondaryBracket() {
                     }
                             <span>${displayTeam1}</span>
                         </div>
-                        <span class="score">${showScore ? match.score1 : '-'}</span>
-                        ${elo1Html}
+                        <div class="bracket-team-meta">
+                            <span class="score">${showScore ? match.score1 : '-'}</span>
+                            ${elo1Html}
+                        </div>
                     `;
 
                 // Adicionar label de qualificação acima da equipa 1 (mesma lógica da liguilha)
@@ -5241,8 +5287,10 @@ function createSecondaryBracket() {
                     }
                             <span>${displayTeam2}</span>
                         </div>
-                        <span class="score">${showScore ? match.score2 : '-'}</span>
-                        ${elo2Html}
+                        <div class="bracket-team-meta">
+                            <span class="score">${showScore ? match.score2 : '-'}</span>
+                            ${elo2Html}
+                        </div>
                     `;
 
                 matchDiv.appendChild(team1Div);
@@ -6443,7 +6491,7 @@ function formatBracketMatchDate(dateStr, time, location, currentLang = 'pt') {
     const date = new Date(year, month, day);
     const weekdayIndex = date.getDay();
     const weekday = t(weekdayKeys[weekdayIndex]);
-    const dateStrFormatted = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')} (${weekday})`;
+    const dateStrFormatted = `${day.toString().padStart(2, '0')}/${String(month + 1).padStart(2, '0')} (${weekday})`;
     let locationShort = location || '';
     if (locationShort === 'Caixa UA') locationShort = 'Nave';
     else if (locationShort === 'Sintético') locationShort = 'Sintético';
@@ -6531,11 +6579,7 @@ function resolvePlayoffMatchup(teamLabel, bracketData, roundName) {
     if (qfMatch) {
         const qfRoundName = 'Quartos de Final';
         if (bracketData && bracketData[qfRoundName]) {
-            // Mapping visual: índice 0->QF1, 1->QF4, 2->QF2, 3->QF3
-            const qfVisualMap = { 1: 0, 4: 1, 2: 2, 3: 3 };
-            const qfIndex = qfVisualMap[parseInt(qfMatch[1])] !== undefined
-                ? qfVisualMap[parseInt(qfMatch[1])]
-                : parseInt(qfMatch[1]) - 1;
+            const qfIndex = parseInt(qfMatch[1], 10) - 1;
             sourceRound = bracketData[qfRoundName][qfIndex];
         }
     } else if (mfMatch) {
@@ -6545,7 +6589,7 @@ function resolvePlayoffMatchup(teamLabel, bracketData, roundName) {
         // Primeiro tenta encontrar no bracket principal (Meias-Finais)
         if (bracketData && bracketData[mfRoundName] && bracketData[mfRoundName][mfIndex]) {
             sourceRound = bracketData[mfRoundName][mfIndex];
-            // Obter os QF correspondentes: MF1=(QF1+QF4), MF2=(QF2+QF3)
+            // Obter os QF correspondentes: MF1=(QF1+QF2), MF2=(QF3+QF4)
             const qfIndices = mfIndex === 0 ? [0, 1] : [2, 3];
             // Resolver os placeholders internos (Vencedor Q1, Vencedor Q2, etc)
             if (sourceRound.team1?.startsWith('Vencedor')) {
@@ -8850,8 +8894,8 @@ function buildCalendarTeamPages(filteredMatches, options = {}) {
 
                         if (!qfId) return;
 
-                        // Mapear QF para MF: QF1/QF4 -> MF1, QF2/QF3 -> MF2
-                        const mfId = (qfId === 'QF1' || qfId === 'QF4') ? 'MF1' : 'MF2';
+                        // Mapear QF para MF: QF1/QF2 -> MF1, QF3/QF4 -> MF2
+                        const mfId = (qfId === 'QF1' || qfId === 'QF2') ? 'MF1' : 'MF2';
 
                         // Adicionar a meia-final correta (E2) e as finais (E3/E3L)
                         filteredMatches.forEach(m => {
@@ -10406,8 +10450,8 @@ function updateCalendar() {
 
         return {
             ...game,
-            eloDelta1: eloMatch ? eloMatch['Elo Delta 1'] : null,
-            eloDelta2: eloMatch ? eloMatch['Elo Delta 2'] : null
+            eloDelta1: getDisplayEloChange(eloMatch, 1),
+            eloDelta2: getDisplayEloChange(eloMatch, 2)
         };
     });
 
@@ -10770,7 +10814,6 @@ function processRankings(data) {
     // Limpar cache de equipas qualificadas quando rankings mudam
     qualifiedTeamsCache = null;
 
-    // Verificar duplicatas na lista de teams (apenas em modo debug)
     // Carregar brackets depois de processar classificações
     // Isso garante que getQualifiedTeams() terá dados disponíveis
     setTimeout(() => {

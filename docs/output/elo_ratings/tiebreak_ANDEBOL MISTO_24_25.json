@@ -62,8 +62,8 @@
       "tie_points": 18,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Informática",
         "Eng. Computadores e Telemática",
+        "Eng. Informática",
         "Eng. Civil"
       ],
       "criteria_order": [
@@ -125,8 +125,8 @@
       "tie_points": 21,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -287,8 +287,8 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. Informática",
         "Eng. Computadores e Telemática",
+        "Eng. Informática",
         "Eng. Civil"
       ],
       "criteria_order": [
@@ -319,8 +319,8 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. Informática",
         "Eng. Computadores e Telemática",
+        "Eng. Informática",
         "Eng. Civil"
       ],
       "criteria_order": [
@@ -351,8 +351,8 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. Informática",
         "Eng. Computadores e Telemática",
+        "Eng. Informática",
         "Eng. Civil"
       ],
       "criteria_order": [
@@ -383,8 +383,8 @@
       "tie_type": "head_to_head",
       "tie_points": 21,
       "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -414,8 +414,8 @@
       "tie_type": "head_to_head",
       "tie_points": 21,
       "tied_teams": [
-        "Gestão",
-        "DPT"
+        "DPT",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",

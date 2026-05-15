@@ -12,8 +12,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Matemática",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,8 +162,8 @@
       "tie_points": 9,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Psicologia",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Psicologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -212,8 +212,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -243,8 +243,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Civil"
+        "Eng. Civil",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -336,8 +336,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Matemática",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -367,8 +367,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Matemática",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -398,8 +398,8 @@
       "tie_type": "head_to_head",
       "tie_points": 9,
       "tied_teams": [
-        "Psicologia",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Psicologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -429,8 +429,8 @@
       "tie_type": "head_to_head",
       "tie_points": 9,
       "tied_teams": [
-        "Psicologia",
-        "Eng. Mecânica"
+        "Eng. Mecânica",
+        "Psicologia"
       ],
       "criteria_order": [
         "faltas_comparencia",

@@ -61,7 +61,12 @@ def is_playoff_jornada(jornada_value) -> bool:
         return False
     if not s:
         return False
-    return s.startswith("E") or s.startswith("MP") or s.startswith("LP") or s.startswith("LM")
+    return (
+        s.startswith("E")
+        or s.startswith("MP")
+        or s.startswith("LP")
+        or s.startswith("LM")
+    )
 
 
 def detect_latest_season_from_csv_files(input_dir: str = None):
@@ -223,7 +228,11 @@ def normalize_team_name(team_name):
         return None
 
     # Ignorar se for um objeto de data/hora (Timestamp ou datetime)
-    if hasattr(team_name, "year") and hasattr(team_name, "month") and hasattr(team_name, "day"):
+    if (
+        hasattr(team_name, "year")
+        and hasattr(team_name, "month")
+        and hasattr(team_name, "day")
+    ):
         return None
 
     # Remover espaços em branco
@@ -1702,9 +1711,27 @@ class EloRatingSystem:
         Returns:
             Multiplicador para o fator K
         """
+
         # Verificar se é jogo do terceiro lugar
         if jornada and str(jornada).upper() == "E3L":
             return 0.75
+
+        # Se não há informação de jogos da fase de grupos, tratar como eliminatória
+        if not total_group_games or total_group_games <= 0:
+            if jornada:
+                j = str(jornada).upper()
+                # Terceiro lugar já tratado acima
+                # Definir multiplicador padrão para fases eliminatórias
+                if (
+                    j.startswith("E")
+                    or j.startswith("PM")
+                    or j.startswith("LM")
+                    or j.startswith("MP")
+                    or j.startswith("LP")
+                ):
+                    return 1.5
+            # Sem jornada, retornar multiplicador neutro
+            return 1
 
         # Normalizar o número do jogo para uma escala de 0 a 8
         game_number_scaled = game_number / total_group_games * 8
@@ -2194,12 +2221,14 @@ class EloRatingSystem:
 
         # Calcular multiplicadores
         if is_elimination:
-            phase_multiplier1 = self.calculate_season_phase_multiplier(
-                game_count[team1], total_group_games[team1], None, jornada
-            )
-            phase_multiplier2 = self.calculate_season_phase_multiplier(
-                game_count[team2], total_group_games[team2], None, jornada
-            )
+            # Para jogos de eliminatórias, usar regra uniforme por jornada:
+            # - 'E3L' (3º lugar) -> 0.75
+            # - outras jornadas de playoff -> 1.5
+            j = str(jornada).upper() if jornada is not None else ""
+            if j == "E3L":
+                phase_multiplier1 = phase_multiplier2 = 0.75
+            else:
+                phase_multiplier1 = phase_multiplier2 = 1.5
         else:
             phase_multiplier1 = self.calculate_season_phase_multiplier(
                 game_count[team1],
@@ -2896,24 +2925,34 @@ class TournamentProcessor:
                         # Procurar a equipa desistente no DataFrame original para obter divisão/grupo
                         # USAR NOME NORMALIZADO para encontrar a equipa
                         normalized_withdrawn = normalize_team_name(withdrawn_team)
-                        
+
                         # Normalizar nomes das equipas no DataFrame para matching
                         df_original_normalized = df_original.copy()
                         if "Equipa 1" in df_original_normalized.columns:
-                            df_original_normalized["Equipa 1_normalized"] = df_original_normalized["Equipa 1"].apply(
-                                lambda x: normalize_team_name(str(x)) if pd.notna(x) else ""
+                            df_original_normalized[
+                                "Equipa 1_normalized"
+                            ] = df_original_normalized["Equipa 1"].apply(
+                                lambda x: (
+                                    normalize_team_name(str(x)) if pd.notna(x) else ""
+                                )
                             )
                         if "Equipa 2" in df_original_normalized.columns:
-                            df_original_normalized["Equipa 2_normalized"] = df_original_normalized["Equipa 2"].apply(
-                                lambda x: normalize_team_name(str(x)) if pd.notna(x) else ""
+                            df_original_normalized[
+                                "Equipa 2_normalized"
+                            ] = df_original_normalized["Equipa 2"].apply(
+                                lambda x: (
+                                    normalize_team_name(str(x)) if pd.notna(x) else ""
+                                )
                             )
-                        
+
                         team_data = df_original_normalized[
-                            df_original_normalized["Equipa 1_normalized"] == normalized_withdrawn
+                            df_original_normalized["Equipa 1_normalized"]
+                            == normalized_withdrawn
                         ]
                         if team_data.empty:
                             team_data = df_original_normalized[
-                                df_original_normalized["Equipa 2_normalized"] == normalized_withdrawn
+                                df_original_normalized["Equipa 2_normalized"]
+                                == normalized_withdrawn
                             ]
 
                         if not team_data.empty:
@@ -3181,7 +3220,9 @@ def main():
                 for csv_file in previsoes_dir.glob("*.csv"):
                     try:
                         csv_file.unlink()
-                        logger.info(f"Apagado ficheiro de previsão antigo: {csv_file.name}")
+                        logger.info(
+                            f"Apagado ficheiro de previsão antigo: {csv_file.name}"
+                        )
                     except Exception as e:
                         logger.warning(f"Erro ao apagar {csv_file.name}: {e}")
 

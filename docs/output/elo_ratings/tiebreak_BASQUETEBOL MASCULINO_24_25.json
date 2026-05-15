@@ -12,9 +12,9 @@
       "tie_points": 14,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. de Materiais",
         "Eng. Mecânica",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -75,9 +75,9 @@
       "tie_points": 8,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. e Gestão Industrial",
         "Biologia",
-        "Eng. Aeroespacial"
+        "Eng. Aeroespacial",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -138,8 +138,8 @@
       "tie_points": 4,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Fisioterapia",
-        "Economia"
+        "Economia",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -188,9 +188,9 @@
       "tie_points": 10,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Eng. Química",
+        "Eng. Física",
         "Gestão e Planeamento em Turismo",
-        "Eng. Física"
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -251,8 +251,8 @@
       "tie_points": 8,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Biomédica",
-        "Finanças"
+        "Finanças",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -301,8 +301,8 @@
       "tie_points": 4,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Biologia e Geologia",
-        "DPT"
+        "DPT",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -464,9 +464,9 @@
       "tie_type": "mini_league",
       "tie_points": 14,
       "tied_teams": [
-        "Eng. de Materiais",
         "Eng. Mecânica",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -496,9 +496,9 @@
       "tie_type": "mini_league",
       "tie_points": 14,
       "tied_teams": [
-        "Eng. de Materiais",
         "Eng. Mecânica",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -528,9 +528,9 @@
       "tie_type": "mini_league",
       "tie_points": 14,
       "tied_teams": [
-        "Eng. de Materiais",
         "Eng. Mecânica",
-        "Eng. Eletrónica e Telecomunicações"
+        "Eng. Eletrónica e Telecomunicações",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -560,9 +560,9 @@
       "tie_type": "mini_league",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
         "Biologia",
-        "Eng. Aeroespacial"
+        "Eng. Aeroespacial",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -592,9 +592,9 @@
       "tie_type": "mini_league",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
         "Biologia",
-        "Eng. Aeroespacial"
+        "Eng. Aeroespacial",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -624,9 +624,9 @@
       "tie_type": "mini_league",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
         "Biologia",
-        "Eng. Aeroespacial"
+        "Eng. Aeroespacial",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -656,8 +656,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "Fisioterapia",
-        "Economia"
+        "Economia",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -687,8 +687,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "Fisioterapia",
-        "Economia"
+        "Economia",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -718,9 +718,9 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Química",
+        "Eng. Física",
         "Gestão e Planeamento em Turismo",
-        "Eng. Física"
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -750,9 +750,9 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Química",
+        "Eng. Física",
         "Gestão e Planeamento em Turismo",
-        "Eng. Física"
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -782,9 +782,9 @@
       "tie_type": "mini_league",
       "tie_points": 10,
       "tied_teams": [
-        "Eng. Química",
+        "Eng. Física",
         "Gestão e Planeamento em Turismo",
-        "Eng. Física"
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -814,8 +814,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. Biomédica",
-        "Finanças"
+        "Finanças",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -845,8 +845,8 @@
       "tie_type": "head_to_head",
       "tie_points": 8,
       "tied_teams": [
-        "Eng. Biomédica",
-        "Finanças"
+        "Finanças",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -876,8 +876,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "Biologia e Geologia",
-        "DPT"
+        "DPT",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -907,8 +907,8 @@
       "tie_type": "head_to_head",
       "tie_points": 4,
       "tied_teams": [
-        "Biologia e Geologia",
-        "DPT"
+        "DPT",
+        "Biologia e Geologia"
       ],
       "criteria_order": [
         "faltas_comparencia",

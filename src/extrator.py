@@ -485,11 +485,11 @@ class ExcelProcessor:
                 continue
             if sl in cols_lower:
                 continue
-            
+
             # Filtrar por validade
             if not ExcelProcessor._is_valid_team(s):
                 continue
-                
+
             if s not in texts:
                 texts.append(s)
 
@@ -524,7 +524,7 @@ class ExcelProcessor:
         """Devolve False se o nome da equipa for inválido (cabeçalho, data, etc.)."""
         if not name:
             return False
-        
+
         # Se for um objeto de data/hora
         if hasattr(name, "year") and hasattr(name, "month"):
             return False
@@ -556,6 +556,77 @@ class ExcelProcessor:
             if any(s in cl for s in substrings):
                 return c
         return None
+
+    @staticmethod
+    def _to_int_goal(value) -> Optional[int]:
+        """Converte um valor de golo para inteiro, se possível."""
+        if pd.isna(value):
+            return None
+
+        # Evitar tratar datas como golos
+        if hasattr(value, "year") and hasattr(value, "month"):
+            return None
+
+        if isinstance(value, (int, float)):
+            if pd.isna(value):
+                return None
+            try:
+                return int(value)
+            except Exception:
+                return None
+
+        s = str(value).strip()
+        if not s:
+            return None
+        if s.lower() in {"vs", "v.s.", "v s", "x", "nan", "none", "null"}:
+            return None
+
+        m = re.match(r"^\d+$", s)
+        if not m:
+            return None
+        try:
+            return int(s)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _extract_goals(
+        row: pd.Series,
+        col_home: Optional[str],
+        col_away: Optional[str],
+        df_columns,
+    ) -> Tuple[object, object]:
+        """Extrai golos da linha de playoff (ex.: ""2 vs 0"").
+
+        Procura primeiro colunas explícitas de golos/resultado. Se não existir,
+        usa as colunas entre equipa visitada e visitante.
+        """
+        # 1) Tentativa por nomes de coluna explícitos
+        col_g1 = ExcelProcessor._find_col(df_columns, "golos 1", "resultado 1")
+        col_g2 = ExcelProcessor._find_col(df_columns, "golos 2", "resultado 2")
+        if col_g1 and col_g2:
+            g1 = ExcelProcessor._to_int_goal(row.get(col_g1))
+            g2 = ExcelProcessor._to_int_goal(row.get(col_g2))
+            return (g1 if g1 is not None else pd.NA, g2 if g2 is not None else pd.NA)
+
+        # 2) Fallback pelo intervalo entre equipa visitada e visitante
+        cols_list = list(df_columns)
+        if col_home in cols_list and col_away in cols_list:
+            ih = cols_list.index(col_home)
+            ia = cols_list.index(col_away)
+            if ih < ia:
+                between_cols = cols_list[ih + 1 : ia]
+                goals: List[int] = []
+                for c in between_cols:
+                    g = ExcelProcessor._to_int_goal(row.get(c))
+                    if g is not None:
+                        goals.append(g)
+                        if len(goals) == 2:
+                            break
+                if len(goals) == 2:
+                    return goals[0], goals[1]
+
+        return pd.NA, pd.NA
 
     # ── Células vermelhas (faltas de comparência) ─────────────────────────────
 
@@ -735,6 +806,7 @@ class ExcelProcessor:
             team1, team2 = self._extract_teams(
                 row, col_home, col_away, cols, sheet_extra_banned
             )
+            golos1, golos2 = self._extract_goals(row, col_home, col_away, cols)
 
             if not team1 and not team2:
                 continue
@@ -766,8 +838,8 @@ class ExcelProcessor:
                     "Hora": str(row.get(col_hora)) if col_hora else "",
                     "Local": str(row.get(col_local)) if col_local else "",
                     "Equipa 1": team1,
-                    "Golos 1": pd.NA,
-                    "Golos 2": pd.NA,
+                    "Golos 1": golos1,
+                    "Golos 2": golos2,
                     "Equipa 2": team2,
                     "Falta de Comparência": "",
                 }
@@ -847,6 +919,7 @@ class ExcelProcessor:
             )
 
             team1, team2 = self._extract_teams(row, col_home, col_away, cols)
+            golos1, golos2 = self._extract_goals(row, col_home, col_away, cols)
 
             if not team1 and not team2:
                 continue
@@ -881,8 +954,8 @@ class ExcelProcessor:
                     "Hora": str(row.get(col_hora)) if col_hora else "",
                     "Local": str(row.get(col_local)) if col_local else "",
                     "Equipa 1": team1,
-                    "Golos 1": pd.NA,
-                    "Golos 2": pd.NA,
+                    "Golos 1": golos1,
+                    "Golos 2": golos2,
                     "Equipa 2": team2,
                     "Falta de Comparência": "",
                 }
@@ -926,9 +999,7 @@ class ExcelProcessor:
         # Evita acumulacao entre execucoes.
         if "Jornada" in base_df.columns:
             base_df = base_df[
-                ~base_df["Jornada"].apply(
-                    lambda j: self.is_playoff_jornada(str(j))
-                )
+                ~base_df["Jornada"].apply(lambda j: self.is_playoff_jornada(str(j)))
             ].copy()
 
         # Inicializar colunas de metadados se não existirem
@@ -937,7 +1008,7 @@ class ExcelProcessor:
             playoffs_df["Data_Placeholder"] = False
         if "Fonte_Data" not in playoffs_df.columns:
             playoffs_df["Fonte_Data"] = ""
-            
+
         # Partilhar o contador de slots entre datas e locais para que
         # cada jogo consuma o slot correcto nas duas operações
         self._shared_playoff_indices: dict = {}
@@ -1148,7 +1219,7 @@ class ExcelProcessor:
     def _assign_date_placeholders(
         self, df: pd.DataFrame, modality: str
     ) -> pd.DataFrame:
-        """Atribui datas com prioridade corrigida: 
+        """Atribui datas com prioridade corrigida:
         Para Playoffs: PDF Playoffs -> Excel -> Placeholder.
         Para Regular: Excel -> PDF Regular -> Placeholder.
         """
@@ -1160,20 +1231,29 @@ class ExcelProcessor:
             df["Fonte_Data"] = ""
 
         import re
-        modality_clean = re.sub(r"(_25_26|_24_25|\|.*|PLAYOFFS.*)$", "", modality, flags=re.I).strip()
+
+        modality_clean = re.sub(
+            r"(_25_26|_24_25|\|.*|PLAYOFFS.*)$", "", modality, flags=re.I
+        ).strip()
 
         modality_map = {
             "ANDEBOL MISTO": "ANDEBOL",
             "FUTEBOL DE 7 MASCULINO": "FUTEBOL 7",
         }
         pdf_modality = modality_map.get(modality_clean, modality_clean)
-        
-        logging.info(f"[PLAYOFFS] Modalidade: {modality} -> pdf_modality: {pdf_modality}")
+
+        logging.info(
+            f"[PLAYOFFS] Modalidade: {modality} -> pdf_modality: {pdf_modality}"
+        )
         if cal_playoffs:
             keys_for_mod = [k for k in cal_playoffs.keys() if k[0] == pdf_modality]
-            logging.info(f"[PLAYOFFS] Chaves disponíveis para {pdf_modality}: {keys_for_mod}")
+            logging.info(
+                f"[PLAYOFFS] Chaves disponíveis para {pdf_modality}: {keys_for_mod}"
+            )
 
-        def _lookup_pdf_date(equipa1: str, equipa2: str) -> Tuple[Optional[str], Optional[str]]:
+        def _lookup_pdf_date(
+            equipa1: str, equipa2: str
+        ) -> Tuple[Optional[str], Optional[str]]:
             if pdf_modality not in cal:
                 return None, None
             e1n = self._normalizar(equipa1, config)
@@ -1225,31 +1305,39 @@ class ExcelProcessor:
             jornada = str(row.get("Jornada", "")).strip().upper()
 
             has_result = (
-                pd.notna(golos1) and str(golos1).strip() != "" 
-                and pd.notna(golos2) and str(golos2).strip() != ""
+                pd.notna(golos1)
+                and str(golos1).strip() != ""
+                and pd.notna(golos2)
+                and str(golos2).strip() != ""
             )
             has_excel_date = (
-                pd.notna(dia) and str(dia).strip() != "" 
-                and pd.notna(hora) and str(hora).strip() != ""
+                pd.notna(dia)
+                and str(dia).strip() != ""
+                and pd.notna(hora)
+                and str(hora).strip() != ""
             )
 
-# --- LÓGICA PARA JOGOS DE PLAYOFF (E*, PM*, LM*) ---
+            # --- LÓGICA PARA JOGOS DE PLAYOFF (E*, PM*, LM*) ---
             if self.is_playoff_jornada(jornada):
                 # Normalizar jornada para busca flexível
                 jornada_normalized = jornada.upper().strip()
-                
+
                 # PDF de Playoffs é a fonte de datas para playoffs
                 if cal_playoffs:
                     playoff_key = (pdf_modality, jornada_normalized)
-                    
-                    logging.info(f"[PLAYOFFS] Procurando chave: {playoff_key} em {list(cal_playoffs.keys())[:5]}...")
-                    
+
+                    logging.info(
+                        f"[PLAYOFFS] Procurando chave: {playoff_key} em {list(cal_playoffs.keys())[:5]}..."
+                    )
+
                     # Tentar chave exata primeiro
                     if playoff_key in cal_playoffs and cal_playoffs[playoff_key]:
                         idx_in_list = playoff_indices.get(playoff_key, 0)
                         total_slots = len(cal_playoffs[playoff_key])
-                        logging.info(f"[PLAYOFFS] Encontrada chave {playoff_key} com {total_slots} slots, idx_atual={idx_in_list}")
-                        
+                        logging.info(
+                            f"[PLAYOFFS] Encontrada chave {playoff_key} com {total_slots} slots, idx_atual={idx_in_list}"
+                        )
+
                         if idx_in_list < total_slots:
                             slot = cal_playoffs[playoff_key][idx_in_list]
                             playoff_indices[playoff_key] = idx_in_list + 1
@@ -1257,30 +1345,46 @@ class ExcelProcessor:
                             df.at[idx, "Hora"] = slot[1]
                             df.at[idx, "Fonte_Data"] = "Calendário PDF Playoffs"
                             df.at[idx, "Data_Placeholder"] = False
-                            logging.info(f"[PLAYOFFS] OK {idx}: {jornada_normalized} -> {slot[0]} {slot[1]}")
+                            logging.info(
+                                f"[PLAYOFFS] OK {idx}: {jornada_normalized} -> {slot[0]} {slot[1]}"
+                            )
                             continue
                         else:
-                            logging.warning(f"[PLAYOFFS] Índice excedido: {idx_in_list} >= {total_slots}, usando último slot")
+                            logging.warning(
+                                f"[PLAYOFFS] Índice excedido: {idx_in_list} >= {total_slots}, usando último slot"
+                            )
                             slot = cal_playoffs[playoff_key][-1]
                             df.at[idx, "Dia"] = slot[0]
                             df.at[idx, "Hora"] = slot[1]
                             df.at[idx, "Fonte_Data"] = "Calendário PDF Playoffs"
                             df.at[idx, "Data_Placeholder"] = False
-                            logging.info(f"[PLAYOFFS] ULTIMO SLOT {idx}: {jornada_normalized} -> {slot[0]} {slot[1]}")
+                            logging.info(
+                                f"[PLAYOFFS] ULTIMO SLOT {idx}: {jornada_normalized} -> {slot[0]} {slot[1]}"
+                            )
                             continue
-                    
+
                     # Fallback: procurar por nomes de equipas (busca exata)
-                    e1_normalized = self._normalizar(equipa1, config) if self._normalizar else None
-                    e2_normalized = self._normalizar(equipa2, config) if self._normalizar else None
-                    
-                    logging.info(f"[PLAYOFFS] Fallback equipas: {e1_normalized} vs {e2_normalized}")
-                    
+                    e1_normalized = (
+                        self._normalizar(equipa1, config) if self._normalizar else None
+                    )
+                    e2_normalized = (
+                        self._normalizar(equipa2, config) if self._normalizar else None
+                    )
+
+                    logging.info(
+                        f"[PLAYOFFS] Fallback equipas: {e1_normalized} vs {e2_normalized}"
+                    )
+
                     if e1_normalized and e2_normalized:
                         for key in cal_playoffs:
                             if key[0] != pdf_modality:
                                 continue
                             for slot_idx, slot in enumerate(cal_playoffs[key]):
-                                local = str(slot[2]).lower() if len(slot) >= 3 and slot[2] else ""
+                                local = (
+                                    str(slot[2]).lower()
+                                    if len(slot) >= 3 and slot[2]
+                                    else ""
+                                )
                                 e1_lower = e1_normalized.lower()
                                 e2_lower = e2_normalized.lower()
                                 if e1_lower in local or e2_lower in local:
@@ -1288,20 +1392,29 @@ class ExcelProcessor:
                                     df.at[idx, "Hora"] = slot[1]
                                     df.at[idx, "Fonte_Data"] = "Calendário PDF Playoffs"
                                     df.at[idx, "Data_Placeholder"] = False
-                                    logging.info(f"[PLAYOFFS-EQUIPAS] OK {idx}: {jornada_normalized} -> {slot[0]} (local={local})")
+                                    logging.info(
+                                        f"[PLAYOFFS-EQUIPAS] OK {idx}: {jornada_normalized} -> {slot[0]} (local={local})"
+                                    )
                                     break
                             else:
                                 continue
                             break
 
                     # Fallback: procurar qualquer jogo disponível nesta fase (sem depender de índice)
-                    fase_prefix = jornada_normalized[:2] if len(jornada_normalized) >= 2 else jornada_normalized
+                    fase_prefix = (
+                        jornada_normalized[:2]
+                        if len(jornada_normalized) >= 2
+                        else jornada_normalized
+                    )
                     logging.info(f"[PLAYOFFS] Fallback fase: {fase_prefix}")
-                    
+
                     for key in cal_playoffs:
                         if key[0] == pdf_modality and key[1].startswith(fase_prefix):
-                            available_slots = [i for i, s in enumerate(cal_playoffs[key]) 
-                                             if i >= playoff_indices.get(key, 0)]
+                            available_slots = [
+                                i
+                                for i, s in enumerate(cal_playoffs[key])
+                                if i >= playoff_indices.get(key, 0)
+                            ]
                             if available_slots:
                                 next_idx = available_slots[0]
                                 slot = cal_playoffs[key][next_idx]
@@ -1312,10 +1425,14 @@ class ExcelProcessor:
                             df.at[idx, "Hora"] = slot[1]
                             df.at[idx, "Fonte_Data"] = "Calendário PDF Playoffs"
                             df.at[idx, "Data_Placeholder"] = False
-                            logging.info(f"[PLAYOFFS-FALLBACK] OK {idx}: {jornada_normalized} -> {slot[0]} (chave {key})")
+                            logging.info(
+                                f"[PLAYOFFS-FALLBACK] OK {idx}: {jornada_normalized} -> {slot[0]} (chave {key})"
+                            )
                             break
                     else:
-                        logging.warning(f"[PLAYOFFS] Nenhuma chave encontrada para fase {fase_prefix} em {pdf_modality}")
+                        logging.warning(
+                            f"[PLAYOFFS] Nenhuma chave encontrada para fase {fase_prefix} em {pdf_modality}"
+                        )
 
                 # Se chegou aqui sem encontrar data no PDF, usar placeholder se tiver resultado
                 if has_result:
@@ -1423,7 +1540,10 @@ class ExcelProcessor:
             df["Local"] = ""
 
         import re
-        modality_clean = re.sub(r"(_25_26|_24_25|\|.*|PLAYOFFS.*)$", "", modality, flags=re.I).strip()
+
+        modality_clean = re.sub(
+            r"(_25_26|_24_25|\|.*|PLAYOFFS.*)$", "", modality, flags=re.I
+        ).strip()
 
         modality_map = {
             "ANDEBOL MISTO": "ANDEBOL",
@@ -1793,9 +1913,14 @@ class ExcelProcessor:
         dedicated = getattr(self, "_modalities_with_dedicated_playoffs", set())
         # Comparar pelo prefixo da folha (antes do "|") porque dedicated
         # guarda o prefixo devolvido por _detect_base_modality_for_playoffs
-        sheet_prefix = sheet_name.split("|")[0].strip() if "|" in sheet_name else sheet_name
-        if playoffs_df_embedded is not None and not playoffs_df_embedded.empty \
-                and sheet_prefix not in dedicated:
+        sheet_prefix = (
+            sheet_name.split("|")[0].strip() if "|" in sheet_name else sheet_name
+        )
+        if (
+            playoffs_df_embedded is not None
+            and not playoffs_df_embedded.empty
+            and sheet_prefix not in dedicated
+        ):
             expected_cols = self.base_headers
             for c in expected_cols:
                 if c not in playoffs_df_embedded.columns:
@@ -1898,7 +2023,8 @@ def main():
     if config_url:
         try:
             url = normalize_results_url(config_url)
-            downloaded_file = download_results_excel(url)
+            data_dir = repo_root / "data"
+            downloaded_file = download_results_excel(url, dest_dir=data_dir)
             logging.info(f"Documento descarregado para: {downloaded_file}")
 
             xls_temp = pd.ExcelFile(str(downloaded_file))
@@ -1917,7 +2043,7 @@ def main():
                 )
 
             target_name = f"Resultados Taça UA {season_detected}.xlsx"
-            target_path = downloaded_file.parent / target_name
+            target_path = (repo_root / "data") / target_name
             if downloaded_file.name != target_name:
                 try:
                     if target_path.exists():

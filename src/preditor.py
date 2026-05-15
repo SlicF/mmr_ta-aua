@@ -1905,6 +1905,7 @@ def simulate_playoffs(
     ranking: List[Tuple[str, int]],
     elo_system: CompleteTacauaEloSystem,
     score_simulator: SportScoreSimulator,
+    exclude_teams: Set[str] | None = None,
 ) -> Tuple[str, List[str], List[str], List[Dict]]:
     """
     Simula playoffs com árvore de eliminatória.
@@ -1921,8 +1922,13 @@ def simulate_playoffs(
     Equipas B não podem ir aos playoffs - se estiverem no top 8, a próxima
     equipa não-B ocupa a posição.
     """
-    # Filtrar equipas B do ranking
-    eligible_ranking = [(team, pts) for team, pts in ranking if not is_b_team(team)]
+    # Filtrar equipas B do ranking e qualquer equipa já eliminada em jogos de playoff reais
+    exclude_teams = exclude_teams or set()
+    eligible_ranking = [
+        (team, pts)
+        for team, pts in ranking
+        if not is_b_team(team) and team not in exclude_teams
+    ]
 
     if len(eligible_ranking) < 2:
         champion = eligible_ranking[0][0] if eligible_ranking else None
@@ -2475,6 +2481,8 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         past_played_matches,
         hardset_manager,
         withdrawn_teams,
+        playoff_eliminated_teams,
+        playoff_active_winners,
         modalidade,
         playoff_rules,
     ) = args_tuple
@@ -2514,7 +2522,12 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         played_matches_for_tiebreak,
         modalidade=modalidade,
     )
-    playoff_teams = {name: Team(name, final_elos[name]) for name in final_elos}
+    # Excluir equipas que já foram eliminadas em jogos de playoff já realizados
+    playoff_teams = {
+        name: Team(name, final_elos[name])
+        for name in final_elos
+        if name not in (playoff_eliminated_teams or set())
+    }
 
     # Acumular estatísticas apenas de jogos futuros
     # season_results: {match_id: (winner, score_a, score_b, elo_a_before, elo_b_before)}
@@ -2590,7 +2603,16 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
     playoff_count_sim: Dict = {}
     playoff_bracket_ranking: List[Tuple[str, int]] = []
 
-    if playoff_slots:
+    # Se há vencedores ativos de playoff (rondas já jogadas), usar APENAS esses.
+    # Isto evita substituir eliminados por equipas do ranking regular que nunca
+    # chegaram a disputar os playoffs, o que criaria confrontos impossíveis.
+    if playoff_active_winners:
+        points_map = {t: pts for t, pts in ranking}
+        for team, pts in ranking:
+            if team in playoff_active_winners and not is_b_team(team):
+                playoff_count_sim[team] = 1
+                playoff_bracket_ranking.append((team, points_map[team]))
+    elif playoff_slots:
         # Necessitamos do dictionary em points para mapear ranking original
         points_map = {t: pts for t, pts in ranking}
 
@@ -2599,7 +2621,7 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
             slots = playoff_slots[group_key]
             placed = 0
             for team in ranked_by_group.get(group_key, []):
-                if is_b_team(team):
+                if is_b_team(team) or team in (playoff_eliminated_teams or set()):
                     continue
                 playoff_count_sim[team] = 1
                 playoff_bracket_ranking.append((team, points_map[team]))
@@ -2611,13 +2633,17 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
         for team, pts in ranking:
             if playoff_qualifiers >= total_playoff_slots:
                 break
-            if not is_b_team(team):
+            if not is_b_team(team) and team not in (playoff_eliminated_teams or set()):
                 playoff_count_sim[team] = 1
                 playoff_bracket_ranking.append((team, pts))
                 playoff_qualifiers += 1
 
     champion, semifinalists, finalists, playoff_matches = simulate_playoffs(
-        playoff_teams, playoff_bracket_ranking, elo_system, score_simulator
+        playoff_teams,
+        playoff_bracket_ranking,
+        elo_system,
+        score_simulator,
+        exclude_teams=playoff_eliminated_teams,
     )
 
     secondary_liguilla_top_team: str | None = None
@@ -2634,9 +2660,7 @@ def _run_single_simulation_worker(args_tuple) -> SimulationResult:
             div = int(entry.get("div", 1))
             offset = int(entry.get("offset", 3))
             # No Tacaua, manutenção é o 1º acima dos descidos diretos
-            candidates = [
-                t for t in standings.get((div, ""), []) if not is_b_team(t)
-            ]
+            candidates = [t for t in standings.get((div, ""), []) if not is_b_team(t)]
             if not candidates:
                 return None
             pos = len(candidates) - offset
@@ -3009,6 +3033,8 @@ def monte_carlo_forecast(
     past_played_matches: List[Tuple[str, str, int, int]] = None,
     hardset_manager: "HardsetManager | None" = None,
     withdrawn_teams: Set[str] = None,
+    playoff_eliminated_teams: Set[str] = None,
+    playoff_active_winners: Set[str] = None,
     modalidade: str | None = None,
     playoff_rules: Dict | None = None,
 ) -> Tuple[
@@ -3029,6 +3055,12 @@ def monte_carlo_forecast(
 
     if withdrawn_teams is None:
         withdrawn_teams = set()
+
+    if playoff_eliminated_teams is None:
+        playoff_eliminated_teams = set()
+
+    if playoff_active_winners is None:
+        playoff_active_winners = set()
 
     if secondary_playoff_pm1 is None:
         secondary_playoff_pm1 = []
@@ -3123,6 +3155,8 @@ def monte_carlo_forecast(
                         past_played_matches,
                         hardset_manager,
                         withdrawn_teams,
+                        playoff_eliminated_teams,
+                        playoff_active_winners,
                         modalidade,
                         playoff_rules,
                     )
@@ -3810,7 +3844,14 @@ def _build_teams_and_fixtures(
     course_mapping_short: Dict[str, str],
     initial_elos: Dict[str, float],
     modalidade: str,
-) -> Tuple[Dict[str, Team], List[Dict], Set[str], Dict[str, Tuple[int, str]], Set[str]]:
+) -> Tuple[
+    Dict[str, Team],
+    List[Dict],
+    Set[str],
+    Dict[str, Tuple[int, str]],
+    Set[str],
+    Set[str],
+]:
     """Constrói teams, fixtures, all_teams_in_epoch, team_division e withdrawn_teams.
 
     Retorna:
@@ -3914,7 +3955,76 @@ def _build_teams_and_fixtures(
         _register_team(team_a)
         _register_team(team_b)
 
-    return teams, fixtures, all_teams_in_epoch, team_division, withdrawn_teams
+    # Detectar equipas já eliminadas em playoffs (resultados passados com jornadas E/PM/LM)
+    # E também os vencedores ativos (ainda não eliminados em rondas seguintes)
+    playoff_eliminated: Set[str] = set()
+    playoff_all_winners: Set[str] = set()
+    for row in past_matches_rows:
+        jornada_val = str(row.get(COL_JORNADA, "")).strip().upper()
+        if not jornada_val.startswith(("E", "PM", "LM")):
+            continue
+
+        team_a_raw = row.get(COL_EQUIPA_1, "").strip()
+        team_b_raw = row.get(COL_EQUIPA_2, "").strip()
+        if not team_a_raw or not team_b_raw:
+            continue
+
+        team_a = normalize_team_name(team_a_raw, course_mapping)
+        team_b = normalize_team_name(team_b_raw, course_mapping)
+
+        golos_1_str = str(row.get(COL_GOLOS_1, "")).strip()
+        golos_2_str = str(row.get(COL_GOLOS_2, "")).strip()
+        falta = str(row.get(COL_FALTA_COMPARENCIA, "")).strip()
+
+        if not golos_1_str or not golos_2_str:
+            # Se falta de comparência registada, determinar vencedor/derrotado
+            if falta:
+                falta_norm = normalize_team_name(falta, course_mapping)
+                if falta_norm == team_a:
+                    # team_a faltou -> team_b venceu
+                    playoff_eliminated.add(team_a)
+                    playoff_all_winners.add(team_b)
+                elif falta_norm == team_b:
+                    playoff_eliminated.add(team_b)
+                    playoff_all_winners.add(team_a)
+            continue
+
+        try:
+            g1 = int(float(golos_1_str))
+            g2 = int(float(golos_2_str))
+        except ValueError:
+            continue
+
+        if g1 == g2:
+            # Empates em fases eliminatórias não resolvidos aqui
+            continue
+        if g1 > g2:
+            playoff_eliminated.add(team_b)
+            playoff_all_winners.add(team_a)
+        else:
+            playoff_eliminated.add(team_a)
+            playoff_all_winners.add(team_b)
+
+    # Vencedores ativos = ganharam pelo menos uma ronda mas ainda não foram eliminados
+    # (ex: após E1, os 4 vencedores dos quartos ainda estão vivos)
+    playoff_active_winners: Set[str] = playoff_all_winners - playoff_eliminated
+
+    if playoff_active_winners:
+        logger.info(
+            f"Vencedores ativos de playoff em {modalidade}: "
+            f"{sorted(playoff_active_winners)} "
+            f"(eliminados: {sorted(playoff_eliminated)})"
+        )
+
+    return (
+        teams,
+        fixtures,
+        all_teams_in_epoch,
+        team_division,
+        withdrawn_teams,
+        playoff_eliminated,
+        playoff_active_winners,
+    )
 
 
 def _export_results(
@@ -4353,9 +4463,7 @@ def main(
 
     course_mapping, course_mapping_short = load_course_mapping(docs_dir)
     playoff_rules = load_playoff_rules(docs_dir)
-    print(
-        f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos"
-    )
+    print(f"Carregado mapeamento de {len(course_mapping)} variações de nomes de cursos")
     if playoff_rules:
         print("✅ Regras de playoff carregadas do ficheiro JSON\n")
     else:
@@ -4462,6 +4570,8 @@ def main(
             all_teams_in_epoch,
             team_division,
             withdrawn_teams,
+            playoff_eliminated_teams,
+            playoff_active_winners,
         ) = _build_teams_and_fixtures(
             all_csv_rows,
             past_matches_rows,
@@ -4476,6 +4586,12 @@ def main(
             print(
                 f"  ⚠️  Equipas desistentes detectadas (excluídas da simulação e com descida garantida): "
                 f"{', '.join(sorted(withdrawn_teams))}"
+            )
+
+        if playoff_active_winners:
+            print(
+                f"  🏆 Vencedores ativos de playoff (rondas já jogadas): "
+                f"{', '.join(sorted(playoff_active_winners))}"
             )
 
         # --- Correr simulação ---
@@ -4502,7 +4618,9 @@ def main(
 
         # Fallback para regras se o CSV não tem liguilhas/playoffs secundários definidos
         if not secondary_playoff_pm1 and not secondary_liguilla_rows and playoff_rules:
-            pm1_inferred, lm_inferred = infer_secondary_brackets_from_rules(modalidade, playoff_rules)
+            pm1_inferred, lm_inferred = infer_secondary_brackets_from_rules(
+                modalidade, playoff_rules
+            )
             if pm1_inferred:
                 secondary_playoff_pm1 = pm1_inferred
                 has_liguilla = True
@@ -4522,8 +4640,15 @@ def main(
             modalidade=modalidade,
         )
 
-        if not fixtures and not playoff_slots and not secondary_playoff_pm1 and not secondary_liguilla_rows:
-            print(f"Nenhum jogo futuro ou estrutura de playoff encontrada para {modalidade}\n")
+        if (
+            not fixtures
+            and not playoff_slots
+            and not secondary_playoff_pm1
+            and not secondary_liguilla_rows
+        ):
+            print(
+                f"Nenhum jogo futuro ou estrutura de playoff encontrada para {modalidade}\n"
+            )
             continue
 
         (
@@ -4553,6 +4678,8 @@ def main(
             past_played_matches=past_played_matches,
             hardset_manager=hardset_manager,
             withdrawn_teams=withdrawn_teams,
+            playoff_eliminated_teams=playoff_eliminated_teams,
+            playoff_active_winners=playoff_active_winners,
             modalidade=modalidade,
             playoff_rules=playoff_rules,
         )
