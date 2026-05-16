@@ -213,7 +213,7 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.00046108713820880865,
+    "margin_elo_slope": 0.00046108713820880855,
     "margin_elo_intercept": 1.6411899570677302,
     "elo_adjustment_limit": 0.5,
     "p_sweep_base": 0.5,

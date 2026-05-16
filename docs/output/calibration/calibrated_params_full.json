@@ -629,9 +629,9 @@
       "margin": {
         "mean_margin": 1.7033898305084745,
         "margin_std": 0.4567631518037921,
-        "margin_elo_slope": 0.00046108713820880865,
+        "margin_elo_slope": 0.00046108713820880855,
         "margin_elo_intercept": 1.6411899570677302,
-        "margin_elo_r2": 0.012781557681817182,
+        "margin_elo_r2": 0.012781557681817176,
         "mean_margin_small_diff": 1.6529411764705881,
         "mean_margin_large_diff": 1.7628865979381443,
         "n_games": 354,
