@@ -17,14 +17,14 @@
     "elo_adjustment_limit": 0.45,
     "division_params": {
       "1": {
-        "base_goals": 22.142241379310345,
-        "dispersion_k": 18.4431732963381,
-        "base_draw_rate": 0.06896551724137931
+        "base_goals": 21.235294117647058,
+        "dispersion_k": 17.455965281219445,
+        "base_draw_rate": 0.058823529411764705
       },
       "2": {
-        "base_goals": 18.745689655172413,
-        "dispersion_k": 16.413343075802942,
-        "base_draw_rate": 0.034482758620689655
+        "base_goals": 18.274193548387096,
+        "dispersion_k": 14.315223088332052,
+        "base_draw_rate": 0.03225806451612903
       }
     }
   },
