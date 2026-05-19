@@ -1,4 +1,4 @@
 ﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Eng. Civil,LM1:Psicologia|LM3:Eng. Física,LM1,Psicologia,62.6100,0.0000,37.3900,LM3,Eng. Física,69.5800,0.0000,30.4200,100.0000,52.1100
-Eng. Física,LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,36.7500,0.0000,63.2500,LM3,Eng. Civil,30.4200,0.0000,69.5800,100.0000,14.6500
-Psicologia,LM1:Eng. Civil|LM2:Eng. Física,LM1,Eng. Civil,37.3900,0.0000,62.6100,LM2,Eng. Física,63.2500,0.0000,36.7500,100.0000,33.2400
+Eng. Civil,LM1:Psicologia|LM3:Eng. Física,LM1,Psicologia,62.2000,0.0000,37.8000,LM3,Eng. Física,70.0000,0.0000,30.0000,100.0000,52.0000
+Eng. Física,LM2:Psicologia|LM3:Eng. Civil,LM2,Psicologia,36.8400,0.0000,63.1600,LM3,Eng. Civil,30.0000,0.0000,70.0000,100.0000,14.0500
+Psicologia,LM1:Eng. Civil|LM2:Eng. Física,LM1,Eng. Civil,37.8000,0.0000,62.2000,LM2,Eng. Física,63.1600,0.0000,36.8400,100.0000,33.9500
