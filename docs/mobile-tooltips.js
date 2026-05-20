@@ -60,11 +60,11 @@ function initMobileTooltips() {
         return;
     }
 
-    // Adiciona listener a todos os elementos com atributo title
+    // Adiciona listener a todos os elementos com atributo title, exceto elementos interativos (botões, links, etc.)
     document.addEventListener('click', function (e) {
         const target = e.target.closest('[title]');
 
-        if (target && target.title) {
+        if (target && target.title && !target.closest('button, a, .lang-btn, [role="button"]')) {
             e.preventDefault();
             e.stopPropagation();
             showMobileTooltip(target, target.title);

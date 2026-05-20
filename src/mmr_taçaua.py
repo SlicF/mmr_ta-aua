@@ -451,7 +451,7 @@ class PointsCalculator:
 class StandingsCalculator:
     """Calcula tabelas de classificação para competições esportivas"""
 
-    def __init__(self, df, sport, teams, withdrawn_teams=None):
+    def __init__(self, df, sport, teams, withdrawn_teams=None, modality_name=None):
         """
         Inicializa o calculador de classificação
 
@@ -460,11 +460,13 @@ class StandingsCalculator:
             sport: Desporto da competição (enum Sport)
             teams: Dicionário com as equipas e seus ratings
             withdrawn_teams: Dict de equipas desistentes {equipa: num_jogos}
+            modality_name: Nome da modalidade
         """
         self.df = df.copy()
         self.sport = sport
         self.teams = teams
         self.withdrawn_teams = set((withdrawn_teams or {}).keys())
+        self.modality_name = modality_name
 
         # Identificar colunas de divisão e grupo - corrigido para ser mais robusto
         self.div_col = next(
@@ -1236,24 +1238,30 @@ class StandingsCalculator:
         # 6. Golos/pontos marcados GERAL
         # NOTA: Critério de disciplina é saltado pois não há dados
 
-        sort_columns = [
-            "faltas_comparencia",  # PRIMEIRO: Faltas gerais (menos é melhor)
-            "pontos_h2h",  # DEPOIS: Pontos no H2H
-        ]
+        # Verificar se é modalidade com liga única (Futsal Feminino ou Basquetebol Feminino)
+        is_single_league = False
+        if self.modality_name:
+            norm_name = self.modality_name.upper().strip()
+            is_single_league = norm_name in ("FUTSAL FEMININO", "BASQUETEBOL FEMININO")
 
-        sort_columns.extend(
-            [
+        if is_single_league:
+            sort_columns = [
+                "faltas_comparencia",    # 1º Faltas de comparência geral
+                "diferenca_golos",       # 2º Diferença de golos geral
+                "pontos_h2h",            # Depois: confronto direto
                 "diferenca_golos_h2h",
                 "golos_marcados_h2h",
+                "golos_marcados",
             ]
-        )
-
-        sort_columns.extend(
-            [
+        else:
+            sort_columns = [
+                "faltas_comparencia",    # 1º Faltas de comparência geral
+                "pontos_h2h",            # 2º Confronto direto
+                "diferenca_golos_h2h",
+                "golos_marcados_h2h",
                 "diferenca_golos",
                 "golos_marcados",
             ]
-        )
 
         # Filtrar apenas colunas que existem
         valid_columns = [col for col in sort_columns if col in merged_df.columns]
@@ -1369,11 +1377,12 @@ class StandingsCalculator:
 class InterGroupAdjuster:
     """Calcula ajustes de ELO baseados em confrontos entre grupos"""
 
-    def __init__(self, df, teams, sport):
+    def __init__(self, df, teams, sport, modality_name=None):
         """Inicializa o ajustador inter-grupos"""
         self.df = df
         self.teams = teams
         self.sport = sport
+        self.modality_name = modality_name
 
     def calculate_adjustments(self):
         """Calcula ajustes de ELO baseados em confrontos inter-grupos nos playoffs"""
@@ -1482,7 +1491,7 @@ class InterGroupAdjuster:
 
     def _get_group_standings(self, team_to_group, playoff_teams):
         """Obtém classificações por grupo excluindo equipas dos playoffs"""
-        calculator = StandingsCalculator(self.df, self.sport, self.teams)
+        calculator = StandingsCalculator(self.df, self.sport, self.teams, modality_name=self.modality_name)
         real_standings = calculator.calculate_standings()
 
         # Agrupar por grupo (apenas equipas que NÃO foram aos playoffs)
@@ -1816,6 +1825,14 @@ class EloRatingSystem:
         # Determinar o desporto
         sport = SportDetector.detect_from_filename(filename)
 
+        modality_name = None
+        if filename and isinstance(filename, str):
+            import os
+            base_filename = os.path.basename(filename)
+            base_name = base_filename.replace(".csv", "")
+            season_pattern = re.compile(r"_\d{2}_\d{2}$")
+            modality_name = season_pattern.sub("", base_name).upper().strip()
+
         # Identificar desistentes cedo para suportar faltas administrativas na classificação
         withdrawn_teams = self._detect_withdrawn_teams(df)
 
@@ -1827,7 +1844,7 @@ class EloRatingSystem:
 
         # Calcular classificação real
         standings_calculator = StandingsCalculator(
-            df, sport, teams, withdrawn_teams=withdrawn_teams
+            df, sport, teams, withdrawn_teams=withdrawn_teams, modality_name=modality_name
         )
         real_standings = standings_calculator.calculate_standings()
         tiebreak_events = standings_calculator.get_tiebreak_events()
@@ -1844,7 +1861,7 @@ class EloRatingSystem:
 
         # Aplicar ajustes inter-grupos
         self._apply_inter_group_adjustments(
-            df, teams, sport, elo_history, detailed_rows
+            df, teams, sport, elo_history, detailed_rows, modality_name=modality_name
         )
 
         return (
@@ -2343,7 +2360,7 @@ class EloRatingSystem:
                 elo_history[team].append(elo_history[team][-1])
 
     def _apply_inter_group_adjustments(
-        self, df, teams, sport, elo_history, detailed_rows
+        self, df, teams, sport, elo_history, detailed_rows, modality_name=None
     ):
         """Aplica ajustes inter-grupos se necessário"""
         # Verificar se tem divisões (sem acento pois as colunas são limpas)
@@ -2353,7 +2370,7 @@ class EloRatingSystem:
             return  # Não aplicar ajustes se houver divisões
 
         # Calcular ajustes
-        adjuster = InterGroupAdjuster(df, teams, sport)
+        adjuster = InterGroupAdjuster(df, teams, sport, modality_name=modality_name)
         inter_group_adjustments = adjuster.calculate_adjustments()
 
         if not inter_group_adjustments:

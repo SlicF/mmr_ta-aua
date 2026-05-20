@@ -2113,19 +2113,41 @@ def _rank_group_with_tiebreak(
             h2h_stats[team_b]["ga"] += score_a
 
         # Ordem equivalente ao mmr_taçaua para critérios disponíveis aqui:
-        # faltas gerais (não modeladas no preditor) -> h2h pontos -> h2h diff ->
-        # h2h golos -> diff geral -> golos gerais.
-        tied_sorted = sorted(
-            tied,
-            key=lambda t: (
-                -h2h_stats[t]["points"],
-                -(h2h_stats[t]["gf"] - h2h_stats[t]["ga"]),
-                -h2h_stats[t]["gf"],
-                -(global_stats[t]["gf"] - global_stats[t]["ga"]),
-                -global_stats[t]["gf"],
-                t,
-            ),
-        )
+        # Para modalidades com liga única (Futsal Feminino e Basket Feminino):
+        # 1. Diferença de golos geral
+        # 2. Confronto direto (pontos, diferença, golos)
+        # 3. Golos marcados gerais
+        # Para outras modalidades:
+        # Confronto direto -> Diferença de golos geral -> Golos marcados gerais
+        is_single_league = False
+        if modalidade:
+            norm_mod = modalidade.upper().strip()
+            is_single_league = norm_mod in ("FUTSAL FEMININO", "BASQUETEBOL FEMININO")
+
+        if is_single_league:
+            tied_sorted = sorted(
+                tied,
+                key=lambda t: (
+                    -(global_stats[t]["gf"] - global_stats[t]["ga"]),  # 1º Diferença de golos geral
+                    -h2h_stats[t]["points"],                           # 2º Pontos H2H
+                    -(h2h_stats[t]["gf"] - h2h_stats[t]["ga"]),        # 3º Diferença de golos H2H
+                    -h2h_stats[t]["gf"],                               # 4º Golos marcados H2H
+                    -global_stats[t]["gf"],                            # 5º Golos marcados gerais
+                    t,
+                ),
+            )
+        else:
+            tied_sorted = sorted(
+                tied,
+                key=lambda t: (
+                    -h2h_stats[t]["points"],
+                    -(h2h_stats[t]["gf"] - h2h_stats[t]["ga"]),
+                    -h2h_stats[t]["gf"],
+                    -(global_stats[t]["gf"] - global_stats[t]["ga"]),
+                    -global_stats[t]["gf"],
+                    t,
+                ),
+            )
         resolved.extend(tied_sorted)
 
     return resolved

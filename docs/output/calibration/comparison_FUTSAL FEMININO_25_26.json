@@ -1,0 +1,192 @@
+{
+  "comparison": {
+    "season": "25_26",
+    "modalidade": "FUTSAL FEMININO",
+    "cutoff_jornada": 8,
+    "fixed_model": {
+      "season": "25_26",
+      "cutoff_jornada": 8,
+      "num_teams": 13,
+      "brier_score_champion": 0.04561734933333333,
+      "rmse_expected_place": 31.79853479016499,
+      "rmse_expected_points": 4.395052675176425,
+      "calibration_champion": {
+        "20-30%": {
+          "predicted": 0.26144999999999996,
+          "observed": 0.5,
+          "count": 2,
+          "calibrated": false
+        },
+        "0-10%": {
+          "predicted": 0.016736363636363636,
+          "observed": 0.0,
+          "count": 11,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.1465,
+          "observed": 0.0,
+          "count": 2,
+          "calibrated": true
+        }
+      },
+      "calibration_playoffs": {
+        "90-100%": {
+          "predicted": 0.9902333333333333,
+          "observed": 0.8333333333333334,
+          "count": 6,
+          "calibrated": false
+        },
+        "50-60%": {
+          "predicted": 0.5895,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "10-20%": {
+          "predicted": 0.1713,
+          "observed": 0.3333333333333333,
+          "count": 3,
+          "calibrated": false
+        },
+        "80-90%": {
+          "predicted": 0.8398,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "0-10%": {
+          "predicted": 0.02885,
+          "observed": 0.0,
+          "count": 4,
+          "calibrated": true
+        }
+      }
+    },
+    "calibrated_model": {
+      "season": "25_26",
+      "cutoff_jornada": 8,
+      "num_teams": 13,
+      "brier_score_champion": 0.044849381333333334,
+      "rmse_expected_place": 31.829917453971927,
+      "rmse_expected_points": 4.34243821992071,
+      "calibration_champion": {
+        "20-30%": {
+          "predicted": 0.26280000000000003,
+          "observed": 0.5,
+          "count": 2,
+          "calibrated": false
+        },
+        "0-10%": {
+          "predicted": 0.017827272727272726,
+          "observed": 0.0,
+          "count": 11,
+          "calibrated": true
+        },
+        "10-20%": {
+          "predicted": 0.13915,
+          "observed": 0.0,
+          "count": 2,
+          "calibrated": true
+        }
+      },
+      "calibration_playoffs": {
+        "90-100%": {
+          "predicted": 0.9909666666666667,
+          "observed": 0.8333333333333334,
+          "count": 6,
+          "calibrated": false
+        },
+        "50-60%": {
+          "predicted": 0.5886,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": false
+        },
+        "10-20%": {
+          "predicted": 0.16523333333333332,
+          "observed": 0.3333333333333333,
+          "count": 3,
+          "calibrated": false
+        },
+        "80-90%": {
+          "predicted": 0.8599,
+          "observed": 1.0,
+          "count": 1,
+          "calibrated": true
+        },
+        "0-10%": {
+          "predicted": 0.0275,
+          "observed": 0.0,
+          "count": 4,
+          "calibrated": true
+        }
+      }
+    },
+    "calibrated_params_used": {
+      "sport_type": "futsal",
+      "base_goals": 3.707920792079208,
+      "base_goals_std": 3.808385307081133,
+      "dispersion_k": 3.0,
+      "base_draw_rate": 0.0297029702970297,
+      "draw_elo_sensitivity": 0.001,
+      "draw_multiplier": 1.4,
+      "draw_model": {
+        "intercept": 0.0,
+        "coef_linear": 0.0,
+        "coef_quadratic": 0.0
+      },
+      "margin_elo_slope": 0.002402648329411969,
+      "margin_elo_intercept": 5.224853723678243,
+      "elo_adjustment_limit": 1.2,
+      "division_params": {
+        "1": {
+          "base_goals": 3.707920792079208,
+          "dispersion_k": 3.0,
+          "base_draw_rate": 0.0297029702970297
+        }
+      }
+    },
+    "improvement": {
+      "brier_score": 0.0168349983333825,
+      "rmse_expected_place": -0.0009869216935317283,
+      "rmse_expected_points": 0.011971291164013872
+    },
+    "status": "completed"
+  },
+  "evaluation": {
+    "modalidade": "FUTSAL FEMININO",
+    "components": {
+      "draw_multiplier": {
+        "value": 1.4,
+        "base_draw_rate": 0.0297029702970297,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Ótimo para taxa de empates 3.0%"
+      },
+      "draw_model": {
+        "intercept": 0.0,
+        "coef_linear": 0.0,
+        "status": "[X]",
+        "score": 0.0,
+        "comment": "Modelo logístico não calibrado ou simples"
+      },
+      "goals_distribution": {
+        "base_goals": 3.707920792079208,
+        "dispersion_k": 3.0,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Distribuição calibrada: 3.71 golos/equipa, dispersão=3.00"
+      },
+      "margin_distribution": {
+        "slope": 0.002402648329411969,
+        "intercept": 5.224853723678243,
+        "status": "[OK]",
+        "score": 1.0,
+        "comment": "Margem varia com ELO: slope=0.0024"
+      }
+    },
+    "overall_score": 0.75,
+    "status": "evaluated"
+  }
+}

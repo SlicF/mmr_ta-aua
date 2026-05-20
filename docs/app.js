@@ -3405,7 +3405,11 @@ function updateRankingsTable() {
             tiebreakIndicator.addEventListener('click', (event) => {
                 event.stopPropagation();
                 const isOpen = tiebreakTooltipEl && tiebreakTooltipEl.style.display === 'block';
-                if (isOpen) {
+                const now = Date.now();
+                // Se foi aberto há menos de 250ms (por exemplo, via focus de um touch), não fecha de imediato
+                const justOpened = (now - tiebreakTooltipLastShownAt) < 250;
+                
+                if (isOpen && !justOpened) {
                     hideTiebreakTooltip();
                 } else {
                     showTiebreakTooltip(tiebreakIndicator, tiebreakInfo, team.team);
@@ -6942,6 +6946,7 @@ let currentLoadToken = 0;
 let historicalTooltipEl = null;
 let tiebreakTooltipEl = null;
 let tiebreakTooltipHideTimer = null;
+let tiebreakTooltipLastShownAt = 0;
 
 // ==================== COMPATIBILIDADE COM CÓDIGO LEGADO ====================
 // Proxies para sincronizar variáveis antigas com appState
@@ -7167,14 +7172,30 @@ function updateSelectorLabels() {
 function changeEpoca(epoca) {
     if (!epoca || epoca === currentEpoca) return;
 
+    // Obter o valor selecionado diretamente do seletor DOM para evitar inconsistências
+    const modalidadeSelect = document.getElementById('modalidade');
+    const selectedModVal = modalidadeSelect ? modalidadeSelect.value : null;
+    const baseModalityName = selectedModVal ? selectedModVal.replace(/_\d{2}_\d{2}$/, '') : null;
+
     currentEpoca = epoca;
 
     // Salvar época selecionada no cache
     localStorage.setItem('mmr_selectedEpoca', epoca);
 
-    // IMPORTANTE: invalidar cache de modalidade quando muda de época
-    // A modalidade pode não existir na nova época
-    localStorage.removeItem('mmr_selectedModalidade');
+    // Tentar manter a mesma modalidade na nova época se existir
+    if (baseModalityName) {
+        const newModalidadeValue = `${baseModalityName}_${epoca}`;
+        const newModalidades = getModalidadesForEpoca(epoca);
+        const exists = newModalidades.some(m => m.value === newModalidadeValue);
+
+        if (exists) {
+            localStorage.setItem('mmr_selectedModalidade', newModalidadeValue);
+        } else {
+            localStorage.removeItem('mmr_selectedModalidade');
+        }
+    } else {
+        localStorage.removeItem('mmr_selectedModalidade');
+    }
 
     updateModalidadeSelector();
 }
@@ -7607,6 +7628,7 @@ function showTiebreakTooltip(anchorEl, tiebreakInfo, currentTeam) {
     tooltip.innerHTML = buildTiebreakTooltipTableHtml(tiebreakInfo, eventData, currentTeam);
     tooltip.style.display = 'block';
     positionTiebreakTooltip(anchorEl);
+    tiebreakTooltipLastShownAt = Date.now();
 }
 
 function hideTiebreakTooltip() {
@@ -14282,13 +14304,13 @@ function appendMoreTooltipResults() {
     const nextIndex = Math.min(state.currentIndex + TOOLTIP_CHUNK_SIZE, state.allScores.length);
     const newScores = state.allScores.slice(0, nextIndex);
 
-    // Actualizar altura e série sem destruir o chart
+    // Actualizar altura e série de forma síncrona/junta com redrawPaths=true para evitar desalinhamento das labels
     predictionsTooltipChart.updateOptions(
-        { chart: { height: newScores.length * TOOLTIP_ITEM_HEIGHT } },
-        false, false
-    );
-    predictionsTooltipChart.updateSeries(
-        [{ name: 'Probabilidade (%)', data: newScores.map(s => ({ x: s.score, y: s.probability })) }],
+        {
+            chart: { height: newScores.length * TOOLTIP_ITEM_HEIGHT },
+            series: [{ name: 'Probabilidade (%)', data: newScores.map(s => ({ x: s.score, y: s.probability })) }]
+        },
+        true,
         false
     );
 

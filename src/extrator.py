@@ -380,7 +380,7 @@ class ExcelProcessor:
 
         self._sheets_to_process = sheets_to_process
 
-        self.divisao_pattern = re.compile(r"(\d)ª DIVISÃO")
+        self.divisao_pattern = re.compile(r"(\d)\s*(?:ª|º||\.)?\s*DIVIS[ÃAO]+O", re.IGNORECASE)
         self.grupo_pattern = re.compile(r"GRUPO [A-Z]")
 
         self.base_headers = [
@@ -1141,13 +1141,15 @@ class ExcelProcessor:
             grupos[grupo] = 0
 
         for idx, valor in enumerate(df[primeira_coluna]):
-            if isinstance(valor, str) and "DIVISÃO" in valor:
-                nd = self.extract_division_number(valor)
-                if nd and nd not in divisoes:
-                    divisoes[nd] = idx
-                g = self.extract_group(valor)
-                if g and g not in grupos:
-                    grupos[g] = idx
+            if isinstance(valor, str):
+                norm_val = valor.upper().replace("Ã", "A").replace("Õ", "O").replace("Ç", "C")
+                if "DIVISAO" in norm_val:
+                    nd = self.extract_division_number(valor)
+                    if nd and nd not in divisoes:
+                        divisoes[nd] = idx
+                    g = self.extract_group(valor)
+                    if g and g not in grupos:
+                        grupos[g] = idx
             else:
                 g = self.extract_group(str(valor))
                 if g and g not in grupos:
@@ -1826,15 +1828,23 @@ class ExcelProcessor:
 
         logging.info(f"A processar a folha: {sheet_name}")
 
-        sample = self.xls.parse(sheet_name, nrows=1)
-        has_div = "DIVISÃO" in str(sample.columns[0])
-
         linhas_faltas = self.extract_red_cells(sheet_name)
 
         df = pd.read_excel(
             self.xls, sheet_name=sheet_name, usecols=[0, 1, 2, 3, 4, 5, 7, 8]
         )
         df["Falta de Comparência"] = ""
+
+        # Procurar se há divisões na folha (scaneando a primeira coluna e cabeçalho)
+        def _has_divisao_text(text):
+            if not isinstance(text, str):
+                return False
+            norm = text.upper().replace("Ã", "A").replace("Õ", "O").replace("Ç", "C")
+            return "DIVISAO" in norm
+
+        has_div = _has_divisao_text(df.columns[0]) or any(
+            _has_divisao_text(val) for val in df.iloc[:, 0]
+        )
 
         # Validar datas fora do intervalo da época
         dia_col = df.columns[1]
@@ -1856,6 +1866,9 @@ class ExcelProcessor:
 
         if has_div:
             divisoes, grupos = self.find_divisions_and_groups(df)
+            if divisoes and not any(start_idx == 0 for start_idx in divisoes.values()):
+                if "1" not in divisoes:
+                    divisoes["1"] = 0
             df = self.fill_sections(df, divisoes, "Divisão")
             df = self.fill_sections(df, grupos, "Grupo")
             headers = self.create_headers(bool(divisoes), bool(grupos))
