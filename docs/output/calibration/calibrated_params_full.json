@@ -3,10 +3,10 @@
     "global": {
       "draw": {
         "base_draw_rate": 0.05084745762711865,
-        "elo_sensitivity": 0.0046594304131467815,
-        "model_intercept": -2.3081339830513374,
-        "model_coef_linear": -0.0046594304131467815,
-        "model_coef_quadratic": -8.568356752084586e-06,
+        "elo_sensitivity": 0.004659430413270792,
+        "model_intercept": -2.30813398304251,
+        "model_coef_linear": -0.004659430413270792,
+        "model_coef_quadratic": -8.568356751658613e-06,
         "n_games": 236,
         "median_elo_diff": 104.0,
         "status": "calibrated"
@@ -37,10 +37,10 @@
     "division_1": {
       "draw": {
         "base_draw_rate": 0.06666666666666667,
-        "elo_sensitivity": 0.010189585879703242,
-        "model_intercept": -2.5137807114008406,
-        "model_coef_linear": 0.010189585879703242,
-        "model_coef_quadratic": -6.984054583084821e-05,
+        "elo_sensitivity": 0.010189585879635305,
+        "model_intercept": -2.513780711396314,
+        "model_coef_linear": 0.010189585879635305,
+        "model_coef_quadratic": -6.984054583064458e-05,
         "n_games": 120,
         "median_elo_diff": 112.0,
         "status": "calibrated"
@@ -173,9 +173,9 @@
       "margin": {
         "mean_margin": 5.622775800711744,
         "margin_std": 4.5705284566691216,
-        "margin_elo_slope": 0.0049272825619517124,
-        "margin_elo_intercept": 5.068658162846135,
-        "margin_elo_r2": 0.009813966304340659,
+        "margin_elo_slope": 0.0049272825619517055,
+        "margin_elo_intercept": 5.068658162846136,
+        "margin_elo_r2": 0.009813966304340645,
         "mean_margin_small_diff": 4.993197278911564,
         "mean_margin_large_diff": 6.037037037037037,
         "n_games": 281,
@@ -258,10 +258,10 @@
     "global": {
       "draw": {
         "base_draw_rate": 0.11235955056179775,
-        "elo_sensitivity": 0.0022459065817240762,
+        "elo_sensitivity": 0.0022459065817240736,
         "model_intercept": -1.969555138281915,
-        "model_coef_linear": 0.0022459065817240762,
-        "model_coef_quadratic": -1.5829175234552973e-05,
+        "model_coef_linear": 0.0022459065817240736,
+        "model_coef_quadratic": -1.582917523455296e-05,
         "n_games": 267,
         "median_elo_diff": 103.0,
         "status": "calibrated"
@@ -292,10 +292,10 @@
     "division_1": {
       "draw": {
         "base_draw_rate": 0.12213740458015267,
-        "elo_sensitivity": 0.013147792105713135,
-        "model_intercept": -2.4336578123490678,
-        "model_coef_linear": 0.013147792105713135,
-        "model_coef_quadratic": -4.843874461629552e-05,
+        "elo_sensitivity": 0.013147792105713043,
+        "model_intercept": -2.433657812349062,
+        "model_coef_linear": 0.013147792105713043,
+        "model_coef_quadratic": -4.8438744616295244e-05,
         "n_games": 131,
         "median_elo_diff": 120.0,
         "status": "calibrated"
@@ -326,10 +326,10 @@
     "division_2": {
       "draw": {
         "base_draw_rate": 0.10294117647058823,
-        "elo_sensitivity": 0.007525015771462023,
-        "model_intercept": -1.595867414733575,
-        "model_coef_linear": -0.007525015771462023,
-        "model_coef_quadratic": 1.1462244417964353e-05,
+        "elo_sensitivity": 0.0075250157714620266,
+        "model_intercept": -1.5958674147335747,
+        "model_coef_linear": -0.0075250157714620266,
+        "model_coef_quadratic": 1.1462244417964361e-05,
         "n_games": 136,
         "median_elo_diff": 101.5,
         "status": "calibrated"
@@ -426,10 +426,10 @@
     "global": {
       "draw": {
         "base_draw_rate": 0.11023622047244094,
-        "elo_sensitivity": 0.0014207557417588613,
-        "model_intercept": -1.6753053425652185,
-        "model_coef_linear": -0.0014207557417588613,
-        "model_coef_quadratic": -1.6142503103815876e-05,
+        "elo_sensitivity": 0.0014207557417589799,
+        "model_intercept": -1.6753053425652116,
+        "model_coef_linear": -0.0014207557417589799,
+        "model_coef_quadratic": -1.614250310381554e-05,
         "n_games": 381,
         "median_elo_diff": 103.0,
         "status": "calibrated"
@@ -439,7 +439,7 @@
         "margin_std": 3.009780641409289,
         "margin_elo_slope": 0.004586880735511044,
         "margin_elo_intercept": 3.0855797048213858,
-        "margin_elo_r2": 0.022972811121785598,
+        "margin_elo_r2": 0.022972811121785633,
         "mean_margin_small_diff": 3.4285714285714284,
         "mean_margin_large_diff": 4.242857142857143,
         "n_games": 339,
@@ -460,10 +460,10 @@
     "division_1": {
       "draw": {
         "base_draw_rate": 0.10714285714285714,
-        "elo_sensitivity": 0.009213214078491752,
-        "model_intercept": -2.5680379604610906,
-        "model_coef_linear": 0.009213214078491752,
-        "model_coef_quadratic": -3.0082535488264964e-05,
+        "elo_sensitivity": 0.009213214078491409,
+        "model_intercept": -2.5680379604610732,
+        "model_coef_linear": 0.009213214078491409,
+        "model_coef_quadratic": -3.0082535488264032e-05,
         "n_games": 140,
         "median_elo_diff": 108.0,
         "status": "calibrated"
@@ -494,10 +494,10 @@
     "division_2": {
       "draw": {
         "base_draw_rate": 0.11203319502074689,
-        "elo_sensitivity": 0.005496004751923592,
-        "model_intercept": -1.2908801602815,
-        "model_coef_linear": -0.005496004751923592,
-        "model_coef_quadratic": -2.2357917107044014e-05,
+        "elo_sensitivity": 0.005496004751920838,
+        "model_intercept": -1.2908801602816098,
+        "model_coef_linear": -0.005496004751920838,
+        "model_coef_quadratic": -2.2357917107052606e-05,
         "n_games": 241,
         "median_elo_diff": 101.0,
         "status": "calibrated"
@@ -537,9 +537,9 @@
       "margin": {
         "mean_margin": 1.7237237237237237,
         "margin_std": 0.44715511340382874,
-        "margin_elo_slope": 0.001001555156709462,
-        "margin_elo_intercept": 1.595741216131228,
-        "margin_elo_r2": 0.06203606982922131,
+        "margin_elo_slope": 0.001001555156709461,
+        "margin_elo_intercept": 1.5957412161312283,
+        "margin_elo_r2": 0.06203606982922121,
         "mean_margin_small_diff": 1.6335403726708075,
         "mean_margin_large_diff": 1.9125,
         "n_games": 333,
@@ -629,9 +629,9 @@
       "margin": {
         "mean_margin": 1.7033898305084745,
         "margin_std": 0.4567631518037921,
-        "margin_elo_slope": 0.00046108713820880855,
+        "margin_elo_slope": 0.00046108713820880865,
         "margin_elo_intercept": 1.6411899570677302,
-        "margin_elo_r2": 0.0127815576818172,
+        "margin_elo_r2": 0.012781557681817182,
         "mean_margin_small_diff": 1.6529411764705881,
         "mean_margin_large_diff": 1.7628865979381443,
         "n_games": 354,
