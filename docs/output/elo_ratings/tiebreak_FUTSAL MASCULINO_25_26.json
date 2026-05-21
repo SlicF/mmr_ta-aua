@@ -12,8 +12,8 @@
       "tie_points": 16,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -62,8 +62,8 @@
       "tie_points": 18,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -312,9 +312,9 @@
       "tie_points": 16,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Gestão Pública",
         "Ciências Biomédicas",
-        "Eng. Aeroespacial",
-        "Gestão Pública"
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -375,8 +375,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -406,8 +406,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Eng. Biomédica",
-        "Fisioterapia"
+        "Fisioterapia",
+        "Eng. Biomédica"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -437,8 +437,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -468,8 +468,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -747,9 +747,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Gestão Pública",
         "Ciências Biomédicas",
-        "Eng. Aeroespacial",
-        "Gestão Pública"
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -779,9 +779,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Gestão Pública",
         "Ciências Biomédicas",
-        "Eng. Aeroespacial",
-        "Gestão Pública"
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -811,9 +811,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Gestão Pública",
         "Ciências Biomédicas",
-        "Eng. Aeroespacial",
-        "Gestão Pública"
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
