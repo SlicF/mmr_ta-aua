@@ -162,8 +162,8 @@
       "tie_points": 20,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Línguas, Literaturas e Culturas",
         "Eng. Química",
+        "Línguas, Literaturas e Culturas",
         "Eng. Mecânica"
       ],
       "criteria_order": [
@@ -225,8 +225,8 @@
       "tie_points": 5,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -461,8 +461,8 @@
       "tie_type": "mini_league",
       "tie_points": 20,
       "tied_teams": [
-        "Línguas, Literaturas e Culturas",
         "Eng. Química",
+        "Línguas, Literaturas e Culturas",
         "Eng. Mecânica"
       ],
       "criteria_order": [
@@ -493,8 +493,8 @@
       "tie_type": "mini_league",
       "tie_points": 20,
       "tied_teams": [
-        "Línguas, Literaturas e Culturas",
         "Eng. Química",
+        "Línguas, Literaturas e Culturas",
         "Eng. Mecânica"
       ],
       "criteria_order": [
@@ -525,8 +525,8 @@
       "tie_type": "mini_league",
       "tie_points": 20,
       "tied_teams": [
-        "Línguas, Literaturas e Culturas",
         "Eng. Química",
+        "Línguas, Literaturas e Culturas",
         "Eng. Mecânica"
       ],
       "criteria_order": [
@@ -557,8 +557,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -588,8 +588,8 @@
       "tie_type": "head_to_head",
       "tie_points": 5,
       "tied_teams": [
-        "Economia",
-        "Matemática"
+        "Matemática",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",

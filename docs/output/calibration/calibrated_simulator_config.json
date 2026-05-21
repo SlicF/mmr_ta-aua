@@ -87,25 +87,25 @@
   },
   "FUTEBOL DE 7 MASCULINO": {
     "sport_type": "futebol7",
-    "base_goals": 2.4667896678966788,
-    "base_goals_std": 2.2454966059695844,
+    "base_goals": 2.466666666666667,
+    "base_goals_std": 2.249444375840399,
     "dispersion_k": 3.0,
-    "base_draw_rate": 0.11070110701107011,
-    "draw_elo_sensitivity": 0.0019442989228117974,
+    "base_draw_rate": 0.1111111111111111,
+    "draw_elo_sensitivity": 0.0020885615531164373,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -1.9770554815715906,
-      "coef_linear": 0.0019442989228117974,
-      "coef_quadratic": -1.4730039091571986e-05
+      "intercept": -1.9791921555562058,
+      "coef_linear": 0.0020885615531164373,
+      "coef_quadratic": -1.5184976272938943e-05
     },
-    "margin_elo_slope": 0.002550815778733495,
-    "margin_elo_intercept": 2.751074555994591,
+    "margin_elo_slope": 0.0025484761273392173,
+    "margin_elo_intercept": 2.76002497329559,
     "elo_adjustment_limit": 1.0,
     "division_params": {
       "1": {
-        "base_goals": 2.325925925925926,
+        "base_goals": 2.324626865671642,
         "dispersion_k": 3.0,
-        "base_draw_rate": 0.11851851851851852
+        "base_draw_rate": 0.11940298507462686
       },
       "2": {
         "base_goals": 2.6066176470588234,
