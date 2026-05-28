@@ -62,8 +62,8 @@
       "tie_points": 18,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. de Materiais"
+        "Eng. de Materiais",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -212,8 +212,8 @@
       "tie_points": 18,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -262,8 +262,8 @@
       "tie_points": 12,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Línguas e Relações Empresariais",
-        "Eng. do Ambiente"
+        "Eng. do Ambiente",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -312,9 +312,9 @@
       "tie_points": 16,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Eng. Aeroespacial",
         "Gestão Pública",
-        "Ciências Biomédicas",
-        "Eng. Aeroespacial"
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -375,8 +375,8 @@
       "tie_points": 0,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. Química",
-        "Marketing"
+        "Marketing",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -390,7 +390,7 @@
       "used_global_fallback": false,
       "standings": [
         {
-          "team": "Eng. Química",
+          "team": "Marketing",
           "rank_in_tiebreak": 1,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -402,7 +402,7 @@
           }
         },
         {
-          "team": "Marketing",
+          "team": "Eng. Química",
           "rank_in_tiebreak": 2,
           "criteria_values": {
             "faltas_comparencia": 0,
@@ -487,8 +487,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. de Materiais"
+        "Eng. de Materiais",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -518,8 +518,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. Informática",
-        "Eng. de Materiais"
+        "Eng. de Materiais",
+        "Eng. Informática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -673,8 +673,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Gestão",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -704,8 +704,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Gestão",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -735,8 +735,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Línguas e Relações Empresariais",
-        "Eng. do Ambiente"
+        "Eng. do Ambiente",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -766,8 +766,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Línguas e Relações Empresariais",
-        "Eng. do Ambiente"
+        "Eng. do Ambiente",
+        "Línguas e Relações Empresariais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -797,9 +797,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Eng. Aeroespacial",
         "Gestão Pública",
-        "Ciências Biomédicas",
-        "Eng. Aeroespacial"
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -829,9 +829,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Eng. Aeroespacial",
         "Gestão Pública",
-        "Ciências Biomédicas",
-        "Eng. Aeroespacial"
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -861,9 +861,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Eng. Aeroespacial",
         "Gestão Pública",
-        "Ciências Biomédicas",
-        "Eng. Aeroespacial"
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -886,15 +886,15 @@
       "rank_in_tiebreak": 3,
       "final_position": 5
     },
-    "ª Divisão::Eng. Química": {
+    "ª Divisão::Marketing": {
       "event_id": 8,
       "ranking_key": "ª Divisão",
-      "team": "Eng. Química",
+      "team": "Marketing",
       "tie_type": "head_to_head",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Química",
-        "Marketing"
+        "Marketing",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -917,15 +917,15 @@
       "rank_in_tiebreak": 1,
       "final_position": null
     },
-    "ª Divisão::Marketing": {
+    "ª Divisão::Eng. Química": {
       "event_id": 8,
       "ranking_key": "ª Divisão",
-      "team": "Marketing",
+      "team": "Eng. Química",
       "tie_type": "head_to_head",
       "tie_points": 0,
       "tied_teams": [
-        "Eng. Química",
-        "Marketing"
+        "Marketing",
+        "Eng. Química"
       ],
       "criteria_order": [
         "faltas_comparencia",

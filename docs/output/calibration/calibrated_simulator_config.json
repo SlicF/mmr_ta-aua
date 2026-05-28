@@ -30,8 +30,8 @@
   },
   "BASQUETEBOL FEMININO": {
     "sport_type": "basquete",
-    "base_goals": 8.763157894736842,
-    "base_goals_std": 6.082045234806063,
+    "base_goals": 8.873737373737374,
+    "base_goals_std": 6.081036691564914,
     "dispersion_k": 3.0,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
@@ -41,14 +41,14 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.01216794777285861,
-    "margin_elo_intercept": 6.727609797015255,
+    "margin_elo_slope": 0.011928344020371183,
+    "margin_elo_intercept": 6.808352641712973,
     "elo_adjustment_limit": 0.5,
-    "base_score": 8.763157894736842,
-    "sigma": 6.082045234806063,
+    "base_score": 8.873737373737374,
+    "sigma": 6.081036691564914,
     "division_params": {
       "1": {
-        "base_goals": 8.763157894736842,
+        "base_goals": 8.873737373737374,
         "dispersion_k": 3.0,
         "base_draw_rate": 0.0
       }
