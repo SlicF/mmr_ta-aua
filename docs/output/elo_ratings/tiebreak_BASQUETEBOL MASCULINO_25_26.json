@@ -62,8 +62,8 @@
       "tie_points": 14,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. e Gestão Industrial",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,9 +112,9 @@
       "tie_points": 6,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Tecnologias de Informação",
         "Matemática",
         "Biotecnologia",
+        "Tecnologias de Informação",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
@@ -238,8 +238,8 @@
       "tie_points": 6,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -339,8 +339,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Psicologia",
-        "Eng. Física",
-        "Ciências do Mar"
+        "Ciências do Mar",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -463,8 +463,8 @@
       "tie_type": "head_to_head",
       "tie_points": 14,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -494,8 +494,8 @@
       "tie_type": "head_to_head",
       "tie_points": 14,
       "tied_teams": [
-        "Eng. e Gestão Industrial",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. e Gestão Industrial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -525,9 +525,9 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
-        "Tecnologias de Informação",
         "Matemática",
         "Biotecnologia",
+        "Tecnologias de Informação",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
@@ -558,9 +558,9 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
-        "Tecnologias de Informação",
         "Matemática",
         "Biotecnologia",
+        "Tecnologias de Informação",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
@@ -591,9 +591,9 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
-        "Tecnologias de Informação",
         "Matemática",
         "Biotecnologia",
+        "Tecnologias de Informação",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
@@ -624,9 +624,9 @@
       "tie_type": "mini_league",
       "tie_points": 6,
       "tied_teams": [
-        "Tecnologias de Informação",
         "Matemática",
         "Biotecnologia",
+        "Tecnologias de Informação",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
@@ -719,8 +719,8 @@
       "tie_type": "head_to_head",
       "tie_points": 6,
       "tied_teams": [
-        "Economia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -750,8 +750,8 @@
       "tie_type": "head_to_head",
       "tie_points": 6,
       "tied_teams": [
-        "Economia",
-        "Gestão e Planeamento em Turismo"
+        "Gestão e Planeamento em Turismo",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -844,8 +844,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Psicologia",
-        "Eng. Física",
-        "Ciências do Mar"
+        "Ciências do Mar",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -876,8 +876,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Psicologia",
-        "Eng. Física",
-        "Ciências do Mar"
+        "Ciências do Mar",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -908,8 +908,8 @@
       "tie_points": 6,
       "tied_teams": [
         "Psicologia",
-        "Eng. Física",
-        "Ciências do Mar"
+        "Ciências do Mar",
+        "Eng. Física"
       ],
       "criteria_order": [
         "faltas_comparencia",

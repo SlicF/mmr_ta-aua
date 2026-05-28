@@ -62,8 +62,8 @@
       "tie_points": 18,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Economia",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -262,8 +262,8 @@
       "tie_points": 12,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. do Ambiente",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -312,8 +312,8 @@
       "tie_points": 16,
       "tie_type": "mini_league",
       "tied_teams": [
-        "Ciências Biomédicas",
         "Gestão Pública",
+        "Ciências Biomédicas",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
@@ -487,8 +487,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -518,8 +518,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -549,8 +549,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Economia",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -580,8 +580,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Economia",
-        "Música"
+        "Música",
+        "Economia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -735,8 +735,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. do Ambiente",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -766,8 +766,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. do Ambiente",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -797,8 +797,8 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Ciências Biomédicas",
         "Gestão Pública",
+        "Ciências Biomédicas",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
@@ -829,8 +829,8 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Ciências Biomédicas",
         "Gestão Pública",
+        "Ciências Biomédicas",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
@@ -861,8 +861,8 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
-        "Ciências Biomédicas",
         "Gestão Pública",
+        "Ciências Biomédicas",
         "Eng. Aeroespacial"
       ],
       "criteria_order": [
