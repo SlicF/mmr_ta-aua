@@ -62,8 +62,8 @@
       "tie_points": 18,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -262,8 +262,8 @@
       "tie_points": 12,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. do Ambiente",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -313,8 +313,8 @@
       "tie_type": "mini_league",
       "tied_teams": [
         "Gestão Pública",
-        "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -487,8 +487,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -518,8 +518,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Informática"
+        "Eng. Informática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -735,8 +735,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. do Ambiente",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -766,8 +766,8 @@
       "tie_type": "head_to_head",
       "tie_points": 12,
       "tied_teams": [
-        "Eng. do Ambiente",
-        "Línguas e Relações Empresariais"
+        "Línguas e Relações Empresariais",
+        "Eng. do Ambiente"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -798,8 +798,8 @@
       "tie_points": 16,
       "tied_teams": [
         "Gestão Pública",
-        "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -830,8 +830,8 @@
       "tie_points": 16,
       "tied_teams": [
         "Gestão Pública",
-        "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -862,8 +862,8 @@
       "tie_points": 16,
       "tied_teams": [
         "Gestão Pública",
-        "Eng. Aeroespacial",
-        "Ciências Biomédicas"
+        "Ciências Biomédicas",
+        "Eng. Aeroespacial"
       ],
       "criteria_order": [
         "faltas_comparencia",
