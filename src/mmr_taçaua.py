@@ -53,6 +53,26 @@ def load_courses_config(config_path: str = None):
 COURSES_CONFIG = load_courses_config()
 
 
+def parse_score(val):
+    if pd.isna(val) or val == "":
+        return None, None
+    if isinstance(val, (int, float)):
+        try:
+            return int(val), None
+        except Exception:
+            pass
+    s = str(val).strip()
+    m = re.match(r"^(\d+)\s*(?:\((\d+)\))?$", s)
+    if m:
+        base = int(m.group(1))
+        pen = int(m.group(2)) if m.group(2) is not None else None
+        return base, pen
+    try:
+        return int(float(s)), None
+    except (ValueError, TypeError):
+        return None, None
+
+
 def is_playoff_jornada(jornada_value) -> bool:
     """Determina se a jornada é um jogo de playoff (E*, MP*, LP*, LM*)."""
     try:
@@ -856,18 +876,21 @@ class StandingsCalculator:
             if team1 in self.withdrawn_teams or team2 in self.withdrawn_teams:
                 continue
 
-            try:
-                score1 = int(row.get("Golos 1"))
-                score2 = int(row.get("Golos 2"))
-                sets1 = int(row.get("Sets 1")) if pd.notna(row.get("Sets 1")) else None
-                sets2 = int(row.get("Sets 2")) if pd.notna(row.get("Sets 2")) else None
-            except (ValueError, TypeError):
+            score1, pen1 = parse_score(row.get("Golos 1"))
+            score2, pen2 = parse_score(row.get("Golos 2"))
+            if score1 is None or score2 is None:
                 if self._apply_withdrawn_forfeit_if_needed(row, team1, team2, stats):
                     continue
                 logger.warning(
                     f"Dados inválidos: {row.get('Golos 1')}-{row.get('Golos 2')}"
                 )
                 continue
+
+            try:
+                sets1 = int(row.get("Sets 1")) if pd.notna(row.get("Sets 1")) else None
+                sets2 = int(row.get("Sets 2")) if pd.notna(row.get("Sets 2")) else None
+            except (ValueError, TypeError):
+                sets1 = sets2 = None
 
             # Verificar falta de comparência
             falta_comparencia = row.get("Falta de Comparência", "")
@@ -1148,10 +1171,9 @@ class StandingsCalculator:
             team2 = game["Equipa 2"]
 
             # Validar dados do jogo
-            try:
-                score1 = int(game.get("Golos 1"))
-                score2 = int(game.get("Golos 2"))
-            except (ValueError, TypeError):
+            score1, pen1 = parse_score(game.get("Golos 1"))
+            score2, pen2 = parse_score(game.get("Golos 2"))
+            if score1 is None or score2 is None:
                 continue
 
             sets1 = game.get("Sets 1")
@@ -1471,21 +1493,24 @@ class InterGroupAdjuster:
 
             # Só contar se forem grupos diferentes
             if group1 != group2:
-                try:
-                    score1 = int(row.get("Golos 1"))
-                    score2 = int(row.get("Golos 2"))
-
+                score1, pen1 = parse_score(row.get("Golos 1"))
+                score2, pen2 = parse_score(row.get("Golos 2"))
+                if score1 is not None and score2 is not None:
                     # Incrementar contadores de jogos
                     inter_group_results[group1]["total"] += 1
                     inter_group_results[group2]["total"] += 1
 
-                    # Contar vitórias
-                    if score1 > score2:
-                        inter_group_results[group1]["wins"] += 1
-                    elif score2 > score1:
-                        inter_group_results[group2]["wins"] += 1
-                except (ValueError, TypeError):
-                    continue
+                    # Contar vitórias (incluindo grandes penalidades se aplicável)
+                    if pen1 is not None and pen2 is not None:
+                        if pen1 > pen2:
+                            inter_group_results[group1]["wins"] += 1
+                        elif pen2 > pen1:
+                            inter_group_results[group2]["wins"] += 1
+                    else:
+                        if score1 > score2:
+                            inter_group_results[group1]["wins"] += 1
+                        elif score2 > score1:
+                            inter_group_results[group2]["wins"] += 1
 
         return inter_group_results
 
@@ -2051,10 +2076,9 @@ class EloRatingSystem:
             if not (team1 and team2 and team1 in teams and team2 in teams):
                 continue
 
-            try:
-                score1 = int(row.get("Golos 1"))
-                score2 = int(row.get("Golos 2"))
-            except (ValueError, TypeError):
+            score1, pen1 = parse_score(row.get("Golos 1"))
+            score2, pen2 = parse_score(row.get("Golos 2"))
+            if score1 is None or score2 is None:
                 continue
 
             # Verificar falta de comparência
@@ -2068,13 +2092,22 @@ class EloRatingSystem:
                 if absent_team in absence_count:
                     absence_count[absent_team] += 1
 
-            # Determinar resultado
-            if score1 > score2:
-                outcome = 1
-            elif score2 > score1:
-                outcome = 2
+            # Determinar resultado (incluindo penáltis se aplicável)
+            is_penalty_shootout = pen1 is not None and pen2 is not None
+            if is_penalty_shootout:
+                if pen1 > pen2:
+                    outcome = 1
+                elif pen2 > pen1:
+                    outcome = 2
+                else:
+                    outcome = 0
             else:
-                outcome = 0
+                if score1 > score2:
+                    outcome = 1
+                elif score2 > score1:
+                    outcome = 2
+                else:
+                    outcome = 0
 
             # ELO antes do jogo
             elo_before1 = teams[team1]
@@ -2093,7 +2126,11 @@ class EloRatingSystem:
                 games_before_winter,
             )
 
-            proportion_multiplier = self.calculate_score_proportion(score1, score2)
+            # Para grandes penalidades, o multiplicador de score deve ficar a 1
+            if is_penalty_shootout:
+                proportion_multiplier = 1.0
+            else:
+                proportion_multiplier = self.calculate_score_proportion(score1, score2)
 
             # Calcular fatores K e mudanças de ELO
             k_factors, elo_changes, elo_deltas = self._calculate_elo_factors(

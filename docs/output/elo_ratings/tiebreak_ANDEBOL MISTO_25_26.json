@@ -62,8 +62,8 @@
       "tie_points": 13,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -162,8 +162,8 @@
       "tie_points": 23,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Matemática",
-        "Administração Pública"
+        "Administração Pública",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -212,9 +212,9 @@
       "tie_points": 18,
       "tie_type": "mini_league",
       "tied_teams": [
-        "MTC",
+        "Gestão",
         "DPT",
-        "Gestão"
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -337,8 +337,8 @@
       "tie_type": "head_to_head",
       "tie_points": 13,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -368,8 +368,8 @@
       "tie_type": "head_to_head",
       "tie_points": 13,
       "tied_teams": [
-        "Eng. de Materiais",
-        "Eng. Computadores e Telemática"
+        "Eng. Computadores e Telemática",
+        "Eng. de Materiais"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -461,8 +461,8 @@
       "tie_type": "head_to_head",
       "tie_points": 23,
       "tied_teams": [
-        "Matemática",
-        "Administração Pública"
+        "Administração Pública",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -492,8 +492,8 @@
       "tie_type": "head_to_head",
       "tie_points": 23,
       "tied_teams": [
-        "Matemática",
-        "Administração Pública"
+        "Administração Pública",
+        "Matemática"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -523,9 +523,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "MTC",
+        "Gestão",
         "DPT",
-        "Gestão"
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -555,9 +555,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "MTC",
+        "Gestão",
         "DPT",
-        "Gestão"
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -587,9 +587,9 @@
       "tie_type": "mini_league",
       "tie_points": 18,
       "tied_teams": [
-        "MTC",
+        "Gestão",
         "DPT",
-        "Gestão"
+        "MTC"
       ],
       "criteria_order": [
         "faltas_comparencia",

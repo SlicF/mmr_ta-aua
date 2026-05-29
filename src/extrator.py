@@ -558,8 +558,8 @@ class ExcelProcessor:
         return None
 
     @staticmethod
-    def _to_int_goal(value) -> Optional[int]:
-        """Converte um valor de golo para inteiro, se possível."""
+    def _to_int_goal(value) -> object:
+        """Converte um valor de golo para inteiro ou mantém string com grandes penalidades."""
         if pd.isna(value):
             return None
 
@@ -581,9 +581,16 @@ class ExcelProcessor:
         if s.lower() in {"vs", "v.s.", "v s", "x", "nan", "none", "null"}:
             return None
 
+        # Se tiver parênteses (ex. grandes penalidades), retornar como string
+        if "(" in s and ")" in s:
+            return s
+
         m = re.match(r"^\d+$", s)
         if not m:
-            return None
+            try:
+                return int(float(s))
+            except Exception:
+                return None
         try:
             return int(s)
         except Exception:
@@ -1676,7 +1683,17 @@ class ExcelProcessor:
 
         for col in ("Golos 1", "Golos 2"):
             if col in df.columns:
-                df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) else pd.NA)
+                def clean_goal(x):
+                    if pd.isna(x) or x == "":
+                        return pd.NA
+                    s = str(x).strip()
+                    if "(" in s and ")" in s:
+                        return s
+                    try:
+                        return int(float(s))
+                    except (ValueError, TypeError):
+                        return pd.NA
+                df[col] = df[col].apply(clean_goal)
 
         return df
 
@@ -1812,9 +1829,24 @@ class ExcelProcessor:
         return self._coerce_integer_columns(df)
 
     def _coerce_integer_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Garante que golos e divisões ficam como Int64 no CSV."""
+        """Garante que golos e divisões ficam como Int64 no CSV, exceto se contiverem grandes penalidades."""
         df = df.copy()
-        for col in ("Golos 1", "Golos 2", "Divisão", "Divisao"):
+        def coerce_goal(val):
+            if pd.isna(val) or val == "":
+                return pd.NA
+            s = str(val).strip()
+            if "(" in s and ")" in s:
+                return s
+            try:
+                return int(float(s))
+            except (ValueError, TypeError):
+                return pd.NA
+
+        for col in ("Golos 1", "Golos 2"):
+            if col in df.columns:
+                df[col] = df[col].apply(coerce_goal)
+
+        for col in ("Divisão", "Divisao"):
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
         return df

@@ -1,32 +1,32 @@
 {
   "modalidade": "FUTSAL FEMININO",
   "num_seasons": 1,
-  "avg_brier_score": 0.04514245333333334,
-  "avg_rmse_place": 31.80196889080926,
-  "avg_rmse_points": 4.3973205965640245,
+  "avg_brier_score": 0.041937371999999994,
+  "avg_rmse_place": 31.813311100669797,
+  "avg_rmse_points": 4.400072649756643,
   "seasons": [
     {
       "season": "25_26",
       "cutoff_jornada": 8,
       "num_teams": 13,
-      "brier_score_champion": 0.04514245333333334,
-      "rmse_expected_place": 31.80196889080926,
-      "rmse_expected_points": 4.3973205965640245,
+      "brier_score_champion": 0.041937371999999994,
+      "rmse_expected_place": 31.813311100669797,
+      "rmse_expected_points": 4.400072649756643,
       "calibration_champion": {
         "20-30%": {
-          "predicted": 0.2635,
+          "predicted": 0.27995000000000003,
           "observed": 0.5,
           "count": 2,
           "calibrated": false
         },
         "0-10%": {
-          "predicted": 0.01726363636363636,
+          "predicted": 0.014672727272727277,
           "observed": 0.0,
           "count": 11,
           "calibrated": true
         },
         "10-20%": {
-          "predicted": 0.14155,
+          "predicted": 0.13935,
           "observed": 0.0,
           "count": 2,
           "calibrated": true
@@ -34,31 +34,31 @@
       },
       "calibration_playoffs": {
         "90-100%": {
-          "predicted": 0.9894999999999999,
+          "predicted": 0.9860500000000001,
           "observed": 0.8333333333333334,
           "count": 6,
           "calibrated": false
         },
         "50-60%": {
-          "predicted": 0.5906,
+          "predicted": 0.594,
           "observed": 1.0,
           "count": 1,
           "calibrated": false
         },
         "10-20%": {
-          "predicted": 0.17013333333333333,
+          "predicted": 0.1697,
           "observed": 0.3333333333333333,
           "count": 3,
           "calibrated": false
         },
         "80-90%": {
-          "predicted": 0.8433,
+          "predicted": 0.8451,
           "observed": 1.0,
           "count": 1,
           "calibrated": false
         },
         "0-10%": {
-          "predicted": 0.029675,
+          "predicted": 0.033875,
           "observed": 0.0,
           "count": 4,
           "calibrated": true

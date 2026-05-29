@@ -4,6 +4,82 @@ const ENABLE_RANKING_SPARKLINES = true; // Mostrar micro-tendência de ELO na ta
 const SPARKLINE_POINTS = 10; // número de pontos mais recentes
 
 /**
+ * Faz parse de um valor de golo do CSV, preservando a string original para display.
+ * Suporta grandes penalidades no formato "2 (5)" ou "2(5)".
+ * @param {*} raw - Valor bruto do CSV (string ou número)
+ * @returns {{ numeric: number|null, display: string|null, pen: number|null }}
+ */
+function parseGolosValue(raw) {
+    if (raw === null || raw === undefined || raw === '') return { numeric: null, display: null, pen: null };
+    const s = String(raw).trim();
+    if (!s || s.toLowerCase() === 'nan') return { numeric: null, display: null, pen: null };
+    // Formato com grandes penalidades: "2 (5)" ou "2(5)"
+    const m = s.match(/^(\d+)\s*\((\d+)\)$/);
+    if (m) {
+        return { numeric: parseInt(m[1], 10), display: `${m[1]}(${m[2]})`, pen: parseInt(m[2], 10) };
+    }
+    const n = parseFloat(s);
+    if (isNaN(n)) return { numeric: null, display: null, pen: null };
+    return { numeric: n, display: String(Math.round(n)), pen: null };
+}
+
+function formatCalendarScoreValue(match, side) {
+    const displayKey = side === 1 ? 'scoreDisplay1' : 'scoreDisplay2';
+    const scoreKey = side === 1 ? 'score1' : 'score2';
+    const rawKeys = side === 1
+        ? ['Resultado 1', 'Golos 1', 'Golos Equipa 1']
+        : ['Resultado 2', 'Golos 2', 'Golos Equipa 2'];
+
+    const displayValue = match?.[displayKey];
+    if (displayValue !== null && displayValue !== undefined && String(displayValue).trim() !== '') {
+        return String(displayValue).trim();
+    }
+
+    for (const key of rawKeys) {
+        const rawValue = match?.[key];
+        if (rawValue === null || rawValue === undefined || String(rawValue).trim() === '') {
+            continue;
+        }
+
+        const parsed = parseGolosValue(rawValue);
+        if (parsed.display) {
+            return parsed.display;
+        }
+        return String(rawValue).trim();
+    }
+
+    const scoreValue = match?.[scoreKey];
+    if (scoreValue !== null && scoreValue !== undefined && String(scoreValue).trim() !== '') {
+        return String(scoreValue).trim();
+    }
+
+    return '';
+}
+
+/**
+ * Determina o vencedor de um jogo, tendo em conta grandes penalidades.
+ * Se houver penalties, o vencedor é quem ganhou nos penalties.
+ * @param {number|null} base1 - golos base equipa 1
+ * @param {number|null} base2 - golos base equipa 2
+ * @param {number|null} pen1  - penalties equipa 1 (ou null)
+ * @param {number|null} pen2  - penalties equipa 2 (ou null)
+ * @param {string} team1
+ * @param {string} team2
+ * @returns {string|null}
+ */
+function resolveWinner(base1, base2, pen1, pen2, team1, team2) {
+    if (base1 === null || base2 === null) return null;
+    if (pen1 !== null && pen2 !== null) {
+        if (pen1 > pen2) return team1;
+        if (pen2 > pen1) return team2;
+        return null; // empate mesmo nos penalties (não deve acontecer)
+    }
+    if (base1 > base2) return team1;
+    if (base2 > base1) return team2;
+    return null;
+}
+
+/**
  * Detecta se o dispositivo é móvel
  * @returns {boolean} true se for dispositivo móvel
  */
@@ -3408,7 +3484,7 @@ function updateRankingsTable() {
                 const now = Date.now();
                 // Se foi aberto há menos de 250ms (por exemplo, via focus de um touch), não fecha de imediato
                 const justOpened = (now - tiebreakTooltipLastShownAt) < 250;
-                
+
                 if (isOpen && !justOpened) {
                     hideTiebreakTooltip();
                 } else {
@@ -4167,8 +4243,8 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             const team1 = resolveTeamName(match['Equipa 1']);
             const team2 = resolveTeamName(match['Equipa 2']);
             // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
-            const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
-            const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+            const g1 = parseGolosValue(match['Golos 1']);
+            const g2 = parseGolosValue(match['Golos 2']);
 
             // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
             const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
@@ -4179,9 +4255,11 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             return {
                 team1: team1,
                 team2: team2,
-                score1: score1Val,
-                score2: score2Val,
-                winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
+                score1: g1.numeric,
+                score2: g2.numeric,
+                scoreDisplay1: g1.display,
+                scoreDisplay2: g2.display,
+                winner: resolveWinner(g1.numeric, g2.numeric, g1.pen, g2.pen, team1, team2),
                 unknownResult: isUnknownResult,
                 jornada: 'E1',
                 round: 'Quartos de Final',
@@ -4203,8 +4281,8 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             const team1 = resolveTeamName(match['Equipa 1']);
             const team2 = resolveTeamName(match['Equipa 2']);
             // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
-            const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
-            const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+            const g1 = parseGolosValue(match['Golos 1']);
+            const g2 = parseGolosValue(match['Golos 2']);
 
             // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
             const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
@@ -4215,9 +4293,11 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             return {
                 team1: team1,
                 team2: team2,
-                score1: score1Val,
-                score2: score2Val,
-                winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
+                score1: g1.numeric,
+                score2: g2.numeric,
+                scoreDisplay1: g1.display,
+                scoreDisplay2: g2.display,
+                winner: resolveWinner(g1.numeric, g2.numeric, g1.pen, g2.pen, team1, team2),
                 unknownResult: isUnknownResult,
                 jornada: 'E2',
                 round: 'Meias-Finais',
@@ -4250,8 +4330,8 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             const team1 = resolveTeamName(match['Equipa 1']);
             const team2 = resolveTeamName(match['Equipa 2']);
             // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
-            const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
-            const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+            const g1 = parseGolosValue(match['Golos 1']);
+            const g2 = parseGolosValue(match['Golos 2']);
 
             // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
             const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
@@ -4262,9 +4342,11 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             return {
                 team1: team1,
                 team2: team2,
-                score1: score1Val,
-                score2: score2Val,
-                winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
+                score1: g1.numeric,
+                score2: g2.numeric,
+                scoreDisplay1: g1.display,
+                scoreDisplay2: g2.display,
+                winner: resolveWinner(g1.numeric, g2.numeric, g1.pen, g2.pen, team1, team2),
                 unknownResult: isUnknownResult,
                 isThirdPlace: false,
                 jornada: 'E3',
@@ -4282,8 +4364,8 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             const team1 = resolveTeamName(match['Equipa 1']);
             const team2 = resolveTeamName(match['Equipa 2']);
             // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
-            const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
-            const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+            const g1 = parseGolosValue(match['Golos 1']);
+            const g2 = parseGolosValue(match['Golos 2']);
 
             // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
             const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
@@ -4294,9 +4376,11 @@ function processEliminationMatches(eliminationMatches, isProcessedData = false) 
             return {
                 team1: team1,
                 team2: team2,
-                score1: score1Val,
-                score2: score2Val,
-                winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
+                score1: g1.numeric,
+                score2: g2.numeric,
+                scoreDisplay1: g1.display,
+                scoreDisplay2: g2.display,
+                winner: resolveWinner(g1.numeric, g2.numeric, g1.pen, g2.pen, team1, team2),
                 unknownResult: isUnknownResult,
                 isThirdPlace: true,
                 jornada: 'E3L',
@@ -4351,8 +4435,8 @@ function processSecondaryMatches(secondaryMatches) {
                 const team1 = match['Equipa 1'];
                 const team2 = match['Equipa 2'];
                 // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
-                const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
-                const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+                const g1 = parseGolosValue(match['Golos 1']);
+                const g2 = parseGolosValue(match['Golos 2']);
 
                 // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
                 const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
@@ -4363,9 +4447,11 @@ function processSecondaryMatches(secondaryMatches) {
                 return {
                     team1: team1,
                     team2: team2,
-                    score1: score1Val,
-                    score2: score2Val,
-                    winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
+                    score1: g1.numeric,
+                    score2: g2.numeric,
+                    scoreDisplay1: g1.display,
+                    scoreDisplay2: g2.display,
+                    winner: resolveWinner(g1.numeric, g2.numeric, g1.pen, g2.pen, team1, team2),
                     unknownResult: detectUnknownResult(match),
                     eloDelta1: elo1Delta,
                     eloDelta2: elo2Delta
@@ -4380,8 +4466,8 @@ function processSecondaryMatches(secondaryMatches) {
                 const team1 = match['Equipa 1'];
                 const team2 = match['Equipa 2'];
                 // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
-                const score1Val = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
-                const score2Val = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+                const g1 = parseGolosValue(match['Golos 1']);
+                const g2 = parseGolosValue(match['Golos 2']);
 
                 // Procurar dados de ELO no rawEloData (mesmo padrão do calendário)
                 const eloMatch = getRawEloMatch(match.Jornada, team1, team2);
@@ -4392,9 +4478,11 @@ function processSecondaryMatches(secondaryMatches) {
                 return {
                     team1: team1,
                     team2: team2,
-                    score1: score1Val,
-                    score2: score2Val,
-                    winner: (score1Val !== null && score2Val !== null) ? (score1Val > score2Val ? team1 : team2) : null,
+                    score1: g1.numeric,
+                    score2: g2.numeric,
+                    scoreDisplay1: g1.display,
+                    scoreDisplay2: g2.display,
+                    winner: resolveWinner(g1.numeric, g2.numeric, g1.pen, g2.pen, team1, team2),
                     unknownResult: detectUnknownResult(match),
                     eloDelta1: elo1Delta,
                     eloDelta2: elo2Delta
@@ -4418,15 +4506,19 @@ function processSecondaryMatches(secondaryMatches) {
                 const team1 = resolveTeamName(match['Equipa 1']);
                 const team2 = resolveTeamName(match['Equipa 2']);
                 // ⚠️ IMPORTANTE: Se score estiver vazio no CSV, usar null (não 0)
-                const score1 = match['Golos 1'] ? parseFloat(match['Golos 1']) : null;
-                const score2 = match['Golos 2'] ? parseFloat(match['Golos 2']) : null;
+                const g1 = parseGolosValue(match['Golos 1']);
+                const g2 = parseGolosValue(match['Golos 2']);
+                const score1 = g1.numeric;
+                const score2 = g2.numeric;
                 const isUnknown = detectUnknownResult(match);
-                const winner = (score1 !== null && score2 !== null) ? (score1 > score2 ? team1 : (score2 > score1 ? team2 : null)) : null;
+                const winner = resolveWinner(score1, score2, g1.pen, g2.pen, team1, team2);
                 lmMatches.push({
                     team1: team1,
                     team2: team2,
                     score1: score1,
                     score2: score2,
+                    scoreDisplay1: g1.display,
+                    scoreDisplay2: g2.display,
                     unknownResult: isUnknown
                 });
 
@@ -4841,7 +4933,7 @@ function createBracket() {
                             <span>${displayTeam1}</span>
                         </div>
                         <div class="bracket-team-meta">
-                            <span class="score">${showScore ? match.score1 : '-'}</span>
+                            <span class="score">${showScore ? (match.scoreDisplay1 ?? match.score1) : '-'}</span>
                             ${elo1Html}
                         </div>
                     `;
@@ -4923,7 +5015,7 @@ function createBracket() {
                             <span>${displayTeam2}</span>
                         </div>
                         <div class="bracket-team-meta">
-                            <span class="score">${showScore ? match.score2 : '-'}</span>
+                            <span class="score">${showScore ? (match.scoreDisplay2 ?? match.score2) : '-'}</span>
                             ${elo2Html}
                         </div>
                     `;
@@ -5236,7 +5328,7 @@ function createSecondaryBracket() {
                             <span>${displayTeam1}</span>
                         </div>
                         <div class="bracket-team-meta">
-                            <span class="score">${showScore ? match.score1 : '-'}</span>
+                            <span class="score">${showScore ? (match.scoreDisplay1 ?? match.score1) : '-'}</span>
                             ${elo1Html}
                         </div>
                     `;
@@ -5292,7 +5384,7 @@ function createSecondaryBracket() {
                             <span>${displayTeam2}</span>
                         </div>
                         <div class="bracket-team-meta">
-                            <span class="score">${showScore ? match.score2 : '-'}</span>
+                            <span class="score">${showScore ? (match.scoreDisplay2 ?? match.score2) : '-'}</span>
                             ${elo2Html}
                         </div>
                     `;
@@ -10618,10 +10710,13 @@ function createGameItem(game, favoriteTeamCanonical = null) {
         ? `<div class="game-warning">${t('calendarPendingResultWarning')}</div>`
         : '';
 
-    // Resultado
+    // Resultado — manter o valor bruto do CSV para preservar penalidades (ex: "2 (5)")
+    // O result1/result2 já vem como string do CSV através de game['Golos 1']
+    const displayResult1 = formatCalendarScoreValue(game, 1);
+    const displayResult2 = formatCalendarScoreValue(game, 2);
     let scoreHtml = '';
     if (hasResult) {
-        scoreHtml = `<div class="game-score">${result1} - ${result2}</div>`;
+        scoreHtml = `<div class="game-score">${displayResult1} - ${displayResult2}</div>`;
     } else {
         scoreHtml = '<div class="game-vs">vs</div>';
     }
@@ -11046,6 +11141,8 @@ function processMatches(data) {
         // Extrair golos (podem estar vazios para jogos futuros)
         const golos1 = row["Golos 1"];
         const golos2 = row["Golos 2"];
+        const parsedGolos1 = parseGolosValue(golos1);
+        const parsedGolos2 = parseGolosValue(golos2);
 
         const team1 = normalizeTeamName(row["Equipa 1"].trim());
         const team2 = normalizeTeamName(row["Equipa 2"].trim());
@@ -11059,8 +11156,10 @@ function processMatches(data) {
             jornada: row.Jornada,
             team1: team1,
             team2: team2,
-            score1: golos1 !== '' && golos1 !== undefined ? parseInt(golos1) : null,
-            score2: golos2 !== '' && golos2 !== undefined ? parseInt(golos2) : null,
+            score1: parsedGolos1.numeric,
+            score2: parsedGolos2.numeric,
+            scoreDisplay1: parsedGolos1.display,
+            scoreDisplay2: parsedGolos2.display,
             absentTeam: row['Falta de Comparência'] || '',
             date: date,
             time: time,
@@ -12500,8 +12599,10 @@ function updatePredictionsSimulationsCount() {
     if (countEl && PredictionsState.simulations) {
         const formatted = PredictionsState.simulations.toLocaleString('pt-PT');
         countEl.textContent = `(${formatted} ${t('simulations')})`;
+        countEl.hidden = false;
     } else if (countEl) {
         countEl.textContent = '';
+        countEl.hidden = true;
     }
 }
 
@@ -12631,7 +12732,10 @@ function clearPredictionsDisplay(customMessage = null) {
     document.getElementById('nextTeamBtn').disabled = true;
 
     const countEl = document.getElementById('predictionsSimCount');
-    if (countEl) countEl.textContent = '';
+    if (countEl) {
+        countEl.textContent = '';
+        countEl.hidden = true;
+    }
 
     PredictionsState.forecastData = null;
     PredictionsState.predictionsData = null;
