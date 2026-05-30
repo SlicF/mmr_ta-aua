@@ -12,8 +12,8 @@
       "tie_points": 16,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Fisioterapia",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -112,8 +112,8 @@
       "tie_points": 15,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Música",
-        "Economia"
+        "Economia",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -212,8 +212,8 @@
       "tie_points": 18,
       "tie_type": "head_to_head",
       "tied_teams": [
-        "Gestão",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -312,9 +312,9 @@
       "tie_points": 16,
       "tie_type": "mini_league",
       "tied_teams": [
+        "Eng. Aeroespacial",
         "Gestão Pública",
-        "Ciências Biomédicas",
-        "Eng. Aeroespacial"
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -425,8 +425,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Fisioterapia",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -456,8 +456,8 @@
       "tie_type": "head_to_head",
       "tie_points": 16,
       "tied_teams": [
-        "Fisioterapia",
-        "Eng. Biomédica"
+        "Eng. Biomédica",
+        "Fisioterapia"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -549,8 +549,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Música",
-        "Economia"
+        "Economia",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -580,8 +580,8 @@
       "tie_type": "head_to_head",
       "tie_points": 15,
       "tied_teams": [
-        "Música",
-        "Economia"
+        "Economia",
+        "Música"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -673,8 +673,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Gestão",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -704,8 +704,8 @@
       "tie_type": "head_to_head",
       "tie_points": 18,
       "tied_teams": [
-        "Gestão",
-        "Eng. Computacional"
+        "Eng. Computacional",
+        "Gestão"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -797,9 +797,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Eng. Aeroespacial",
         "Gestão Pública",
-        "Ciências Biomédicas",
-        "Eng. Aeroespacial"
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -829,9 +829,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Eng. Aeroespacial",
         "Gestão Pública",
-        "Ciências Biomédicas",
-        "Eng. Aeroespacial"
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
@@ -861,9 +861,9 @@
       "tie_type": "mini_league",
       "tie_points": 16,
       "tied_teams": [
+        "Eng. Aeroespacial",
         "Gestão Pública",
-        "Ciências Biomédicas",
-        "Eng. Aeroespacial"
+        "Ciências Biomédicas"
       ],
       "criteria_order": [
         "faltas_comparencia",
