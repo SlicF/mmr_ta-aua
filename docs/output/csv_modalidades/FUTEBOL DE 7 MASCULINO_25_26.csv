@@ -131,7 +131,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 11,,,,Finanças,,,Eng. Mecânica,1,,,,False,False,Finanças
 LM1,2026-05-13 00:00:00,21h00,Sintético,Contabilidade,3,1,Tecnologias de Informação,,,Calendário PDF Playoffs,Excel,False,False,
 LM2,2026-05-20 00:00:00,21h00,Sintético,Tecnologias de Informação,2,3,CBM,,,Calendário PDF Playoffs,Excel,False,False,
-LM3,2026-05-28 00:00:00,21h00,Sintético,CBM,,,Contabilidade,,,Calendário PDF Playoffs,Excel,False,False,
+LM3,2026-05-28 00:00:00,21h00,Sintético,CBM,6,1,Contabilidade,,,Calendário PDF Playoffs,Excel,False,False,
 E1,2026-05-13 00:00:00,22h00,Sintético,Fisioterapia,4,0,Eng. Materiais,,,Calendário PDF Playoffs,Excel,False,False,
 E1,2026-05-13 00:00:00,23h00,Sintético,EGI,4,2,Eng. Civil,,,Calendário PDF Playoffs,Excel,False,False,
 E1,2026-05-14 00:00:00,21h00,Sintético,Eng. Mecânica,4,0,EET,,,Calendário PDF Playoffs,Excel,False,False,

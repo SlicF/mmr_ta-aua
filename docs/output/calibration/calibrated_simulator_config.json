@@ -87,25 +87,25 @@
   },
   "FUTEBOL DE 7 MASCULINO": {
     "sport_type": "futebol7",
-    "base_goals": 2.46309963099631,
-    "base_goals_std": 2.247902668499647,
+    "base_goals": 2.4669117647058822,
+    "base_goals_std": 2.2497566909968554,
     "dispersion_k": 3.0,
-    "base_draw_rate": 0.11070110701107011,
-    "draw_elo_sensitivity": 0.011089580584651556,
+    "base_draw_rate": 0.11029411764705882,
+    "draw_elo_sensitivity": 0.011216235001158092,
     "draw_multiplier": 1.4,
     "draw_model": {
-      "intercept": -2.571495184872202,
-      "coef_linear": 0.011089580584651556,
-      "coef_quadratic": -3.651877907912481e-05
+      "intercept": -2.5759928278358286,
+      "coef_linear": 0.011216235001158092,
+      "coef_quadratic": -3.712434365609697e-05
     },
-    "margin_elo_slope": 0.0024076383493394,
-    "margin_elo_intercept": 2.757004204119313,
+    "margin_elo_slope": 0.0024328434540295545,
+    "margin_elo_intercept": 2.7598823695310024,
     "elo_adjustment_limit": 1.0,
     "division_params": {
       "1": {
-        "base_goals": 2.3185185185185184,
+        "base_goals": 2.327205882352941,
         "dispersion_k": 3.0,
-        "base_draw_rate": 0.11851851851851852
+        "base_draw_rate": 0.11764705882352941
       },
       "2": {
         "base_goals": 2.6066176470588234,
@@ -116,10 +116,10 @@
   },
   "FUTSAL FEMININO": {
     "sport_type": "futsal",
-    "base_goals": 3.703883495145631,
-    "base_goals_std": 3.7848297682691268,
+    "base_goals": 3.701923076923077,
+    "base_goals_std": 3.774611054064704,
     "dispersion_k": 3.0,
-    "base_draw_rate": 0.02912621359223301,
+    "base_draw_rate": 0.028846153846153848,
     "draw_elo_sensitivity": 0.001,
     "draw_multiplier": 1.4,
     "draw_model": {
@@ -127,14 +127,14 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0022616067441455366,
-    "margin_elo_intercept": 5.212809654133589,
+    "margin_elo_slope": 0.0022798364154390962,
+    "margin_elo_intercept": 5.206546000510445,
     "elo_adjustment_limit": 1.2,
     "division_params": {
       "1": {
-        "base_goals": 3.703883495145631,
+        "base_goals": 3.701923076923077,
         "dispersion_k": 3.0,
-        "base_draw_rate": 0.02912621359223301
+        "base_draw_rate": 0.028846153846153848
       }
     }
   },
@@ -169,8 +169,8 @@
   },
   "VOLEIBOL FEMININO": {
     "sport_type": "volei",
-    "base_goals": 1.1375739644970415,
-    "base_goals_std": 0.9184222557165768,
+    "base_goals": 1.1371681415929205,
+    "base_goals_std": 0.9187038474606625,
     "dispersion_k": 10.0,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
@@ -180,8 +180,8 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.0009926792041490809,
-    "margin_elo_intercept": 1.5977773851919455,
+    "margin_elo_slope": 0.0009945581888973782,
+    "margin_elo_intercept": 1.598254651836474,
     "elo_adjustment_limit": 0.5,
     "p_sweep_base": 0.5,
     "volei_sigma": 1.2,
@@ -189,7 +189,7 @@
     "elo_divisor": 600,
     "division_params": {
       "1": {
-        "base_goals": 1.114864864864865,
+        "base_goals": 1.1140939597315436,
         "dispersion_k": 10.0,
         "base_draw_rate": 0.0
       },
@@ -202,8 +202,8 @@
   },
   "VOLEIBOL MASCULINO": {
     "sport_type": "volei",
-    "base_goals": 1.149025069637883,
-    "base_goals_std": 0.9103661126060995,
+    "base_goals": 1.15,
+    "base_goals_std": 0.9096702699330126,
     "dispersion_k": 10.0,
     "base_draw_rate": 0.0,
     "draw_elo_sensitivity": 0.0,
@@ -213,8 +213,8 @@
       "coef_linear": 0.0,
       "coef_quadratic": 0.0
     },
-    "margin_elo_slope": 0.00044330554127223684,
-    "margin_elo_intercept": 1.6376088155209196,
+    "margin_elo_slope": 0.0004111895406233337,
+    "margin_elo_intercept": 1.640048564977118,
     "elo_adjustment_limit": 0.5,
     "p_sweep_base": 0.5,
     "volei_sigma": 1.2,
@@ -222,7 +222,7 @@
     "elo_divisor": 600,
     "division_params": {
       "1": {
-        "base_goals": 1.1472602739726028,
+        "base_goals": 1.1496598639455782,
         "dispersion_k": 10.0,
         "base_draw_rate": 0.0
       },

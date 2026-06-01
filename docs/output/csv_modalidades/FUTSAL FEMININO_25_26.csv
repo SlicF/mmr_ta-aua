@@ -60,11 +60,11 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Fonte_Data,Fonte_Local,
 5,2026-05-07 00:00:00,20h45,Caixa UA,Eng. Mecânica,6,0,Biologia,Excel,Excel,False,False,
 6,2026-05-07 00:00:00,21h30,Caixa UA,Economia,0,11,Eng. Civil,Excel,Excel,False,False,
 6,2026-05-13 00:00:00,20h15,PAH,Biologia,0,8,Eng. Biomédica,Excel,Excel,False,False,
+8,2026-05-27 00:00:00,19h30,PAH,Biologia,6,1,Música,Excel,Excel,False,False,
 4,,,,Biologia,,,Educação Básica,,,False,False,Educação Básica
 5,,,,Educação Básica,,,Contabilidade,,,False,False,Educação Básica
 6,,,,Educação Básica,,,Matemática,,,False,False,Educação Básica
 7,,,,Educação Básica,,,Economia,,,False,False,Educação Básica
-8,,,,Biologia,,,Música,,,False,False,
 9,,,,Eng. Informática,,,Educação Básica,,,False,False,"Eng. Informática, Educação Básica"
 10,,,,Economia,,,Eng. Informática,,,False,False,Eng. Informática
 E1,2026-05-14 00:00:00,20h15,PAH,Eng. Biomédica,6,1,Contabilidade,Calendário PDF Playoffs,Excel,False,False,

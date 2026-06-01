@@ -177,7 +177,7 @@ Jornada,Dia,Hora,Local,Equipa 1,Golos 1,Golos 2,Equipa 2,Divisão,Grupo,Fonte_Da
 9,2026-05-06 00:00:00,19h30,PAH,Fisioterapia,2,0,Eng. Materiais,1,,Excel,Excel,False,False,
 LM1,2026-05-13 00:00:00,16h30,PAH,Eng. Civil,0,2,Psicologia,,,Calendário PDF Playoffs,Excel,False,False,
 LM2,2026-05-20 00:00:00,19h30,PAH,Psicologia,1,2,Eng. Física,,,Calendário PDF Playoffs,Excel,False,False,
-LM3,2026-05-28 00:00:00,20h30,PAH,Eng. Física,,,Eng. Civil,,,Calendário PDF Playoffs,Excel,False,False,
+LM3,2026-05-28 00:00:00,20h30,PAH,Eng. Física,2,0,Eng. Civil,,,Calendário PDF Playoffs,Excel,False,False,
 E1,2026-05-13 00:00:00,18h00,PAH,EGI,2,0,Gestão,,,Calendário PDF Playoffs,Excel,False,False,
 E1,2026-05-13 00:00:00,19h30,PAH,Fisioterapia,2,1,Eng. Ambiente,,,Calendário PDF Playoffs,Excel,False,False,
 E1,2026-05-13 00:00:00,21h00,PAH,EET,2,1,Eng. Informática,,,Calendário PDF Playoffs,Excel,False,False,
