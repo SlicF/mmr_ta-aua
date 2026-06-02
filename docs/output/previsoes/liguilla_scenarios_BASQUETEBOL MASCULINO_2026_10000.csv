@@ -1,4 +1,4 @@
 ﻿team,scenario_key,stage_game1,opponent_game1,p_win_game1,p_draw_game1,p_loss_game1,stage_game2,opponent_game2,p_win_game2,p_draw_game2,p_loss_game2,p_cenario,p_passa_cenario_cond
-Administração Pública,LM2:Contabilidade|LM3:Eng. Aeroespacial,LM2,Contabilidade,43.5700,0.0000,56.4300,LM3,Eng. Aeroespacial,46.4500,0.0000,53.5500,100.0000,31.8000
-Contabilidade,LM1:Eng. Aeroespacial|LM2:Administração Pública,LM1,Eng. Aeroespacial,55.8900,0.0000,44.1100,LM2,Administração Pública,56.4300,0.0000,43.5700,100.0000,32.0800
-Eng. Aeroespacial,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,44.1100,0.0000,55.8900,LM3,Administração Pública,53.5500,0.0000,46.4500,100.0000,36.1200
+Administração Pública,LM2:Contabilidade|LM3:Eng. Aeroespacial,LM2,Contabilidade,44.0800,0.0000,55.9200,LM3,Eng. Aeroespacial,47.0200,0.0000,52.9800,100.0000,33.0500
+Contabilidade,LM1:Eng. Aeroespacial|LM2:Administração Pública,LM1,Eng. Aeroespacial,55.3600,0.0000,44.6400,LM2,Administração Pública,55.9200,0.0000,44.0800,100.0000,31.3100
+Eng. Aeroespacial,LM1:Contabilidade|LM3:Administração Pública,LM1,Contabilidade,44.6400,0.0000,55.3600,LM3,Administração Pública,52.9800,0.0000,47.0200,100.0000,35.6400
