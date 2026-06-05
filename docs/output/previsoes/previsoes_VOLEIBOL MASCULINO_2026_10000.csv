@@ -1,5 +1,5 @@
 ﻿jornada,dia,hora,team_a,team_b,expected_elo_a,expected_elo_a_std,expected_elo_b,expected_elo_b_std,prob_vitoria_a,prob_empate,prob_vitoria_b,expected_goals_a,expected_goals_a_std,expected_goals_b,expected_goals_b_std,ocorrencias,divisao,grupo,distribuicao_placares
-Final,-,-,Eng. Eletrónica e Telecomunicações,Física,1417.0,0.0,907.0,0.0,100.0000,0.0000,0.0000,2.00,0.00,0.01,0.10,10000,1,,2-0:98.9300%|2-1:1.0700%
-Liguilha 1,-,-,Ciências Biomédicas,Eng. Computadores e Telemática,743.0,0.0,691.0,0.0,57.4100,0.0000,42.5900,1.52,0.60,1.31,0.67,10000,1,,2-1:45.3900%|1-2:36.8000%|2-0:12.0200%|0-2:5.7900%
-Liguilha 2,-,-,Ciências Biomédicas,Física,734.0,107.2,907.0,0.0,22.4200,0.0000,77.5800,0.98,0.68,1.75,0.48,10000,1,,1-2:53.1400%|0-2:24.4400%|2-1:20.0200%|2-0:2.4000%
-Liguilha 3,-,-,Eng. Computadores e Telemática,Física,700.0,107.2,904.4,83.0,20.5800,0.0000,79.4200,0.89,0.71,1.78,0.46,10000,1,,1-2:47.6300%|0-2:31.7900%|2-1:18.8100%|2-0:1.7700%
+Final,-,-,Eng. Eletrónica e Telecomunicações,Física,1417.0,0.0,907.0,0.0,100.0000,0.0000,0.0000,2.00,0.00,0.01,0.10,10000,1,,2-0:99.0200%|2-1:0.9800%
+Liguilha 1,-,-,Ciências Biomédicas,Eng. Computadores e Telemática,743.0,0.0,691.0,0.0,57.5900,0.0000,42.4100,1.52,0.61,1.30,0.68,10000,1,,2-1:45.0000%|1-2:36.4700%|2-0:12.5900%|0-2:5.9400%
+Liguilha 2,-,-,Ciências Biomédicas,Física,734.4,107.1,907.0,0.0,22.3100,0.0000,77.6900,0.97,0.69,1.76,0.48,10000,1,,1-2:52.4800%|0-2:25.2100%|2-1:20.1900%|2-0:2.1200%
+Liguilha 3,-,-,Eng. Computadores e Telemática,Física,699.6,107.1,904.8,82.6,20.0600,0.0000,79.9400,0.87,0.72,1.78,0.45,10000,1,,1-2:47.2600%|0-2:32.6800%|2-1:18.4900%|2-0:1.5700%

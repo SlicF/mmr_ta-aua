@@ -1,5 +1,0 @@
-﻿jornada,dia,hora,team_a,team_b,expected_elo_a,expected_elo_a_std,expected_elo_b,expected_elo_b_std,prob_vitoria_a,prob_empate,prob_vitoria_b,expected_goals_a,expected_goals_a_std,expected_goals_b,expected_goals_b_std,ocorrencias,divisao,grupo,distribuicao_placares
-Final,-,-,Eng. Eletrónica e Telecomunicações,Física,1417.0,0.0,907.0,0.0,100.0000,0.0000,0.0000,2.00,0.00,0.01,0.10,100000,1,,2-0:98.9750%|2-1:1.0250%
-Liguilha 1,-,-,Ciências Biomédicas,Eng. Computadores e Telemática,743.0,0.0,691.0,0.0,58.5470,0.0000,41.4530,1.53,0.60,1.29,0.67,100000,1,,2-1:46.3070%|1-2:35.7120%|2-0:12.2400%|0-2:5.7410%
-Liguilha 2,-,-,Ciências Biomédicas,Física,736.5,106.8,907.0,0.0,22.7660,0.0000,77.2340,0.98,0.69,1.75,0.49,100000,1,,1-2:52.7090%|0-2:24.5250%|2-1:20.4060%|2-0:2.3600%
-Liguilha 3,-,-,Eng. Computadores e Telemática,Física,697.5,106.8,904.3,83.5,19.5860,0.0000,80.4140,0.86,0.71,1.79,0.45,100000,1,,1-2:47.3130%|0-2:33.1010%|2-1:17.9730%|2-0:1.6130%
